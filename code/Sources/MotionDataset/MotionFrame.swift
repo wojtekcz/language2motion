@@ -4,8 +4,11 @@ public struct MotionFrame {
 
     var timestamp: Float = 0.0
     var jointPositions: [Float] = []
+    var jointNames: [String] = []
 
-    let jointNames: [String] = ["BLNx", "BLNy", "BLNz", "BPx", "BPy", "BPz", "BTx", "BTy", "BTz", "BUNx", "BUNy", "BUNz", "LAx", "LAy", "LAz", "LEx", "LEz", "LHx", "LHy", "LHz", "LKx", "LSx", "LSy", "LSz", "LWx", "LWy", "LFx", "LMrot", "RAx", "RAy", "RAz", "REx", "REz", "RHx", "RHy", "RHz", "RKx", "RSx", "RSy", "RSz", "RWx", "RWy", "RFx", "RMrot"]
+    init(jointNames: [String]) {
+        self.jointNames = jointNames
+    }
 
     func jp(of: String) -> Float {
         return self.jointPositions[jointNames.firstIndex(of: of)!]
