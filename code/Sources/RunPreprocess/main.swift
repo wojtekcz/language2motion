@@ -1,9 +1,10 @@
+import Foundation
 import MotionDataset
 
 print("Running MotionDataset preprocessing...")
 
-var motionFrames: [MotionFrame] = []
-print(motionFrames)
+let datasetFolderURL = URL(fileURLWithPath: "/notebooks/m2l.gt/data/2017-06-22/")
 
-var motionDataset = MotionDataset(a_count: 1)
-print(motionDataset)
+let date = Date()
+var motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, maxSamples: 100)
+print(abs(date.timeIntervalSinceNow))
