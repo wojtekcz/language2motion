@@ -31,13 +31,20 @@ struct MotionSample {
     
     func getMotionFrames(mmm_doc: XMLDocument) -> [MotionFrame] {
         var motionFrames: [MotionFrame] = []
+        var count = 0
         for motionFrame in try! mmm_doc.nodes(forXPath: "/MMM/Motion/MotionFrames/MotionFrame") {
+            count += 1
             var mf = MotionFrame(jointNames: self.jointNames)
             let tNode: [XMLNode] = try! motionFrame.nodes(forXPath:"Timestep")
             mf.timestamp = Float(tNode[0].stringValue!)!
             let jpNode: [XMLNode] = try! motionFrame.nodes(forXPath:"JointPosition")
-            let jointPosition: String = jpNode[0].stringValue!
-            mf.jointPositions = jointPosition.components(separatedBy: " ").map{$0.floatValue}
+            let jointPosition: String = jpNode[0].stringValue!            
+            let comps = jointPosition.split(separator: " ")
+            mf.jointPositions = comps.map {
+                var xx = Float($0)
+                if xx==nil { xx = 0.0 }
+                return xx!
+            }
             motionFrames.append(mf)
         }
         return motionFrames
