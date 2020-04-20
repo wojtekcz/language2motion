@@ -2,12 +2,13 @@ import Foundation
 import FoundationXML
 
 struct MotionSample {
-
+    var sampleID: Int
     var motionFrames: [MotionFrame] = []
     var jointNames: [String] = []
     var annotations: [String] = []
     
-    init(mmmURL: URL, annotationsURL: URL) {
+    init(sampleID: Int, mmmURL: URL, annotationsURL: URL) {
+        self.sampleID = sampleID
         let mmm_doc = loadMMM(fileURL: mmmURL)
         self.jointNames = getJointNames(mmm_doc: mmm_doc)
         self.motionFrames = getMotionFrames(mmm_doc: mmm_doc)
@@ -50,6 +51,14 @@ struct MotionSample {
         return motionFrames
     }
     
+    func getJointPositions(grouppedJoints: Bool) -> [[Float]] {
+        if grouppedJoints {
+            return self.motionFrames.map {$0.grouppedJointPositions()}
+        } else {
+            return self.motionFrames.map {$0.jointPositions}
+        }
+    }
+
     func describe() -> String {
         return "MotionSample(timestamp: \(self.motionFrames.last!.timestamp), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
     }

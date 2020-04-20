@@ -17,7 +17,7 @@ public class MotionDataset {
             let annotationsURL = datasetFolderURL.appendingPathComponent(annotationsFilename)
             
             if fm.fileExists(atPath: mmmURL.path) {
-                let motionSample = MotionSample(mmmURL: mmmURL, annotationsURL: annotationsURL)            
+                let motionSample = MotionSample(sampleID: i, mmmURL: mmmURL, annotationsURL: annotationsURL)            
                 motionSamples.append(motionSample)
             } else {
                 print("** Sample \(i) doesn't exist.")
