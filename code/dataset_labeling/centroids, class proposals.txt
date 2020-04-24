@@ -1,0 +1,49 @@
+1, 'A person is turning right while walking'
+1, turning
+
+'A person walking backwards for a few steps.', 2
+wal
+
+walking for few steps
+
+('the person is walking in a circular shape', 3)
+walking circular
+
+('A person walks 4 steps forward.', 4)
+walks four steps
+
+('A person walks in a circle and looks facing down.', 5),
+ ('A person walks backwards, arms swinging by his side.', 5),
+ ('Someone is walking backwards starting with the left leg.', 5),
+ ('A person walks backwards in a straight line slightly swinging his arms by '
+  'his sides as he does so.',
+
+kill this one, or:
+
+"using right hand or foot"
+------------------
+
+('A human performs two squats with his arms extended forward', 6),
+ ('A person kicks with the right foot.', 6),
+
+('A person turns in a circle', 7),
+ ('A person walks in a circle counter clockwise.', 7),
+
+[('Someone walks in a circle counterclockwise', 8),
+ ('Somebody wals a circle anticlockwise.', 8),
+
+
+[('Somebody walks backwards.', 9
+
+('Someone walks forward', 9)]
+[('A person is walking forwards.', 10),
+
+
+('A person performs one squat.', 12),
+
+('A person runs in the forward direction.', 13),
+
+
+[('Someone is walking forward slowly doing 4 steps starting with the left leg.',
+  14),
+
