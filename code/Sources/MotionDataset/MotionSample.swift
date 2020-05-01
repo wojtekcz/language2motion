@@ -1,11 +1,26 @@
 import Foundation
 import FoundationXML
+import TensorFlow
+import PythonKit
+
+let np = Python.import("numpy")
+
+// TODO: move to some utils
+func tensorFromArray(arr: Array<Array<Float>>) -> Tensor<Float>? {
+    // TODO: convert to extension with custom init
+    return Tensor<Float>.init(numpy: np.array(arr).astype(np.float32))
+}
+func shapedArrayFromArray(arr: Array<Array<Float>>) -> ShapedArray<Float>? {
+    // TODO: convert to extension with custom init
+    return ShapedArray<Float>.init(numpy: np.array(arr).astype(np.float32))
+}
+
 
 struct MotionSample {
-    var sampleID: Int
-    var motionFrames: [MotionFrame] = []
-    var jointNames: [String] = []
-    var annotations: [String] = []
+    public var sampleID: Int
+    public var motionFrames: [MotionFrame] = []
+    public var jointNames: [String] = []
+    public var annotations: [String] = []
     
     init(sampleID: Int, mmmURL: URL, annotationsURL: URL) {
         self.sampleID = sampleID
@@ -51,11 +66,26 @@ struct MotionSample {
         return motionFrames
     }
     
-    func getJointPositions(grouppedJoints: Bool) -> [[Float]] {
+    // func getJointPositions(grouppedJoints: Bool) -> [[Float]] {
+    //     if grouppedJoints {
+    //         return self.motionFrames.map {$0.grouppedJointPositions()}
+    //     } else {
+    //         return self.motionFrames.map {$0.jointPositions}
+    //     }
+    // }
+
+    func getJointPositions(grouppedJoints: Bool, normalized: Bool) -> ShapedArray<Float> {
+        var a: Array<Array<Float>>? = nil
         if grouppedJoints {
-            return self.motionFrames.map {$0.grouppedJointPositions()}
+            a = self.motionFrames.map {$0.grouppedJointPositions()}
         } else {
-            return self.motionFrames.map {$0.jointPositions}
+            a = self.motionFrames.map {$0.jointPositions}
+        }
+        if normalized {
+            let t = sigmoid(tensorFromArray(arr: a!)!)
+            return t.array
+        } else {
+            return shapedArrayFromArray(arr: a!)!
         }
     }
 
