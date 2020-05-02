@@ -10,12 +10,28 @@ let package = Package(
     ],
     products: [
         .library(name: "MotionDataset", targets: ["MotionDataset"]),
-        .executable(name: "RunPreprocess", targets: ["RunPreprocess"])
+        .library(name: "ImageClassificationModels", targets: ["ImageClassificationModels"]),
+        .library(name: "Batcher", targets: ["Batcher"]),
+        .library(name: "Datasets", targets: ["Datasets"]),
+        .library(name: "ModelSupport", targets: ["ModelSupport"]),
+        .executable(name: "RunPreprocess", targets: ["RunPreprocess"]),
+        .executable(name: "ResNet-img2label", targets: ["ResNet-img2label"])
     ],
     dependencies: [
+        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0"),
     ],
     targets: [
         .target(name: "MotionDataset", path: "Sources/MotionDataset"),
-        .target(name: "RunPreprocess", dependencies: ["MotionDataset"], path: "Sources/RunPreprocess")
+        .target(name: "RunPreprocess", dependencies: ["MotionDataset"], path: "Sources/RunPreprocess"),
+        .target(
+            name: "ResNet-img2label", dependencies: ["ImageClassificationModels", "Datasets"],
+            path: "Sources/ResNet-img2label"),
+        .target(name: "Batcher", path: "Sources/Batcher"),
+        .target(name: "Datasets", dependencies: ["ModelSupport", "Batcher"], path: "Sources/Datasets"),
+        .target(name: "ImageClassificationModels", path: "Sources/Models/ImageClassification"),
+        .target(
+            name: "ModelSupport", dependencies: ["SwiftProtobuf", "STBImage"], path: "Sources/Support",
+            exclude: ["STBImage"]),
+        .target(name: "STBImage", path: "Sources/Support/STBImage"),
     ]
 )
