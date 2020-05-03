@@ -1,3 +1,5 @@
 .ipynb_checkpoints
 /data
 .build
+swift-install
+.DS_Store
