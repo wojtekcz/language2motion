@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Foundation
 import Datasets
 import ImageClassificationModels
 import TensorFlow
 
 let batchSize = 25
 
-let dataset = CIFAR10(batchSize: batchSize)
-print("dataset.training.count: \(dataset.training.count)")
+let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/img2label_ds_v1", isDirectory: true)
 
-// Use the network sized for CIFAR-10
-var model = ResNet(classCount: 10, depth: .resNet56, downsamplingInFirstStage: false)
+let dataset = Img2Label(batchSize: batchSize, dsURL: dsURL, normalizing: true)
+print("dataset.training.count: \(dataset.training.count)")
+print("dataset.test.count: \(dataset.test.count)")
+
+// Use the network sized for img2label
+var model = ResNet(classCount: 5, depth: .resNet56, downsamplingInFirstStage: false)
 
 // the classic ImageNet optimizer setting diverges on CIFAR-10
 // let optimizer = SGD(for: model, learningRate: 0.1, momentum: 0.9)
