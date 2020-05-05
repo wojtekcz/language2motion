@@ -17,7 +17,7 @@ import Datasets
 import ImageClassificationModels
 import TensorFlow
 
-let batchSize = 25
+let batchSize = 10
 
 let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/img2label_ds_v1", isDirectory: true)
 
@@ -26,21 +26,21 @@ print("dataset.training.count: \(dataset.training.count)")
 print("dataset.test.count: \(dataset.test.count)")
 
 // Use the network sized for img2label
-var model = ResNet(classCount: 5, depth: .resNet56, downsamplingInFirstStage: false)
+var model = ResNet(classCount: 5, depth: .resNet18, downsamplingInFirstStage: false)
 
 // the classic ImageNet optimizer setting diverges on CIFAR-10
 // let optimizer = SGD(for: model, learningRate: 0.1, momentum: 0.9)
-let optimizer = SGD(for: model, learningRate: 0.001)
+let optimizer = SGD(for: model, learningRate: 0.001, momentum: 0.9)
 
 print("Starting img2label training...")
 
 for epoch in 1...10 {
-    print("epoch \(epoch)")
+    // print("epoch \(epoch)")
     Context.local.learningPhase = .training
     var trainingLossSum: Float = 0
     var trainingBatchCount = 0
     for batch in dataset.training.sequenced() {
-        print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
+        // print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
         let (images, labels) = (batch.first, batch.second)
         let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
             let logits = model(images)
@@ -57,7 +57,7 @@ for epoch in 1...10 {
     var correctGuessCount = 0
     var totalGuessCount = 0
     for batch in dataset.test.sequenced() {
-        print("batch")
+        // print("batch")
         let (images, labels) = (batch.first, batch.second)
         let logits = model(images)
         testLossSum += softmaxCrossEntropy(logits: logits, labels: labels).scalarized()
