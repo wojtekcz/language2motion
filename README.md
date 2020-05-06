@@ -4,7 +4,7 @@ The goal of this project is to create multi-modal implementation of Transformer 
 
 Also it's an attempt to answer the question if Swift for Tensorflow is ready for non-trivial work.
 
-The use-case is based on a paper "[Learning a bidirectional mapping between human whole-body motion and natural language using deep recurrent neural networks"](https://arxiv.org/abs/1705.06400) by Matthias Plappert. He created a nice dataset of few thousand motions "[The KIT Motion-Language Dataset](https://arxiv.org/abs/1607.03827)".
+The use-case is based on a paper "[Learning a bidirectional mapping between human whole-body motion and natural language using deep recurrent neural networks"](https://arxiv.org/abs/1705.06400) by Matthias Plappert. He created a nice dataset of few thousand motions "[The KIT Motion-Language Dataset (paper)](https://arxiv.org/abs/1607.03827)", [website](https://motion-annotation.humanoids.kit.edu/dataset/).
 
 ## The rough plan
 - motion 2 language
@@ -21,5 +21,6 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
   - Transformer encoder on annotation
   - Transformer decoder on motion
 
-## Processed dataset
-* [img2label_ds_v1.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/img2label_ds_v1.tgz)
+## Dataset files
+* original: [2017-06-22.zip](https://motion-annotation.humanoids.kit.edu/downloads/4/)
+* processed: [img2label_ds_v1.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/img2label_ds_v1.tgz)
