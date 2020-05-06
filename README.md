@@ -12,8 +12,10 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] build image2label dataset with images representing motions
     - [x] assign 5 dummy(ish) classes with PCA and k-means on motion annotations
     - [x] classify motion images (+in fastai, +in swift)
+  - language 2 label
+    - [ ] \* Transformer encoder on annotation + classifier
   - motion 2 label
-    - [ ] \* Transformer encoder on motion + classifier
+    - [ ] Transformer encoder on motion + classifier
     - [ ] RNN encoder on motion + classifier
   - motion 2 language
     - do image captioning (with RNN decoder)
