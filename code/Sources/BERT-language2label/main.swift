@@ -38,8 +38,8 @@ var bertClassifier = BERTClassifier(bert: bert, classCount: 5)
 // it is done to improve memory usage and computational efficiency when dealing with sequences of
 // varied lengths. Note that this is not used in the original BERT implementation released by
 // Google and so the batch size setting here is expected to differ from that one.
-let maxSequenceLength = 128
-let batchSize = 1024
+let maxSequenceLength = 20
+let batchSize = 2048
 
 var dataset = try Language2Label(
     taskDirectoryURL: workspaceURL,
@@ -78,6 +78,7 @@ for (epoch, epochBatches) in dataset.trainingEpochs.prefix(3).enumerated() {
     Context.local.learningPhase = .training
     var trainingLossSum: Float = 0
     var trainingBatchCount = 0
+    print("epochBatches.count: \(epochBatches.count)")
 
     for batch in epochBatches {
         let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
@@ -109,9 +110,9 @@ for (epoch, epochBatches) in dataset.trainingEpochs.prefix(3).enumerated() {
         devLossSum += loss.scalarized()
         devBatchCount += 1
 
-        let predictedLabels = sigmoid(logits.squeezingShape(at: -1)) .>= 0.5
-        devPredictedLabels.append(contentsOf: predictedLabels.scalars)
-        devGroundTruth.append(contentsOf: labels.scalars.map { $0 == 1 })
+        // let predictedLabels = sigmoid(logits.squeezingShape(at: -1)) .>= 0.5
+        // devPredictedLabels.append(contentsOf: predictedLabels.scalars)
+        // devGroundTruth.append(contentsOf: labels.scalars.map { $0 == 1 })
     }
 
     let mcc = matthewsCorrelationCoefficient(
