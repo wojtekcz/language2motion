@@ -13,7 +13,9 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] assign 5 dummy(ish) classes with PCA and k-means on motion annotations
     - [x] classify motion images (+in fastai, +in swift)
   - language 2 label
-    - [ ] \* Transformer encoder on annotation + classifier
+    - [x] Transformer encoder on annotation + classifier
+    - [ ] \* batched prediction
+    - [ ] \* Use BERT classifier to assign better labels
   - motion 2 label
     - [ ] Transformer encoder on motion + classifier
     - [ ] RNN encoder on motion + classifier
@@ -30,3 +32,6 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
 
 ## Motion player
 * [C3D file player](http://biomechanical-toolkit.github.io/mokka/index.html)
+
+## Runtime env
+* [custom swift-jupyter](https://github.com/wojtekcz/swift-jupyter/tree/language2motion)
