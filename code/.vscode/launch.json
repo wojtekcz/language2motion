@@ -1,0 +1,56 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug test2",
+            "program": "${workspaceFolder}/vscode_debug/plain_swift/test2",
+            "args": [],
+            "cwd": "${workspaceFolder}/vscode_debug/plain_swift"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug test",
+            "program": "${workspaceFolder}/vscode_debug/plain_swift/test",
+            "args": [],
+            "cwd": "${workspaceFolder}/vscode_debug/plain_swift"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug inference",
+            "program": "${workspaceFolder}/vscode_debug/plain_swift/inference",
+            "args": [],
+            "cwd": "${workspaceFolder}/vscode_debug/plain_swift"
+        }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug ResNet-CIFAR10",
+            "program": "${workspaceFolder}/swift-models.gt/.build/x86_64-unknown-linux-gnu/debug/ResNet-CIFAR10",
+            "args": [],
+            "cwd": "${workspaceFolder}/swift-models.gt"
+        }
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug ResNet-img2label",
+            "program": "${workspaceFolder}/swift-models.gt/.build/x86_64-unknown-linux-gnu/debug/ResNet-img2label",
+            "args": [],
+            "cwd": "${workspaceFolder}/swift-models.gt"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug BERT-languagelabel",
+            "program": "${workspaceFolder}/.build/debug/BERT-language2label",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
