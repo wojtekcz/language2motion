@@ -94,7 +94,7 @@ extension Language2Label {
     exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
   ) throws {
     // Load the data file.
-        let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels.csv")
+        let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v1.csv")
         let df = pd.read_csv(dsURL.path)
         labels = df.label.unique().sorted().map {String($0)!}
         let (train_df, test_df) = model_selection.train_test_split(df, test_size: 0.2).tuple2
