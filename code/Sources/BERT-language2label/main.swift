@@ -98,31 +98,33 @@ for (epoch, epochBatches) in dataset.trainingEpochs.prefix(3).enumerated() {
         )
     }
 
+    print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
     Context.local.learningPhase = .inference
     var devLossSum: Float = 0
     var devBatchCount = 0
-    var devPredictedLabels = [Bool]()
-    var devGroundTruth = [Bool]()
+    var correctGuessCount = 0
+    var totalGuessCount = 0
+
     for batch in dataset.validationBatches {
+        let valBatchSize = batch.data.tokenIds.shape[0]
+
         let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
         let logits = bertClassifier(documents)
         let loss = softmaxCrossEntropy(logits: logits, labels: labels)
         devLossSum += loss.scalarized()
         devBatchCount += 1
 
-        // let predictedLabels = sigmoid(logits.squeezingShape(at: -1)) .>= 0.5
-        // devPredictedLabels.append(contentsOf: predictedLabels.scalars)
-        // devGroundTruth.append(contentsOf: labels.scalars.map { $0 == 1 })
+        let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
+
+        correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
+        totalGuessCount += valBatchSize
     }
-
-    let mcc = matthewsCorrelationCoefficient(
-        predictions: devPredictedLabels,
-        groundTruth: devGroundTruth)
-
+    
+    let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
     print(
         """
-          MCC: \(mcc)
-          Eval loss: \(devLossSum / Float(devBatchCount))
+        Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
+        Eval loss: \(devLossSum / Float(devBatchCount))
         """
     )
 }
