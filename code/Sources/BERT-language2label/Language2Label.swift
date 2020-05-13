@@ -30,7 +30,7 @@ public struct Language2LabelExample {
 
 public struct Language2Label <Entropy: RandomNumberGenerator> {
     public typealias Samples = LazyMapSequence<[Language2LabelExample], LabeledTextBatch>
-    
+    public let datasetURL: URL
     /// The training texts.
     public let trainingExamples: Samples
     /// The validation texts.
@@ -58,11 +58,6 @@ public struct Language2Label <Entropy: RandomNumberGenerator> {
 
 extension Language2Label {
 
-    internal enum FileType: String {
-        case train = "train"
-        case dev = "dev"
-    }
-    
     static func Df2Example(df: PythonObject, labels: [String]) -> [Language2LabelExample] {
         return Python.list(df.iterrows()).map {
             (rowObj: PythonObject) -> Language2LabelExample in 
@@ -77,7 +72,7 @@ extension Language2Label {
 }
 
 extension Language2Label {
-  /// Creates an instance in `taskDirectoryURL` with batches of size `batchSize`
+  /// Creates an instance of `datasetURL` dataset with batches of size `batchSize`
   /// by `maximumSequenceLength`.
   ///
   /// - Parameters:
@@ -87,15 +82,15 @@ extension Language2Label {
   ///     other operations.
   ///   - exampleMap: a transform that processes `Example` in `LabeledTextBatch`.
   public init(
-    taskDirectoryURL: URL,
+    datasetURL: URL,
     maxSequenceLength: Int,
     batchSize: Int,
     entropy: Entropy,
     exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
   ) throws {
     // Load the data file.
-        let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v1.csv")
-        let df = pd.read_csv(dsURL.path)
+        self.datasetURL = datasetURL
+        let df = pd.read_csv(datasetURL.path)
         labels = df.label.unique().sorted().map {String($0)!}
         let (train_df, test_df) = model_selection.train_test_split(df, test_size: 0.2).tuple2
         
@@ -134,13 +129,13 @@ extension Language2Label where Entropy == SystemRandomNumberGenerator {
   ///
   /// - Parameter exampleMap: a transform that processes `Example` in `LabeledTextBatch`.
   public init(
-    taskDirectoryURL: URL,
+    datasetURL: URL,
     maxSequenceLength: Int,
     batchSize: Int,
     exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
   ) throws {
     try self.init(
-      taskDirectoryURL: taskDirectoryURL,
+      datasetURL: datasetURL,
       maxSequenceLength: maxSequenceLength,
       batchSize: batchSize,
       entropy: SystemRandomNumberGenerator(),

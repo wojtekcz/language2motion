@@ -38,11 +38,13 @@ var bertClassifier = BERTClassifier(bert: bert, classCount: 5)
 // it is done to improve memory usage and computational efficiency when dealing with sequences of
 // varied lengths. Note that this is not used in the original BERT implementation released by
 // Google and so the batch size setting here is expected to differ from that one.
-let maxSequenceLength = 20
+let maxSequenceLength = 50
 let batchSize = 2048
 
+let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2_manual_labels.csv")
+
 var dataset = try Language2Label(
-    taskDirectoryURL: workspaceURL,
+    datasetURL: dsURL,
     maxSequenceLength: maxSequenceLength,
     batchSize: batchSize,
     entropy: SystemRandomNumberGenerator()
