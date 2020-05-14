@@ -18,6 +18,9 @@ import ModelSupport
 import TensorFlow
 import TextModels
 
+// let device = Device.defaultXLA
+// print(device)
+
 let bertPretrained = BERT.PreTrainedModel.bertBase(cased: false, multilingual: false)
 let workspaceURL = URL(
     fileURLWithPath: "bert_models", isDirectory: true,
@@ -26,6 +29,7 @@ let workspaceURL = URL(
         isDirectory: true))
 let bert = try BERT.PreTrainedModel.load(bertPretrained)(from: workspaceURL)
 var bertClassifier = BERTClassifier(bert: bert, classCount: 5)
+// bertClassifier.move(to: device)
 
 // Regarding the batch size, note that the way batching is performed currently is that we bucket
 // input sequences based on their length (e.g., first bucket contains sequences of length 1 to 10,
@@ -74,6 +78,8 @@ var optimizer = WeightDecayedAdam(
     weightDecayRate: 0.01,
     maxGradientGlobalNorm: 1)
 
+// optimizer = WeightDecayedAdam(copying: optimizer, to: device)
+
 print("Training BERT for the Language2Label task!")
 
 time() {
@@ -86,6 +92,9 @@ time() {
 
         for batch in epochBatches {
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
+            // let labels = Tensor(copying: eagerLabels, to: device)
             let (loss, gradients) = valueWithGradient(at: bertClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)
                 return softmaxCrossEntropy(logits: logits, labels: labels)
@@ -94,6 +103,7 @@ time() {
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
             optimizer.update(&bertClassifier, along: gradients)
+            // LazyTensorBarrier()
 
             print(
                 """
@@ -113,8 +123,13 @@ time() {
             let valBatchSize = batch.data.tokenIds.shape[0]
 
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
+            // let labels = Tensor(copying: eagerLabels, to: device)
+
             let logits = bertClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
+            // LazyTensorBarrier()
             devLossSum += loss.scalarized()
             devBatchCount += 1
 
