@@ -26,12 +26,16 @@ let dataset = Img2Label(batchSize: batchSize, dsURL: dsURL, normalizing: true)
 print("dataset.training.count: \(dataset.training.count)")
 print("dataset.test.count: \(dataset.test.count)")
 
+// let device = Device.defaultXLA
+
 // Use the network sized for img2label
-var model = ResNet(classCount: dataset.labels.count, depth: .resNet18, downsamplingInFirstStage: false)
+var model: ResNet = ResNet(classCount: dataset.labels.count, depth: .resNet18, downsamplingInFirstStage: false)
+// model = model.move(to: device)
 
 // the classic ImageNet optimizer setting diverges on CIFAR-10
 // let optimizer = SGD(for: model, learningRate: 0.1, momentum: 0.9)
-let optimizer = SGD(for: model, learningRate: 0.001, momentum: 0.9)
+var optimizer = SGD(for: model, learningRate: 0.001, momentum: 0.9)
+// optimizer = SGD(copying: optimizer, to: device)
 
 print("Starting img2label training...")
 
@@ -44,6 +48,10 @@ time() {
         for batch in dataset.training.sequenced() {
             // print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
             let (images, labels) = (batch.first, batch.second)
+            // let (eagerImages, eagerLabels) = (batch.first, batch.second)
+            // let images = Tensor(copying: eagerImages, to: device)
+            // let labels = Tensor(copying: eagerLabels, to: device)
+
             let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
                 let logits = model(images)
                 return softmaxCrossEntropy(logits: logits, labels: labels)
@@ -51,6 +59,7 @@ time() {
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
             optimizer.update(&model, along: gradients)
+            // LazyTensorBarrier()
         }
 
         Context.local.learningPhase = .inference
@@ -61,8 +70,12 @@ time() {
         for batch in dataset.test.sequenced() {
             // print("batch")
             let (images, labels) = (batch.first, batch.second)
+            // let (eagerImages, eagerLabels) = (batch.first, batch.second)
+            // let images = Tensor(copying: eagerImages, to: device)
+            // let labels = Tensor(copying: eagerLabels, to: device)
             let logits = model(images)
             testLossSum += softmaxCrossEntropy(logits: logits, labels: labels).scalarized()
+            // LazyTensorBarrier()
             testBatchCount += 1
 
             let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
