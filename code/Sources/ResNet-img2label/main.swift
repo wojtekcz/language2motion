@@ -16,17 +16,18 @@ import Foundation
 import Datasets
 import ImageClassificationModels
 import TensorFlow
+import ModelSupport
 
 let batchSize = 10
 
-let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/img2label_ds_v1", isDirectory: true)
+let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/img2label_ds_v2", isDirectory: true)
 
 let dataset = Img2Label(batchSize: batchSize, dsURL: dsURL, normalizing: true)
 print("dataset.training.count: \(dataset.training.count)")
 print("dataset.test.count: \(dataset.test.count)")
 
 // Use the network sized for img2label
-var model = ResNet(classCount: 5, depth: .resNet18, downsamplingInFirstStage: false)
+var model = ResNet(classCount: dataset.labels.count, depth: .resNet18, downsamplingInFirstStage: false)
 
 // the classic ImageNet optimizer setting diverges on CIFAR-10
 // let optimizer = SGD(for: model, learningRate: 0.1, momentum: 0.9)
@@ -34,48 +35,50 @@ let optimizer = SGD(for: model, learningRate: 0.001, momentum: 0.9)
 
 print("Starting img2label training...")
 
-for epoch in 1...10 {
-    // print("epoch \(epoch)")
-    Context.local.learningPhase = .training
-    var trainingLossSum: Float = 0
-    var trainingBatchCount = 0
-    for batch in dataset.training.sequenced() {
-        // print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
-        let (images, labels) = (batch.first, batch.second)
-        let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
-            let logits = model(images)
-            return softmaxCrossEntropy(logits: logits, labels: labels)
+time() {
+    for epoch in 1...10 {
+        // print("epoch \(epoch)")
+        Context.local.learningPhase = .training
+        var trainingLossSum: Float = 0
+        var trainingBatchCount = 0
+        for batch in dataset.training.sequenced() {
+            // print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
+            let (images, labels) = (batch.first, batch.second)
+            let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
+                let logits = model(images)
+                return softmaxCrossEntropy(logits: logits, labels: labels)
+            }
+            trainingLossSum += loss.scalarized()
+            trainingBatchCount += 1
+            optimizer.update(&model, along: gradients)
         }
-        trainingLossSum += loss.scalarized()
-        trainingBatchCount += 1
-        optimizer.update(&model, along: gradients)
+
+        Context.local.learningPhase = .inference
+        var testLossSum: Float = 0
+        var testBatchCount = 0
+        var correctGuessCount = 0
+        var totalGuessCount = 0
+        for batch in dataset.test.sequenced() {
+            // print("batch")
+            let (images, labels) = (batch.first, batch.second)
+            let logits = model(images)
+            testLossSum += softmaxCrossEntropy(logits: logits, labels: labels).scalarized()
+            testBatchCount += 1
+
+            let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
+            correctGuessCount = correctGuessCount
+                + Int(
+                    Tensor<Int32>(correctPredictions).sum().scalarized())
+            totalGuessCount = totalGuessCount + batchSize
+        }
+
+        let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
+        print(
+            """
+            [Epoch \(epoch)] \
+            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
+            Loss: \(testLossSum / Float(testBatchCount))
+            """
+        )
     }
-
-    Context.local.learningPhase = .inference
-    var testLossSum: Float = 0
-    var testBatchCount = 0
-    var correctGuessCount = 0
-    var totalGuessCount = 0
-    for batch in dataset.test.sequenced() {
-        // print("batch")
-        let (images, labels) = (batch.first, batch.second)
-        let logits = model(images)
-        testLossSum += softmaxCrossEntropy(logits: logits, labels: labels).scalarized()
-        testBatchCount += 1
-
-        let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
-        correctGuessCount = correctGuessCount
-            + Int(
-                Tensor<Int32>(correctPredictions).sum().scalarized())
-        totalGuessCount = totalGuessCount + batchSize
-    }
-
-    let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
-    print(
-        """
-        [Epoch \(epoch)] \
-        Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
-        Loss: \(testLossSum / Float(testBatchCount))
-        """
-    )
 }
