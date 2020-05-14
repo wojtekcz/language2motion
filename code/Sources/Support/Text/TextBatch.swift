@@ -74,3 +74,14 @@ extension Collection where Element == TextBatch {
     return paddedTexts.collated
   }
 }
+
+
+extension TextBatch {
+  // returns new TextBatch with tensors copied to device
+  public func copyingTensorsToDevice(to device: Device) -> TextBatch {
+    let tokenIds = Tensor(copying: self.tokenIds, to: device)
+    let tokenTypeIds = Tensor(copying: self.tokenTypeIds, to: device)
+    let mask = Tensor(copying: self.mask, to: device)
+    return TextBatch(tokenIds: tokenIds, tokenTypeIds: tokenTypeIds, mask: mask)
+  }
+}
