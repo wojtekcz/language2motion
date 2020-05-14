@@ -7,47 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug test2",
-            "program": "${workspaceFolder}/vscode_debug/plain_swift/test2",
+            "name": "ResNet-img2label",
+            "program": "${workspaceFolder}/.build/debug/ResNet-img2label",
             "args": [],
-            "cwd": "${workspaceFolder}/vscode_debug/plain_swift"
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug test",
-            "program": "${workspaceFolder}/vscode_debug/plain_swift/test",
-            "args": [],
-            "cwd": "${workspaceFolder}/vscode_debug/plain_swift"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug inference",
-            "program": "${workspaceFolder}/vscode_debug/plain_swift/inference",
-            "args": [],
-            "cwd": "${workspaceFolder}/vscode_debug/plain_swift"
-        }
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug ResNet-CIFAR10",
-            "program": "${workspaceFolder}/swift-models.gt/.build/x86_64-unknown-linux-gnu/debug/ResNet-CIFAR10",
-            "args": [],
-            "cwd": "${workspaceFolder}/swift-models.gt"
-        }
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug ResNet-img2label",
-            "program": "${workspaceFolder}/swift-models.gt/.build/x86_64-unknown-linux-gnu/debug/ResNet-img2label",
-            "args": [],
-            "cwd": "${workspaceFolder}/swift-models.gt"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug BERT-language2label",
+            "name": "BERT-language2label",
             "program": "${workspaceFolder}/.build/debug/BERT-language2label",
             "args": [],
             "cwd": "${workspaceFolder}"
