@@ -39,9 +39,9 @@ var bertClassifier = BERTClassifier(bert: bert, classCount: 5)
 // varied lengths. Note that this is not used in the original BERT implementation released by
 // Google and so the batch size setting here is expected to differ from that one.
 let maxSequenceLength = 50
-let batchSize = 2048
+let batchSize = 3096
 
-let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2_manual_labels.csv")
+let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 var dataset = try Language2Label(
     datasetURL: dsURL,
@@ -68,65 +68,68 @@ var optimizer = WeightDecayedAdam(
             baseParameter: FixedParameter<Float>(2e-5),
             warmUpStepCount: 10,
             warmUpOffset: 0),
-        slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
+        // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
+        slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
         startStep: 10),
     weightDecayRate: 0.01,
     maxGradientGlobalNorm: 1)
 
 print("Training BERT for the Language2Label task!")
 
-for (epoch, epochBatches) in dataset.trainingEpochs.prefix(3).enumerated() {
-    print("[Epoch \(epoch + 1)]")
-    Context.local.learningPhase = .training
-    var trainingLossSum: Float = 0
-    var trainingBatchCount = 0
-    print("epochBatches.count: \(epochBatches.count)")
+time() {
+    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
+        print("[Epoch \(epoch + 1)]")
+        Context.local.learningPhase = .training
+        var trainingLossSum: Float = 0
+        var trainingBatchCount = 0
+        print("epochBatches.count: \(epochBatches.count)")
 
-    for batch in epochBatches {
-        let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-        let (loss, gradients) = valueWithGradient(at: bertClassifier) { model -> Tensor<Float> in
-            let logits = model(documents)
-            return softmaxCrossEntropy(logits: logits, labels: labels)
+        for batch in epochBatches {
+            let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            let (loss, gradients) = valueWithGradient(at: bertClassifier) { model -> Tensor<Float> in
+                let logits = model(documents)
+                return softmaxCrossEntropy(logits: logits, labels: labels)
+            }
+
+            trainingLossSum += loss.scalarized()
+            trainingBatchCount += 1
+            optimizer.update(&bertClassifier, along: gradients)
+
+            print(
+                """
+                Training loss: \(trainingLossSum / Float(trainingBatchCount))
+                """
+            )
         }
 
-        trainingLossSum += loss.scalarized()
-        trainingBatchCount += 1
-        optimizer.update(&bertClassifier, along: gradients)
+        print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+        Context.local.learningPhase = .inference
+        var devLossSum: Float = 0
+        var devBatchCount = 0
+        var correctGuessCount = 0
+        var totalGuessCount = 0
 
+        for batch in dataset.validationBatches {
+            let valBatchSize = batch.data.tokenIds.shape[0]
+
+            let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            let logits = bertClassifier(documents)
+            let loss = softmaxCrossEntropy(logits: logits, labels: labels)
+            devLossSum += loss.scalarized()
+            devBatchCount += 1
+
+            let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
+
+            correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
+            totalGuessCount += valBatchSize
+        }
+        
+        let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
         print(
             """
-              Training loss: \(trainingLossSum / Float(trainingBatchCount))
+            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
+            Eval loss: \(devLossSum / Float(devBatchCount))
             """
         )
     }
-
-    print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
-    Context.local.learningPhase = .inference
-    var devLossSum: Float = 0
-    var devBatchCount = 0
-    var correctGuessCount = 0
-    var totalGuessCount = 0
-
-    for batch in dataset.validationBatches {
-        let valBatchSize = batch.data.tokenIds.shape[0]
-
-        let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-        let logits = bertClassifier(documents)
-        let loss = softmaxCrossEntropy(logits: logits, labels: labels)
-        devLossSum += loss.scalarized()
-        devBatchCount += 1
-
-        let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
-
-        correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
-        totalGuessCount += valBatchSize
-    }
-    
-    let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
-    print(
-        """
-        Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
-        Eval loss: \(devLossSum / Float(devBatchCount))
-        """
-    )
 }
