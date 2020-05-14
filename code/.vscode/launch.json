@@ -47,7 +47,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug BERT-languagelabel",
+            "name": "Debug BERT-language2label",
             "program": "${workspaceFolder}/.build/debug/BERT-language2label",
             "args": [],
             "cwd": "${workspaceFolder}"
