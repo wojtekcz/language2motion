@@ -18,6 +18,15 @@ import ModelSupport
 import TensorFlow
 import TextModels
 
+// // Note: The this initial eager-mode tensor computation is needed, or all GPU memory
+// // will be exhausted on initial allocation of the model.
+// // TODO: Remove the following tensor workaround when above is fixed.
+// // Investigate why a simple eager Tensor calculation is needed at start of training benchmark #529
+// // https://github.com/tensorflow/swift-models/issues/529
+// let testTensor = Tensor<Float>([1.0, 2.0, 3.0])
+// let testTensor2 = Tensor<Float>([1.0, 2.0, 3.0])
+// let _ = testTensor + testTensor2
+
 // let device = Device.defaultXLA
 // print(device)
 
