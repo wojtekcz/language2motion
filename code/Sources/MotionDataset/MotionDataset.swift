@@ -1,11 +1,12 @@
 import Foundation
 
-public class MotionDataset {
+public class MotionDataset: Codable {
     let datasetFolderURL: URL
-    var motionSamples: [MotionSample] = []
+    let motionSamples: [MotionSample]
 
     public init(datasetFolderURL: URL, maxSamples: Int) {
         self.datasetFolderURL = datasetFolderURL
+        var motionSamples: [MotionSample] = []
         let fm = FileManager()
         
         for i in 1...maxSamples {
@@ -23,9 +24,10 @@ public class MotionDataset {
                 print("** Sample \(i) doesn't exist.")
             }
         }
+        self.motionSamples = motionSamples
     }
     
-    func describe() -> String {
+    public func describe() -> String {
         return "MotionDataset(motionSamples: \(motionSamples.count))"
     }
 }

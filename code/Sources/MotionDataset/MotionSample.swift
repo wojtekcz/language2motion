@@ -16,13 +16,13 @@ func shapedArrayFromArray(arr: Array<Array<Float>>) -> ShapedArray<Float>? {
 }
 
 
-struct MotionSample {
+public struct MotionSample: Codable {
     public var sampleID: Int
     public var motionFrames: [MotionFrame] = []
     public var jointNames: [String] = []
     public var annotations: [String] = []
     
-    init(sampleID: Int, mmmURL: URL, annotationsURL: URL) {
+    public init(sampleID: Int, mmmURL: URL, annotationsURL: URL) {
         self.sampleID = sampleID
         let mmm_doc = loadMMM(fileURL: mmmURL)
         self.jointNames = getJointNames(mmm_doc: mmm_doc)
@@ -89,7 +89,7 @@ struct MotionSample {
         }
     }
 
-    func describe() -> String {
+    public func describe() -> String {
         return "MotionSample(timestamp: \(self.motionFrames.last!.timestamp), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
     }
 }

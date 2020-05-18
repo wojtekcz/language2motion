@@ -1,12 +1,18 @@
 import Foundation
 
-public struct MotionFrame {
-
+public struct MotionFrame: Codable {
+    // TODO: change to let
     var timestamp: Float = 0.0
     var jointPositions: [Float] = []
     var jointNames: [String] = []
 
-    init(jointNames: [String]) {
+    public init(jointNames: [String]) {
+        self.jointNames = jointNames
+    }
+
+    public init(timestamp: Float, jointPositions: [Float], jointNames: [String]) {
+        self.timestamp = timestamp
+        self.jointPositions = jointPositions
         self.jointNames = jointNames
     }
 
