@@ -24,6 +24,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "MotionDataset", path: "Sources/MotionDataset"),
+        .testTarget(name: "MotionDatasetTests", dependencies: ["MotionDataset"]),
         .target(name: "RunPreprocess", dependencies: ["MotionDataset"], path: "Sources/RunPreprocess"),
         .target(
             name: "ResNet-img2label", dependencies: ["ImageClassificationModels", "Datasets"],

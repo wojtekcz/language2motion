@@ -10,7 +10,8 @@
             "name": "ResNet-img2label",
             "program": "${workspaceFolder}/.build/debug/ResNet-img2label",
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "initCommands": ["settings set target.disable-aslr false"]
         },
         {
             "type": "lldb",
@@ -18,7 +19,17 @@
             "name": "BERT-language2label",
             "program": "${workspaceFolder}/.build/debug/BERT-language2label",
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
+        // Running unit tests
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug tests on Linux",
+            "program": "${workspaceFolder}/.build/x86_64-unknown-linux-gnu/debug/MotionDatasetPackageTests.xctest",
+            // "preLaunchTask": "swift-build-tests",
+            "initCommands": ["settings set target.disable-aslr false"]
         }
     ]
 }
