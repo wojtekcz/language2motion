@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MotionFrame: Codable {
+public struct MotionFrame {
     // TODO: change to let
     var timestamp: Float = 0.0
     var jointPositions: [Float] = []

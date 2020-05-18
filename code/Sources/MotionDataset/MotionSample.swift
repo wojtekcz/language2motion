@@ -21,15 +21,50 @@ public struct MotionSample: Codable {
     public var motionFrames: [MotionFrame] = []
     public var jointNames: [String] = []
     public var annotations: [String] = []
-    
+
+    // TODO: make motionFramesArray additional info
+    public var motionFramesArray: ShapedArray<Float>? = nil
+    // TODO: encode/decode timestamps
+
+    enum CodingKeys: String, CodingKey {
+        case sampleID
+        case jointNames
+        case annotations
+        case motionFramesArray
+    }
+
+    // enum AdditionalInfoKeys: String, CodingKey {
+    //     case motionFrames
+    // }
+
     public init(sampleID: Int, mmmURL: URL, annotationsURL: URL) {
         self.sampleID = sampleID
         let mmm_doc = loadMMM(fileURL: mmmURL)
         self.jointNames = getJointNames(mmm_doc: mmm_doc)
         self.motionFrames = getMotionFrames(mmm_doc: mmm_doc)
+
         self.annotations = getAnnotations(fileURL: annotationsURL)
+        self.motionFramesArray = getJointPositions(grouppedJoints: false, normalized: false)
     }
     
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        sampleID = try values.decode(Int.self, forKey: .sampleID)
+        jointNames = try values.decode(Array<String>.self, forKey: .jointNames)
+        annotations = try values.decode(Array<String>.self, forKey: .annotations)
+        motionFramesArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .motionFramesArray).shapedArray
+        // TODO: loop over motionFramesArray and create MotionFrames
+        motionFrames = []
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(sampleID, forKey: .sampleID)
+        try container.encode(jointNames, forKey: .jointNames)
+        try container.encode(annotations, forKey: .annotations)
+        try container.encode(FastCodableShapedArray<Float>(shapedArray: motionFramesArray!), forKey: .motionFramesArray)
+    }
+
     func loadMMM(fileURL: URL) -> XMLDocument {
         let mmm_text = try! String(contentsOf: fileURL, encoding: .utf8)
         return try! XMLDocument(data: mmm_text.data(using: .utf8)!, options: [])

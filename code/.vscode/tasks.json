@@ -17,14 +17,14 @@
             // build --build-tests -c debug --enable-test-discovery --target MotionDatasetTests
             "args": [
                 "build",
-                "--build-tests",
                 "-c",
                 "debug",
-                // "--enable-test-discovery",
-                // "--target",
-                // "MotionDatasetTests",
+                "--enable-test-discovery",
+                "--target",
+                "MotionDatasetTests",
                 "--build-path", 
-                "/root/.build"
+                "/root/.build",
+                // "--build-tests",
                  // for TensorFlow add "-Xlinker", "-ltensorflow"
             ]
         }
