@@ -20,12 +20,11 @@ let package = Package(
         .executable(name: "BERT-language2label", targets: ["BERT-language2label"])
     ],
     dependencies: [
-        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0"),
-        .package(name: "StickyEncoding", url: "https://github.com/stickytools/sticky-encoding.git", from: "1.0.0-beta.5"),
+        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0")
     ],
     targets: [
         .target(name: "MotionDataset", path: "Sources/MotionDataset"),
-        .testTarget(name: "MotionDatasetTests", dependencies: ["MotionDataset", "StickyEncoding"]),
+        .testTarget(name: "MotionDatasetTests", dependencies: ["MotionDataset"]),
         .target(name: "RunPreprocess", dependencies: ["MotionDataset"], path: "Sources/RunPreprocess"),
         .target(
             name: "ResNet-img2label", dependencies: ["ImageClassificationModels", "Datasets"],

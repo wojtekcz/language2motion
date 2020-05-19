@@ -27,7 +27,7 @@ public class MotionDataset: Codable {
         self.motionSamples = motionSamples
     }
     
-    public func describe() -> String {
+    public var description: String {
         return "MotionDataset(motionSamples: \(motionSamples.count))"
     }
 }

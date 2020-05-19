@@ -1,20 +1,9 @@
 import Foundation
 
 public struct MotionFrame {
-    // TODO: change to let
-    var timestamp: Float = 0.0
-    var jointPositions: [Float] = []
-    var jointNames: [String] = []
-
-    public init(jointNames: [String]) {
-        self.jointNames = jointNames
-    }
-
-    public init(timestamp: Float, jointPositions: [Float], jointNames: [String]) {
-        self.timestamp = timestamp
-        self.jointPositions = jointPositions
-        self.jointNames = jointNames
-    }
+    public let timestamp: Float
+    public let jointPositions: [Float]
+    public let jointNames: [String]
 
     func jp(of: String) -> Float {
         return self.jointPositions[jointNames.firstIndex(of: of)!]
@@ -143,5 +132,4 @@ public struct MotionFrame {
         legAndFoot(side: "L")// +
         //[self.jointPositions[44]]
     }
-
 }
