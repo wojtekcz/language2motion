@@ -31,6 +31,7 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
 * processed: 
   * [img2label_ds_v1.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/img2label_ds_v1.tgz)
   * [img2label_ds_v2.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/img2label_ds_v2.tgz)
+  * [motion_dataset_v1.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/motion_dataset_v1.tgz)
 * annotations and labels: 
   * [labels_ds_v1.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v1.csv)
   * [labels_ds_v2.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv)
