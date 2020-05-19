@@ -14,8 +14,9 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] classify motion images (+in fastai, +in swift)
   - language 2 label
     - [x] Transformer encoder on annotation + classifier
-    - [ ] \* batched prediction
-    - [ ] \* Use BERT classifier to assign better labels
+    - [x] batched prediction
+    - [x] Use BERT classifier to assign better labels - didn't work
+    - [x] manually assign better labels
   - motion 2 label
     - [ ] Transformer encoder on motion + classifier
     - [ ] RNN encoder on motion + classifier
