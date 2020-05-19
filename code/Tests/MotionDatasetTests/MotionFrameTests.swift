@@ -86,9 +86,8 @@ final class MotionDatasetTests: XCTestCase {
         print("Decoding...")
         let date = Date() 
         let motionDataset = try PropertyListDecoder().decode(MotionDataset.self, from: data)
-        print("Done...")
+        print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
         print(motionDataset.description)
-        print(abs(date.timeIntervalSinceNow))
     }
 
     static var allTests = [

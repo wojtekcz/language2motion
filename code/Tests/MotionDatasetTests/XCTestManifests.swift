@@ -9,7 +9,7 @@ extension MotionDatasetTests {
         // ("serializeMotionFrame", serializeMotionFrame),
         // ("serializeMotionSample", serializeMotionSample),
         // ("serializeMotionDatasetJSON", serializeMotionDatasetJSON),
-        ("serializeMotionDatasetBinary", serializeMotionDatasetBinary),
+        // ("serializeMotionDatasetBinary", serializeMotionDatasetBinary),
         ("readBinaryMotionDataset", readBinaryMotionDataset),
     ]
 }

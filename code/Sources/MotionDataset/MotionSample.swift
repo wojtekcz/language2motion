@@ -1,19 +1,6 @@
 import Foundation
 import FoundationXML
 import TensorFlow
-import PythonKit
-
-let np = Python.import("numpy")
-
-// TODO: move to some utils
-func tensorFromArray(arr: Array<Array<Float>>) -> Tensor<Float>? {
-    // TODO: convert to extension with custom init
-    return Tensor<Float>.init(numpy: np.array(arr).astype(np.float32))
-}
-func shapedArrayFromArray(arr: Array<Array<Float>>) -> ShapedArray<Float>? {
-    // TODO: convert to extension with custom init
-    return ShapedArray<Float>.init(numpy: np.array(arr).astype(np.float32))
-}
 
 
 public struct MotionSample: Codable {
@@ -22,14 +9,14 @@ public struct MotionSample: Codable {
     public let jointNames: [String]
     public let annotations: [String]
 
-    public let timestamps: [Float]
+    public let timestampsArray: ShapedArray<Float>
     public let motionFramesArray: ShapedArray<Float>
 
     enum CodingKeys: String, CodingKey {
         case sampleID
         case jointNames
         case annotations
-        case timestamps
+        case timestampsArray
         case motionFramesArray
     }
 
@@ -41,7 +28,8 @@ public struct MotionSample: Codable {
         let motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
         self.motionFrames = motionFrames
         self.annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
-        self.timestamps = motionFrames.map { $0.timestamp }
+        let timestamps: [Float] = motionFrames.map { $0.timestamp }
+        self.timestampsArray = ShapedArray<Float>(shape: [timestamps.count], scalars: timestamps)
         self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: false, normalized: false)
     }
     
@@ -50,15 +38,20 @@ public struct MotionSample: Codable {
         sampleID = try values.decode(Int.self, forKey: .sampleID)
         jointNames = try values.decode(Array<String>.self, forKey: .jointNames)
         annotations = try values.decode(Array<String>.self, forKey: .annotations)
-        timestamps = try values.decode(Array<Float>.self, forKey: .timestamps)
+        timestampsArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .timestampsArray).shapedArray
         motionFramesArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .motionFramesArray).shapedArray
 
         // loop over motionFramesArray and create MotionFrames
         var motionFrames: [MotionFrame] = []
-        for f_idx in 0..<motionFramesArray.shape[0] {
+        let timestamps = timestampsArray.scalars // working with scalars, for performance
+        let mfScalars = motionFramesArray.scalars // working with scalars, for performance
+        let cj = motionFramesArray.shape[1]
+        for i in 0..<motionFramesArray.shape[0] {
+            let start = i*cj
+            let jointPositions: [Float] = Array(mfScalars[start..<(start+cj)])
             let mf = MotionFrame(
-                timestamp: timestamps[f_idx], 
-                jointPositions: motionFramesArray[f_idx].scalars, 
+                timestamp: timestamps[i], 
+                jointPositions: jointPositions, 
                 jointNames: jointNames
             )
             motionFrames.append(mf)
@@ -71,7 +64,7 @@ public struct MotionSample: Codable {
         try container.encode(sampleID, forKey: .sampleID)
         try container.encode(jointNames, forKey: .jointNames)
         try container.encode(annotations, forKey: .annotations)
-        try container.encode(timestamps, forKey: .timestamps)
+        try container.encode(FastCodableShapedArray<Float>(shapedArray: timestampsArray), forKey: .timestampsArray)
         try container.encode(FastCodableShapedArray<Float>(shapedArray: motionFramesArray), forKey: .motionFramesArray)
     }
 
@@ -122,10 +115,10 @@ public struct MotionSample: Codable {
             a = motionFrames.map {$0.jointPositions}
         }
         if normalized {
-            let t = sigmoid(tensorFromArray(arr: a!)!)
+            let t = sigmoid(a!.makeTensor())
             return t.array
         } else {
-            return shapedArrayFromArray(arr: a!)!
+            return a!.makeShapedArray()
         }
     }
 
