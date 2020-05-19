@@ -68,24 +68,16 @@ final class MotionDatasetTests: XCTestCase {
         let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples)
         print(abs(date.timeIntervalSinceNow))
 
-        // serialize dataset to property list
-        let encoder = PropertyListEncoder()
-        encoder.outputFormat = .binary
         date = Date()
-        print("Encoding to property list")
-        let mdData = try encoder.encode(motionDataset)
-        print("Writing to file")
-        try mdData.write(to: serializedDatasetURL) 
-        print(abs(date.timeIntervalSinceNow))
+        print("Encoding to property list..., writing to file...")
+        motionDataset.write(to: serializedDatasetURL)
+        print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
     }
 
     func readBinaryMotionDataset() throws {
-        print("Reading...")
-        let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
-        // decode from proprty list
-        print("Decoding...")
+        print("Reading..., decoding...")
         let date = Date() 
-        let motionDataset = try PropertyListDecoder().decode(MotionDataset.self, from: data)
+        let motionDataset = MotionDataset(from: serializedDatasetURL)
         print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
         print(motionDataset.description)
     }

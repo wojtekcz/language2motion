@@ -26,7 +26,23 @@ public class MotionDataset: Codable {
         }
         self.motionSamples = motionSamples
     }
-    
+
+    // TODO: code throwing errors
+    public init(from serializedDatasetURL: URL) {
+        let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
+        let motionDataset = try! PropertyListDecoder().decode(MotionDataset.self, from: data)
+        datasetFolderURL = motionDataset.datasetFolderURL
+        motionSamples = motionDataset.motionSamples
+    }
+
+    // TODO: code throwing errors
+    public func write(to serializedDatasetURL: URL) {
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        let mdData = try! encoder.encode(self)
+        try! mdData.write(to: serializedDatasetURL) 
+    }
+
     public var description: String {
         return "MotionDataset(motionSamples: \(motionSamples.count))"
     }
