@@ -1,8 +1,8 @@
 import Foundation
 
 public class MotionDataset: Codable {
-    let datasetFolderURL: URL
-    let motionSamples: [MotionSample]
+    public let datasetFolderURL: URL
+    public let motionSamples: [MotionSample]
 
     public init(datasetFolderURL: URL, maxSamples: Int) {
         self.datasetFolderURL = datasetFolderURL
