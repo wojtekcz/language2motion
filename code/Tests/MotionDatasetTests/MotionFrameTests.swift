@@ -6,7 +6,7 @@ import MotionDataset
 final class MotionDatasetTests: XCTestCase {
     let maxSamples: Int = 4000
     var serializedDatasetURL: URL {
-        return URL(fileURLWithPath: "/notebooks/language2motion.gt/data/dataset.\(maxSamples).plist")
+        return URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.\(maxSamples).plist")
     }
 
     public var description: String {
