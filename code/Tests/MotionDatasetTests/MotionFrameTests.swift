@@ -32,18 +32,18 @@ final class MotionDatasetTests: XCTestCase {
         print(ms2)
     }
 
-    func serializeMotionDatasetJSON() throws {
+    func serializeMotionDataJSON() throws {
         let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
 
         var date = Date()
-        let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, maxSamples: 10)
+        let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: 10)
         print(abs(date.timeIntervalSinceNow))
 
         // serialize dataset to JSON
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
 
-        let mdJSON = try encoder.encode(motionDataset)
+        let mdJSON = try encoder.encode(motionData)
         let jsonStr = String(data: mdJSON, encoding: .utf8)!
         // print(jsonStr)
         print(jsonStr.count)
@@ -56,36 +56,36 @@ final class MotionDatasetTests: XCTestCase {
         print("Decoding...")
         let decoder = JSONDecoder()
         date = Date()
-        let md2 = try decoder.decode(MotionDataset.self, from: mdJSON)
+        let md2 = try decoder.decode(MotionData.self, from: mdJSON)
         print(md2.description)
         print(abs(date.timeIntervalSinceNow))
     }
 
-    func serializeMotionDatasetBinary() throws {
+    func serializeMotionDataBinary() throws {
         let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
 
         var date = Date()
-        let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples)
+        let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples)
         print(abs(date.timeIntervalSinceNow))
 
         date = Date()
         print("Encoding to property list..., writing to file...")
-        motionDataset.write(to: serializedDatasetURL)
+        motionData.write(to: serializedDatasetURL)
         print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
     }
 
-    func readBinaryMotionDataset() throws {
+    func readBinaryMotionData() throws {
         print("Reading..., decoding...")
         let date = Date() 
-        let motionDataset = MotionDataset(from: serializedDatasetURL)
+        let motionData = MotionData(from: serializedDatasetURL)
         print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
-        print(motionDataset.description)
+        print(motionData.description)
     }
 
     static var allTests = [
         ("serializeMotionSample", serializeMotionSample),
-        ("serializeMotionDatasetJSON", serializeMotionDatasetJSON),
-        ("serializeMotionDatasetBinary", serializeMotionDatasetBinary),
-        ("readBinaryMotionDataset", readBinaryMotionDataset),
+        ("serializeMotionDataJSON", serializeMotionDataJSON),
+        ("serializeMotionDataBinary", serializeMotionDataBinary),
+        ("readBinaryMotionData", readBinaryMotionData),
     ]
 }

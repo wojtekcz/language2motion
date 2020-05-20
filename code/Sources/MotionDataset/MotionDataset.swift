@@ -1,6 +1,6 @@
 import Foundation
 
-public class MotionDataset: Codable {
+public class MotionData: Codable {
     public let datasetFolderURL: URL
     public let motionSamples: [MotionSample]
 
@@ -30,9 +30,9 @@ public class MotionDataset: Codable {
     // TODO: code throwing errors
     public init(from serializedDatasetURL: URL) {
         let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
-        let motionDataset = try! PropertyListDecoder().decode(MotionDataset.self, from: data)
-        datasetFolderURL = motionDataset.datasetFolderURL
-        motionSamples = motionDataset.motionSamples
+        let motionData = try! PropertyListDecoder().decode(MotionData.self, from: data)
+        datasetFolderURL = motionData.datasetFolderURL
+        motionSamples = motionData.motionSamples
     }
 
     // TODO: code throwing errors
@@ -44,6 +44,6 @@ public class MotionDataset: Codable {
     }
 
     public var description: String {
-        return "MotionDataset(motionSamples: \(motionSamples.count))"
+        return "MotionData(motionSamples: \(motionSamples.count))"
     }
 }

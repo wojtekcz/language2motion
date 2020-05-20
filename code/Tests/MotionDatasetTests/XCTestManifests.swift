@@ -8,9 +8,9 @@ extension MotionDatasetTests {
     static let __allTests__MotionDatasetTests = [
         // ("serializeMotionFrame", serializeMotionFrame),
         // ("serializeMotionSample", serializeMotionSample),
-        // ("serializeMotionDatasetJSON", serializeMotionDatasetJSON),
-        // ("serializeMotionDatasetBinary", serializeMotionDatasetBinary),
-        ("readBinaryMotionDataset", readBinaryMotionDataset),
+        // ("serializeMotionDataJSON", serializeMotionDataJSON),
+        ("serializeMotionDataBinary", serializeMotionDataBinary),
+        // ("readBinaryMotionData", readBinaryMotionData),
     ]
 }
 
