@@ -9,8 +9,8 @@ public struct MotionSample: Codable {
     public let jointNames: [String]
     public let annotations: [String]
 
-    public let timestampsArray: ShapedArray<Float>
-    public let motionFramesArray: ShapedArray<Float>
+    public let timestampsArray: ShapedArray<Float> // 1D, time steps
+    public let motionFramesArray: ShapedArray<Float> // 2D, motion frames, joint positions
 
     enum CodingKeys: String, CodingKey {
         case sampleID

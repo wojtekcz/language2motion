@@ -9,7 +9,6 @@ let package = Package(
         .macOS(.v10_13),
     ],
     products: [
-        .library(name: "MotionDataset", targets: ["MotionDataset"]),
         .library(name: "ImageClassificationModels", targets: ["ImageClassificationModels"]),
         .library(name: "Batcher", targets: ["Batcher"]),
         .library(name: "Datasets", targets: ["Datasets"]),
@@ -17,18 +16,21 @@ let package = Package(
         .library(name: "TextModels", targets: ["TextModels"]),
         .executable(name: "RunPreprocess", targets: ["RunPreprocess"]),
         .executable(name: "ResNet-img2label", targets: ["ResNet-img2label"]),
+        .executable(name: "ResNet-motion2label", targets: ["ResNet-motion2label"]),
         .executable(name: "BERT-language2label", targets: ["BERT-language2label"])
     ],
     dependencies: [
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0")
     ],
     targets: [
-        .target(name: "MotionDataset", path: "Sources/MotionDataset"),
-        .testTarget(name: "MotionDatasetTests", dependencies: ["MotionDataset"]),
-        .target(name: "RunPreprocess", dependencies: ["MotionDataset"], path: "Sources/RunPreprocess"),
+        .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
+        .target(name: "RunPreprocess", dependencies: ["Datasets"], path: "Sources/RunPreprocess"),
         .target(
             name: "ResNet-img2label", dependencies: ["ImageClassificationModels", "Datasets"],
             path: "Sources/ResNet-img2label"),
+        .target(
+            name: "ResNet-motion2label", dependencies: ["ImageClassificationModels", "Datasets"],
+            path: "Sources/ResNet-motion2label"),
         .target(
             name: "BERT-language2label", dependencies: ["TextModels", "Datasets"],
             path: "Sources/BERT-language2label"),
