@@ -10,15 +10,17 @@ import ImageClassificationModels
 var model = ResNet(classCount: 5, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
 let optimizer = SGD(for: model, learningRate: 0.001)
 
-let batchSize = 25
+let batchSize = 10
 
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v1.plist")
+// let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v1.plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.500.plist")
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 let dataset = Motion2Label(
     batchSize: batchSize, 
     serializedDatasetURL: serializedDatasetURL,
-    labelsURL: labelsURL
+    labelsURL: labelsURL,
+    tensorWidth: 224
 )
 print("dataset.training.count: \(dataset.training.count)")
 print("dataset.test.count: \(dataset.test.count)")
@@ -28,10 +30,11 @@ print("Starting motion2label training...")
 for epoch in 1...10 {
 //     print("epoch \(epoch)")
     Context.local.learningPhase = .training
+    dataset.newTrainCrops()
     var trainingLossSum: Float = 0
     var trainingBatchCount = 0
     for batch in dataset.training.sequenced() {
-//         print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
+        print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
         let (tensors, labels) = (batch.first, batch.second)
         let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
             let logits = model(tensors)
