@@ -1,6 +1,6 @@
 import XCTest
 import class Foundation.Bundle
-import MotionDataset
+import Datasets
 
 
 final class MotionDatasetTests: XCTestCase {
