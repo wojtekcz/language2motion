@@ -3,12 +3,12 @@ import Datasets
 
 print("Running MotionData preprocessing...")
 
-let maxSamples: Int = 4000
+let maxSamples: Int = 500
 let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.grouppedJoints.normalized.\(maxSamples).plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.normalized.\(maxSamples).plist")
 
 var date = Date()
-let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples, grouppedJoints: true, normalized: true)
+let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples, grouppedJoints: false, normalized: true)
 print(abs(date.timeIntervalSinceNow))
 
 date = Date()
