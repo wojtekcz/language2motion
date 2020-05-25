@@ -4,9 +4,6 @@ import Batcher
 import PythonKit
 
 
-let pd = Python.import("pandas")
-
-
 extension Tensor where Scalar: Numeric {
     func paddedOrCropped(to width: Int) -> Tensor<Scalar> {
         // pads or crops two-dimensional tensor along 0-th axis

@@ -1,14 +1,6 @@
 // TODO:
 // - download dataset if not present
 // - unpack dataset
-// + enumerate folders, get (sorted) labels
-// + enumerate images
-// + sort image paths
-// + load image
-// + create [TensorPair<Float, Int32>] list
-// + create dataset object
-// + calculate normalization
-// + split into training/test
 
 
 import Foundation
@@ -16,13 +8,6 @@ import PythonKit
 import ModelSupport
 import TensorFlow
 import Batcher
-
-
-let np  = Python.import("numpy")
-let sklearn  = Python.import("sklearn")
-let model_selection  = Python.import("sklearn.model_selection")
-let glob = Python.import("glob")
-let Image = Python.import("PIL.Image")
 
 
 public struct Img2Label: ImageClassificationDataset {

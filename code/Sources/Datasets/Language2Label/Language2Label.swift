@@ -1,12 +1,8 @@
-// import Datasets
 import Foundation
 import ModelSupport
 import TensorFlow
-// import TextModels
 import PythonKit
 
-let pd  = Python.import("pandas")
-let model_selection  = Python.import("sklearn.model_selection")
 
 /// A `TextBatch` with the corresponding labels.
 public typealias LabeledTextBatch = (data: TextBatch, label: Tensor<Int32>)
