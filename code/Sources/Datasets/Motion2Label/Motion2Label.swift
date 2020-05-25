@@ -96,9 +96,10 @@ public class Motion2Label {
         
         let label: Tensor<Int32> = Tensor<Int32>(Int32(labels.firstIndex(of: labelStr!)!))
     
-        // var tensor = Tensor<Float>(ms.motionFramesArray)
+        var tensor = Tensor<Float>(ms.motionFramesArray)
         // FIXME: make getJointPositions much faster
-        var tensor = Tensor<Float>(MotionSample.getJointPositions(motionFrames: ms.motionFrames, grouppedJoints: true, normalized: true))
+        // no need, following transformation is done during dataset preprocessing
+        // var tensor = Tensor<Float>(MotionSample.getJointPositions(motionFrames: ms.motionFrames, grouppedJoints: true, normalized: true))
         tensor = tensor.paddedOrCropped(to: tensorWidth).expandingShape(at: 2)
         return TensorPair(first: tensor, second: label)
     }
