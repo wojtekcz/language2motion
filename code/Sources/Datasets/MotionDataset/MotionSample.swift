@@ -20,7 +20,7 @@ public struct MotionSample: Codable {
         case motionFramesArray
     }
 
-    public init(sampleID: Int, mmmURL: URL, annotationsURL: URL) {
+    public init(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true) {
         self.sampleID = sampleID
         let mmm_doc = MotionSample.loadMMM(fileURL: mmmURL)
         let jointNames = MotionSample.getJointNames(mmm_doc: mmm_doc)
@@ -30,7 +30,7 @@ public struct MotionSample: Codable {
         self.annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
         let timestamps: [Float] = motionFrames.map { $0.timestamp }
         self.timestampsArray = ShapedArray<Float>(shape: [timestamps.count], scalars: timestamps)
-        self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: false, normalized: false)
+        self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
     }
     
     public init(from decoder: Decoder) throws {

@@ -4,7 +4,7 @@ public class MotionData: Codable {
     public let datasetFolderURL: URL
     public let motionSamples: [MotionSample]
 
-    public init(datasetFolderURL: URL, maxSamples: Int) {
+    public init(datasetFolderURL: URL, maxSamples: Int, grouppedJoints: Bool = true, normalized: Bool = true) {
         self.datasetFolderURL = datasetFolderURL
         var motionSamples: [MotionSample] = []
         let fm = FileManager()
@@ -18,7 +18,7 @@ public class MotionData: Codable {
             let annotationsURL = datasetFolderURL.appendingPathComponent(annotationsFilename)
             
             if fm.fileExists(atPath: mmmURL.path) {
-                let motionSample = MotionSample(sampleID: i, mmmURL: mmmURL, annotationsURL: annotationsURL)            
+                let motionSample = MotionSample(sampleID: i, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized)            
                 motionSamples.append(motionSample)
             } else {
                 print("** Sample \(i) doesn't exist.")

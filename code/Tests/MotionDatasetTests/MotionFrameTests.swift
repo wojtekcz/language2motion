@@ -6,7 +6,7 @@ import Datasets
 final class MotionDatasetTests: XCTestCase {
     let maxSamples: Int = 4000
     var serializedDatasetURL: URL {
-        return URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.\(maxSamples).plist")
+        return URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.grouppedJoints.normalized.\(maxSamples).plist")
     }
 
     public var description: String {
@@ -65,7 +65,7 @@ final class MotionDatasetTests: XCTestCase {
         let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
 
         var date = Date()
-        let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples)
+        let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples, grouppedJoints: true, normalized: true)
         print(abs(date.timeIntervalSinceNow))
 
         date = Date()
