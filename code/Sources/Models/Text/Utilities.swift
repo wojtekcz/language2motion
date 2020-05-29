@@ -39,13 +39,13 @@ extension KeyPathIterable {
 extension Tensor {
     /// Returns this tensor reshaped to a matrix (i.e., a rank-2 tensor).
     @differentiable(wrt: self where Scalar: TensorFlowFloatingPoint)
-    internal func reshapedToMatrix() -> Tensor {
+    public func reshapedToMatrix() -> Tensor {
         reshaped(to: [-1, shape[rank - 1]])
     }
 
     /// Returns this previously-reshaped rank-2 tensor reshaped back to its original shape.
     @differentiable(wrt: self where Scalar: TensorFlowFloatingPoint)
-    internal func reshapedFromMatrix(originalShape: TensorShape) -> Tensor {
+    public func reshapedFromMatrix(originalShape: TensorShape) -> Tensor {
         reshaped(
             to: TensorShape(
                 originalShape[0..<originalShape.count - 1].dimensions + [shape[rank - 1]]))
@@ -53,7 +53,7 @@ extension Tensor {
 
     /// Returns this previously-reshaped rank-2 tensor reshaped back to its original shape.
     @differentiable(wrt: self where Scalar: TensorFlowFloatingPoint)
-    internal func reshapedFromMatrix(originalShape: Tensor<Int32>) -> Tensor {
+    public func reshapedFromMatrix(originalShape: Tensor<Int32>) -> Tensor {
         reshaped(
             toShape: Tensor<Int32>(concatenating: [
                 originalShape[0..<originalShape.shape[0] - 1],
