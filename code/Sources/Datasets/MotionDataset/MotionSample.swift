@@ -10,7 +10,7 @@ public struct MotionSample: Codable {
     public let annotations: [String]
 
     public let timestampsArray: ShapedArray<Float> // 1D, time steps
-    public let motionFramesArray: ShapedArray<Float> // 2D, motion frames, joint positions
+    public let motionFramesArray: ShapedArray<Float> // 2D, motion frames, joint positions, motion flag
 
     enum CodingKeys: String, CodingKey {
         case sampleID
@@ -91,11 +91,12 @@ public struct MotionSample: Codable {
             
             let timestampStr: String = (try! motionFrame.nodes(forXPath:"Timestep"))[0].stringValue!
             let jointPositionStr: String = (try! motionFrame.nodes(forXPath:"JointPosition"))[0].stringValue!
-            let jointPositions: [Float] = jointPositionStr.split(separator: " ").map {
-                var xx = Float($0)
-                if xx==nil { xx = 0.0 }
-                return xx!
+            var jointPositions: [Float] = jointPositionStr.split(separator: " ").map {
+                var value = Float($0)
+                if value==nil { value = 0.0 }
+                return value!
             }
+            jointPositions += [1.0] // Adding motion flag
 
             let mf = MotionFrame(
                 timestamp: Float(timestampStr)!, 
@@ -115,7 +116,12 @@ public struct MotionSample: Codable {
             a = motionFrames.map {$0.jointPositions}
         }
         if normalized {
-            let t = sigmoid(a!.makeTensor())
+            // don't sigmoid motion flag
+            let mfIdx = 44
+            var t = a!.makeTensor()
+            let mf = t[0..., mfIdx...mfIdx]
+            t = sigmoid(t)
+            t[0..., mfIdx...mfIdx] = mf
             return t.array
         } else {
             return a!.makeShapedArray()

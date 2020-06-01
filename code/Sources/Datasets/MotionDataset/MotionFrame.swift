@@ -129,7 +129,7 @@ public struct MotionFrame {
         armAndHand(side: "R") + 
         armAndHand(side: "L") +
         legAndFoot(side: "R") +
-        legAndFoot(side: "L")// +
-        //[self.jointPositions[44]]
+        legAndFoot(side: "L") +
+        [self.jointPositions[44]]
     }
 }
