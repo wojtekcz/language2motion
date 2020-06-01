@@ -17,7 +17,8 @@ let package = Package(
         .executable(name: "PreprocessMotionData", targets: ["PreprocessMotionData"]),
         .executable(name: "ResNet-img2label", targets: ["ResNet-img2label"]),
         .executable(name: "ResNet-motion2label", targets: ["ResNet-motion2label"]),
-        .executable(name: "BERT-language2label", targets: ["BERT-language2label"])
+        .executable(name: "BERT-language2label", targets: ["BERT-language2label"]),
+        .executable(name: "Transformer-motion2label2", targets: ["Transformer-motion2label2"])
     ],
     dependencies: [
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0")
@@ -34,6 +35,9 @@ let package = Package(
         .target(
             name: "BERT-language2label", dependencies: ["TextModels", "Datasets"],
             path: "Sources/BERT-language2label"),
+        .target(
+            name: "Transformer-motion2label2", dependencies: ["ImageClassificationModels", "TextModels", "Datasets"],
+            path: "Sources/Transformer-motion2label2"),
         .target(name: "Batcher", path: "Sources/Batcher"),
         .target(name: "Datasets", dependencies: ["ModelSupport", "Batcher"], path: "Sources/Datasets"),
         .target(name: "ImageClassificationModels", path: "Sources/Models/ImageClassification"),
