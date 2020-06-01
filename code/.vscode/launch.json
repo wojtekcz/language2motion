@@ -7,8 +7,17 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "PreprocessMotionData",
+            "program": "/root/.build/debug/PreprocessMotionData",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "ResNet-img2label",
-            "program": "${workspaceFolder}/.build/debug/ResNet-img2label",
+            "program": "/root/.build/debug/ResNet-img2label",
             "args": [],
             "cwd": "${workspaceFolder}",
             "initCommands": ["settings set target.disable-aslr false"]
@@ -17,7 +26,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "BERT-language2label",
-            "program": "${workspaceFolder}/.build/debug/BERT-language2label",
+            "program": "/root/.build/debug/BERT-language2label",
             "args": [],
             "cwd": "${workspaceFolder}",
             "initCommands": ["settings set target.disable-aslr false"]

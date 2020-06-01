@@ -14,7 +14,7 @@ let package = Package(
         .library(name: "Datasets", targets: ["Datasets"]),
         .library(name: "ModelSupport", targets: ["ModelSupport"]),
         .library(name: "TextModels", targets: ["TextModels"]),
-        .executable(name: "RunPreprocess", targets: ["RunPreprocess"]),
+        .executable(name: "PreprocessMotionData", targets: ["PreprocessMotionData"]),
         .executable(name: "ResNet-img2label", targets: ["ResNet-img2label"]),
         .executable(name: "ResNet-motion2label", targets: ["ResNet-motion2label"]),
         .executable(name: "BERT-language2label", targets: ["BERT-language2label"])
@@ -24,7 +24,7 @@ let package = Package(
     ],
     targets: [
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
-        .target(name: "RunPreprocess", dependencies: ["Datasets"], path: "Sources/RunPreprocess"),
+        .target(name: "PreprocessMotionData", dependencies: ["Datasets"], path: "Sources/PreprocessMotionData"),
         .target(
             name: "ResNet-img2label", dependencies: ["ImageClassificationModels", "Datasets"],
             path: "Sources/ResNet-img2label"),
