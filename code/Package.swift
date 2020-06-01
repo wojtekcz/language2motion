@@ -21,7 +21,7 @@ let package = Package(
         .executable(name: "Transformer-motion2label2", targets: ["Transformer-motion2label2"])
     ],
     dependencies: [
-        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.7.0")
+        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0")
     ],
     targets: [
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
