@@ -33,13 +33,13 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 
 for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
     print("[Epoch \(epoch + 1)]")
-    for batch in epochBatches {
+    for _ in epochBatches {
         // print(7)
     }
 }
 
 print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
-for batch in dataset.validationBatches {
+for _ in dataset.validationBatches {
     // print(8)
 }
 
