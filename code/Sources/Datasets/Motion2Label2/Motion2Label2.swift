@@ -104,19 +104,19 @@ extension Motion2Label2 {
 
         // Create the training sequence of epochs.
         self.trainingEpochs = TrainingEpochs(
-                samples: trainingExamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
+                samples: trainingExamples, batchSize: batchSize, entropy: entropy
             ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LabeledMotionBatch> in
-            batches.lazy.map { 
-                (
-                    data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
-                    label: Tensor($0.map(\.label))
-                )
-            }
+                batches.lazy.map { 
+                    LabeledMotionBatch(
+                        data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
+                        label: Tensor($0.map(\.label))
+                    )
+                }
         }
         
         // Create the validation collection of batches.
-        self.validationBatches = validationExamples.inBatches(of: batchSize / maxSequenceLength).lazy.map { 
-            (
+        self.validationBatches = validationExamples.inBatches(of: batchSize).lazy.map { 
+            LabeledMotionBatch(
                 data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
                 label: Tensor($0.map(\.label))
             )
