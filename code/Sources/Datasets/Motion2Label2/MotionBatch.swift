@@ -20,8 +20,8 @@ extension MotionBatch: Collatable {
   public init<BatchSamples: Collection>(collating samples: BatchSamples)
   where BatchSamples.Element == Self {
     self.init(
-      motionFrames: .init(concatenating: samples.map(\.motionFrames)), 
-      motionFlag: .init(concatenating: samples.map(\.motionFlag))
+      motionFrames: .init(concatenating: samples.map({$0.motionFrames.expandingShape(at: 0)})), 
+      motionFlag: .init(concatenating: samples.map({$0.motionFlag.expandingShape(at: 0)}))
     )
   }
 }
