@@ -33,16 +33,11 @@ extension Collection where Element == MotionBatch {
   public func paddedAndCollated(to maxLength: Int? = nil) -> MotionBatch {
     if count == 1 { return first! }
     let maxLength = maxLength ?? self.map { $0.motionFrames.shape[1] }.max()!
-    let paddedTexts = self.map { text -> MotionBatch in
-      let paddingSize = maxLength - text.motionFrames.shape[1]
+    let paddedMotions = self.map { text -> MotionBatch in
       return MotionBatch(
-        motionFrames: text.motionFrames.padded(forSizes: [
-          (before: 0, after: 0),
-          (before: 0, after: paddingSize)]),
-        motionFlag: text.motionFlag.padded(forSizes: [
-          (before: 0, after: 0),
-          (before: 0, after: paddingSize)]))
+        motionFrames: text.motionFrames.paddedOrCropped(to: maxLength),
+        motionFlag: text.motionFlag.paddedOrCropped(to: maxLength))
     }
-    return paddedTexts.collated
+    return paddedMotions.collated
   }
 }
