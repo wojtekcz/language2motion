@@ -85,9 +85,6 @@ extension Motion2Label2 {
         // split into train/test sets
         let (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplit(split: 0.8)
 
-        print("trainMotionSamples.count = \(trainMotionSamples.count)")
-        print("testMotionSamples.count = \(testMotionSamples.count)")
-
         // samples to tensors
         self.trainingExamples = trainMotionSamples.map {
             Motion2Label2.getExample($0, labelsDict: _labelsDict, labels: _labels, tensorWidth: maxSequenceLength) 
