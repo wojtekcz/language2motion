@@ -29,7 +29,7 @@ public func createAttentionMask2(input2: Tensor<Float>, mask: Tensor<Int32>) -> 
 extension FeatureTransformerEncoder {
     @differentiable(wrt: self)
     public func callAsFunction(_ featureBatch: FeatureBatch) -> Tensor<Scalar> {
-        print("ala ma kota")
+        print("FeatureTransformerEncoder.callAsFunction()")
         let input2 = featureBatch.motionFrames
         print("input2 = \(input2.shape)")
 //         let tokenIds: Tensor<Int32> = Tensor<Int32>([[1, 2, 3, 4, 5], [1, 2, 3, 4, 5]])
@@ -39,7 +39,7 @@ extension FeatureTransformerEncoder {
 //         let sequenceLength = input.tokenIds.shape[1]
         let sequenceLength = input2.shape[1]
 //         let variant = withoutDerivative(at: self.variant)
-        print(1)
+        // print(1)
 
         // Compute the input embeddings and apply layer normalization and dropout on them.
 //         let tokenEmbeddings = tokenEmbedding(input.tokenIds)
@@ -91,8 +91,9 @@ extension FeatureTransformerEncoder {
         }
 
         // Reshape back to the original tensor shape.
-        return transformerInput.reshapedFromMatrix(originalShape: embeddings.shape)
-        // return Tensor<Float>([1.0, 1.0])
+        let rslt = transformerInput.reshapedFromMatrix(originalShape: embeddings.shape)
+        print("FeatureTransformerEncoder.callAsFunction() - stop")
+        return rslt
     }
 }
 
@@ -107,38 +108,57 @@ public struct MotionClassifier: Module {
         self.dense = Dense<Float>(inputSize: transformerEncoder.hiddenSize, outputSize: classCount)
     }
 
-    func extractMotionFeatures(_ batchTensor: Tensor<Float>) -> Tensor<Float> {
+    func extractMotionFeatures(_ motionFrames: Tensor<Float>) -> Tensor<Float> {
+        print("MotionClassifier.extractMotionFeatures()")
         let tensorWidth = 60
         let stride = 10
         let tWidth = stride*2
 
+        let tmpMotionFrames = motionFrames.expandingShape(at: 3)
+        print("  tmpMotionFrames.shape: \(tmpMotionFrames.shape)")
+        let origBatchSize = tmpMotionFrames.shape[0]
+        let hiddenSize = featureExtractor.classifier.weight.shape[1]
+
         // sliding resnet feature extractor
         var t2: [Tensor<Float>] = []
-        let origBatchSize = batchTensor.shape[0]
         let nElements = (tensorWidth/stride)-1
         for i in 0..<nElements {
             let start = i*stride
             let end = i*stride+tWidth
             // print(start, end)
-            let t1 = batchTensor[0..., start..<end]
+            let t1 = tmpMotionFrames[0..., start..<end]
             // print(t1.shape)
             t2.append(t1)
         }
         let t3 = Tensor(concatenating: t2)
         // print(t3.shape)
-        let emb2 = featureExtractor(t3)
-        let outShape: Array<Int> = [origBatchSize, nElements, featureExtractor.classifier.weight.shape[1]]
+        let motionFeatures = featureExtractor(t3)
+        let outShape: Array<Int> = [origBatchSize, nElements, hiddenSize]
         // print(outShape)
-        let emb3 = emb2.reshaped(to: TensorShape(outShape))
-        return emb3
+        let motionFeatures2 = motionFeatures.reshaped(to: TensorShape(outShape))
+        print("MotionClassifier.extractMotionFeatures() - stop")
+        return motionFeatures2
     }
 
-  /// Returns: logits with shape `[batchSize, classCount]`.
+    /// Returns: logits with shape `[batchSize, classCount]`.
     @differentiable(wrt: self)
     public func callAsFunction(_ input: MotionBatch) -> Tensor<Float> {
+        print("MotionClassifier.callAsFunction()")
+        print("  input.motionFrames.shape: \(input.motionFrames.shape)")
+        print("  input.motionFlag.shape: \(input.motionFlag.shape)")
         let motionFeatures = extractMotionFeatures(input.motionFrames)
+        print("  motionFeatures.shape: \(motionFeatures.shape)")
         // FIXME: calculate feature mask
         let featureBatch = withoutDerivative(at:FeatureBatch(motionFrames: motionFeatures, motionFlag: input.motionFlag))
-        return dense(transformerEncoder(featureBatch)[0..., 0])
+        print("  featureBatch.motionFrames.shape: \(featureBatch.motionFrames.shape)")
+        // numFeatures: 5
+        // mask shape [bs, numFeatures, 1]
+        print("  featureBatch.motionFlag.shape: \(featureBatch.motionFlag.shape)")
+        print(1)
+        let transformerEncodings = transformerEncoder(featureBatch)
+        print("  transformerEncodings.shape: \(transformerEncodings.shape)")
+        print("MotionClassifier.callAsFunction() - stop")
+        let classifierOutput = dense(transformerEncodings[0..., 0])
+        return classifierOutput
     }
 }

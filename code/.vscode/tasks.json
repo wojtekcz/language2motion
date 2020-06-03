@@ -8,6 +8,19 @@
             "type": "shell",
             "command": "swift build" // for TensorFlow add -Xlinker -ltensorflow
         },
+        // compile your SPM project
+        {
+            "label": "swift-build-Transformer-motion2label2",
+            "type": "shell",
+            "command": "/swift-tensorflow-toolchain/usr/bin/swift",
+            "args": [
+                "build",
+                "-c",
+                "debug",
+                "--build-path", 
+                "/root/.build"
+            ]
+        },
         // compile your SPM tests
         {
             "label": "swift-build-tests",
@@ -23,9 +36,8 @@
                 "--target",
                 "MotionDatasetTests",
                 "--build-path", 
-                "/root/.build",
-                // "--build-tests",
-                 // for TensorFlow add "-Xlinker", "-ltensorflow"
+                "/root/.build"
+                // "--build-tests"
             ]
         }
     ]

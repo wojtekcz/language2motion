@@ -37,7 +37,7 @@ let package = Package(
             name: "BERT-language2label", dependencies: ["TextModels", "Datasets"],
             path: "Sources/BERT-language2label"),
         .target(
-            name: "Transformer-motion2label2", dependencies: ["ImageClassificationModels", "TextModels", "Datasets"],
+            name: "Transformer-motion2label2", dependencies: ["ImageClassificationModels", "TextModels", "Datasets", "ModelSupport", "MotionModels"],
             path: "Sources/Transformer-motion2label2"),
         .target(name: "Batcher", path: "Sources/Batcher"),
         .target(name: "Datasets", dependencies: ["ModelSupport", "Batcher"], path: "Sources/Datasets"),
