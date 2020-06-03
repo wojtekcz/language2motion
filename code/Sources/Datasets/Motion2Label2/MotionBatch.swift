@@ -6,12 +6,12 @@ public struct MotionBatch {
   /// opposed to "padding".
   /// The shape of this tensor is `[batchSize, maxSequenceLength]`.
   public let motionFlag: Tensor<Int32>
+  public let origMotionFramesCount: Tensor<Int32>
 
-  public init(
-    motionFrames: Tensor<Float>, motionFlag: Tensor<Int32>
-  ) {
+  public init(motionFrames: Tensor<Float>, motionFlag: Tensor<Int32>,  origMotionFramesCount: Tensor<Int32>) {
     self.motionFrames = motionFrames
     self.motionFlag = motionFlag
+    self.origMotionFramesCount = origMotionFramesCount
   }
 }
 
@@ -21,7 +21,8 @@ extension MotionBatch: Collatable {
   where BatchSamples.Element == Self {
     self.init(
       motionFrames: .init(concatenating: samples.map({$0.motionFrames.expandingShape(at: 0)})), 
-      motionFlag: .init(concatenating: samples.map({$0.motionFlag.expandingShape(at: 0)}))
+      motionFlag: .init(concatenating: samples.map({$0.motionFlag.expandingShape(at: 0)})),
+      origMotionFramesCount: .init(concatenating: samples.map({$0.origMotionFramesCount.expandingShape(at: 0)}))
     )
   }
 }
@@ -33,10 +34,11 @@ extension Collection where Element == MotionBatch {
   public func paddedAndCollated(to maxLength: Int? = nil) -> MotionBatch {
     if count == 1 { return first! }
     let maxLength = maxLength ?? self.map { $0.motionFrames.shape[1] }.max()!
-    let paddedMotions = self.map { text -> MotionBatch in
+    let paddedMotions = self.map { example -> MotionBatch in
       return MotionBatch(
-        motionFrames: text.motionFrames.paddedOrCropped(to: maxLength),
-        motionFlag: text.motionFlag.paddedOrCropped(to: maxLength))
+        motionFrames: example.motionFrames.paddedOrCropped(to: maxLength),
+        motionFlag: example.motionFlag.paddedOrCropped(to: maxLength),
+        origMotionFramesCount: example.origMotionFramesCount)
     }
     return paddedMotions.collated
   }
