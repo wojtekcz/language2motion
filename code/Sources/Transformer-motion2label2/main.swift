@@ -8,10 +8,10 @@ import ModelSupport
 
 
 let batchSize = 2
-let tensorWidth = 60
+let maxSequenceLength = 60
 
 print("batchSize: \(batchSize)")
-print("tensorWidth: \(tensorWidth)")
+print("maxSequenceLength: \(maxSequenceLength)")
 
 let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.100.plist")
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
@@ -20,19 +20,17 @@ print("\nLoading dataset...")
 let dataset = try! Motion2Label2(
     serializedDatasetURL: serializedDatasetURL,
     labelsURL: labelsURL,
-    maxSequenceLength: tensorWidth,
+    maxSequenceLength: maxSequenceLength,
     batchSize: batchSize
 ) { 
-    // TODO: move this to the dataset
+    // TODO: move this to dataset class
     (example: Motion2LabelExample) -> LabeledMotionBatch in
     let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray)
-    let motionFlag = Tensor<Int32>(motionFrames[0..., 44...44])
-    let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag)
+    let motionFlag = Tensor<Int32>(motionFrames[0..., 44...44].squeezingShape(at: 1))
+    let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
+    let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag, origMotionFramesCount: origMotionFramesCount)
     let label = Tensor<Int32>(Int32(example.label!.idx))
-    return LabeledMotionBatch(
-        data: motionBatch, 
-        label: label
-    )
+    return LabeledMotionBatch(data: motionBatch, label: label)
 }
 
 print("dataset.trainingExamples.count: \(dataset.trainingExamples.count)")
@@ -92,7 +90,7 @@ var transformerEncoder = BERT(
     initializerStandardDeviation: 0.02,
     useOneHotEmbeddings: false)
 
-var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount)
+var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
 
 
 // get a batch
