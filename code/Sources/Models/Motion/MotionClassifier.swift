@@ -79,6 +79,7 @@ public struct MotionClassifier: Module {
         self.maxSequenceLength = maxSequenceLength
     }
 
+    @differentiable(wrt: self)
     func extractMotionFeatures(_ input: MotionBatch) -> FeatureBatch {
         /// sliding 1-channel ResNet feature extractor
         let stride = 10
@@ -118,8 +119,7 @@ public struct MotionClassifier: Module {
         // print("  input.motionFlag.shape: \(input.motionFlag.shape)")
         // print("  input.origMotionFramesCount: \(input.origMotionFramesCount)")
 
-        // TODO: make extractMotionFeatures() differentiable
-        let featureBatch = withoutDerivative(at:extractMotionFeatures(input))
+        let featureBatch = extractMotionFeatures(input)
         // print("  featureBatch.motionFrames.shape: \(featureBatch.motionFrames.shape)")
         // print("  featureBatch.motionFlag.shape: \(featureBatch.motionFlag.shape)")
 

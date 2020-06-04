@@ -1,13 +1,17 @@
 import TensorFlow
 
-public struct MotionBatch {
-  public let motionFrames: Tensor<Float>
+public struct MotionBatch: Differentiable {
+  public var motionFrames: Tensor<Float>
   /// Mask over the sequence of tokens specifying which ones are "real" as 
   /// opposed to "padding".
   /// The shape of this tensor is `[batchSize, maxSequenceLength]`.
+  @noDerivative
   public let motionFlag: Tensor<Int32>
+
+  @noDerivative
   public let origMotionFramesCount: Tensor<Int32>
 
+  @differentiable
   public init(motionFrames: Tensor<Float>, motionFlag: Tensor<Int32>,  origMotionFramesCount: Tensor<Int32>) {
     self.motionFrames = motionFrames
     self.motionFlag = motionFlag

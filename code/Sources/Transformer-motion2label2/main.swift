@@ -7,13 +7,13 @@ import TextModels
 import ModelSupport
 
 
-let batchSize = 2
-let maxSequenceLength = 60
+let batchSize = 10
+let maxSequenceLength = 224
 
 print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
 
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.100.plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.500.plist")
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 print("\nLoading dataset...")
@@ -37,18 +37,6 @@ print("dataset.trainingExamples.count: \(dataset.trainingExamples.count)")
 print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
-
-// for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
-//     print("[Epoch \(epoch + 1)]")
-//     for _ in epochBatches {
-//         // print(7)
-//     }
-// }
-
-// print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
-// for _ in dataset.validationBatches {
-//     // print(8)
-// }
 
 // instantiate model
 var hiddenSize = 768
@@ -130,8 +118,7 @@ print("classifierOutput.shape: \(classifierOutput.shape)")
 
 let optimizer = SGD(for: motionClassifier, learningRate: 2e-5)
 
-print("Training BERT for the Language2Label task!")
-
+print("\nTraining BERT for the Language2Label task!")
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
         print("[Epoch \(epoch + 1)]")
@@ -141,7 +128,6 @@ time() {
         print("epochBatches.count: \(epochBatches.count)")
 
         for batch in epochBatches {
-            print("batch")
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
             // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
             // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
@@ -171,7 +157,6 @@ time() {
         var totalGuessCount = 0
 
         for batch in dataset.validationBatches {
-            print("batch")
             let valBatchSize = batch.data.motionFrames.shape[0]
 
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
@@ -200,6 +185,5 @@ time() {
         )
     }
 }
-
 
 print("\nFinito.")
