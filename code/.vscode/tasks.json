@@ -2,13 +2,16 @@
 {
     "version": "2.0.0",
     "tasks": [
-        // compile your SPM project
         {
             "label": "swift-build",
             "type": "shell",
-            "command": "swift build" // for TensorFlow add -Xlinker -ltensorflow
+            "command": "swift build",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
-        // compile your SPM project
         {
             "label": "swift-build-Transformer-motion2label2",
             "type": "shell",
@@ -17,17 +20,15 @@
                 "build",
                 "-c",
                 "debug",
-                "--build-path", 
+                "--build-path",
                 "/root/.build"
             ]
         },
-        // compile your SPM tests
         {
             "label": "swift-build-tests",
             "type": "process",
             "command": "swift",
             "group": "build",
-            // build --build-tests -c debug --enable-test-discovery --target MotionDatasetTests
             "args": [
                 "build",
                 "-c",
@@ -35,9 +36,8 @@
                 "--enable-test-discovery",
                 "--target",
                 "MotionDatasetTests",
-                "--build-path", 
+                "--build-path",
                 "/root/.build"
-                // "--build-tests"
             ]
         }
     ]
