@@ -113,4 +113,93 @@ print("==============")
 let classifierOutput = motionClassifier(motionBatch)
 print("classifierOutput.shape: \(classifierOutput.shape)")
 
+// train
+
+// var optimizer = WeightDecayedAdam(
+//     for: motionClassifier,
+//     learningRate: LinearlyDecayedParameter(
+//         baseParameter: LinearlyWarmedUpParameter(
+//             baseParameter: FixedParameter<Float>(2e-5),
+//             warmUpStepCount: 10,
+//             warmUpOffset: 0),
+//         // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
+//         slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
+//         startStep: 10),
+//     weightDecayRate: 0.01,
+//     maxGradientGlobalNorm: 1)
+
+let optimizer = SGD(for: motionClassifier, learningRate: 2e-5)
+
+print("Training BERT for the Language2Label task!")
+
+time() {
+    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
+        print("[Epoch \(epoch + 1)]")
+        Context.local.learningPhase = .training
+        var trainingLossSum: Float = 0
+        var trainingBatchCount = 0
+        print("epochBatches.count: \(epochBatches.count)")
+
+        for batch in epochBatches {
+            print("batch")
+            let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
+            // let labels = Tensor(copying: eagerLabels, to: device)
+            let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
+                let logits = model(documents)
+                return softmaxCrossEntropy(logits: logits, labels: labels)
+            }
+
+            trainingLossSum += loss.scalarized()
+            trainingBatchCount += 1
+            optimizer.update(&motionClassifier, along: gradients)
+            // LazyTensorBarrier()
+
+            print(
+                """
+                Training loss: \(trainingLossSum / Float(trainingBatchCount))
+                """
+            )
+        }
+
+        print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+        Context.local.learningPhase = .inference
+        var devLossSum: Float = 0
+        var devBatchCount = 0
+        var correctGuessCount = 0
+        var totalGuessCount = 0
+
+        for batch in dataset.validationBatches {
+            print("batch")
+            let valBatchSize = batch.data.motionFrames.shape[0]
+
+            let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
+            // let labels = Tensor(copying: eagerLabels, to: device)
+
+            let logits = motionClassifier(documents)
+            let loss = softmaxCrossEntropy(logits: logits, labels: labels)
+            // LazyTensorBarrier()
+            devLossSum += loss.scalarized()
+            devBatchCount += 1
+
+            let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
+
+            correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
+            totalGuessCount += valBatchSize
+        }
+        
+        let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
+        print(
+            """
+            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
+            Eval loss: \(devLossSum / Float(devBatchCount))
+            """
+        )
+    }
+}
+
+
 print("\nFinito.")
