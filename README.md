@@ -19,7 +19,7 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] manually assign better labels
   - motion 2 label
     - [x] 1-channel ResNet on motion + classifier
-    - [ ] Transformer encoder on motion + classifier
+    - [ ] * Transformer encoder on motion + classifier
     - [ ] RNN encoder on motion + classifier
   - motion 2 language
     - do image captioning (with RNN decoder)
