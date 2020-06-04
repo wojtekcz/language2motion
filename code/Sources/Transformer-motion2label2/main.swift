@@ -7,13 +7,13 @@ import TextModels
 import ModelSupport
 
 
-let batchSize = 10
-let maxSequenceLength = 224
+let batchSize = 25
+let maxSequenceLength = 600
 
 print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
 
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.500.plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v2.normalized.plist")
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 print("\nLoading dataset...")
@@ -61,7 +61,7 @@ var hiddenLayerCount: Int = 12
 var attentionHeadCount: Int = 12
 var intermediateSize: Int = hiddenSize*4 // 3072/768=4
 
-var transformerEncoder = BERT(
+var transformerEncoder = FeatureTransformerEncoder(
     variant: variant,
     vocabulary: vocabulary,
     tokenizer: tokenizer,
@@ -116,7 +116,7 @@ print("classifierOutput.shape: \(classifierOutput.shape)")
 //     weightDecayRate: 0.01,
 //     maxGradientGlobalNorm: 1)
 
-let optimizer = SGD(for: motionClassifier, learningRate: 2e-5)
+let optimizer = SGD(for: motionClassifier, learningRate: 1e-5)
 
 print("\nTraining BERT for the Language2Label task!")
 time() {
@@ -142,12 +142,12 @@ time() {
             optimizer.update(&motionClassifier, along: gradients)
             // LazyTensorBarrier()
 
-            print(
-                """
-                Training loss: \(trainingLossSum / Float(trainingBatchCount))
-                """
-            )
         }
+        print(
+            """
+            Training loss: \(trainingLossSum / Float(trainingBatchCount))
+            """
+        )
 
         print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
         Context.local.learningPhase = .inference
