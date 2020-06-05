@@ -39,7 +39,9 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
 // instantiate ResNet
-var hiddenSize = 768
+var hiddenLayerCount: Int = 6 //12
+var attentionHeadCount: Int = 6 //12
+var hiddenSize = 32*attentionHeadCount // 64*12 = 768 // 32*6=192
 let classCount = 5
 var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
 
@@ -56,8 +58,6 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
     caseSensitive: caseSensitive, unknownToken: "[UNK]", maxTokenLength: nil)
 
 var variant: BERT.Variant = .bert          
-var hiddenLayerCount: Int = 12
-var attentionHeadCount: Int = 12
 var intermediateSize: Int = hiddenSize*4 // 3072/768=4
 
 var transformerEncoder = FeatureTransformerEncoder(
