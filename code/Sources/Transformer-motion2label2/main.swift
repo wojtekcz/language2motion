@@ -38,12 +38,12 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
-// instantiate model
+// instantiate ResNet
 var hiddenSize = 768
 let classCount = 5
 var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
 
-// instantiate BERT
+// instantiate FeatureTransformerEncoder
 var caseSensitive: Bool = false
 var subDirectory: String = "uncased_L-12_H-768_A-12"
 let directory = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
@@ -56,7 +56,6 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
     caseSensitive: caseSensitive, unknownToken: "[UNK]", maxTokenLength: nil)
 
 var variant: BERT.Variant = .bert          
-// var hiddenSize: Int = 768
 var hiddenLayerCount: Int = 12
 var attentionHeadCount: Int = 12
 var intermediateSize: Int = hiddenSize*4 // 3072/768=4
@@ -78,6 +77,7 @@ var transformerEncoder = FeatureTransformerEncoder(
     initializerStandardDeviation: 0.02,
     useOneHotEmbeddings: false)
 
+// instantiate MotionClassifier
 var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
 
 
@@ -118,7 +118,7 @@ print("classifierOutput.shape: \(classifierOutput.shape)")
 
 let optimizer = SGD(for: motionClassifier, learningRate: 1e-5)
 
-print("\nTraining BERT for the Language2Label task!")
+print("\nTraining MotionClassifier for the motion2Label task!")
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
         print("[Epoch \(epoch + 1)]")
