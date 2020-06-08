@@ -7,23 +7,6 @@ import ImageClassificationModels
 public typealias FeatureTransformerEncoder = BERT
 public typealias FeatureBatch = MotionBatch
 
-public func createAttentionMask(forFeatureBatch featureBatch: FeatureBatch) -> Tensor<Float> {
-    let batchSize = featureBatch.motionFrames.shape[0]
-    let mask = featureBatch.motionFlag
-    // let fromSequenceLength = text.tokenIds.shape[1]
-    // let toSequenceLength = text.mask.shape[1]
-    let fromSequenceLength = featureBatch.motionFrames.shape[1]
-    let toSequenceLength = featureBatch.motionFrames.shape[1]
-    let reshapedMask = Tensor<Float>(mask.reshaped(to: [batchSize, 1, toSequenceLength]))
-
-    // We do not assume that `input.tokenIds` is a mask. We do not actually care if we attend
-    // *from* padding tokens (only *to* padding tokens) so we create a tensor of all ones.
-    let broadcastOnes = Tensor<Float>(ones: [batchSize, fromSequenceLength, 1], on: mask.device)
-
-    // We broadcast along two dimensions to create the mask.
-    return broadcastOnes * reshapedMask
-}
-
 extension FeatureTransformerEncoder {
     @differentiable(wrt: self)
     public func callAsFunction(_ featureBatch: FeatureBatch) -> Tensor<Scalar> {
@@ -43,7 +26,7 @@ extension FeatureTransformerEncoder {
 
         // Create an attention mask for the inputs with shape
         // `[batchSize, sequenceLength, sequenceLength]`.
-        let attentionMask = createAttentionMask(forFeatureBatch: featureBatch)
+        let attentionMask = FeatureTransformerEncoder.createAttentionMask(forFeatureBatch: featureBatch)
 
         // We keep the representation as a 2-D tensor to avoid reshaping it back and forth from a
         // 3-D tensor to a 2-D tensor. Reshapes are normally free on GPUs/CPUs but may not be free
@@ -62,6 +45,29 @@ extension FeatureTransformerEncoder {
         // Reshape back to the original tensor shape.
         return transformerInput.reshapedFromMatrix(originalShape: embeddings.shape)
     }
+
+    static public func createAttentionMask(forFeatureBatch featureBatch: FeatureBatch) -> Tensor<Float> {
+        let batchSize = featureBatch.motionFrames.shape[0]
+        let mask = featureBatch.motionFlag
+        // let fromSequenceLength = text.tokenIds.shape[1]
+        // let toSequenceLength = text.mask.shape[1]
+        let fromSequenceLength = featureBatch.motionFrames.shape[1]
+        let toSequenceLength = featureBatch.motionFrames.shape[1]
+        let reshapedMask = Tensor<Float>(mask.reshaped(to: [batchSize, 1, toSequenceLength]))
+
+        // We do not assume that `input.tokenIds` is a mask. We do not actually care if we attend
+        // *from* padding tokens (only *to* padding tokens) so we create a tensor of all ones.
+        let broadcastOnes = Tensor<Float>(ones: [batchSize, fromSequenceLength, 1], on: mask.device)
+
+        // We broadcast along two dimensions to create the mask.
+        return broadcastOnes * reshapedMask
+    }
+}
+
+public struct Prediction {
+    public let classIdx: Int
+    public let className: String
+    public let probability: Float
 }
 
 public struct MotionClassifier: Module {
