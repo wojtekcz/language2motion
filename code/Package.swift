@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "ModelSupport", targets: ["ModelSupport"]),
         .library(name: "TextModels", targets: ["TextModels"]),
         .library(name: "MotionModels", targets: ["MotionModels"]),
+        .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
         .executable(name: "PreprocessMotionData", targets: ["PreprocessMotionData"]),
         .executable(name: "ResNet-img2label", targets: ["ResNet-img2label"]),
         .executable(name: "ResNet-motion2label", targets: ["ResNet-motion2label"]),
@@ -48,5 +49,6 @@ let package = Package(
         .target(name: "STBImage", path: "Sources/Support/STBImage"),
         .target(name: "TextModels", dependencies: ["Datasets"], path: "Sources/Models/Text"),
         .target(name: "MotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels"], path: "Sources/Models/Motion"),
+        .target(name: "SummaryWriter", path: "Sources/SummaryWriter")
     ]
 )
