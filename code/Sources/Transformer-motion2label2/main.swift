@@ -10,16 +10,18 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let batchSize = 10
-let maxSequenceLength =  300 //600
-let runName = "run_9"
+let batchSize = 5
+let maxSequenceLength =  1000 //600
+let runName = "run_7"
+let nEpochs = 10
+let learningRate: Float = 1e-5
 
 print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
 print("runName: \(runName)")
 
 // let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v2.normalized.plist")
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.sampled.100.plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.sampled.500.plist") // sampled.500
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 print("\nLoading dataset...")
@@ -45,8 +47,8 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
 // instantiate ResNet
-var hiddenLayerCount: Int = 6 //12
-var attentionHeadCount: Int = 6 //12
+var hiddenLayerCount: Int = 12 //12
+var attentionHeadCount: Int = 12 //12
 var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
 let classCount = 5
 var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
@@ -88,24 +90,24 @@ var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, tran
 
 
 // get a batch
-print("\nOne batch (LabeledMotionBatch):")
-var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch = epochIterator.next()
-let batches = Array(epoch!.1)
-let batch = batches[0]
-print("type: \(type(of:batch))")
-print("\nOne motionBatch")
-let motionBatch = batch.data
-print("type: \(type(of:motionBatch))")
-print("motionFrames.shape: \(motionBatch.motionFrames.shape)")
-print("motionFlag.shape: \(motionBatch.motionFlag.shape)")
+// print("\nOne batch (LabeledMotionBatch):")
+// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+// let epoch = epochIterator.next()
+// let batches = Array(epoch!.1)
+// let batch = batches[0]
+// print("type: \(type(of:batch))")
+// print("\nOne motionBatch")
+// let motionBatch = batch.data
+// print("type: \(type(of:motionBatch))")
+// print("motionFrames.shape: \(motionBatch.motionFrames.shape)")
+// print("motionFlag.shape: \(motionBatch.motionFlag.shape)")
 
 
 // run one batch
-print("\nRun one batch:")
-print("==============")
-let classifierOutput = motionClassifier(motionBatch)
-print("classifierOutput.shape: \(classifierOutput.shape)")
+// print("\nRun one batch:")
+// print("==============")
+// let classifierOutput = motionClassifier(motionBatch)
+// print("classifierOutput.shape: \(classifierOutput.shape)")
 
 // train
 
@@ -122,13 +124,13 @@ print("classifierOutput.shape: \(classifierOutput.shape)")
 //     weightDecayRate: 0.01,
 //     maxGradientGlobalNorm: 1)
 
-let optimizer = SGD(for: motionClassifier, learningRate: 1e-5)
+let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
 let summaryWriter = SummaryWriter(logdir: URL(fileURLWithPath: "/notebooks/language2motion.gt/data/tboard/").appendingPathComponent(runName), flushMillis: 30*1000)
 
 print("\nTraining MotionClassifier for the motion2Label task!")
 var trainingStepCount = 0
 time() {
-    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
+    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
         print("[Epoch \(epoch + 1)]")
         Context.local.learningPhase = .training
         var trainingLossSum: Float = 0
@@ -159,7 +161,7 @@ time() {
             Training loss: \(trainingLossSum / Float(trainingBatchCount))
             """
         )
-        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch, value: trainingLossSum / Float(trainingBatchCount))
+        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
 
         if epoch == 0 {
             print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
@@ -197,8 +199,8 @@ time() {
             Eval loss: \(devLossSum / Float(devBatchCount))
             """
         )
-        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch, value: devLossSum / Float(devBatchCount))
-        summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch, value: testAccuracy)
+        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
+        summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch+1, value: testAccuracy)
 
         let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
         let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
@@ -208,6 +210,8 @@ time() {
 }
 
 print("\nFinal stats:")
+print(dataset.labels)
+print()
 let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
 let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
 let y_pred = preds.map { $0.className }
