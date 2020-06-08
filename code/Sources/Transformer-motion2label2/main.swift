@@ -5,15 +5,21 @@ import MotionModels
 import ImageClassificationModels
 import TextModels
 import ModelSupport
+import SummaryWriter
+import PythonKit
 
+let metrics = Python.import("sklearn.metrics")
 
-let batchSize = 25
-let maxSequenceLength = 600
+let batchSize = 10
+let maxSequenceLength =  300 //600
+let runName = "run_9"
 
 print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
+print("runName: \(runName)")
 
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v2.normalized.plist")
+// let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v2.normalized.plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.sampled.100.plist")
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 print("\nLoading dataset...")
@@ -41,7 +47,7 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // instantiate ResNet
 var hiddenLayerCount: Int = 6 //12
 var attentionHeadCount: Int = 6 //12
-var hiddenSize = 32*attentionHeadCount // 64*12 = 768 // 32*6=192
+var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
 let classCount = 5
 var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
 
@@ -117,15 +123,19 @@ print("classifierOutput.shape: \(classifierOutput.shape)")
 //     maxGradientGlobalNorm: 1)
 
 let optimizer = SGD(for: motionClassifier, learningRate: 1e-5)
+let summaryWriter = SummaryWriter(logdir: URL(fileURLWithPath: "/notebooks/language2motion.gt/data/tboard/").appendingPathComponent(runName), flushMillis: 30*1000)
 
 print("\nTraining MotionClassifier for the motion2Label task!")
+var trainingStepCount = 0
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
         print("[Epoch \(epoch + 1)]")
         Context.local.learningPhase = .training
         var trainingLossSum: Float = 0
         var trainingBatchCount = 0
-        print("epochBatches.count: \(epochBatches.count)")
+        if epoch == 0 {
+            print("epochBatches.count: \(epochBatches.count)")
+        }
 
         for batch in epochBatches {
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
@@ -139,17 +149,21 @@ time() {
 
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
+            trainingStepCount += 1
             optimizer.update(&motionClassifier, along: gradients)
             // LazyTensorBarrier()
-
+            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
         }
         print(
             """
             Training loss: \(trainingLossSum / Float(trainingBatchCount))
             """
         )
+        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch, value: trainingLossSum / Float(trainingBatchCount))
 
-        print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+        if epoch == 0 {
+            print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+        }
         Context.local.learningPhase = .inference
         var devLossSum: Float = 0
         var devBatchCount = 0
@@ -176,14 +190,28 @@ time() {
             totalGuessCount += valBatchSize
         }
         
-        let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
+        let testAccuracy = Float(correctGuessCount) / Float(totalGuessCount)
         print(
             """
-            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
+            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(testAccuracy)) \
             Eval loss: \(devLossSum / Float(devBatchCount))
             """
         )
+        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch, value: devLossSum / Float(devBatchCount))
+        summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch, value: testAccuracy)
+
+        let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
+        let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
+        let y_pred = preds.map { $0.className }
+        print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
     }
 }
+
+print("\nFinal stats:")
+let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
+let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
+let y_pred = preds.map { $0.className }
+print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
+print(metrics.classification_report(y_true, y_pred, labels: dataset.labels, zero_division: false))
 
 print("\nFinito.")

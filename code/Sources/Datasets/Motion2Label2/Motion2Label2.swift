@@ -27,6 +27,7 @@ public struct Motion2Label2 <Entropy: RandomNumberGenerator> {
     public typealias Samples = LazyMapSequence<[Motion2LabelExample], LabeledMotionBatch>
 
     public let motionData: MotionData
+    public let testMotionSamples: [MotionSample]
     public let trainingExamples: Samples
     public let validationExamples: Samples
 
@@ -84,6 +85,7 @@ extension Motion2Label2 {
         
         // split into train/test sets
         let (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplit(split: 0.8)
+        self.testMotionSamples = testMotionSamples
 
         // samples to tensors
         self.trainingExamples = trainMotionSamples.map {
@@ -120,11 +122,19 @@ extension Motion2Label2 {
         }
     }
 
-    static func getExample(_ ms: MotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> Motion2LabelExample {
-        let sample_id = ms.sampleID
-        let labelStr: String? = labelsDict[sample_id]
+    static func getLabel(sampleID: Int, labelsDict: [Int: String], labels: [String]) -> Motion2LabelExample.LabelTuple? {
+        let labelStr: String? = labelsDict[sampleID]
         let label: Motion2LabelExample.LabelTuple? = Motion2LabelExample.LabelTuple(idx: labels.firstIndex(of: labelStr!)!, label: labelStr!)
-        return Motion2LabelExample(id: "\(sample_id)", motionSample: ms, label: label)
+        return label
+    }
+
+    public func getLabel(_ sampleID: Int) -> Motion2LabelExample.LabelTuple? {
+        return Motion2Label2.getLabel(sampleID: sampleID, labelsDict: labelsDict, labels: labels)
+    }
+
+    static func getExample(_ ms: MotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> Motion2LabelExample {
+        let label: Motion2LabelExample.LabelTuple? = Motion2Label2.getLabel(sampleID: ms.sampleID, labelsDict: labelsDict, labels: labels)
+        return Motion2LabelExample(id: "\(ms.sampleID)", motionSample: ms, label: label)
     }
 }
 
