@@ -3,25 +3,31 @@ import Foundation
 public class MotionData: Codable {
     public let datasetFolderURL: URL
     public let motionSamples: [MotionSample]
+    public var maxSampleID = 3966
 
-    public init(datasetFolderURL: URL, maxSamples: Int, grouppedJoints: Bool = true, normalized: Bool = true) {
+    public init(datasetFolderURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, sampled: Int? = nil) {
         self.datasetFolderURL = datasetFolderURL
         var motionSamples: [MotionSample] = []
         let fm = FileManager()
         
-        for i in 1...maxSamples {
-            let mmmFilename = String(format: "%05d_mmm.xml", i)
-            let annotationsFilename = String(format: "%05d_annotations.json", i)
-            print("Sample \(i), \(mmmFilename), \(annotationsFilename)")
+        var sampleIDs: [Int] = Array<Int>((0...maxSampleID))
+        if sampled != nil {
+            sampleIDs = Array(sampleIDs.choose(sampled!))
+        }
+        
+        for sampleID in sampleIDs {
+            let mmmFilename = String(format: "%05d_mmm.xml", sampleID)
+            let annotationsFilename = String(format: "%05d_annotations.json", sampleID)
+            print("Sample \(sampleID), \(mmmFilename), \(annotationsFilename)")
             
             let mmmURL = datasetFolderURL.appendingPathComponent(mmmFilename)
             let annotationsURL = datasetFolderURL.appendingPathComponent(annotationsFilename)
             
             if fm.fileExists(atPath: mmmURL.path) {
-                let motionSample = MotionSample(sampleID: i, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized)            
+                let motionSample = MotionSample(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized)            
                 motionSamples.append(motionSample)
             } else {
-                print("** Sample \(i) doesn't exist.")
+                print("** Sample \(sampleID) doesn't exist.")
             }
         }
         self.motionSamples = motionSamples

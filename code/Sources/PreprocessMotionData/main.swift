@@ -1,19 +1,24 @@
 import Foundation
 import Datasets
 
-let maxSamples: Int = 100
 let grouppedJoints = false
 let normalized = true
+let sampled: Int? = 500 // 500
 
 let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
 let grouppedJointsStr = grouppedJoints ? "grouppedJoints." : ""
 let normalizedStr = normalized ? "normalized." : ""
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.\(grouppedJointsStr)\(normalizedStr)\(maxSamples).plist")
+var sampledStr = "" 
+if sampled != nil { 
+    sampledStr = "sampled.\(sampled!)" 
+}
 
-print("Running MotionData preprocessing (maxSamples=\(maxSamples))...")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.\(grouppedJointsStr)\(normalizedStr)\(sampledStr).plist")
+
+print("Running MotionData preprocessing (sampledStr=\(sampledStr))...")
 
 var date = Date()
-let motionData = MotionData(datasetFolderURL: datasetFolderURL, maxSamples: maxSamples, grouppedJoints: grouppedJoints, normalized: true)
+let motionData = MotionData(datasetFolderURL: datasetFolderURL, grouppedJoints: grouppedJoints, normalized: true, sampled: sampled)
 print(abs(date.timeIntervalSinceNow))
 
 date = Date()

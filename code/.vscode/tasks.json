@@ -5,12 +5,19 @@
         {
             "label": "swift-build",
             "type": "shell",
-            "command": "swift build",
+            "command": "swift",
             "problemMatcher": [],
             "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+                "kind": "build"//,
+                // "isDefault": true
+            },
+            "args": [
+                "build",
+                "-c",
+                "debug",
+                "--build-path",
+                "/root/.build"
+            ]
         },
         {
             "label": "swift-build-Transformer-motion2label2",

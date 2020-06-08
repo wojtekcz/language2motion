@@ -11,6 +11,7 @@
             "program": "/root/.build/debug/PreprocessMotionData",
             "args": [],
             "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build",
             "initCommands": ["settings set target.disable-aslr false"]
         },
         {

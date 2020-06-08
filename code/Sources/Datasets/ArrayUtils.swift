@@ -23,3 +23,7 @@ extension Array {
         return (train: train, test: test)
     }
 }
+
+extension Collection {
+    func choose(_ n: Int) -> ArraySlice<Element> { shuffled().prefix(n) }
+}
