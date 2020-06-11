@@ -60,7 +60,7 @@ public class Motion2Label {
         self.tensorWidth = tensorWidth
     }
 
-    static func getTensorPair(_ ms: MotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> TensorPair<Float, Int32> {
+    public static func getTensorPair(_ ms: MotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> TensorPair<Float, Int32> {
         // TODO: code _unknown_ label
         var labelStr = labelsDict[ms.sampleID]
         
@@ -89,4 +89,19 @@ public class Motion2Label {
             numWorkers: 1, //No need to use parallelism since everything is loaded in memory
             shuffle: true)
     }
+
+    static func getLabel(sampleID: Int, labelsDict: [Int: String], labels: [String]) -> Motion2LabelExample.LabelTuple? {
+        let labelStr: String? = labelsDict[sampleID]
+        
+        var label: Motion2LabelExample.LabelTuple? = nil
+        if labelStr != nil {
+            label = Motion2LabelExample.LabelTuple(idx: labels.firstIndex(of: labelStr!)!, label: labelStr!)
+        }
+        return label
+    }
+
+    public func getLabel(_ sampleID: Int) -> Motion2LabelExample.LabelTuple? {
+        return Motion2Label.getLabel(sampleID: sampleID, labelsDict: labelsDict, labels: labels)
+    }
+
 }

@@ -32,7 +32,7 @@ let package = Package(
             name: "ResNet-img2label", dependencies: ["ImageClassificationModels", "Datasets"],
             path: "Sources/ResNet-img2label"),
         .target(
-            name: "ResNet-motion2label", dependencies: ["ImageClassificationModels", "Datasets"],
+            name: "ResNet-motion2label", dependencies: ["ImageClassificationModels", "Datasets", "SummaryWriter"],
             path: "Sources/ResNet-motion2label"),
         .target(
             name: "BERT-language2label", dependencies: ["TextModels", "Datasets"],
