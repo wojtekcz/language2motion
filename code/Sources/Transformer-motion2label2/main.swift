@@ -10,9 +10,9 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let batchSize = 5
-let maxSequenceLength =  1000 //600
-let runName = "run_7"
+let batchSize = 10
+let maxSequenceLength =  300 //600
+let runName = "run_8"
 let nEpochs = 10
 let learningRate: Float = 1e-5
 
@@ -21,7 +21,7 @@ print("maxSequenceLength: \(maxSequenceLength)")
 print("runName: \(runName)")
 
 // let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v2.normalized.plist")
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.normalized.sampled.500.plist") // sampled.500
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.balanced.515.plist")
 let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
 
 print("\nLoading dataset...")
