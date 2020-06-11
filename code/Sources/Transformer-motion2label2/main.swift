@@ -153,10 +153,10 @@ time() {
 
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
-            trainingStepCount += 1
             optimizer.update(&motionClassifier, along: gradients)
             // LazyTensorBarrier()
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+            trainingStepCount += 1
         }
         print(
             """
