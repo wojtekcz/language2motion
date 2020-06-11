@@ -8,8 +8,8 @@
             "command": "swift",
             "problemMatcher": [],
             "group": {
-                "kind": "build"//,
-                // "isDefault": true
+                "kind": "build",
+                "isDefault": true
             },
             "args": [
                 "build",
@@ -20,9 +20,9 @@
             ]
         },
         {
-            "label": "swift-build-Transformer-motion2label2",
+            "label": "swift-build2",
             "type": "shell",
-            "command": "/swift-tensorflow-toolchain/usr/bin/swift",
+            "command": "swift",
             "args": [
                 "build",
                 "-c",
