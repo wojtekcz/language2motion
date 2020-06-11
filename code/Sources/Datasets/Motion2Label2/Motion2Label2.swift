@@ -124,7 +124,11 @@ extension Motion2Label2 {
 
     static func getLabel(sampleID: Int, labelsDict: [Int: String], labels: [String]) -> Motion2LabelExample.LabelTuple? {
         let labelStr: String? = labelsDict[sampleID]
-        let label: Motion2LabelExample.LabelTuple? = Motion2LabelExample.LabelTuple(idx: labels.firstIndex(of: labelStr!)!, label: labelStr!)
+        
+        var label: Motion2LabelExample.LabelTuple? = nil
+        if labelStr != nil {
+            label = Motion2LabelExample.LabelTuple(idx: labels.firstIndex(of: labelStr!)!, label: labelStr!)
+        }
         return label
     }
 
