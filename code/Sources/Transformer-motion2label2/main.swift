@@ -20,9 +20,9 @@ print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
 print("runName: \(runName)")
 
-// let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v2.normalized.plist")
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.balanced.515.plist")
-let labelsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
+let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.balanced.515.plist")
+let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 print("\nLoading dataset...")
 let dataset = try! Motion2Label2(
@@ -56,8 +56,7 @@ var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamp
 // instantiate FeatureTransformerEncoder
 var caseSensitive: Bool = false
 var subDirectory: String = "uncased_L-12_H-768_A-12"
-let directory = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let vocabularyURL = directory
+let vocabularyURL = dataURL
     .appendingPathComponent(subDirectory)
     .appendingPathComponent("vocab.txt")
 
@@ -125,7 +124,10 @@ var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, tran
 //     maxGradientGlobalNorm: 1)
 
 let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
-let summaryWriter = SummaryWriter(logdir: URL(fileURLWithPath: "/notebooks/language2motion.gt/data/tboard/").appendingPathComponent(runName), flushMillis: 30*1000)
+let logdirURL = dataURL
+                .appendingPathComponent("tboard", isDirectory: true)
+                .appendingPathComponent(runName, isDirectory: true)
+let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 print("\nTraining MotionClassifier for the motion2Label task!")
 var trainingStepCount = 0
