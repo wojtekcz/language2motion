@@ -10,10 +10,10 @@ let grouppedJointsStr = grouppedJoints ? "grouppedJoints." : ""
 let normalizedStr = normalized ? "normalized." : ""
 var sampledStr = "" 
 if sampled != nil { 
-    sampledStr = "sampled.\(sampled!)" 
+    sampledStr = "sampled.\(sampled!)." 
 }
 
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.\(grouppedJointsStr)\(normalizedStr)\(sampledStr).plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.\(grouppedJointsStr)\(normalizedStr)\(sampledStr)plist")
 
 print("Running MotionData preprocessing (sampledStr=\(sampledStr))...")
 
