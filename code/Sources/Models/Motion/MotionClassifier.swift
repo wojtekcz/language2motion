@@ -90,7 +90,7 @@ public struct MotionClassifier: Module {
         /// sliding 1-channel ResNet feature extractor
         let stride = 10
         let sliceWidth = stride*2 // 20
-        let numFeatures = (maxSequenceLength/stride)-1
+        let numFeatures = (maxSequenceLength/stride)-1 // RENAME: numFeatureVectors
         let origBatchSize = input.motionFrames.shape[0]
         let hiddenSize = featureExtractor.classifier.weight.shape[1]
 
@@ -109,7 +109,7 @@ public struct MotionClassifier: Module {
             let motionMaskSlice = motionFlagSlice.max(alongAxes: 1)
             tmpMaskSlices.append(motionMaskSlice)
         }
-        let motionFrameSlices = Tensor(concatenating: tmpMotionFrameSlices)
+        let motionFrameSlices = Tensor(concatenating: tmpMotionFrameSlices) // TODO: annotate tensor sizes/dimensions
         let tmpMotionFeatures = featureExtractor(motionFrameSlices) // batch size here is origBatchSize*numFeatures
         let motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFeatures, hiddenSize])
 
