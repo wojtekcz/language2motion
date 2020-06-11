@@ -2,7 +2,7 @@ import Foundation
 
 public class MotionData: Codable {
     public let datasetFolderURL: URL
-    public let motionSamples: [MotionSample]
+    public var motionSamples: [MotionSample]
     public var maxSampleID = 3966
 
     public init(datasetFolderURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, sampled: Int? = nil) {
@@ -39,6 +39,7 @@ public class MotionData: Codable {
         let motionData = try! PropertyListDecoder().decode(MotionData.self, from: data)
         datasetFolderURL = motionData.datasetFolderURL
         motionSamples = motionData.motionSamples
+        maxSampleID = motionData.maxSampleID
     }
 
     // TODO: code throwing errors
