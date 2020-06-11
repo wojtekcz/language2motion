@@ -23,4 +23,8 @@ public class SummaryWriter {
         let valueTensor = Tensor<Float>(value)
         _Raw.writeScalarSummary(writer: writerHandle, step: stepTensor, tag: tagTensor, value: valueTensor)
     }
+
+    public func flush() {
+        _Raw.flushSummaryWriter(writer: writerHandle)
+    }
 }

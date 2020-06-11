@@ -209,6 +209,7 @@ time() {
         let y_pred = preds.map { $0.className }
         print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
     }
+    summaryWriter.flush()
 }
 
 print("\nFinal stats:")
