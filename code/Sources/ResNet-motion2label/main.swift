@@ -10,10 +10,10 @@ import SummaryWriter
 import PythonKit
 
 let batchSize = 10
-let maxSequenceLength =  224
-let runName = "run_4"
-let nEpochs = 3
-let learningRate: Float = 0.0001
+let maxSequenceLength =  1000
+let runName = "run_9"
+let nEpochs = 120
+let learningRate: Float = 0.001
 
 let metrics = Python.import("sklearn.metrics")
 
@@ -35,9 +35,7 @@ let dataset = Motion2Label(
 print("dataset.training.count: \(dataset.training.count)")
 print("dataset.test.count: \(dataset.test.count)")
 
-let logdirURL = dataURL
-                .appendingPathComponent("tboard/ResNet-motion2label/\(runName)", isDirectory: true)
-                // .appendingPathComponent(runName, isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("tboard/ResNet-motion2label/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 public struct Prediction {
@@ -92,7 +90,7 @@ time() {
         var trainingLossSum: Float = 0
         var trainingBatchCount = 0
         for batch in dataset.training.sequenced() {
-            print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
+            // print("progress \(100.0*Float(trainingBatchCount)/Float(dataset.training.count))%")
             let (tensors, labels) = (batch.first, batch.second)
             let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
                 let logits = model(tensors)
@@ -153,6 +151,7 @@ time() {
     let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
     let y_pred = preds.map { $0.className }
     print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
+    print(metrics.classification_report(y_true, y_pred, labels: dataset.labels, zero_division: false))
 }
 
 print("\nFinito.")
