@@ -11,10 +11,10 @@ import PythonKit
 let metrics = Python.import("sklearn.metrics")
 
 let batchSize = 10
-let maxSequenceLength =  300 //600
-let runName = "run_8"
-let nEpochs = 10
-let learningRate: Float = 1e-5
+let maxSequenceLength =  1000
+let runName = "run_1"
+let nEpochs = 120
+let learningRate: Float = 1e-3
 
 print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
@@ -124,9 +124,7 @@ var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, tran
 //     maxGradientGlobalNorm: 1)
 
 let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
-let logdirURL = dataURL
-                .appendingPathComponent("tboard", isDirectory: true)
-                .appendingPathComponent(runName, isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("tboard/Transformer-motion2label2/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 print("\nTraining MotionClassifier for the motion2Label task!")
