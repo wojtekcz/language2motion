@@ -27,6 +27,16 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Transformer2-motion2label2",
+            "program": "/root/.build/debug/Transformer2-motion2label2",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build2",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "ResNet-img2label",
             "program": "/root/.build/debug/ResNet-img2label",
             "args": [],

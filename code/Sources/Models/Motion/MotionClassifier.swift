@@ -92,7 +92,8 @@ public struct MotionClassifier: Module {
         let sliceWidth = stride*2 // 20
         let numFeatures = (maxSequenceLength/stride)-1 // RENAME: numFeatureVectors
         let origBatchSize = input.motionFrames.shape[0]
-        let hiddenSize = featureExtractor.classifier.weight.shape[1]
+        // let hiddenSize = featureExtractor.classifier.weight.shape[1]
+        let hiddenSize = featureExtractor.classifier.weight.shape[0]
 
         // create set of slices
         var tmpMotionFrameSlices: [Tensor<Float>] = []
@@ -110,7 +111,7 @@ public struct MotionClassifier: Module {
             tmpMaskSlices.append(motionMaskSlice)
         }
         let motionFrameSlices = Tensor(concatenating: tmpMotionFrameSlices) // TODO: annotate tensor sizes/dimensions
-        let tmpMotionFeatures = featureExtractor(motionFrameSlices) // batch size here is origBatchSize*numFeatures
+        let tmpMotionFeatures = featureExtractor.extractFeatures(motionFrameSlices) // batch size here is origBatchSize*numFeatures
         let motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFeatures, hiddenSize])
 
         let mask = Tensor(concatenating: tmpMaskSlices).reshaped(to: [origBatchSize, numFeatures])
