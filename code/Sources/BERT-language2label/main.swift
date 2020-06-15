@@ -1,34 +1,9 @@
-// Copyright 2020 The TensorFlow Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import Datasets
 import Foundation
 import ModelSupport
 import TensorFlow
 import TextModels
 
-// // Note: The this initial eager-mode tensor computation is needed, or all GPU memory
-// // will be exhausted on initial allocation of the model.
-// // TODO: Remove the following tensor workaround when above is fixed.
-// // Investigate why a simple eager Tensor calculation is needed at start of training benchmark #529
-// // https://github.com/tensorflow/swift-models/issues/529
-// let testTensor = Tensor<Float>([1.0, 2.0, 3.0])
-// let testTensor2 = Tensor<Float>([1.0, 2.0, 3.0])
-// let _ = testTensor + testTensor2
-
-// let device = Device.defaultXLA
-// print(device)
 
 let bertPretrained = BERT.PreTrainedModel.bertBase(cased: false, multilingual: false)
 let workspaceURL = URL(
@@ -38,19 +13,7 @@ let workspaceURL = URL(
         isDirectory: true))
 let bert = try BERT.PreTrainedModel.load(bertPretrained)(from: workspaceURL)
 var bertClassifier = BERTClassifier(bert: bert, classCount: 5)
-// bertClassifier.move(to: device)
 
-// Regarding the batch size, note that the way batching is performed currently is that we bucket
-// input sequences based on their length (e.g., first bucket contains sequences of length 1 to 10,
-// second 11 to 20, etc.). We then keep processing examples in the input data pipeline until a
-// bucket contains enough sequences to form a batch. The batch size specified in the task
-// constructor specifies the *total number of tokens in the batch* and not the total number of
-// sequences. So, if the batch size is set to 1024, the first bucket (i.e., lengths 1 to 10)
-// will need 1024 / 10 = 102 examples to form a batch (every sentence in the bucket is padded
-// to the max length of the bucket). This kind of bucketing is common practice with NLP models and
-// it is done to improve memory usage and computational efficiency when dealing with sequences of
-// varied lengths. Note that this is not used in the original BERT implementation released by
-// Google and so the batch size setting here is expected to differ from that one.
 let maxSequenceLength = 50
 let batchSize = 3096
 
@@ -87,8 +50,6 @@ var optimizer = WeightDecayedAdam(
     weightDecayRate: 0.01,
     maxGradientGlobalNorm: 1)
 
-// optimizer = WeightDecayedAdam(copying: optimizer, to: device)
-
 print("Training BERT for the Language2Label task!")
 
 time() {
@@ -101,9 +62,6 @@ time() {
 
         for batch in epochBatches {
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
-            // let labels = Tensor(copying: eagerLabels, to: device)
             let (loss, gradients) = valueWithGradient(at: bertClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)
                 return softmaxCrossEntropy(logits: logits, labels: labels)
@@ -112,7 +70,6 @@ time() {
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
             optimizer.update(&bertClassifier, along: gradients)
-            // LazyTensorBarrier()
 
             print(
                 """
@@ -132,13 +89,8 @@ time() {
             let valBatchSize = batch.data.tokenIds.shape[0]
 
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
-            // let labels = Tensor(copying: eagerLabels, to: device)
-
             let logits = bertClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
-            // LazyTensorBarrier()
             devLossSum += loss.scalarized()
             devBatchCount += 1
 
