@@ -10,11 +10,11 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_1"
+let runName = "run_3"
 let batchSize = 10
-let maxSequenceLength =  1000
-let nEpochs = 120
-let learningRate: Float = 1e-3
+let maxSequenceLength =  500
+let nEpochs = 15
+let learningRate: Float = 1e-4
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -49,11 +49,11 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
 // instantiate ResNet
-var hiddenLayerCount: Int = 12 //12
-var attentionHeadCount: Int = 12 //12
+var hiddenLayerCount: Int = 8 //12
+var attentionHeadCount: Int = 8 //12
 var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
 let classCount = 5
-var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
+var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
 
 // instantiate FeatureTransformerEncoder
 var caseSensitive: Bool = false
@@ -82,6 +82,12 @@ var transformerEncoder = FeatureTransformerEncoder(
     typeVocabularySize: 2,
     initializerStandardDeviation: 0.02,
     useOneHotEmbeddings: false)
+
+print("\nFeatureTransformerEncoder stats:")
+print("hiddenLayerCount: \(hiddenLayerCount)")
+print("attentionHeadCount: \(attentionHeadCount)")
+print("hiddenSize: \(hiddenSize)")
+
 
 // instantiate MotionClassifier
 var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
@@ -122,7 +128,9 @@ var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, tran
 //     weightDecayRate: 0.01,
 //     maxGradientGlobalNorm: 1)
 
-let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
+// let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
+let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
+
 let logdirURL = dataURL.appendingPathComponent("tboard/Transformer-motion2label2/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
