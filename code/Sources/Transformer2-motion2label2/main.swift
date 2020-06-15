@@ -10,12 +10,12 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_2"
+let runName = "run_3"
 let batchSize = 10
-let maxSequenceLength =  300
-let nEpochs = 30
+let maxSequenceLength =  1000
+let nEpochs = 60
 let resNetLearningRate: Float = 1e-3
-let learningRate: Float = 2e-5
+let learningRate: Float = 1e-3
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")

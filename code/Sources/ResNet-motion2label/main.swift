@@ -11,14 +11,14 @@ import PythonKit
 
 let batchSize = 10
 let maxSequenceLength =  1000
-let runName = "run_9"
+let runName = "run_10"
 let nEpochs = 120
 let learningRate: Float = 0.001
 
 let metrics = Python.import("sklearn.metrics")
 
 // instantiate ResNet
-var model = ResNet(classCount: 5, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
+var model = ResNet(classCount: 5, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
 let optimizer = SGD(for: model, learningRate: learningRate)
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
