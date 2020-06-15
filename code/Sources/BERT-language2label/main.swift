@@ -8,16 +8,26 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_1"
+let runName = "run_3"
 let batchSize = 512
 let maxSequenceLength =  50
-let nEpochs = 5
+let nEpochs = 20
 let learningRate: Float = 2e-5
 
-var hiddenLayerCount: Int = 12 //12
-var attentionHeadCount: Int = 12 //12
+print("runName: \(runName)")
+print("batchSize: \(batchSize)")
+print("maxSequenceLength: \(maxSequenceLength)")
+print("nEpochs: \(nEpochs)")
+print("learningRate: \(learningRate)")
+
+print("\nBERT stats:")
+var hiddenLayerCount: Int = 8 //12
+var attentionHeadCount: Int = 8 //12
 var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
 let classCount = 5
+print("hiddenLayerCount: \(hiddenLayerCount)")
+print("attentionHeadCount: \(attentionHeadCount)")
+print("hiddenSize: \(hiddenSize)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
@@ -40,6 +50,7 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
 
 var variant: BERT.Variant = .bert          
 var intermediateSize: Int = hiddenSize*4 // 3072/768=4
+print("intermediateSize: \(intermediateSize)")
 
 let bert = BERT(
     variant: variant,
@@ -87,7 +98,8 @@ var optimizer = WeightDecayedAdam(
             warmUpStepCount: 10,
             warmUpOffset: 0),
         // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
-        slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
+        // slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
+        slope: -0.5e-7,  // The LR decays linearly to zero in ~100 steps.
         startStep: 10),
     weightDecayRate: 0.01,
     maxGradientGlobalNorm: 1)
