@@ -31,6 +31,7 @@ public struct Language2Label <Entropy: RandomNumberGenerator> {
     public let trainingExamples: Samples
     /// The validation texts.
     public let validationExamples: Samples
+    public let validationSamples: [(text: String, label: String)]
 
     /// The sequence length to which every sentence will be padded.
     public let maxSequenceLength: Int
@@ -68,74 +69,74 @@ extension Language2Label {
 }
 
 extension Language2Label {
-  /// Creates an instance of `datasetURL` dataset with batches of size `batchSize`
-  /// by `maximumSequenceLength`.
-  ///
-  /// - Parameters:
-  ///   - entropy: a source of randomness used to shuffle sample ordering. It
-  ///     will be stored in `self`, so if it is only pseudorandom and has value
-  ///     semantics, the sequence of epochs is determinstic and not dependent on
-  ///     other operations.
-  ///   - exampleMap: a transform that processes `Example` in `LabeledTextBatch`.
-  public init(
-    datasetURL: URL,
-    maxSequenceLength: Int,
-    batchSize: Int,
-    entropy: Entropy,
-    exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
-  ) throws {
-    // Load the data file.
+    /// Creates an instance of `datasetURL` dataset with batches of size `batchSize`
+    /// by `maximumSequenceLength`.
+    ///
+    /// - Parameters:
+    ///   - entropy: a source of randomness used to shuffle sample ordering. It
+    ///     will be stored in `self`, so if it is only pseudorandom and has value
+    ///     semantics, the sequence of epochs is determinstic and not dependent on
+    ///     other operations.
+    ///   - exampleMap: a transform that processes `Example` in `LabeledTextBatch`.
+    public init(
+        datasetURL: URL,
+        maxSequenceLength: Int,
+        batchSize: Int,
+        entropy: Entropy,
+        exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
+    ) throws {
+        // Load the data file.
         self.datasetURL = datasetURL
         let df = pd.read_csv(datasetURL.path)
         labels = df.label.unique().sorted().map {String($0)!}
         let (train_df, test_df) = model_selection.train_test_split(df, test_size: 0.2).tuple2
         
+        validationSamples = Python.list(test_df.iterrows()).map { (text: String($0[1].text)!, label: String($0[1].label)!) }
         trainingExamples = Language2Label.Df2Example(df: train_df, labels: labels).lazy.map(exampleMap)
         validationExamples = Language2Label.Df2Example(df: test_df, labels: labels).lazy.map(exampleMap)
       
-      
-    self.maxSequenceLength = maxSequenceLength
-    self.batchSize = batchSize
+        self.maxSequenceLength = maxSequenceLength
+        self.batchSize = batchSize
 
-    // Create the training sequence of epochs.
-    trainingEpochs = TrainingEpochs(
-      samples: trainingExamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
-    ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LabeledTextBatch> in
-      batches.lazy.map{ 
-        (
-          data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
-          label: Tensor($0.map(\.label))
-        )
-      }
+        // Create the training sequence of epochs.
+        trainingEpochs = TrainingEpochs(
+        samples: trainingExamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
+        ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LabeledTextBatch> in
+            batches.lazy.map{ 
+                (
+                data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
+                label: Tensor($0.map(\.label))
+                )
+            }
+        }
+        
+        // Create the validation collection of batches.
+        validationBatches = validationExamples.inBatches(of: batchSize / maxSequenceLength).lazy.map{ 
+            (
+            data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
+            label: Tensor($0.map(\.label))
+            )
+        }
     }
-    
-    // Create the validation collection of batches.
-    validationBatches = validationExamples.inBatches(of: batchSize / maxSequenceLength).lazy.map{ 
-      (
-        data: $0.map(\.data).paddedAndCollated(to: maxSequenceLength),
-        label: Tensor($0.map(\.label))
-      )
-    }
-  }
 }
 
 extension Language2Label where Entropy == SystemRandomNumberGenerator {
-  /// Creates an instance in `taskDirectoryURL` with batches of size `batchSize`
-  /// by `maximumSequenceLength`.
-  ///
-  /// - Parameter exampleMap: a transform that processes `Example` in `LabeledTextBatch`.
-  public init(
-    datasetURL: URL,
-    maxSequenceLength: Int,
-    batchSize: Int,
-    exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
-  ) throws {
-    try self.init(
-      datasetURL: datasetURL,
-      maxSequenceLength: maxSequenceLength,
-      batchSize: batchSize,
-      entropy: SystemRandomNumberGenerator(),
-      exampleMap: exampleMap
-    )
-  }
+    /// Creates an instance in `taskDirectoryURL` with batches of size `batchSize`
+    /// by `maximumSequenceLength`.
+    ///
+    /// - Parameter exampleMap: a transform that processes `Example` in `LabeledTextBatch`.
+    public init(
+        datasetURL: URL,
+        maxSequenceLength: Int,
+        batchSize: Int,
+        exampleMap: @escaping (Language2LabelExample) -> LabeledTextBatch
+    ) throws {
+        try self.init(
+        datasetURL: datasetURL,
+        maxSequenceLength: maxSequenceLength,
+        batchSize: batchSize,
+        entropy: SystemRandomNumberGenerator(),
+        exampleMap: exampleMap
+        )
+    }
 }

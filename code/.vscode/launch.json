@@ -60,6 +60,7 @@
             "program": "/root/.build/debug/BERT-language2label",
             "args": [],
             "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build2",
             "initCommands": ["settings set target.disable-aslr false"]
         },
         // Running unit tests

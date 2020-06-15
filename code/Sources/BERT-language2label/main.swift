@@ -3,22 +3,64 @@ import Foundation
 import ModelSupport
 import TensorFlow
 import TextModels
+import SummaryWriter
+import PythonKit
 
+let metrics = Python.import("sklearn.metrics")
 
-let bertPretrained = BERT.PreTrainedModel.bertBase(cased: false, multilingual: false)
-let workspaceURL = URL(
-    fileURLWithPath: "bert_models", isDirectory: true,
-    relativeTo: URL(
-        fileURLWithPath: NSTemporaryDirectory(),
-        isDirectory: true))
-let bert = try BERT.PreTrainedModel.load(bertPretrained)(from: workspaceURL)
-var bertClassifier = BERTClassifier(bert: bert, classCount: 5)
+let runName = "run_1"
+let batchSize = 512
+let maxSequenceLength =  50
+let nEpochs = 5
+let learningRate: Float = 2e-5
 
-let maxSequenceLength = 50
-let batchSize = 3096
+var hiddenLayerCount: Int = 12 //12
+var attentionHeadCount: Int = 12 //12
+var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
+let classCount = 5
 
-let dsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/labels_ds_v2.csv")
+let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
 
+// let bertPretrained = BERT.PreTrainedModel.bertBase(cased: false, multilingual: false)
+// let workspaceURL = URL(
+//     fileURLWithPath: "bert_models", isDirectory: true,
+//     relativeTo: URL(
+//         fileURLWithPath: NSTemporaryDirectory(),
+//         isDirectory: true))
+// let bert = try BERT.PreTrainedModel.load(bertPretrained)(from: workspaceURL)
+
+// instantiate BERT
+var caseSensitive: Bool = false
+let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
+
+let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
+let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
+    caseSensitive: caseSensitive, unknownToken: "[UNK]", maxTokenLength: nil)
+
+var variant: BERT.Variant = .bert          
+var intermediateSize: Int = hiddenSize*4 // 3072/768=4
+
+let bert = BERT(
+    variant: variant,
+    vocabulary: vocabulary,
+    tokenizer: tokenizer,
+    caseSensitive: caseSensitive,
+    hiddenSize: hiddenSize,
+    hiddenLayerCount: hiddenLayerCount,
+    attentionHeadCount: attentionHeadCount,
+    intermediateSize: intermediateSize,
+    intermediateActivation: gelu,
+    hiddenDropoutProbability: 0.1,
+    attentionDropoutProbability: 0.1,
+    maxSequenceLength: 512,
+    typeVocabularySize: 2,
+    initializerStandardDeviation: 0.02,
+    useOneHotEmbeddings: false)
+
+var bertClassifier = BERTClassifier(bert: bert, classCount: classCount)
+
+print("\nLoading dataset...")
 var dataset = try Language2Label(
     datasetURL: dsURL,
     maxSequenceLength: maxSequenceLength,
@@ -41,7 +83,7 @@ var optimizer = WeightDecayedAdam(
     for: bertClassifier,
     learningRate: LinearlyDecayedParameter(
         baseParameter: LinearlyWarmedUpParameter(
-            baseParameter: FixedParameter<Float>(2e-5),
+            baseParameter: FixedParameter<Float>(learningRate),
             warmUpStepCount: 10,
             warmUpOffset: 0),
         // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
@@ -50,17 +92,23 @@ var optimizer = WeightDecayedAdam(
     weightDecayRate: 0.01,
     maxGradientGlobalNorm: 1)
 
-print("Training BERT for the Language2Label task!")
+let logdirURL = dataURL.appendingPathComponent("tboard/BERT-language2label/\(runName)", isDirectory: true)
+let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
+print("Training BERT for the Language2Label task!")
+var trainingStepCount = 0
 time() {
-    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(5).enumerated() {
+    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
         print("[Epoch \(epoch + 1)]")
         Context.local.learningPhase = .training
         var trainingLossSum: Float = 0
         var trainingBatchCount = 0
-        print("epochBatches.count: \(epochBatches.count)")
+        if epoch == 0 {
+            print("epochBatches.count: \(epochBatches.count)")
+        }
 
         for batch in epochBatches {
+            print("batch")
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
             let (loss, gradients) = valueWithGradient(at: bertClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)
@@ -70,15 +118,19 @@ time() {
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
             optimizer.update(&bertClassifier, along: gradients)
-
-            print(
-                """
-                Training loss: \(trainingLossSum / Float(trainingBatchCount))
-                """
-            )
+            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+            trainingStepCount += 1
         }
+        print(
+            """
+            Training loss: \(trainingLossSum / Float(trainingBatchCount))
+            """
+        )
+        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
 
-        print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+        if epoch == 0 {
+            print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+        }
         Context.local.learningPhase = .inference
         var devLossSum: Float = 0
         var devBatchCount = 0
@@ -100,12 +152,33 @@ time() {
             totalGuessCount += valBatchSize
         }
         
-        let accuracy = Float(correctGuessCount) / Float(totalGuessCount)
+        let testAccuracy = Float(correctGuessCount) / Float(totalGuessCount)
         print(
             """
-            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(accuracy)) \
+            Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(testAccuracy)) \
             Eval loss: \(devLossSum / Float(devBatchCount))
             """
         )
+        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
+        summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch+1, value: testAccuracy)
+
+        let testTexts: [String] = dataset.validationSamples.map{$0.text}
+        let preds = bertClassifier.predict(testTexts, maxSequenceLength: maxSequenceLength, labels: dataset.labels, batchSize: batchSize)
+        let y_true = dataset.validationSamples.map{$0.label}
+        let y_pred = preds.map { $0.className }
+        print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
     }
+    summaryWriter.flush()
 }
+
+print("\nFinal stats:")
+print(dataset.labels)
+print()
+let testTexts: [String] = dataset.validationSamples.map{$0.text}
+let preds = bertClassifier.predict(testTexts, maxSequenceLength: maxSequenceLength, labels: dataset.labels, batchSize: batchSize)
+let y_true = dataset.validationSamples.map{$0.label}
+let y_pred = preds.map { $0.className }
+print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
+print(metrics.classification_report(y_true, y_pred, labels: dataset.labels, zero_division: false))
+
+print("\nFinito.")
