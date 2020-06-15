@@ -8,7 +8,7 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_3"
+let runName = "run_7"
 let batchSize = 512
 let maxSequenceLength =  50
 let nEpochs = 20
@@ -90,19 +90,22 @@ var dataset = try Language2Label(
 
 print("Dataset acquired.")
 
-var optimizer = WeightDecayedAdam(
-    for: bertClassifier,
-    learningRate: LinearlyDecayedParameter(
-        baseParameter: LinearlyWarmedUpParameter(
-            baseParameter: FixedParameter<Float>(learningRate),
-            warmUpStepCount: 10,
-            warmUpOffset: 0),
-        // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
-        // slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
-        slope: -0.5e-7,  // The LR decays linearly to zero in ~100 steps.
-        startStep: 10),
-    weightDecayRate: 0.01,
-    maxGradientGlobalNorm: 1)
+// var optimizer = WeightDecayedAdam(
+//     for: bertClassifier,
+//     learningRate: LinearlyDecayedParameter(
+//         baseParameter: LinearlyWarmedUpParameter(
+//             baseParameter: FixedParameter<Float>(learningRate),
+//             warmUpStepCount: 10,
+//             warmUpOffset: 0),
+//         // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
+//         // slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
+//         slope: -0.5e-7,  // The LR decays linearly to zero in ~1000 steps.
+//         startStep: 10),
+//     weightDecayRate: 0.01,
+//     maxGradientGlobalNorm: 1)
+
+// let optimizer = SGD(for: bertClassifier, learningRate: learningRate)
+let optimizer = Adam(for: bertClassifier, learningRate: learningRate)
 
 let logdirURL = dataURL.appendingPathComponent("tboard/BERT-language2label/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
