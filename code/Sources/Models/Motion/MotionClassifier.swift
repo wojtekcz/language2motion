@@ -169,13 +169,20 @@ public struct MotionClassifier: Module {
 }
 
 
-public struct DenseMotionClassifier: Module {
+public struct DenseMotionClassifier: Module, Regularizable {
     public var featureExtractor: Dense<Float>
     public var transformerEncoder: FeatureTransformerEncoder
     public var dense: Dense<Float>
 
     @noDerivative
     public let maxSequenceLength: Int
+
+    public var regularizationValue: TangentVector {
+        TangentVector(
+        featureExtractor: featureExtractor.regularizationValue,
+        transformerEncoder: transformerEncoder.regularizationValue,
+        dense: dense.regularizationValue)
+    }
 
     public init(transformerEncoder: FeatureTransformerEncoder, inputSize: Int, classCount: Int, maxSequenceLength: Int) {
         self.featureExtractor = Dense<Float>(inputSize: inputSize, outputSize: transformerEncoder.hiddenSize)

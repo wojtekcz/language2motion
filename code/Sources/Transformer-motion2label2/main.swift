@@ -10,11 +10,11 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_7"
+let runName = "run_14"
 let batchSize = 10
 let maxSequenceLength =  500
-let nEpochs = 10
-let learningRate: Float = 1e-5
+let nEpochs = 20
+let learningRate: Float = 5e-5
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -78,7 +78,7 @@ var transformerEncoder = FeatureTransformerEncoder(
     intermediateActivation: gelu,
     hiddenDropoutProbability: 0.1,
     attentionDropoutProbability: 0.1,
-    maxSequenceLength: 512,
+    maxSequenceLength: maxSequenceLength,
     typeVocabularySize: 2,
     initializerStandardDeviation: 0.02,
     useOneHotEmbeddings: false)
@@ -117,26 +117,26 @@ var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEnco
 
 // train
 
-// var optimizer = WeightDecayedAdam(
-//     for: motionClassifier,
-//     learningRate: LinearlyDecayedParameter(
-//         baseParameter: LinearlyWarmedUpParameter(
-//             baseParameter: FixedParameter<Float>(2e-5),
-//             warmUpStepCount: 10,
-//             warmUpOffset: 0),
-//         // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
-//         slope: -1e-7,  // The LR decays linearly to zero in ~500 steps.
-//         startStep: 10),
-//     weightDecayRate: 0.01,
-//     maxGradientGlobalNorm: 1)
+var optimizer = WeightDecayedAdam(
+    for: motionClassifier,
+    learningRate: LinearlyDecayedParameter(
+        baseParameter: LinearlyWarmedUpParameter(
+            baseParameter: FixedParameter<Float>(learningRate),
+            warmUpStepCount: 10,
+            warmUpOffset: 0),
+        // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
+        slope: (-5e-7)/10,  // The LR decays linearly to zero in ~1000? steps.
+        startStep: 10),
+    weightDecayRate: 0.01/2,
+    maxGradientGlobalNorm: 1)
 
 // let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
-let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
+// let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
 
 let logdirURL = dataURL.appendingPathComponent("tboard/Transformer-motion2label2/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
-print("\nTraining MotionClassifier for the motion2Label task!")
+print("\nTraining DenseMotionClassifier for the motion2Label task!")
 var trainingStepCount = 0
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
@@ -159,6 +159,7 @@ time() {
             trainingBatchCount += 1
             optimizer.update(&motionClassifier, along: gradients)
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+            summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
             trainingStepCount += 1
         }
         print(
