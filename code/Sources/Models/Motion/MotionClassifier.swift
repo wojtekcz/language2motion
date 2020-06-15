@@ -85,10 +85,10 @@ public struct MotionClassifier: Module {
         self.maxSequenceLength = maxSequenceLength
     }
 
-    @differentiable(wrt: self)
+    @differentiable//(wrt: self)
     func extractMotionFeatures(_ input: MotionBatch) -> FeatureBatch {
         /// sliding 1-channel ResNet feature extractor
-        let stride = 10
+        let stride = 1
         let sliceWidth = stride*2 // 20
         let numFeatures = (maxSequenceLength/stride)-1 // RENAME: numFeatureVectors
         let origBatchSize = input.motionFrames.shape[0]
@@ -138,7 +138,7 @@ public struct MotionClassifier: Module {
     }
 
     public func predict(motionSamples: [MotionSample], labels: [String], batchSize: Int = 10) -> [Prediction] {
-
+        Context.local.learningPhase = .inference
         let validationExamples = motionSamples.map {
             (example) -> MotionBatch in
             let motionFrames = Tensor<Float>(example.motionFramesArray)

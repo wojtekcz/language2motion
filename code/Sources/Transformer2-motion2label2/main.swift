@@ -10,12 +10,12 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_3"
+let runName = "run_4"
 let batchSize = 10
 let maxSequenceLength =  1000
-let nEpochs = 60
+let nEpochs = 20
 let resNetLearningRate: Float = 1e-3
-let learningRate: Float = 1e-3
+let learningRate: Float = 2e-5
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -136,19 +136,17 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
 // instantiate FeatureTransformerEncoder
-
 var hiddenLayerCount: Int = 8 //12
 var attentionHeadCount: Int = 8 //12
 var hiddenSize = 64*attentionHeadCount
 
+print("\nFeatureTransformerEncoder stats:")
+print("hiddenLayerCount: \(hiddenLayerCount)")
+print("attentionHeadCount: \(attentionHeadCount)")
 print("hiddenSize: \(hiddenSize)")
 
 var caseSensitive: Bool = false
-var subDirectory: String = "uncased_L-12_H-768_A-12"
-let vocabularyURL = dataURL
-    .appendingPathComponent(subDirectory)
-    .appendingPathComponent("vocab.txt")
-
+let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
     caseSensitive: caseSensitive, unknownToken: "[UNK]", maxTokenLength: nil)
@@ -176,7 +174,8 @@ var transformerEncoder = FeatureTransformerEncoder(
 // instantiate MotionClassifier
 var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
 
-let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
+// let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
+let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
 let logdirURL = dataURL.appendingPathComponent("tboard/Transformer2-motion2label2/\(runName)-Transformer", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
