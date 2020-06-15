@@ -60,6 +60,7 @@ where
 {
     /// The learning rate to use when updating models.
     public var learningRate: LearningRate
+    public var lastLearningRate: Float = 0
 
     /// The weight decay rate.
     public var weightDecayRate: Float
@@ -142,5 +143,6 @@ where
             learningRate *= sqrtf(1 - powf(beta2, step)) / (1 - powf(beta1, step))
         }
         model.move(along: update.scaled(by: -learningRate))
+        lastLearningRate = learningRate
     }
 }
