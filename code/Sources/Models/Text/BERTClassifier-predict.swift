@@ -12,9 +12,6 @@ public struct Prediction {
 extension BERTClassifier {
     // TODO: get num_best preds
     public func predict(_ texts: [String], maxSequenceLength: Int, labels: [String], batchSize: Int) -> [Prediction] {
-        print("predict()")
-        print("texts: \(texts.count)")
-
         let validationExamples = texts.map {
             (text) -> TextBatch in
             return self.bert.preprocess(
@@ -22,20 +19,12 @@ extension BERTClassifier {
                 maxSequenceLength: maxSequenceLength
             )
         }
-        
-        print("validationExamples.count: \(validationExamples.count)")
-
-        print("batchSize: \(batchSize)")
-        print("maxSequenceLength: \(maxSequenceLength)")
-        print("batchSize / maxSequenceLength: \(batchSize / maxSequenceLength)")
-
         let validationBatches = validationExamples.inBatches(of: batchSize / maxSequenceLength).map { 
             $0.paddedAndCollated(to: maxSequenceLength)
         }
-        print("validationBatches: \(validationBatches.count)")
+        Context.local.learningPhase = .inference
         var preds: [Prediction] = []
         for batch in validationBatches {
-            print("batch")
             let logits = self(batch)
             let probs = softmax(logits, alongAxis: 1)
             let classIdxs = logits.argmax(squeezingAxis: 1)

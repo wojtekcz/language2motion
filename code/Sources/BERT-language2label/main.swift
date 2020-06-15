@@ -108,7 +108,6 @@ time() {
         }
 
         for batch in epochBatches {
-            print("batch")
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
             let (loss, gradients) = valueWithGradient(at: bertClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)

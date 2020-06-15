@@ -57,10 +57,7 @@ var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamp
 
 // instantiate FeatureTransformerEncoder
 var caseSensitive: Bool = false
-var subDirectory: String = "uncased_L-12_H-768_A-12"
-let vocabularyURL = dataURL
-    .appendingPathComponent(subDirectory)
-    .appendingPathComponent("vocab.txt")
+let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
 
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
