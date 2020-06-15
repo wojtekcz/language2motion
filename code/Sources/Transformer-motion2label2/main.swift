@@ -53,7 +53,7 @@ var hiddenLayerCount: Int = 8 //12
 var attentionHeadCount: Int = 8 //12
 var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
 let classCount = 5
-var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
+// var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
 
 // instantiate FeatureTransformerEncoder
 var caseSensitive: Bool = false
@@ -90,7 +90,9 @@ print("hiddenSize: \(hiddenSize)")
 
 
 // instantiate MotionClassifier
-var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
+// var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
+let inputSize = dataset.motionData.motionSamples[0].motionFramesArray.shape[1]
+var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: 45, classCount: classCount, maxSequenceLength: maxSequenceLength)
 
 
 // get a batch

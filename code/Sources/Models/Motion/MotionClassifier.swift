@@ -168,7 +168,8 @@ public struct MotionClassifier: Module {
     }
 }
 
-public struct MotionClassifier2: Module {
+
+public struct DenseMotionClassifier: Module {
     public var featureExtractor: Dense<Float>
     public var transformerEncoder: FeatureTransformerEncoder
     public var dense: Dense<Float>
@@ -176,44 +177,29 @@ public struct MotionClassifier2: Module {
     @noDerivative
     public let maxSequenceLength: Int
 
-    public init(transformerEncoder: FeatureTransformerEncoder, classCount: Int, maxSequenceLength: Int) {
-        self.featureExtractor = Dense(inputSize: 45, outputSize: 512)
+    public init(transformerEncoder: FeatureTransformerEncoder, inputSize: Int, classCount: Int, maxSequenceLength: Int) {
+        self.featureExtractor = Dense<Float>(inputSize: inputSize, outputSize: transformerEncoder.hiddenSize)
         self.transformerEncoder = transformerEncoder
         self.dense = Dense<Float>(inputSize: transformerEncoder.hiddenSize, outputSize: classCount)
         self.maxSequenceLength = maxSequenceLength
     }
 
-    @differentiable//(wrt: self)
+    @differentiable(wrt: self)
     func extractMotionFeatures(_ input: MotionBatch) -> FeatureBatch {
-        /// sliding 1-channel ResNet feature extractor
-        let stride = 1
-        let sliceWidth = stride*2 // 20
-        let numFeatures = (maxSequenceLength/stride)-1 // RENAME: numFeatureVectors
+        // TODO: reshape to 2D tensor
+        // TODO: reshape to 3D tendor
         let origBatchSize = input.motionFrames.shape[0]
-        // let hiddenSize = featureExtractor.classifier.weight.shape[1]
-        let hiddenSize = 512 //featureExtractor.classifier.weight.shape[0]
+        let length = input.motionFrames.shape[1]
+        let numFeatures = input.motionFrames.shape[2]
+        let hiddenSize = transformerEncoder.hiddenSize
 
-        // create set of slices
-        var tmpMotionFrameSlices: [Tensor<Float>] = []
-        var tmpMaskSlices: [Tensor<Int32>] = []
-        let tmpMotionFrames = input.motionFrames.expandingShape(at: 3)
+        let tmpBatchSize = origBatchSize * length
+        let tmpMotionFrames = input.motionFrames.reshaped(to: [tmpBatchSize, numFeatures])
 
-        for i in 0..<numFeatures {
-            let start = i*stride
-            let end = i*stride+sliceWidth
-            let aSlice = tmpMotionFrames[0..., start..<end]
-            tmpMotionFrameSlices.append(aSlice)
-            // create mask from motion flag slices that contain at least one non-zero value
-            let motionFlagSlice = input.motionFlag[0..., start..<end]
-            let motionMaskSlice = motionFlagSlice.max(alongAxes: 1)
-            tmpMaskSlices.append(motionMaskSlice)
-        }
-        let motionFrameSlices = Tensor(concatenating: tmpMotionFrameSlices) // TODO: annotate tensor sizes/dimensions
-        let tmpMotionFeatures = featureExtractor.extractFeatures(motionFrameSlices) // batch size here is origBatchSize*numFeatures
-        let motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFeatures, hiddenSize])
+        let tmpMotionFeatures = featureExtractor(tmpMotionFrames) // batch size here is origBatchSize*numFeatures
+        let motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, length, hiddenSize])
 
-        let mask = Tensor(concatenating: tmpMaskSlices).reshaped(to: [origBatchSize, numFeatures])
-        return FeatureBatch(motionFrames: motionFeatures, motionFlag: mask, origMotionFramesCount: input.origMotionFramesCount)
+        return FeatureBatch(motionFrames: motionFeatures, motionFlag: input.motionFlag, origMotionFramesCount: input.origMotionFramesCount)
     }
 
     /// Returns: logits with shape `[batchSize, classCount]`.
