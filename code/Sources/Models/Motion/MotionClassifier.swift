@@ -92,8 +92,7 @@ public struct MotionClassifier: Module {
         let sliceWidth = stride*2 // 20
         let numFeatures = (maxSequenceLength/stride)-1 // RENAME: numFeatureVectors
         let origBatchSize = input.motionFrames.shape[0]
-        // let hiddenSize = featureExtractor.classifier.weight.shape[1]
-        let hiddenSize = featureExtractor.classifier.weight.shape[0]
+        let hiddenSize = transformerEncoder.hiddenSize
 
         // create set of slices
         var tmpMotionFrameSlices: [Tensor<Float>] = []

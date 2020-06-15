@@ -148,9 +148,6 @@ time() {
 
         for batch in epochBatches {
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
-            // let labels = Tensor(copying: eagerLabels, to: device)
             let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)
                 return softmaxCrossEntropy(logits: logits, labels: labels)
@@ -159,7 +156,6 @@ time() {
             trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
             optimizer.update(&motionClassifier, along: gradients)
-            // LazyTensorBarrier()
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
             trainingStepCount += 1
         }
@@ -181,15 +177,10 @@ time() {
 
         for batch in dataset.validationBatches {
             let valBatchSize = batch.data.motionFrames.shape[0]
-
             let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-            // let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            // let documents = eagerDocuments.copyingTensorsToDevice(to: device)
-            // let labels = Tensor(copying: eagerLabels, to: device)
 
             let logits = motionClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
-            // LazyTensorBarrier()
             devLossSum += loss.scalarized()
             devBatchCount += 1
 
