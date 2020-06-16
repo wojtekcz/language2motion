@@ -16,7 +16,7 @@ let package = Package(
         .library(name: "TextModels", targets: ["TextModels"]),
         .library(name: "MotionModels", targets: ["MotionModels"]),
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
-        .executable(name: "PreprocessMotionData", targets: ["PreprocessMotionData"]),
+        .executable(name: "PreprocessMotionDataset", targets: ["PreprocessMotionDataset"]),
         .executable(name: "Language2label", targets: ["Language2label"]),
         .executable(name: "Motion2label", targets: ["Motion2label"]),
     ],
@@ -25,7 +25,7 @@ let package = Package(
     ],
     targets: [
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
-        .target(name: "PreprocessMotionData", dependencies: ["Datasets"], path: "Sources/PreprocessMotionData"),
+        .target(name: "PreprocessMotionDataset", dependencies: ["Datasets"], path: "Sources/PreprocessMotionDataset"),
         .target(
             name: "Language2label", dependencies: ["TextModels", "Datasets", "SummaryWriter"],
             path: "Sources/Language2label"),
