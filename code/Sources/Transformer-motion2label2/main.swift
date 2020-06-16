@@ -10,21 +10,24 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_14"
+let runName = "run_15"
 let batchSize = 10
 let maxSequenceLength =  500
 let nEpochs = 20
-let learningRate: Float = 5e-5
+let learningRate: Float = 2e-5
+let logdir = "tboard/Transformer-motion2label2/\(runName)"
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
 print("maxSequenceLength: \(maxSequenceLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
+print("logdir: \(logdir)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.balanced.515.plist")
 let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+
 
 print("\nLoading dataset...")
 let dataset = try! Motion2Label2(
@@ -117,23 +120,25 @@ var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEnco
 
 // train
 
-var optimizer = WeightDecayedAdam(
-    for: motionClassifier,
-    learningRate: LinearlyDecayedParameter(
-        baseParameter: LinearlyWarmedUpParameter(
-            baseParameter: FixedParameter<Float>(learningRate),
-            warmUpStepCount: 10,
-            warmUpOffset: 0),
-        // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
-        slope: (-5e-7)/10,  // The LR decays linearly to zero in ~1000? steps.
-        startStep: 10),
-    weightDecayRate: 0.01/2,
-    maxGradientGlobalNorm: 1)
+// var optimizer = WeightDecayedAdam(
+//     for: motionClassifier,
+//     learningRate: LinearlyDecayedParameter(
+//         baseParameter: LinearlyWarmedUpParameter(
+//             baseParameter: FixedParameter<Float>(learningRate),
+//             warmUpStepCount: 10,
+//             warmUpOffset: 0),
+//         // slope: -5e-7,  // The LR decays linearly to zero in 100 steps.
+//         slope: (-5e-7)/10,  // The LR decays linearly to zero in ~1000? steps.
+//         startStep: 10),
+//     weightDecayRate: 0.01/2,
+//     maxGradientGlobalNorm: 1)
 
 // let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
-// let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
+let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
 
-let logdirURL = dataURL.appendingPathComponent("tboard/Transformer-motion2label2/\(runName)", isDirectory: true)
+print("optimizer = \(optimizer)")
+
+let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 print("\nTraining DenseMotionClassifier for the motion2Label task!")
@@ -159,7 +164,7 @@ time() {
             trainingBatchCount += 1
             optimizer.update(&motionClassifier, along: gradients)
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-            summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
+            // summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
             trainingStepCount += 1
         }
         print(
@@ -212,11 +217,11 @@ time() {
 }
 
 print("\nFinal stats:")
-print(dataset.labels)
-print()
 let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
 let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
 let y_pred = preds.map { $0.className }
+print("accuracy: \(metrics.accuracy_score(y_true, y_pred))")
+print(dataset.labels)
 print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
 print(metrics.classification_report(y_true, y_pred, labels: dataset.labels, zero_division: false))
 
