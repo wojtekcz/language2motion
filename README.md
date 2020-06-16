@@ -22,6 +22,7 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] Transformer encoder on motion + classifier
     - [ ] RNN encoder on motion + classifier
   - motion 2 language
+    - [ ] Transformer decoder for annotation
     - do image captioning (with RNN decoder)
 - language 2 motion
   - Transformer encoder on annotation
