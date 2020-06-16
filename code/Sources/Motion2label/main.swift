@@ -10,12 +10,12 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_16"
-let batchSize = 10
-let maxSequenceLength =  500
-let nEpochs = 80
+let runName = "run_2"
+let batchSize = 4
+let maxSequenceLength =  1000
+let nEpochs = 10
 let learningRate: Float = 2e-5
-let logdir = "tboard/Transformer-motion2label2/\(runName)"
+let logdir = "tboard/Motion2label/\(runName)"
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
