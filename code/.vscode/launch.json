@@ -7,8 +7,8 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "PreprocessMotionData",
-            "program": "/root/.build/debug/PreprocessMotionData",
+            "name": "PreprocessMotionDataset",
+            "program": "/root/.build/debug/PreprocessMotionDataset",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build",
@@ -17,8 +17,8 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Transformer-motion2label2",
-            "program": "/root/.build/debug/Transformer-motion2label2",
+            "name": "Motion2label",
+            "program": "/root/.build/debug/Motion2label",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build2",
@@ -27,8 +27,8 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "BERT-language2label",
-            "program": "/root/.build/debug/BERT-language2label",
+            "name": "Language2label",
+            "program": "/root/.build/debug/Language2label",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build2",
