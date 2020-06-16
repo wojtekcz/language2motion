@@ -30,7 +30,7 @@ let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 
 print("\nLoading dataset...")
-let dataset = try! Motion2Label2(
+let dataset = try! Motion2Label(
     serializedDatasetURL: serializedDatasetURL,
     labelsURL: labelsURL,
     maxSequenceLength: maxSequenceLength,
@@ -94,7 +94,7 @@ print("hiddenSize: \(hiddenSize)")
 
 // instantiate MotionClassifier
 // var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
-let inputSize = dataset.motionData.motionSamples[0].motionFramesArray.shape[1]
+let inputSize = dataset.motionDataset.motionSamples[0].motionFramesArray.shape[1]
 var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: 45, classCount: classCount, maxSequenceLength: maxSequenceLength)
 
 

@@ -1,6 +1,6 @@
 import Foundation
 
-public class MotionData: Codable {
+public class MotionDataset: Codable {
     public let datasetFolderURL: URL
     public var motionSamples: [MotionSample]
     public var maxSampleID = 3966
@@ -36,7 +36,7 @@ public class MotionData: Codable {
     // TODO: code throwing errors
     public init(from serializedDatasetURL: URL) {
         let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
-        let motionData = try! PropertyListDecoder().decode(MotionData.self, from: data)
+        let motionData = try! PropertyListDecoder().decode(MotionDataset.self, from: data)
         datasetFolderURL = motionData.datasetFolderURL
         motionSamples = motionData.motionSamples
         maxSampleID = motionData.maxSampleID
@@ -51,6 +51,6 @@ public class MotionData: Codable {
     }
 
     public var description: String {
-        return "MotionData(motionSamples: \(motionSamples.count))"
+        return "MotionDataset(motionSamples: \(motionSamples.count))"
     }
 }

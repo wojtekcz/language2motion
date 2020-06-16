@@ -23,10 +23,10 @@ public struct Motion2LabelExample {
 }
 
 
-public struct Motion2Label2 <Entropy: RandomNumberGenerator> {
+public struct Motion2Label <Entropy: RandomNumberGenerator> {
     public typealias Samples = LazyMapSequence<[Motion2LabelExample], LabeledMotionBatch>
 
-    public let motionData: MotionData
+    public let motionDataset: MotionDataset
     public let testMotionSamples: [MotionSample]
     public let trainingExamples: Samples
     public let validationExamples: Samples
@@ -49,7 +49,7 @@ public struct Motion2Label2 <Entropy: RandomNumberGenerator> {
 }
 
 
-extension Motion2Label2 {
+extension Motion2Label {
 
     /// Creates an instance of `serializedDatasetURL` motion dataset with `labelsURL` labels,
     /// with batches of size `batchSize` by `maximumSequenceLength`.
@@ -69,8 +69,8 @@ extension Motion2Label2 {
         exampleMap: @escaping (Motion2LabelExample) -> LabeledMotionBatch
     ) throws {
         // Load the data files.
-        motionData = MotionData(from: serializedDatasetURL)
-        print(motionData.description)
+        motionDataset = MotionDataset(from: serializedDatasetURL)
+        print(motionDataset.description)
         
         let df = pd.read_csv(labelsURL.path)
         let _labels = df.label.unique().sorted().map { String($0)! }
@@ -81,7 +81,7 @@ extension Motion2Label2 {
         }
 
         // filter out samples without annotations
-        let motionSamples = motionData.motionSamples.filter { $0.annotations.count > 0 }
+        let motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
         
         // split into train/test sets
         let (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplit(split: 0.8)
@@ -89,10 +89,10 @@ extension Motion2Label2 {
 
         // samples to tensors
         self.trainingExamples = trainMotionSamples.map {
-            Motion2Label2.getExample($0, labelsDict: _labelsDict, labels: _labels, tensorWidth: maxSequenceLength) 
+            Motion2Label.getExample($0, labelsDict: _labelsDict, labels: _labels, tensorWidth: maxSequenceLength) 
         }.lazy.map(exampleMap)
          self.validationExamples = testMotionSamples.map {
-            Motion2Label2.getExample($0, labelsDict: _labelsDict, labels: _labels, tensorWidth: maxSequenceLength)
+            Motion2Label.getExample($0, labelsDict: _labelsDict, labels: _labels, tensorWidth: maxSequenceLength)
         }.lazy.map(exampleMap)
 
         self.maxSequenceLength = maxSequenceLength
@@ -133,16 +133,16 @@ extension Motion2Label2 {
     }
 
     public func getLabel(_ sampleID: Int) -> Motion2LabelExample.LabelTuple? {
-        return Motion2Label2.getLabel(sampleID: sampleID, labelsDict: labelsDict, labels: labels)
+        return Motion2Label.getLabel(sampleID: sampleID, labelsDict: labelsDict, labels: labels)
     }
 
     static func getExample(_ ms: MotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> Motion2LabelExample {
-        let label: Motion2LabelExample.LabelTuple? = Motion2Label2.getLabel(sampleID: ms.sampleID, labelsDict: labelsDict, labels: labels)
+        let label: Motion2LabelExample.LabelTuple? = Motion2Label.getLabel(sampleID: ms.sampleID, labelsDict: labelsDict, labels: labels)
         return Motion2LabelExample(id: "\(ms.sampleID)", motionSample: ms, label: label)
     }
 }
 
-extension Motion2Label2 where Entropy == SystemRandomNumberGenerator {
+extension Motion2Label where Entropy == SystemRandomNumberGenerator {
     /// Creates an instance in `taskDirectoryURL` with batches of size `batchSize`
     /// by `maximumSequenceLength`.
     ///

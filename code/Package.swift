@@ -17,8 +17,8 @@ let package = Package(
         .library(name: "MotionModels", targets: ["MotionModels"]),
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
         .executable(name: "PreprocessMotionData", targets: ["PreprocessMotionData"]),
-        .executable(name: "BERT-language2label", targets: ["BERT-language2label"]),
-        .executable(name: "Transformer-motion2label2", targets: ["Transformer-motion2label2"]),
+        .executable(name: "Language2label", targets: ["Language2label"]),
+        .executable(name: "Motion2label", targets: ["Motion2label"]),
     ],
     dependencies: [
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0")
@@ -27,11 +27,11 @@ let package = Package(
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
         .target(name: "PreprocessMotionData", dependencies: ["Datasets"], path: "Sources/PreprocessMotionData"),
         .target(
-            name: "BERT-language2label", dependencies: ["TextModels", "Datasets", "SummaryWriter"],
-            path: "Sources/BERT-language2label"),
+            name: "Language2label", dependencies: ["TextModels", "Datasets", "SummaryWriter"],
+            path: "Sources/Language2label"),
         .target(
-            name: "Transformer-motion2label2", dependencies: ["ImageClassificationModels", "TextModels", "Datasets", "ModelSupport", "MotionModels", "SummaryWriter"],
-            path: "Sources/Transformer-motion2label2"),
+            name: "Motion2label", dependencies: ["ImageClassificationModels", "TextModels", "Datasets", "ModelSupport", "MotionModels", "SummaryWriter"],
+            path: "Sources/Motion2label"),
         .target(name: "Batcher", path: "Sources/Batcher"),
         .target(name: "Datasets", dependencies: ["ModelSupport", "Batcher"], path: "Sources/Datasets"),
         .target(name: "ImageClassificationModels", path: "Sources/Models/ImageClassification"),

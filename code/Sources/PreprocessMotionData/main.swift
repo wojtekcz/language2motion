@@ -18,10 +18,10 @@ let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/d
 print("Running MotionData preprocessing (sampledStr=\(sampledStr))...")
 
 var date = Date()
-let motionData = MotionData(datasetFolderURL: datasetFolderURL, grouppedJoints: grouppedJoints, normalized: true, sampled: sampled)
+let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, grouppedJoints: grouppedJoints, normalized: true, sampled: sampled)
 print(abs(date.timeIntervalSinceNow))
 
 date = Date()
 print("Encoding to property list..., writing to file '\(serializedDatasetURL.path)'")
-motionData.write(to: serializedDatasetURL)
+motionDataset.write(to: serializedDatasetURL)
 print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
