@@ -48,6 +48,44 @@ public struct Motion2Label <Entropy: RandomNumberGenerator> {
     public var validationBatches: LazyMapSequence<Slices<Samples>, LabeledMotionBatch>
 }
 
+extension Motion2Label {
+    static func filterSamples(_ motionSamples: [MotionSample], classIdx: Int, labelsDict: [Int: String], labels: [String]) -> [MotionSample] {
+        let motionSamplesForClass = motionSamples.filter {
+            (ms: MotionSample) -> Bool in
+            let labelTuple = Motion2Label.getLabel(sampleID: ms.sampleID, labelsDict: labelsDict, labels: labels)!
+            return labelTuple.idx == classIdx
+        }
+        return motionSamplesForClass
+    }
+    
+    static func balanceClassSamples(_ motionSamples: [MotionSample], numPerClass: Int, split: Double = 0.8, labelsDict: [Int: String], labels: [String]) -> (trainSamples: [MotionSample], testSamples: [MotionSample]) {
+        var allTrainSamples: [MotionSample] = []
+        var allTestSamples: [MotionSample] = []
+
+        for classIdx in (0..<labels.count) { 
+            let samplesForClass = Motion2Label.filterSamples(motionSamples, classIdx: classIdx, labelsDict: labelsDict, labels: labels)
+
+            var trainSamples: [MotionSample]
+            var testSamples: [MotionSample]
+            if samplesForClass.count >= numPerClass { // downsample
+                let sampledSamplesForClass = Array(samplesForClass.choose(numPerClass))
+                (trainSamples, testSamples) = sampledSamplesForClass.trainTestSplit(split: split)
+            } else { // upsample
+                (trainSamples, testSamples) = samplesForClass.trainTestSplit(split: split)
+                let maxTrainPerClass = Int(Double(numPerClass)*split)
+                trainSamples = (0..<maxTrainPerClass).map { (a) -> MotionSample in trainSamples.randomElement()! }
+            }
+
+            allTrainSamples.append(contentsOf: trainSamples)
+            allTestSamples.append(contentsOf: testSamples)
+
+            print((samplesForClass.count, trainSamples.count, testSamples.count))
+        }
+        allTrainSamples.shuffle()
+        allTestSamples.shuffle()
+        return (trainSamples: allTrainSamples, testSamples: allTestSamples)
+    }
+}
 
 extension Motion2Label {
 
@@ -65,6 +103,8 @@ extension Motion2Label {
         labelsURL: URL,
         maxSequenceLength: Int,
         batchSize: Int,
+        balanceClassSamples: Int? = nil,
+        trainTestSplit: Double = 0.8,
         entropy: Entropy,
         exampleMap: @escaping (Motion2LabelExample) -> LabeledMotionBatch
     ) throws {
@@ -84,7 +124,16 @@ extension Motion2Label {
         let motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
         
         // split into train/test sets
-        let (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplit(split: 0.8)
+        var trainMotionSamples: [MotionSample] = []
+        var testMotionSamples: [MotionSample] = []
+        if balanceClassSamples == nil {
+            (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplit(split: trainTestSplit)
+        } else {
+            print("Class balancing...")
+            (trainMotionSamples, testMotionSamples) = Motion2Label.balanceClassSamples(
+                motionSamples, numPerClass: balanceClassSamples!, split: trainTestSplit, labelsDict: _labelsDict, labels: _labels
+            )
+        }
         self.testMotionSamples = testMotionSamples
 
         // samples to tensors
@@ -152,6 +201,8 @@ extension Motion2Label where Entropy == SystemRandomNumberGenerator {
         labelsURL: URL,
         maxSequenceLength: Int,
         batchSize: Int,
+        balanceClassSamples: Int? = nil,
+        trainTestSplit: Double = 0.8,
         exampleMap: @escaping (Motion2LabelExample) -> LabeledMotionBatch
     ) throws {
         try self.init(
@@ -159,6 +210,8 @@ extension Motion2Label where Entropy == SystemRandomNumberGenerator {
             labelsURL: labelsURL,
             maxSequenceLength: maxSequenceLength,
             batchSize: batchSize,
+            balanceClassSamples: balanceClassSamples,
+            trainTestSplit: trainTestSplit,
             entropy: SystemRandomNumberGenerator(),
             exampleMap: exampleMap
         )

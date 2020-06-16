@@ -15,9 +15,9 @@ extension Array where Element == Array<Float> {
 }
 
 extension Array { 
-    public func trainTestSplit(split: Float) -> (train: Array<Element>, test: Array<Element>) {
+    public func trainTestSplit(split: Double) -> (train: Array<Element>, test: Array<Element>) {
         let shuffled = self.shuffled()
-        let splitIdx = Int(roundf(Float(split * Float(self.count))))
+        let splitIdx = Int(roundf(Float(split * Double(self.count))))
         let train = Array(shuffled[0..<splitIdx])
         let test = Array(shuffled[splitIdx..<self.count])
         return (train: train, test: test)

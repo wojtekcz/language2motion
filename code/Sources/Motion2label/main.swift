@@ -25,16 +25,22 @@ print("learningRate: \(learningRate)")
 print("logdir: \(logdir)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.balanced.515.plist")
+// let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.balanced.515.plist")
+// let balanceClassSamples: Int? = nil
+let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.plist")
+let balanceClassSamples: Int? = 600
 let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 
 print("\nLoading dataset...")
+print(serializedDatasetURL.path)
+print(labelsURL.path)
 let dataset = try! Motion2Label(
     serializedDatasetURL: serializedDatasetURL,
     labelsURL: labelsURL,
     maxSequenceLength: maxSequenceLength,
-    batchSize: batchSize
+    batchSize: batchSize,
+    balanceClassSamples: balanceClassSamples
 ) { 
     // TODO: move this to dataset class
     (example: Motion2LabelExample) -> LabeledMotionBatch in
