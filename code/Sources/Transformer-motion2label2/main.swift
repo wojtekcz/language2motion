@@ -10,10 +10,10 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_15"
+let runName = "run_16"
 let batchSize = 10
 let maxSequenceLength =  500
-let nEpochs = 20
+let nEpochs = 80
 let learningRate: Float = 2e-5
 let logdir = "tboard/Transformer-motion2label2/\(runName)"
 
@@ -54,7 +54,7 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // instantiate ResNet
 var hiddenLayerCount: Int = 8 //12
 var attentionHeadCount: Int = 8 //12
-var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384
+var hiddenSize = 64*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384 // 64*8=512
 let classCount = 5
 // var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
 
