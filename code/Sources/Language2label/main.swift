@@ -107,7 +107,7 @@ print("Dataset acquired.")
 // let optimizer = SGD(for: bertClassifier, learningRate: learningRate)
 let optimizer = Adam(for: bertClassifier, learningRate: learningRate)
 
-let logdirURL = dataURL.appendingPathComponent("tboard/BERT-language2label/\(runName)", isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("tboard/Language2label/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 print("Training BERT for the Language2Label task!")

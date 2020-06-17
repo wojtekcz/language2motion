@@ -96,7 +96,7 @@ public struct DenseMotionClassifier: Module, Regularizable {
     func extractMotionFeatures(_ input: MotionBatch) -> FeatureBatch {
         let origBatchSize = input.motionFrames.shape[0]
         let length = input.motionFrames.shape[1]
-        let numFeatures = input.motionFrames.shape[2]
+        let numFeatures = input.motionFrames.shape[2] //numFrames
         let hiddenSize = transformerEncoder.hiddenSize
 
         let tmpBatchSize = origBatchSize * length

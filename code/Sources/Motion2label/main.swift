@@ -10,9 +10,9 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_7"
+let runName = "run_9"
 let batchSize = 4
-let maxSequenceLength =  500
+let maxSequenceLength =  1000
 let nEpochs = 10
 let learningRate: Float = 2e-5
 let logdir = "tboard/Motion2label/\(runName)"
