@@ -1,7 +1,7 @@
 import TensorFlow
 
 extension Tensor where Scalar: Numeric {
-    func paddedOrCropped(to width: Int) -> Tensor<Scalar> {
+    public func paddedOrCropped(to width: Int) -> Tensor<Scalar> {
         // pads or crops one- or two-dimensional tensor along 0-th axis
         let rank = self.shape.count
         let currentWidth = self.shape[0]
