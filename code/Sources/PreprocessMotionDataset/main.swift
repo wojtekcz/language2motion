@@ -18,7 +18,7 @@ let downsampledStr = factor>1 ? "downsampled." : ""
 
 // let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.\(grouppedJointsStr)\(normalizedStr)\(downsampledStr)\(sampledStr)plist")
 
-print("Running MotionData preprocessing (\(sampled))...")
+print("Running MotionData preprocessing (\(String(describing:sampled)))...")
 
 var date = Date()
 let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, grouppedJoints: grouppedJoints, normalized: true, sampled: sampled, factor: factor, maxFrames: maxFrames)

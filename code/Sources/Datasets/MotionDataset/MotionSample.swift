@@ -158,13 +158,16 @@ extension MotionSample {
         var motionFramesBuckets = [[MotionFrame]](repeating: [], count: factor)
         var timestampsBuckets = [[Float]](repeating: [], count: factor)
 
-        for idx in 0..<min(motionFrames.count, maxFrames) {
+        let nFrames = min(motionFrames.count, maxFrames)
+        for idx in 0..<nFrames {
             let bucket = idx % 10
             motionFramesBuckets[bucket].append(motionFrames[idx])
             timestampsBuckets[bucket].append(timestamps[idx])
         }
+        // filter out empty buckets
+        let nBuckets = (nFrames>=factor) ? factor : nFrames
 
-        return (0..<factor).map {
+        return (0..<nBuckets).map {
             MotionSample(
                 sampleID: sampleID, 
                 motionFrames: motionFramesBuckets[$0], 
