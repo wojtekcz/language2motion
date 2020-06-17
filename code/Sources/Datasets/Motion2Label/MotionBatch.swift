@@ -23,11 +23,19 @@ extension MotionBatch: Collatable {
   /// Creates an instance from collating `samples`.
   public init<BatchSamples: Collection>(collating samples: BatchSamples)
   where BatchSamples.Element == Self {
-    self.init(
-      motionFrames: .init(concatenating: samples.map({$0.motionFrames.expandingShape(at: 0)})), 
-      motionFlag: .init(concatenating: samples.map({$0.motionFlag.expandingShape(at: 0)})),
-      origMotionFramesCount: .init(concatenating: samples.map({$0.origMotionFramesCount.expandingShape(at: 0)}))
-    )
+    if samples.count == 1 {
+      let pm = samples.first!
+      self.init(
+          motionFrames: pm.motionFrames.expandingShape(at: 0), 
+          motionFlag: pm.motionFlag.expandingShape(at: 0), 
+          origMotionFramesCount: pm.origMotionFramesCount.expandingShape(at: 0))
+    } else {
+      self.init(
+        motionFrames: .init(concatenating: samples.map({$0.motionFrames.expandingShape(at: 0)})), 
+        motionFlag: .init(concatenating: samples.map({$0.motionFlag.expandingShape(at: 0)})),
+        origMotionFramesCount: .init(concatenating: samples.map({$0.origMotionFramesCount.expandingShape(at: 0)}))
+      )
+    }
   }
 }
 
@@ -36,7 +44,6 @@ extension Collection where Element == MotionBatch {
   /// Returns the elements of `self`, padded to `maxLength` if specified
   /// or the maximum length of the elements in `self` otherwise.
   public func paddedAndCollated(to maxLength: Int? = nil) -> MotionBatch {
-    if count == 1 { return first! }
     let maxLength = maxLength ?? self.map { $0.motionFrames.shape[1] }.max()!
     let paddedMotions = self.map { example -> MotionBatch in
       return MotionBatch(
