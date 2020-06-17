@@ -20,19 +20,32 @@ public struct MotionSample: Codable {
         case motionFramesArray
     }
 
-    public init(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true) {
+    public init(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, maxFrames: Int = 50000) {
         self.sampleID = sampleID
         let mmm_doc = MotionSample.loadMMM(fileURL: mmmURL)
         let jointNames = MotionSample.getJointNames(mmm_doc: mmm_doc)
         self.jointNames = jointNames
-        let motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
+        var motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
         self.motionFrames = motionFrames
         self.annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
-        let timestamps: [Float] = motionFrames.map { $0.timestamp }
+        var timestamps: [Float] = motionFrames.map { $0.timestamp }
+        if motionFrames.count > maxFrames {
+            motionFrames = Array(motionFrames[0..<maxFrames])
+            timestamps = Array(timestamps[0..<maxFrames])
+        }
         self.timestampsArray = ShapedArray<Float>(shape: [timestamps.count], scalars: timestamps)
         self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
     }
-    
+
+    public init(sampleID: Int, motionFrames: [MotionFrame], annotations: [String], jointNames: [String], timestamps: [Float], grouppedJoints: Bool = true, normalized: Bool = true) {
+        self.sampleID = sampleID
+        self.jointNames = jointNames
+        self.motionFrames = motionFrames
+        self.annotations = annotations
+        self.timestampsArray = ShapedArray<Float>(shape: [timestamps.count], scalars: timestamps)
+        self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
+    }
+
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         sampleID = try values.decode(Int.self, forKey: .sampleID)
@@ -68,22 +81,22 @@ public struct MotionSample: Codable {
         try container.encode(FastCodableShapedArray<Float>(shapedArray: motionFramesArray), forKey: .motionFramesArray)
     }
 
-    static func loadMMM(fileURL: URL) -> XMLDocument {
+    public static func loadMMM(fileURL: URL) -> XMLDocument {
         let mmm_text = try! String(contentsOf: fileURL, encoding: .utf8)
         return try! XMLDocument(data: mmm_text.data(using: .utf8)!, options: [])
     }
     
-    static func getAnnotations(fileURL: URL) -> [String] {
+    public static func getAnnotations(fileURL: URL) -> [String] {
         let annotationsData = try! Data(contentsOf: fileURL)
         return try! JSONSerialization.jsonObject(with: annotationsData) as! [String]        
     }
     
-    static func getJointNames(mmm_doc: XMLDocument) -> [String] {
+    public static func getJointNames(mmm_doc: XMLDocument) -> [String] {
         let jointNode: [XMLNode] = try! mmm_doc.nodes(forXPath: "/MMM/Motion/JointOrder/Joint/@name")
         return jointNode.map {$0.stringValue!.replacingOccurrences(of: "_joint", with: "")}
     }
     
-    static func getMotionFrames(mmm_doc: XMLDocument, jointNames: [String]) -> [MotionFrame] {
+    public static func getMotionFrames(mmm_doc: XMLDocument, jointNames: [String]) -> [MotionFrame] {
         var motionFrames: [MotionFrame] = []
         var count = 0
         for motionFrame in try! mmm_doc.nodes(forXPath: "/MMM/Motion/MotionFrames/MotionFrame") {
@@ -108,7 +121,7 @@ public struct MotionSample: Codable {
         return motionFrames
     }
 
-    static func getJointPositions(motionFrames: [MotionFrame], grouppedJoints: Bool, normalized: Bool) -> ShapedArray<Float> {
+    public static func getJointPositions(motionFrames: [MotionFrame], grouppedJoints: Bool, normalized: Bool) -> ShapedArray<Float> {
         var a: Array<Array<Float>>? = nil
         if grouppedJoints {
             a = motionFrames.map {$0.grouppedJointPositions()}
@@ -130,5 +143,37 @@ public struct MotionSample: Codable {
 
     public var description: String {
         return "MotionSample(timestamp: \(self.motionFrames.last!.timestamp), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
+    }
+}
+
+extension MotionSample {
+    public static func downsampledMutlipliedMotionSamples(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, factor: Int = 10, maxFrames: Int = 5000) -> [MotionSample] {
+        let mmm_doc = MotionSample.loadMMM(fileURL: mmmURL)
+        let jointNames = MotionSample.getJointNames(mmm_doc: mmm_doc)
+
+        let motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
+        let annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
+        let timestamps: [Float] = motionFrames.map { $0.timestamp }
+
+        var motionFramesBuckets = [[MotionFrame]](repeating: [], count: factor)
+        var timestampsBuckets = [[Float]](repeating: [], count: factor)
+
+        for idx in 0..<min(motionFrames.count, maxFrames) {
+            let bucket = idx % 10
+            motionFramesBuckets[bucket].append(motionFrames[idx])
+            timestampsBuckets[bucket].append(timestamps[idx])
+        }
+
+        return (0..<factor).map {
+            MotionSample(
+                sampleID: sampleID, 
+                motionFrames: motionFramesBuckets[$0], 
+                annotations: annotations, 
+                jointNames: jointNames, 
+                timestamps: timestampsBuckets[$0], 
+                grouppedJoints: grouppedJoints, 
+                normalized: normalized
+            )
+        }
     }
 }

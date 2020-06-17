@@ -5,7 +5,7 @@ public class MotionDataset: Codable {
     public var motionSamples: [MotionSample]
     public var maxSampleID = 3966
 
-    public init(datasetFolderURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, sampled: Int? = nil) {
+    public init(datasetFolderURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, sampled: Int? = nil, factor: Int = 1, maxFrames: Int = 50000) {
         self.datasetFolderURL = datasetFolderURL
         var motionSamples: [MotionSample] = []
         let fm = FileManager()
@@ -24,13 +24,27 @@ public class MotionDataset: Codable {
             let annotationsURL = datasetFolderURL.appendingPathComponent(annotationsFilename)
             
             if fm.fileExists(atPath: mmmURL.path) {
-                let motionSample = MotionSample(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized)            
-                motionSamples.append(motionSample)
+                if factor == 1 {
+                    let motionSample = MotionSample(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized, maxFrames: maxFrames)
+                    motionSamples.append(motionSample)
+                } else {
+                    let _motionSamples = MotionSample.downsampledMutlipliedMotionSamples(
+                        sampleID: sampleID, 
+                        mmmURL: mmmURL, 
+                        annotationsURL: annotationsURL, 
+                        grouppedJoints: grouppedJoints, 
+                        normalized: normalized, 
+                        factor: factor, 
+                        maxFrames: maxFrames
+                    )
+                    motionSamples.append(contentsOf: _motionSamples)
+                }
             } else {
                 print("** Sample \(sampleID) doesn't exist.")
             }
         }
         self.motionSamples = motionSamples
+        print("motionSamples.count: \(motionSamples.count)")
     }
 
     // TODO: code throwing errors
