@@ -10,9 +10,9 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_1"
-let batchSize = 4
-let maxSequenceLength =  1000
+let runName = "run_2"
+let batchSize = 10
+let maxSequenceLength =  300
 let nEpochs = 10
 let learningRate: Float = 2e-5
 let logdir = "tboard/Motion2label/\(runName)"
@@ -27,8 +27,10 @@ print("logdir: \(logdir)")
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 // let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.balanced.515.plist")
 // let balanceClassSamples: Int? = nil
-let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.plist")
-let balanceClassSamples: Int? = 600
+let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
+let balanceClassSamples: Int? = 60
+// let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.plist")
+// let balanceClassSamples: Int? = 600
 let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 
@@ -59,9 +61,9 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
 // instantiate FeatureTransformerEncoder
-var hiddenLayerCount: Int = 8 //12
-var attentionHeadCount: Int = 8 //12
-var hiddenSize = 48*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384 // 64*8=512
+var hiddenLayerCount: Int = 4 //12
+var attentionHeadCount: Int = 4 //12
+var hiddenSize = 96*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384 // 64*8=512
 let classCount = 5
 
 // TODO: make training work with ResNet, too
