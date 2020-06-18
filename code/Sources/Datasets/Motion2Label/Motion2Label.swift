@@ -104,6 +104,7 @@ extension Motion2Label {
         maxSequenceLength: Int,
         batchSize: Int,
         balanceClassSamples: Int? = nil,
+        minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
         entropy: Entropy,
         exampleMap: @escaping (Motion2LabelExample) -> LabeledMotionBatch
@@ -125,7 +126,6 @@ extension Motion2Label {
         print("keeping \(motionSamples.count) annotatated motions")
 
         // filter out shortest samples
-        let minMotionLength = 10 // 1 sec. (for downsampled motion)
         motionSamples = motionSamples.filter { $0.motionFramesArray.shape[0] >= minMotionLength }
         print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
         
@@ -208,6 +208,7 @@ extension Motion2Label where Entropy == SystemRandomNumberGenerator {
         maxSequenceLength: Int,
         batchSize: Int,
         balanceClassSamples: Int? = nil,
+        minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
         exampleMap: @escaping (Motion2LabelExample) -> LabeledMotionBatch
     ) throws {
@@ -217,6 +218,7 @@ extension Motion2Label where Entropy == SystemRandomNumberGenerator {
             maxSequenceLength: maxSequenceLength,
             batchSize: batchSize,
             balanceClassSamples: balanceClassSamples,
+            minMotionLength: minMotionLength,
             trainTestSplit: trainTestSplit,
             entropy: SystemRandomNumberGenerator(),
             exampleMap: exampleMap
