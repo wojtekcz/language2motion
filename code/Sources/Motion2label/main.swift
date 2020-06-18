@@ -10,12 +10,13 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_2"
+let runName = "run_3"
 let batchSize = 10
 let maxSequenceLength =  300
 let nEpochs = 10
 let learningRate: Float = 2e-5
 let logdir = "tboard/Motion2label/\(runName)"
+let balanceClassSamples: Int? = 6000
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -23,14 +24,10 @@ print("maxSequenceLength: \(maxSequenceLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 print("logdir: \(logdir)")
+print("balanceClassSamples: \(String(describing:balanceClassSamples))")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-// let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.balanced.515.plist")
-// let balanceClassSamples: Int? = nil
-let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
-let balanceClassSamples: Int? = 60
-// let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.plist")
-// let balanceClassSamples: Int? = 600
+let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.39102.plist")
 let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 

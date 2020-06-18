@@ -57,7 +57,7 @@ extension Motion2Label {
         }
         return motionSamplesForClass
     }
-    
+
     static func balanceClassSamples(_ motionSamples: [MotionSample], numPerClass: Int, split: Double = 0.8, labelsDict: [Int: String], labels: [String]) -> (trainSamples: [MotionSample], testSamples: [MotionSample]) {
         var allTrainSamples: [MotionSample] = []
         var allTestSamples: [MotionSample] = []
@@ -121,7 +121,13 @@ extension Motion2Label {
         }
 
         // filter out samples without annotations
-        let motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
+        var motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
+        print("keeping \(motionSamples.count) annotatated motions")
+
+        // filter out shortest samples
+        let minMotionLength = 10 // 1 sec. (for downsampled motion)
+        motionSamples = motionSamples.filter { $0.motionFramesArray.shape[0] >= minMotionLength }
+        print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
         
         // split into train/test sets
         var trainMotionSamples: [MotionSample] = []
@@ -129,7 +135,7 @@ extension Motion2Label {
         if balanceClassSamples == nil {
             (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
         } else {
-            print("Class balancing...")
+            print("\nClass balancing...")
             (trainMotionSamples, testMotionSamples) = Motion2Label.balanceClassSamples(
                 motionSamples, numPerClass: balanceClassSamples!, split: trainTestSplit, labelsDict: _labelsDict, labels: _labels
             )
