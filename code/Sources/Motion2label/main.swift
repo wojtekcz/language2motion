@@ -45,7 +45,8 @@ let dataset = try! Motion2Label(
     // TODO: move this to dataset class
     (example: Motion2LabelExample) -> LabeledMotionBatch in
     let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray)
-    let motionFlag = Tensor<Int32>(motionFrames[0..., 44...44].squeezingShape(at: 1))
+    let mfIdx = MotionFrame.cjpMotionFlagIdx
+    let motionFlag = Tensor<Int32>(motionFrames[0..., mfIdx...mfIdx].squeezingShape(at: 1))
     let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
     let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag, origMotionFramesCount: origMotionFramesCount)
     let label = Tensor<Int32>(Int32(example.label!.idx))
@@ -57,14 +58,15 @@ print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 
 // print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
 
-// instantiate ResNet
+// instantiate FeatureTransformerEncoder
 var hiddenLayerCount: Int = 8 //12
 var attentionHeadCount: Int = 8 //12
 var hiddenSize = 48*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384 // 64*8=512
 let classCount = 5
-// var featureExtractor = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
 
-// instantiate FeatureTransformerEncoder
+// TODO: make training work with ResNet, too
+// var resNetModel = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
+
 var caseSensitive: Bool = false
 let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
 
@@ -98,10 +100,9 @@ print("attentionHeadCount: \(attentionHeadCount)")
 print("hiddenSize: \(hiddenSize)")
 
 
-// instantiate MotionClassifier
-// var motionClassifier = MotionClassifier(featureExtractor: featureExtractor, transformerEncoder: transformerEncoder, classCount: classCount, maxSequenceLength: maxSequenceLength)
+// instantiate DenseMotionClassifier
 let inputSize = dataset.motionDataset.motionSamples[0].motionFramesArray.shape[1]
-var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: 45, classCount: classCount, maxSequenceLength: maxSequenceLength)
+var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: inputSize, classCount: classCount, maxSequenceLength: maxSequenceLength)
 
 
 // get a batch

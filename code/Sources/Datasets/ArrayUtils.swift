@@ -27,3 +27,13 @@ extension Array {
 extension Collection {
     public func choose(_ n: Int) -> ArraySlice<Element> { shuffled().prefix(n) }
 }
+
+extension String { 
+    public func floatArray() -> [Float] {
+        self.split(separator: " ").map {
+                var value = Float($0)
+                if value==nil { value = 0.0 }
+                return value!
+            }
+    }
+}

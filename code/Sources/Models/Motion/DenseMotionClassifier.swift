@@ -122,7 +122,8 @@ public struct DenseMotionClassifier: Module, Regularizable {
         let validationExamples = motionSamples.map {
             (example) -> MotionBatch in
             let motionFrames = Tensor<Float>(example.motionFramesArray)
-            let motionFlag = Tensor<Int32>(motionFrames[0..., 44...44].squeezingShape(at: 1))
+            let mfIdx = MotionFrame.cjpMotionFlagIdx
+            let motionFlag = Tensor<Int32>(motionFrames[0..., mfIdx...mfIdx].squeezingShape(at: 1))
             let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
             let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag, origMotionFramesCount: origMotionFramesCount)
             return motionBatch

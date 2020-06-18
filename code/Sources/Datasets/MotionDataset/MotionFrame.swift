@@ -1,8 +1,16 @@
 import Foundation
 
 public struct MotionFrame {
-    public let jointPositions: [Float]
+    public static let jpMotionFlagIdx = 44 // in jointPositions
+    // in combinedJointPositions() and grouppedJointPositions()
+    public static let cjpRootRotationIdx = 44
+    public static let cjpMotionFlagIdx = jpMotionFlagIdx + 3
+    public static let numCombinedJointPositions = 48
+
     public let timestep: Float
+    public let rootPosition: [Float]? // 3 values
+    public let rootRotation: [Float] // 3 values
+    public let jointPositions: [Float] // 44 positions and motionFlag 1.0 value
     public let jointNames: [String]
 
     func jp(of: String) -> Float {
@@ -83,9 +91,13 @@ public struct MotionFrame {
 
     func torsoHeadNeck() -> [Float] {
         // torso
-        let BPx = self.jp(of: "BPx")
-        let BPy = self.jp(of: "BPy")
-        let BPz = self.jp(of: "BPz")
+        let RRx = rootRotation[0]
+        let RRy = rootRotation[1]
+        let RRz = rootRotation[2]
+
+        var BPx = self.jp(of: "BPx")
+        var BPy = self.jp(of: "BPy")
+        var BPz = self.jp(of: "BPz")
 
         var BTx = self.jp(of: "BTx")
         var BTy = self.jp(of: "BTy")
@@ -102,6 +114,10 @@ public struct MotionFrame {
         var BUNz = self.jp(of: "BUNz")
 
         // torso
+        BPx += RRx
+        BPy += RRy
+        BPz += RRz
+
         BTx += BPx
         BTy += BPy
         BTz += BPz
@@ -116,20 +132,25 @@ public struct MotionFrame {
         BUNy += BLNy
         BUNz += BLNz
         
-        // return [BPx, BPy, BPz, BTx, BTy, BTz, BLNx, BLNy, BLNz, BUNx, BUNy, BUNz]
+        // return [RRx, RRy, RRz, BPx, BPy, BPz, BTx, BTy, BTz, BLNx, BLNy, BLNz, BUNx, BUNy, BUNz]
         return [
-            BPx, BTx, BLNx, BUNx, 
-            BPy, BTy, BLNy, BUNy, 
-            BPz, BTz, BLNz, BUNz
+            RRx, BPx, BTx, BLNx, BUNx, 
+            RRy, BPy, BTy, BLNy, BUNy, 
+            RRz, BPz, BTz, BLNz, BUNz
         ]
     }
 
-    func grouppedJointPositions() -> [Float] {
+    public func grouppedJointPositions() -> [Float] {
         return torsoHeadNeck() + 
         armAndHand(side: "R") + 
         armAndHand(side: "L") +
         legAndFoot(side: "R") +
         legAndFoot(side: "L") +
         [self.jointPositions[44]]
+    }
+
+    public func combinedJointPositions() -> [Float] {
+        // 44 joint positions + 3 root rotation values + motion flag
+        return jointPositions[0..<44] + rootRotation + [self.jointPositions[44]]
     }
 }

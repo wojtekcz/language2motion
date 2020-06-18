@@ -59,11 +59,20 @@ public struct MotionSample: Codable {
         let timesteps = timestepsArray.scalars // working with scalars, for performance
         let mfScalars = motionFramesArray.scalars // working with scalars, for performance
         let cj = motionFramesArray.shape[1]
+        assert(cj==MotionFrame.numCombinedJointPositions) // load only up-to-date processed dataset files
         for i in 0..<motionFramesArray.shape[0] {
             let start = i*cj
-            let jointPositions: [Float] = Array(mfScalars[start..<(start+cj)])
+            let combinedJointPositions: [Float] = Array(mfScalars[start..<(start+cj)])
+            // extract jointPositions
+            let rrIdx = MotionFrame.cjpRootRotationIdx
+            let mfIdx = MotionFrame.cjpMotionFlagIdx
+            let jointPositions: [Float] = combinedJointPositions[0..<rrIdx] + [combinedJointPositions[mfIdx]]
+            // extract rootRotation
+            let rootRotation: [Float] = Array(combinedJointPositions[rrIdx..<mfIdx])
             let mf = MotionFrame(
                 timestep: timesteps[i], 
+                rootPosition: nil,
+                rootRotation: rootRotation,
                 jointPositions: jointPositions, 
                 jointNames: jointNames
             )
@@ -104,15 +113,18 @@ public struct MotionSample: Codable {
             
             let timestepStr: String = (try! motionFrame.nodes(forXPath:"Timestep"))[0].stringValue!
             let jointPositionStr: String = (try! motionFrame.nodes(forXPath:"JointPosition"))[0].stringValue!
-            var jointPositions: [Float] = jointPositionStr.split(separator: " ").map {
-                var value = Float($0)
-                if value==nil { value = 0.0 }
-                return value!
-            }
+            var jointPositions: [Float] = jointPositionStr.floatArray()
             jointPositions += [1.0] // Adding motion flag
+
+            let rootPositionStr: String = (try! motionFrame.nodes(forXPath:"RootPosition"))[0].stringValue!
+            let rootPosition: [Float] = rootPositionStr.floatArray()
+            let rootRotationStr: String = (try! motionFrame.nodes(forXPath:"RootRotation"))[0].stringValue!
+            let rootRotation: [Float] = rootRotationStr.floatArray()
 
             let mf = MotionFrame(
                 timestep: Float(timestepStr)!,
+                rootPosition: rootPosition,
+                rootRotation: rootRotation,
                 jointPositions: jointPositions, 
                 jointNames: jointNames
             )
@@ -126,14 +138,14 @@ public struct MotionSample: Codable {
         if grouppedJoints {
             a = motionFrames.map {$0.grouppedJointPositions()}
         } else {
-            a = motionFrames.map {$0.jointPositions}
+            a = motionFrames.map {$0.combinedJointPositions()}
         }
         if normalized {
             // don't sigmoid motion flag
-            let mfIdx = 44
+            let mfIdx = MotionFrame.cjpMotionFlagIdx
             var t = a!.makeTensor()
             let mf = t[0..., mfIdx...mfIdx]
-            t = sigmoid(t)
+            t = 2.0 * (sigmoid(t) - 0.5) // make range [-1.0, 1.0]
             t[0..., mfIdx...mfIdx] = mf
             return t.array
         } else {
@@ -160,7 +172,7 @@ extension MotionSample {
 
         let nFrames = min(motionFrames.count, maxFrames)
         for idx in 0..<nFrames {
-            let bucket = idx % 10
+            let bucket = idx % factor
             motionFramesBuckets[bucket].append(motionFrames[idx])
             timestepsBuckets[bucket].append(timesteps[idx])
         }

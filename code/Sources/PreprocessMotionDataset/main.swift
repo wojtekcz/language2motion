@@ -21,7 +21,7 @@ let downsampledStr = factor>1 ? "downsampled." : ""
 print("Running MotionData preprocessing (\(String(describing:sampled)))...")
 
 var date = Date()
-let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, grouppedJoints: grouppedJoints, normalized: true, sampled: sampled, factor: factor, maxFrames: maxFrames)
+let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, grouppedJoints: grouppedJoints, normalized: normalized, sampled: sampled, factor: factor, maxFrames: maxFrames)
 print(abs(date.timeIntervalSinceNow))
 
 let numberStr = "\(motionDataset.motionSamples.count)."

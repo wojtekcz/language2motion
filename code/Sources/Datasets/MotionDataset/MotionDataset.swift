@@ -50,10 +50,10 @@ public class MotionDataset: Codable {
     // TODO: code throwing errors
     public init(from serializedDatasetURL: URL) {
         let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
-        let motionData = try! PropertyListDecoder().decode(MotionDataset.self, from: data)
-        datasetFolderURL = motionData.datasetFolderURL
-        motionSamples = motionData.motionSamples
-        maxSampleID = motionData.maxSampleID
+        let motionDataset = try! PropertyListDecoder().decode(MotionDataset.self, from: data)
+        datasetFolderURL = motionDataset.datasetFolderURL
+        motionSamples = motionDataset.motionSamples
+        maxSampleID = motionDataset.maxSampleID
     }
 
     // TODO: code throwing errors
