@@ -10,13 +10,13 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_1"
-let batchSize = 10
-let maxSequenceLength =  300
-let nEpochs = 10
+let runName = "run_4"
+let batchSize = 30
+let maxSequenceLength =  500
+let nEpochs = 20
 let learningRate: Float = 2e-5
 let logdir = "tboard/Motion2label/\(runName)"
-let balanceClassSamples: Int? = 6000
+let balanceClassSamples: Int? = 5900
 let minMotionLength = 20 // 2 secs. (for downsampled motion)
 
 print("runName: \(runName)")
@@ -29,7 +29,7 @@ print("balanceClassSamples: \(String(describing:balanceClassSamples))")
 print("minMotionLength: \(minMotionLength)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.39102.plist")
+let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
 let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 
