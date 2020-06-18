@@ -1,8 +1,8 @@
 import Foundation
 
 public struct MotionFrame {
-    public let timestamp: Float
     public let jointPositions: [Float]
+    public let timestep: Float
     public let jointNames: [String]
 
     func jp(of: String) -> Float {

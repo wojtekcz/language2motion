@@ -9,14 +9,14 @@ public struct MotionSample: Codable {
     public let jointNames: [String]
     public let annotations: [String]
 
-    public let timestampsArray: ShapedArray<Float> // 1D, time steps
+    public let timestepsArray: ShapedArray<Float> // 1D, time steps
     public let motionFramesArray: ShapedArray<Float> // 2D, motion frames, joint positions, motion flag
 
     enum CodingKeys: String, CodingKey {
         case sampleID
         case jointNames
         case annotations
-        case timestampsArray
+        case timestepsArray
         case motionFramesArray
     }
 
@@ -28,21 +28,21 @@ public struct MotionSample: Codable {
         var motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
         self.motionFrames = motionFrames
         self.annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
-        var timestamps: [Float] = motionFrames.map { $0.timestamp }
+        var timesteps: [Float] = motionFrames.map { $0.timestep }
         if motionFrames.count > maxFrames {
             motionFrames = Array(motionFrames[0..<maxFrames])
-            timestamps = Array(timestamps[0..<maxFrames])
+            timesteps = Array(timesteps[0..<maxFrames])
         }
-        self.timestampsArray = ShapedArray<Float>(shape: [timestamps.count], scalars: timestamps)
+        self.timestepsArray = ShapedArray<Float>(shape: [timesteps.count], scalars: timesteps)
         self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
     }
 
-    public init(sampleID: Int, motionFrames: [MotionFrame], annotations: [String], jointNames: [String], timestamps: [Float], grouppedJoints: Bool = true, normalized: Bool = true) {
+    public init(sampleID: Int, motionFrames: [MotionFrame], annotations: [String], jointNames: [String], timesteps: [Float], grouppedJoints: Bool = true, normalized: Bool = true) {
         self.sampleID = sampleID
         self.jointNames = jointNames
         self.motionFrames = motionFrames
         self.annotations = annotations
-        self.timestampsArray = ShapedArray<Float>(shape: [timestamps.count], scalars: timestamps)
+        self.timestepsArray = ShapedArray<Float>(shape: [timesteps.count], scalars: timesteps)
         self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
     }
 
@@ -51,19 +51,19 @@ public struct MotionSample: Codable {
         sampleID = try values.decode(Int.self, forKey: .sampleID)
         jointNames = try values.decode(Array<String>.self, forKey: .jointNames)
         annotations = try values.decode(Array<String>.self, forKey: .annotations)
-        timestampsArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .timestampsArray).shapedArray
+        timestepsArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .timestepsArray).shapedArray
         motionFramesArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .motionFramesArray).shapedArray
 
         // loop over motionFramesArray and create MotionFrames
         var motionFrames: [MotionFrame] = []
-        let timestamps = timestampsArray.scalars // working with scalars, for performance
+        let timesteps = timestepsArray.scalars // working with scalars, for performance
         let mfScalars = motionFramesArray.scalars // working with scalars, for performance
         let cj = motionFramesArray.shape[1]
         for i in 0..<motionFramesArray.shape[0] {
             let start = i*cj
             let jointPositions: [Float] = Array(mfScalars[start..<(start+cj)])
             let mf = MotionFrame(
-                timestamp: timestamps[i], 
+                timestep: timesteps[i], 
                 jointPositions: jointPositions, 
                 jointNames: jointNames
             )
@@ -77,7 +77,7 @@ public struct MotionSample: Codable {
         try container.encode(sampleID, forKey: .sampleID)
         try container.encode(jointNames, forKey: .jointNames)
         try container.encode(annotations, forKey: .annotations)
-        try container.encode(FastCodableShapedArray<Float>(shapedArray: timestampsArray), forKey: .timestampsArray)
+        try container.encode(FastCodableShapedArray<Float>(shapedArray: timestepsArray), forKey: .timestepsArray)
         try container.encode(FastCodableShapedArray<Float>(shapedArray: motionFramesArray), forKey: .motionFramesArray)
     }
 
@@ -102,7 +102,7 @@ public struct MotionSample: Codable {
         for motionFrame in try! mmm_doc.nodes(forXPath: "/MMM/Motion/MotionFrames/MotionFrame") {
             count += 1
             
-            let timestampStr: String = (try! motionFrame.nodes(forXPath:"Timestep"))[0].stringValue!
+            let timestepStr: String = (try! motionFrame.nodes(forXPath:"Timestep"))[0].stringValue!
             let jointPositionStr: String = (try! motionFrame.nodes(forXPath:"JointPosition"))[0].stringValue!
             var jointPositions: [Float] = jointPositionStr.split(separator: " ").map {
                 var value = Float($0)
@@ -112,7 +112,7 @@ public struct MotionSample: Codable {
             jointPositions += [1.0] // Adding motion flag
 
             let mf = MotionFrame(
-                timestamp: Float(timestampStr)!, 
+                timestep: Float(timestepStr)!,
                 jointPositions: jointPositions, 
                 jointNames: jointNames
             )
@@ -142,7 +142,7 @@ public struct MotionSample: Codable {
     }
 
     public var description: String {
-        return "MotionSample(timestamp: \(self.motionFrames.last!.timestamp), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
+        return "MotionSample(timestep: \(self.motionFrames.last!.timestep), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
     }
 }
 
@@ -153,16 +153,16 @@ extension MotionSample {
 
         let motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
         let annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
-        let timestamps: [Float] = motionFrames.map { $0.timestamp }
+        let timesteps: [Float] = motionFrames.map { $0.timestep }
 
         var motionFramesBuckets = [[MotionFrame]](repeating: [], count: factor)
-        var timestampsBuckets = [[Float]](repeating: [], count: factor)
+        var timestepsBuckets = [[Float]](repeating: [], count: factor)
 
         let nFrames = min(motionFrames.count, maxFrames)
         for idx in 0..<nFrames {
             let bucket = idx % 10
             motionFramesBuckets[bucket].append(motionFrames[idx])
-            timestampsBuckets[bucket].append(timestamps[idx])
+            timestepsBuckets[bucket].append(timesteps[idx])
         }
         // filter out empty buckets
         let nBuckets = (nFrames>=factor) ? factor : nFrames
@@ -173,7 +173,7 @@ extension MotionSample {
                 motionFrames: motionFramesBuckets[$0], 
                 annotations: annotations, 
                 jointNames: jointNames, 
-                timestamps: timestampsBuckets[$0], 
+                timesteps: timestepsBuckets[$0], 
                 grouppedJoints: grouppedJoints, 
                 normalized: normalized
             )
