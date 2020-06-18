@@ -69,9 +69,9 @@ extension Motion2Label {
             var testSamples: [MotionSample]
             if samplesForClass.count >= numPerClass { // downsample
                 let sampledSamplesForClass = Array(samplesForClass.choose(numPerClass))
-                (trainSamples, testSamples) = sampledSamplesForClass.trainTestSplit(split: split)
+                (trainSamples, testSamples) = sampledSamplesForClass.trainTestSplitMotionSamples(split: split)
             } else { // upsample
-                (trainSamples, testSamples) = samplesForClass.trainTestSplit(split: split)
+                (trainSamples, testSamples) = samplesForClass.trainTestSplitMotionSamples(split: split)
                 let maxTrainPerClass = Int(Double(numPerClass)*split)
                 trainSamples = (0..<maxTrainPerClass).map { (a) -> MotionSample in trainSamples.randomElement()! }
             }
@@ -127,7 +127,7 @@ extension Motion2Label {
         var trainMotionSamples: [MotionSample] = []
         var testMotionSamples: [MotionSample] = []
         if balanceClassSamples == nil {
-            (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplit(split: trainTestSplit)
+            (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
         } else {
             print("Class balancing...")
             (trainMotionSamples, testMotionSamples) = Motion2Label.balanceClassSamples(
