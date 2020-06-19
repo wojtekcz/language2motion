@@ -10,7 +10,7 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_4"
+let runName = "run_5"
 let batchSize = 30
 let maxSequenceLength =  500
 let nEpochs = 20
