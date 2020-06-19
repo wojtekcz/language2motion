@@ -14,7 +14,7 @@ let runName = "run_4"
 let batchSize = 30
 let maxSequenceLength =  500
 let nEpochs = 20
-let learningRate: Float = 2e-5
+let learningRate: Float = 1e-3 // 2e-5
 let logdir = "tboard/Motion2label/\(runName)"
 let balanceClassSamples: Int? = 5900
 let minMotionLength = 20 // 2 secs. (for downsampled motion)
@@ -58,54 +58,69 @@ let dataset = try! Motion2Label(
 print("dataset.trainingExamples.count: \(dataset.trainingExamples.count)")
 print("dataset.validationExamples.count: \(dataset.validationExamples.count)")
 
-// print("dataset.trainingExamples[0]: \(dataset.trainingExamples[0])")
-
-// instantiate FeatureTransformerEncoder
+// instantiate DenseMotionClassifier
 var hiddenLayerCount: Int = 4 //12
 var attentionHeadCount: Int = 4 //12
-var hiddenSize = 96*attentionHeadCount // 64*12 = 768 // 32*6=192 // 64*6=384 // 64*8=512
+var hiddenSize = 96*attentionHeadCount // 64*12 = 768
+var intermediateSize: Int = hiddenSize*4 // 3072/768=4
 let classCount = 5
 
-// TODO: make training work with ResNet, too
-// var resNetModel = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: true, channelCount: 1)
+func getDenseMotionClassifier(
+        hiddenLayerCount: Int, 
+        attentionHeadCount: Int, 
+        hiddenSize: Int, 
+        intermediateSize: Int, 
+        classCount: Int
+    ) -> DenseMotionClassifier {
 
-var caseSensitive: Bool = false
-let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
+    let caseSensitive: Bool = false
+    let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
 
-let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
-let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
-    caseSensitive: caseSensitive, unknownToken: "[UNK]", maxTokenLength: nil)
+    let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
+    let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
+        caseSensitive: caseSensitive, unknownToken: "[UNK]", maxTokenLength: nil)
 
-var variant: BERT.Variant = .bert          
-var intermediateSize: Int = hiddenSize*4 // 3072/768=4
+    let variant: BERT.Variant = .bert          
 
-var transformerEncoder = FeatureTransformerEncoder(
-    variant: variant,
-    vocabulary: vocabulary,
-    tokenizer: tokenizer,
-    caseSensitive: caseSensitive,
-    hiddenSize: hiddenSize,
-    hiddenLayerCount: hiddenLayerCount,
-    attentionHeadCount: attentionHeadCount,
-    intermediateSize: intermediateSize,
-    intermediateActivation: gelu,
-    hiddenDropoutProbability: 0.1,
-    attentionDropoutProbability: 0.1,
-    maxSequenceLength: maxSequenceLength,
-    typeVocabularySize: 2,
-    initializerStandardDeviation: 0.02,
-    useOneHotEmbeddings: false)
+    let transformerEncoder = FeatureTransformerEncoder(
+        variant: variant,
+        vocabulary: vocabulary,
+        tokenizer: tokenizer,
+        caseSensitive: caseSensitive,
+        hiddenSize: hiddenSize,
+        hiddenLayerCount: hiddenLayerCount,
+        attentionHeadCount: attentionHeadCount,
+        intermediateSize: intermediateSize,
+        intermediateActivation: gelu,
+        hiddenDropoutProbability: 0.1,
+        attentionDropoutProbability: 0.1,
+        maxSequenceLength: maxSequenceLength,
+        typeVocabularySize: 2,
+        initializerStandardDeviation: 0.02,
+        useOneHotEmbeddings: false)
 
-print("\nFeatureTransformerEncoder stats:")
-print("hiddenLayerCount: \(hiddenLayerCount)")
-print("attentionHeadCount: \(attentionHeadCount)")
-print("hiddenSize: \(hiddenSize)")
+    print("\nFeatureTransformerEncoder stats:")
+    print("hiddenLayerCount: \(hiddenLayerCount)")
+    print("attentionHeadCount: \(attentionHeadCount)")
+    print("hiddenSize: \(hiddenSize)")
 
 
-// instantiate DenseMotionClassifier
-let inputSize = dataset.motionDataset.motionSamples[0].motionFramesArray.shape[1]
-var motionClassifier = DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: inputSize, classCount: classCount, maxSequenceLength: maxSequenceLength)
+    // instantiate DenseMotionClassifier
+    let inputSize = dataset.motionDataset.motionSamples[0].motionFramesArray.shape[1]
+    return DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: inputSize, classCount: classCount, maxSequenceLength: maxSequenceLength)
+}
 
+// var motionClassifier = getDenseMotionClassifier(
+//     hiddenLayerCount: hiddenLayerCount, 
+//     attentionHeadCount: attentionHeadCount, 
+//     hiddenSize: hiddenSize, 
+//     intermediateSize: intermediateSize, 
+//     classCount: classCount
+// )
+
+// instantiate ResNetMotionClassifier
+var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
+var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
 
 // get a batch
 // print("\nOne batch (LabeledMotionBatch):")

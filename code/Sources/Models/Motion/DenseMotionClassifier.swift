@@ -1,8 +1,6 @@
 import Datasets
-import ModelSupport
 import TensorFlow
 import TextModels
-import ImageClassificationModels
 
 public typealias FeatureTransformerEncoder = BERT
 public typealias FeatureBatch = MotionBatch
@@ -64,13 +62,7 @@ extension FeatureTransformerEncoder {
     }
 }
 
-public struct Prediction {
-    public let classIdx: Int
-    public let className: String
-    public let probability: Float
-}
-
-public struct DenseMotionClassifier: Module, Regularizable {
+public struct DenseMotionClassifier: Module, Regularizable, MotionClassifierProtocol {
     public var featureExtractor: Dense<Float>
     public var transformerEncoder: FeatureTransformerEncoder
     public var dense: Dense<Float>
@@ -115,37 +107,5 @@ public struct DenseMotionClassifier: Module, Regularizable {
         let transformerEncodings = transformerEncoder(featureBatch)
         let classifierOutput = dense(transformerEncodings[0..., 0])
         return classifierOutput
-    }
-
-    public func predict(motionSamples: [MotionSample], labels: [String], batchSize: Int = 10) -> [Prediction] {
-        Context.local.learningPhase = .inference
-        let validationExamples = motionSamples.map {
-            (example) -> MotionBatch in
-            let motionFrames = Tensor<Float>(example.motionFramesArray)
-            let mfIdx = MotionFrame.cjpMotionFlagIdx
-            let motionFlag = Tensor<Int32>(motionFrames[0..., mfIdx...mfIdx].squeezingShape(at: 1))
-            let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
-            let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag, origMotionFramesCount: origMotionFramesCount)
-            return motionBatch
-        }
-
-        let validationBatches = validationExamples.inBatches(of: batchSize).map { 
-            $0.paddedAndCollated(to: maxSequenceLength)
-        }
-
-        var preds: [Prediction] = []
-        for batch in validationBatches {
-            let logits = self(batch)
-            let probs = softmax(logits, alongAxis: 1)
-            let classIdxs = logits.argmax(squeezingAxis: 1)
-            let batchPreds = (0..<classIdxs.shape[0]).map { 
-                (idx) -> Prediction in
-                let classIdx: Int = Int(classIdxs[idx].scalar!)
-                let prob = probs[idx, classIdx].scalar!
-                return Prediction(classIdx: classIdx, className: labels[classIdx], probability: prob)
-            }
-            preds.append(contentsOf: batchPreds)
-        }
-        return preds
     }
 }
