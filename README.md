@@ -25,6 +25,8 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [ ] Transformer encoder on motion
     - [ ] Transformer decoder for annotation
     - do image captioning (with RNN decoder)
+- language 2 language
+    - [ ] * Transformer seq2seq on annotations
 - language 2 motion
   - Transformer encoder on annotation
   - Transformer decoder on motion
@@ -32,8 +34,8 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
 ## Dataset files
 * original: [2017-06-22.zip](https://motion-annotation.humanoids.kit.edu/downloads/4/)
 * processed: 
-  * [motion_dataset_v2.normalized.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/motion_dataset_v2.normalized.tgz)
-  * [motion_dataset.motion_flag.balanced.515.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/motion_dataset.motion_flag.balanced.515.tgz)
+  * [motion_dataset_v3.norm.10Hz.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.tgz)
+
 * annotations and labels: 
   * [labels_ds_v2.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv)
   * [labels_ds_v2.balanced.515.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.balanced.515.csv)
@@ -41,7 +43,7 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
 
 
 ## Motion player
-* [C3D file player](http://biomechanical-toolkit.github.io/mokka/index.html)
+* [Mokka C3D file player](http://biomechanical-toolkit.github.io/mokka/index.html)
 
 ## Runtime env
 * [custom swift-jupyter](https://github.com/wojtekcz/swift-jupyter/tree/language2motion)
