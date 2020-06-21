@@ -16,9 +16,11 @@ let package = Package(
         .library(name: "TextModels", targets: ["TextModels"]),
         .library(name: "MotionModels", targets: ["MotionModels"]),
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
+        .library(name: "TranslationModels", targets: ["TranslationModels"]),
         .executable(name: "PreprocessMotionDataset", targets: ["PreprocessMotionDataset"]),
         .executable(name: "Language2label", targets: ["Language2label"]),
         .executable(name: "Motion2label", targets: ["Motion2label"]),
+        .executable(name: "Transformer-Translation", targets: ["Transformer-Translation"])
     ],
     dependencies: [
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0")
@@ -41,6 +43,12 @@ let package = Package(
         .target(name: "STBImage", path: "Sources/Support/STBImage"),
         .target(name: "TextModels", dependencies: ["Datasets"], path: "Sources/Models/Text"),
         .target(name: "MotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels"], path: "Sources/Models/Motion"),
-        .target(name: "SummaryWriter", path: "Sources/SummaryWriter")
+        .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
+        .target(name: "TranslationModels", dependencies: ["Datasets"], path: "Sources/Models/Translation"),
+        .target(
+            name: "Transformer-Translation",
+            dependencies: ["TranslationModels", "Datasets", "ModelSupport"],
+            path: "Sources/Transformer-Translation"
+            ),
     ]
 )
