@@ -34,6 +34,16 @@
             "preLaunchTask": "swift-build2",
             "initCommands": ["settings set target.disable-aslr false"]
         },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Transformer-Translation",
+            "program": "/root/.build/debug/Transformer-Translation",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
         // Running unit tests
         {
             "type": "lldb",
