@@ -5,7 +5,7 @@
         {
             "label": "swift-build",
             "type": "shell",
-            "command": "swift",
+            "command": "/swift-tensorflow-toolchain/usr/bin/swift",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -22,7 +22,7 @@
         {
             "label": "swift-build2",
             "type": "shell",
-            "command": "swift",
+            "command": "/swift-tensorflow-toolchain/usr/bin/swift",
             "args": [
                 "build",
                 "-c",
