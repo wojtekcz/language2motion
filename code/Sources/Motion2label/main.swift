@@ -113,8 +113,6 @@ func getDenseMotionClassifier(
     print("attentionHeadCount: \(attentionHeadCount)")
     print("hiddenSize: \(hiddenSize)")
 
-
-    // instantiate DenseMotionClassifier
     let inputSize = dataset.motionDataset.motionSamples[0].motionFramesArray.shape[1]
     return DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: inputSize, classCount: classCount, maxSequenceLength: maxSequenceLength)
 }
@@ -134,28 +132,7 @@ print(device)
 // var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
 // var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
 
-// resNetClassifier.move(to: device)
 motionClassifier.move(to: device)
-
-// get a batch
-// print("\nOne batch (LabeledMotionBatch):")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch = batches[0]
-// print("type: \(type(of:batch))")
-// print("\nOne motionBatch")
-// let motionBatch = batch.data
-// print("type: \(type(of:motionBatch))")
-// print("motionFrames.shape: \(motionBatch.motionFrames.shape)")
-// print("motionFlag.shape: \(motionBatch.motionFlag.shape)")
-
-
-// run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let classifierOutput = motionClassifier(motionBatch)
-// print("classifierOutput.shape: \(classifierOutput.shape)")
 
 // train
 
