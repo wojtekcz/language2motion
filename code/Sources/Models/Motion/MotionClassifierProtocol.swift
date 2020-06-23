@@ -18,7 +18,7 @@ public struct Prediction {
 }
 
 extension MotionClassifierProtocol {
-    public func predict(motionSamples: [MotionSample], labels: [String], batchSize: Int) -> [Prediction] {
+    public func predict(motionSamples: [MotionSample], labels: [String], batchSize: Int, device: Device) -> [Prediction] {
         Context.local.learningPhase = .inference
         let validationExamples = motionSamples.map {
             (example) -> MotionBatch in
@@ -35,10 +35,16 @@ extension MotionClassifierProtocol {
         }
 
         var preds: [Prediction] = []
-        for batch in validationBatches {
+        for eagerBatch in validationBatches {
+            let batch = MotionBatch(
+                motionFrames: Tensor<Float>(copying: eagerBatch.motionFrames, to: device), 
+                motionFlag: Tensor<Int32>(copying: eagerBatch.motionFlag, to: device), 
+                origMotionFramesCount: Tensor<Int32>(copying: eagerBatch.origMotionFramesCount, to: device)
+            )
             let logits = self(batch)
             let probs = softmax(logits, alongAxis: 1)
             let classIdxs = logits.argmax(squeezingAxis: 1)
+            LazyTensorBarrier()
             let batchPreds = (0..<classIdxs.shape[0]).map { 
                 (idx) -> Prediction in
                 let classIdx: Int = Int(classIdxs[idx].scalar!)

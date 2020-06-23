@@ -242,12 +242,10 @@ time() {
 
             let logits = motionClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
+            let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
             LazyTensorBarrier()
             devLossSum += loss.scalarized()
             devBatchCount += 1
-
-            let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
-
             correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
             totalGuessCount += valBatchSize
         }
@@ -262,7 +260,7 @@ time() {
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
         summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch+1, value: testAccuracy)
 
-        let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
+        let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize, device: device)
         let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
         let y_pred = preds.map { $0.className }
         print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
@@ -271,7 +269,7 @@ time() {
 }
 
 print("\nFinal stats:")
-let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize)
+let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize, device: device)
 let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
 let y_pred = preds.map { $0.className }
 print("accuracy: \(metrics.accuracy_score(y_true, y_pred))")
