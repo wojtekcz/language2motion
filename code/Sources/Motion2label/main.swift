@@ -193,7 +193,6 @@ time() {
         }
 
         for batch in epochBatches {
-            print("batch")
             let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
             let documents = MotionBatch(
                 motionFrames: Tensor<Float>(copying: eagerDocuments.motionFrames, to: device), 
