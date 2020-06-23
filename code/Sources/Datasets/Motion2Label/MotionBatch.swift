@@ -39,7 +39,6 @@ extension MotionBatch: Collatable {
   }
 }
 
-
 extension Collection where Element == MotionBatch {
   /// Returns the elements of `self`, padded to `maxLength` if specified
   /// or the maximum length of the elements in `self` otherwise.
@@ -52,5 +51,13 @@ extension Collection where Element == MotionBatch {
         origMotionFramesCount: example.origMotionFramesCount)
     }
     return paddedMotions.collated
+  }
+}
+
+extension MotionBatch {
+  public init(copying batch: MotionBatch, to device: Device) {
+    self.motionFrames = Tensor<Float>(copying: batch.motionFrames, to: device)
+    self.motionFlag = Tensor<Int32>(copying: batch.motionFlag, to: device)
+    self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
   }
 }

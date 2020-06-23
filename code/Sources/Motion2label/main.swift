@@ -195,11 +195,7 @@ time() {
 
         for batch in epochBatches {
             let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            let documents = MotionBatch(
-                motionFrames: Tensor<Float>(copying: eagerDocuments.motionFrames, to: device), 
-                motionFlag: Tensor<Int32>(copying: eagerDocuments.motionFlag, to: device), 
-                origMotionFramesCount: Tensor<Int32>(copying: eagerDocuments.origMotionFramesCount, to: device)
-            )
+            let documents = MotionBatch(copying: eagerDocuments, to: device)
             let labels = Tensor(copying: eagerLabels, to: device)
             let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)
@@ -233,11 +229,7 @@ time() {
         for batch in dataset.validationBatches {
             let valBatchSize = batch.data.motionFrames.shape[0]
             let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            let documents = MotionBatch(
-                motionFrames: Tensor<Float>(copying: eagerDocuments.motionFrames, to: device), 
-                motionFlag: Tensor<Int32>(copying: eagerDocuments.motionFlag, to: device), 
-                origMotionFramesCount: Tensor<Int32>(copying: eagerDocuments.origMotionFramesCount, to: device)
-            )
+            let documents = MotionBatch(copying: eagerDocuments, to: device)
             let labels = Tensor(copying: eagerLabels, to: device)
 
             let logits = motionClassifier(documents)
