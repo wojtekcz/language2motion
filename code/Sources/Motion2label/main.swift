@@ -1,9 +1,9 @@
 import Foundation
 import TensorFlow
 import Datasets
+import TextModels
 import MotionModels
 import ImageClassificationModels
-import TextModels
 import ModelSupport
 import SummaryWriter
 import PythonKit
@@ -170,29 +170,29 @@ time() {
             print("epochBatches.count: \(epochBatches.count)")
         }
 
-        // for batch in epochBatches {
-        //     let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-        //     let documents = MotionBatch(copying: eagerDocuments, to: device)
-        //     let labels = Tensor(copying: eagerLabels, to: device)
-        //     let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
-        //         let logits = model(documents)
-        //         return softmaxCrossEntropy(logits: logits, labels: labels)
-        //     }
+        for batch in epochBatches {
+            let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            let documents = MotionBatch(copying: eagerDocuments, to: device)
+            let labels = Tensor(copying: eagerLabels, to: device)
+            let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
+                let logits = model(documents)
+                return softmaxCrossEntropy(logits: logits, labels: labels)
+            }
 
-        //     trainingBatchCount += 1
-        //     optimizer.update(&motionClassifier, along: gradients)
-        //     LazyTensorBarrier()
-        //     trainingLossSum += loss.scalarized()
-        //     summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-        //     // summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
-        //     trainingStepCount += 1
-        // }
-        // print(
-        //     """
-        //     Training loss: \(trainingLossSum / Float(trainingBatchCount))
-        //     """
-        // )
-        // summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
+            trainingBatchCount += 1
+            optimizer.update(&motionClassifier, along: gradients)
+            LazyTensorBarrier()
+            trainingLossSum += loss.scalarized()
+            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+            // summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
+            trainingStepCount += 1
+        }
+        print(
+            """
+            Training loss: \(trainingLossSum / Float(trainingBatchCount))
+            """
+        )
+        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
 
         if epoch == 0 {
             print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
@@ -204,6 +204,7 @@ time() {
         var correctGuessCount = 0
         var totalGuessCount = 0
 
+        var predictions: [Prediction] = []
         for batch in dataset.validationBatches {
             let valBatchSize = batch.data.motionFrames.shape[0]
             let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
@@ -212,12 +213,29 @@ time() {
 
             let logits = motionClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
-            let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
+            let probs = softmax(logits, alongAxis: 1)
+            let preds = logits.argmax(squeezingAxis: 1)
+            let correctPredictions = preds .== labels
+
             LazyTensorBarrier()
+
             devLossSum += loss.scalarized()
             devBatchCount += 1
             correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
             totalGuessCount += valBatchSize
+
+            // copy tensors to CPU
+            let eagerPreds = Tensor(copying: preds, to: Device.defaultTFEager)
+            let eagerProbs = Tensor(copying: probs, to: Device.defaultTFEager)
+
+            let batchPreds = (0..<eagerPreds.shape[0]).map { 
+                (idx) -> Prediction in
+                let classIdx: Int = Int(eagerPreds[idx].scalar!)
+                let prob = eagerProbs[idx, classIdx].scalar!
+                return Prediction(classIdx: classIdx, className: dataset.labels[classIdx], probability: prob)
+            }
+
+            predictions.append(contentsOf: batchPreds)
         }
         
         let testAccuracy = Float(correctGuessCount) / Float(totalGuessCount)
@@ -229,11 +247,9 @@ time() {
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
         summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch+1, value: testAccuracy)
-        }
-        time {
-        let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize, device: device)
+
         let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
-        let y_pred = preds.map { $0.className }
+        let y_pred = predictions.map { $0.className }
         print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
         }
     }

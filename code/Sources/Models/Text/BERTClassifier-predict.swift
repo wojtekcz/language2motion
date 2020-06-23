@@ -3,12 +3,6 @@ import TensorFlow
 import Foundation
 
 
-public struct Prediction {
-    public let classIdx: Int
-    public let className: String
-    public let probability: Float
-}
-
 extension BERTClassifier {
     // TODO: get num_best preds
     public func predict(_ texts: [String], maxSequenceLength: Int, labels: [String], batchSize: Int) -> [Prediction] {

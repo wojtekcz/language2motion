@@ -1,5 +1,6 @@
 import TensorFlow
 import Datasets
+import ModelSupport
 
 
 public protocol MotionClassifierProtocol: Differentiable {
@@ -9,12 +10,6 @@ public protocol MotionClassifierProtocol: Differentiable {
     /// Returns: logits with shape `[batchSize, classCount]`.
     @differentiable(wrt: self)
     func callAsFunction(_ input: MotionBatch) -> Tensor<Float>
-}
-
-public struct Prediction {
-    public let classIdx: Int
-    public let className: String
-    public let probability: Float
 }
 
 extension MotionClassifierProtocol {
@@ -40,7 +35,9 @@ extension MotionClassifierProtocol {
             let logits = self(batch)
             let probs = softmax(logits, alongAxis: 1)
             let classIdxs = logits.argmax(squeezingAxis: 1)
+
             LazyTensorBarrier()
+
             // copy tensors to CPU
             let eagerClassIdxs = Tensor(copying: classIdxs, to: Device.defaultTFEager)
             let eagerProbs = Tensor(copying: probs, to: Device.defaultTFEager)
