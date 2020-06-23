@@ -11,7 +11,7 @@ import PythonKit
 let metrics = Python.import("sklearn.metrics")
 
 let runName = "transformer_run_3"
-let batchSize = 100
+let batchSize = 800
 let maxSequenceLength =  500
 let nEpochs = 20
 // let learningRate: Float = 1e-3
@@ -170,33 +170,34 @@ time() {
             print("epochBatches.count: \(epochBatches.count)")
         }
 
-        for batch in epochBatches {
-            let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
-            let documents = MotionBatch(copying: eagerDocuments, to: device)
-            let labels = Tensor(copying: eagerLabels, to: device)
-            let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
-                let logits = model(documents)
-                return softmaxCrossEntropy(logits: logits, labels: labels)
-            }
+        // for batch in epochBatches {
+        //     let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+        //     let documents = MotionBatch(copying: eagerDocuments, to: device)
+        //     let labels = Tensor(copying: eagerLabels, to: device)
+        //     let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
+        //         let logits = model(documents)
+        //         return softmaxCrossEntropy(logits: logits, labels: labels)
+        //     }
 
-            trainingBatchCount += 1
-            optimizer.update(&motionClassifier, along: gradients)
-            LazyTensorBarrier()
-            trainingLossSum += loss.scalarized()
-            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-            // summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
-            trainingStepCount += 1
-        }
-        print(
-            """
-            Training loss: \(trainingLossSum / Float(trainingBatchCount))
-            """
-        )
-        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
+        //     trainingBatchCount += 1
+        //     optimizer.update(&motionClassifier, along: gradients)
+        //     LazyTensorBarrier()
+        //     trainingLossSum += loss.scalarized()
+        //     summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+        //     // summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
+        //     trainingStepCount += 1
+        // }
+        // print(
+        //     """
+        //     Training loss: \(trainingLossSum / Float(trainingBatchCount))
+        //     """
+        // )
+        // summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
 
         if epoch == 0 {
             print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
         }
+        time {
         Context.local.learningPhase = .inference
         var devLossSum: Float = 0
         var devBatchCount = 0
@@ -228,11 +229,13 @@ time() {
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
         summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch+1, value: testAccuracy)
-
+        }
+        time {
         let preds = motionClassifier.predict(motionSamples: dataset.testMotionSamples, labels: dataset.labels, batchSize: batchSize, device: device)
         let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
         let y_pred = preds.map { $0.className }
         print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
+        }
     }
     summaryWriter.flush()
 }

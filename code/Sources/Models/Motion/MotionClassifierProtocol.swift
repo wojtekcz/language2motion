@@ -36,13 +36,16 @@ extension MotionClassifierProtocol {
 
         var preds: [Prediction] = []
         for eagerBatch in validationBatches {
+            print(1)
             let batch = MotionBatch(copying: eagerBatch, to: device)
             let logits = self(batch)
             let probs = softmax(logits, alongAxis: 1)
             let classIdxs = logits.argmax(squeezingAxis: 1)
             LazyTensorBarrier()
             // TODO: how to copy it to CPU?
-            let eagerClassIdxs = Tensor(copying: classIdxs, to: Device.defaultTFEager)
+            print(2)
+            let eagerClassIdxs = Tensor(copying: classIdxs, to: Device.defaultTFEager)            
+            print(3)
             let batchPreds = (0..<eagerClassIdxs.shape[0]).map { 
                 (idx) -> Prediction in
                 let classIdx: Int = Int(eagerClassIdxs[idx].scalar!)
@@ -50,6 +53,7 @@ extension MotionClassifierProtocol {
                 return Prediction(classIdx: classIdx, className: labels[classIdx], probability: prob)
             }
             preds.append(contentsOf: batchPreds)
+            print(4)
         }
         return preds
     }
