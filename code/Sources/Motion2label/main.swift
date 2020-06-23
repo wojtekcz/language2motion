@@ -32,6 +32,14 @@ let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
 let labelsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
+// X10 warmup
+let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+let eagerTensorSum = eagerTensor1 + eagerTensor2
+print(eagerTensorSum)
+print(eagerTensor1.device)
+let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+print(x10Tensor2.device)
 
 print("\nLoading dataset...")
 print(serializedDatasetURL.path)
@@ -118,9 +126,15 @@ func getDenseMotionClassifier(
 //     classCount: classCount
 // )
 
+let device = Device.defaultXLA
+print(device)
+
 // instantiate ResNetMotionClassifier
 var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
 var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
+
+resNetClassifier.move(to: device)
+motionClassifier.move(to: device)
 
 // get a batch
 // print("\nOne batch (LabeledMotionBatch):")
@@ -157,15 +171,16 @@ var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier
 //     weightDecayRate: 0.01/2,
 //     maxGradientGlobalNorm: 1)
 
-// let optimizer = SGD(for: motionClassifier, learningRate: learningRate)
-let optimizer = Adam(for: motionClassifier, learningRate: learningRate)
+// var optimizer = SGD(for: motionClassifier, learningRate: learningRate)
+var optimizer = Adam(for: motionClassifier, learningRate: learningRate)
+optimizer = Adam(copying: optimizer, to: device)
 
 print("optimizer = \(optimizer)")
 
 let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
-print("\nTraining DenseMotionClassifier for the motion2Label task!")
+print("\nTraining (Dense)MotionClassifier for the motion2Label task!")
 var trainingStepCount = 0
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
@@ -178,15 +193,23 @@ time() {
         }
 
         for batch in epochBatches {
-            let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            print("batch")
+            let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            let documents = MotionBatch(
+                motionFrames: Tensor<Float>(copying: eagerDocuments.motionFrames, to: device), 
+                motionFlag: Tensor<Int32>(copying: eagerDocuments.motionFlag, to: device), 
+                origMotionFramesCount: Tensor<Int32>(copying: eagerDocuments.origMotionFramesCount, to: device)
+            )
+            let labels = Tensor(copying: eagerLabels, to: device)
             let (loss, gradients) = valueWithGradient(at: motionClassifier) { model -> Tensor<Float> in
                 let logits = model(documents)
                 return softmaxCrossEntropy(logits: logits, labels: labels)
             }
 
-            trainingLossSum += loss.scalarized()
             trainingBatchCount += 1
             optimizer.update(&motionClassifier, along: gradients)
+            LazyTensorBarrier()
+            trainingLossSum += loss.scalarized()
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
             // summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.lastLearningRate)
             trainingStepCount += 1
@@ -209,10 +232,17 @@ time() {
 
         for batch in dataset.validationBatches {
             let valBatchSize = batch.data.motionFrames.shape[0]
-            let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
+            let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
+            let documents = MotionBatch(
+                motionFrames: Tensor<Float>(copying: eagerDocuments.motionFrames, to: device), 
+                motionFlag: Tensor<Int32>(copying: eagerDocuments.motionFlag, to: device), 
+                origMotionFramesCount: Tensor<Int32>(copying: eagerDocuments.origMotionFramesCount, to: device)
+            )
+            let labels = Tensor(copying: eagerLabels, to: device)
 
             let logits = motionClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
+            LazyTensorBarrier()
             devLossSum += loss.scalarized()
             devBatchCount += 1
 
