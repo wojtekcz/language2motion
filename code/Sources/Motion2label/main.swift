@@ -10,11 +10,12 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_5"
-let batchSize = 30
+let runName = "transformer_run_3"
+let batchSize = 100
 let maxSequenceLength =  500
 let nEpochs = 20
-let learningRate: Float = 1e-3 // 2e-5
+// let learningRate: Float = 1e-3
+let learningRate: Float = 2e-5
 let logdir = "tboard/Motion2label/\(runName)"
 let balanceClassSamples: Int? = 5900
 let minMotionLength = 20 // 2 secs. (for downsampled motion)
@@ -82,7 +83,7 @@ func getDenseMotionClassifier(
     ) -> DenseMotionClassifier {
 
     let caseSensitive: Bool = false
-    let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
+    let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 
     let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
     let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary,
@@ -118,22 +119,22 @@ func getDenseMotionClassifier(
     return DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: inputSize, classCount: classCount, maxSequenceLength: maxSequenceLength)
 }
 
-// var motionClassifier = getDenseMotionClassifier(
-//     hiddenLayerCount: hiddenLayerCount, 
-//     attentionHeadCount: attentionHeadCount, 
-//     hiddenSize: hiddenSize, 
-//     intermediateSize: intermediateSize, 
-//     classCount: classCount
-// )
+var motionClassifier = getDenseMotionClassifier(
+    hiddenLayerCount: hiddenLayerCount, 
+    attentionHeadCount: attentionHeadCount, 
+    hiddenSize: hiddenSize, 
+    intermediateSize: intermediateSize, 
+    classCount: classCount
+)
 
 let device = Device.defaultXLA
 print(device)
 
 // instantiate ResNetMotionClassifier
-var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
-var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
+// var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
+// var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
 
-resNetClassifier.move(to: device)
+// resNetClassifier.move(to: device)
 motionClassifier.move(to: device)
 
 // get a batch
