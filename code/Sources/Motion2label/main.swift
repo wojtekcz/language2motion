@@ -10,12 +10,14 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "resnet_run_1"
-let batchSize = 100
+let runName = "resnet_run_3" // resnet
+// let runName = "transf_run_3" // transformer
+let batchSize = 200 // resnet
+// let batchSize = 100 // transformer
 let maxSequenceLength =  500
 let nEpochs = 20
-// let learningRate: Float = 1e-3
-let learningRate: Float = 2e-5
+let learningRate: Float = 1e-3 // resnet
+// let learningRate: Float = 2e-5 // transformer
 let logdir = "tboard/Motion2label/\(runName)"
 let balanceClassSamples: Int? = 5900
 let minMotionLength = 20 // 2 secs. (for downsampled motion)
