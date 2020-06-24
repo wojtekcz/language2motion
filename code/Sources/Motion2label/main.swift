@@ -10,14 +10,14 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "resnet_run_3" // resnet
-// let runName = "transf_run_3" // transformer
-let batchSize = 200 // resnet
-// let batchSize = 100 // transformer
+// let runName = "resnet_run_3" // resnet
+let runName = "transf_run1" // transformer
+// let batchSize = 200 // resnet
+let batchSize = 100 // transformer
 let maxSequenceLength =  500
 let nEpochs = 20
-let learningRate: Float = 1e-3 // resnet
-// let learningRate: Float = 2e-5 // transformer
+// let learningRate: Float = 1e-3 // resnet
+let learningRate: Float = 2e-5 // transformer
 let logdir = "tboard/Motion2label/\(runName)"
 let balanceClassSamples: Int? = 5900
 let minMotionLength = 20 // 2 secs. (for downsampled motion)
@@ -119,21 +119,21 @@ func getDenseMotionClassifier(
     return DenseMotionClassifier(transformerEncoder: transformerEncoder, inputSize: inputSize, classCount: classCount, maxSequenceLength: maxSequenceLength)
 }
 
-// var motionClassifier = getDenseMotionClassifier(
-//     hiddenLayerCount: hiddenLayerCount, 
-//     attentionHeadCount: attentionHeadCount, 
-//     hiddenSize: hiddenSize, 
-//     intermediateSize: intermediateSize, 
-//     classCount: classCount
-// )
+// instantiate DenseMotionClassifier
+var motionClassifier = getDenseMotionClassifier(
+    hiddenLayerCount: hiddenLayerCount, 
+    attentionHeadCount: attentionHeadCount, 
+    hiddenSize: hiddenSize, 
+    intermediateSize: intermediateSize, 
+    classCount: classCount
+)
+
+// instantiate ResNetMotionClassifier
+// var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
+// var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
 
 let device = Device.defaultXLA
 print(device)
-
-// instantiate ResNetMotionClassifier
-var resNetClassifier = ResNet(classCount: hiddenSize, depth: .resNet18, downsamplingInFirstStage: false, channelCount: 1)
-var motionClassifier = ResNetMotionClassifier(resNetClassifier: resNetClassifier, maxSequenceLength: maxSequenceLength)
-
 motionClassifier.move(to: device)
 
 // train
@@ -160,10 +160,11 @@ print("optimizer = \(optimizer)")
 let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
-print("\nTraining (Dense)MotionClassifier for the motion2Label task!")
+print("\nTraining (Dense/ResNet)MotionClassifier for the motion2Label task!")
 var trainingStepCount = 0
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
+        time() {
         print("[Epoch \(epoch + 1)]")
         Context.local.learningPhase = .training
         var trainingLossSum: Float = 0
@@ -253,6 +254,7 @@ time() {
         let y_true = dataset.testMotionSamples.map { dataset.getLabel($0.sampleID)!.label }
         let y_pred = predictions.map { $0.className }
         print(metrics.confusion_matrix(y_pred, y_true, labels: dataset.labels))
+        }
         }
     }
     summaryWriter.flush()
