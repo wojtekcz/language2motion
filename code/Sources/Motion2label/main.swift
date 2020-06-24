@@ -10,8 +10,8 @@ import PythonKit
 
 let metrics = Python.import("sklearn.metrics")
 
-let runName = "run_1"
-let batchSize = 400
+let runName = "resnet_run_1"
+let batchSize = 100
 let maxSequenceLength =  500
 let nEpochs = 20
 // let learningRate: Float = 1e-3
@@ -206,22 +206,16 @@ time() {
 
         var predictions: [Prediction] = []
         for batch in dataset.validationBatches {
-            print(1)
             let valBatchSize = batch.data.motionFrames.shape[0]
             let (eagerDocuments, eagerLabels) = (batch.data, Tensor<Int32>(batch.label))
             let documents = MotionBatch(copying: eagerDocuments, to: device)
             let labels = Tensor(copying: eagerLabels, to: device)
-            print(2)
 
             let logits = motionClassifier(documents)
             let loss = softmaxCrossEntropy(logits: logits, labels: labels)
-            print(3)
             let probs = softmax(logits, alongAxis: 1)
-            print(4)
             let preds = logits.argmax(squeezingAxis: 1)
-            print(5)
             let correctPredictions = preds .== labels
-            print(6)
 
             LazyTensorBarrier()
 
@@ -231,21 +225,15 @@ time() {
             totalGuessCount += valBatchSize
 
             // copy tensors to CPU
-            print(7)
             let eagerPreds = Tensor(copying: preds, to: Device.defaultTFEager)
             let eagerProbs = Tensor(copying: probs, to: Device.defaultTFEager)
-            print(8)
 
             let batchPreds = (0..<eagerPreds.shape[0]).map { 
                 (idx) -> Prediction in
-                print(11)
                 let classIdx: Int = Int(eagerPreds[idx].scalar!)
-                print(22)
                 let prob = eagerProbs[idx, classIdx].scalar!
-                print(33)
                 return Prediction(classIdx: classIdx, className: dataset.labels[classIdx], probability: prob)
             }
-            print(9)
 
             predictions.append(contentsOf: batchPreds)
         }
