@@ -73,8 +73,6 @@ open link in google chrome
 ### c. install extensions
 - Remote-Container
 
-TODO: - Remote-SSH, for colab integration
-
 ### d. attach to running container
 TODO: screenshot
 

@@ -4,6 +4,7 @@ TODO: paste portmap.io instructions
 ## 1. setup colab VM
 
 ### a. notebook swift ssh
+TODO: add notebook to project repo
 
 * open notebook swift ssh on colab, 
 * make sure runtime type is gpu
@@ -16,15 +17,16 @@ scp ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local colabp:/root/.ssh
 
 ## 2. ssh/terminal
 
-### 0. setup ssh connection
-TODO: paste ~/.ssh/config content
+### 0. setup ssh connection ```~/.ssh/config```
+```
+# ============= colab via portmap.io ===============# ssh -i ~/.ssh/wojtekcz.first.pem wojtekcz.first@wojtekcz-22423.portmap.io -N -R 22423:localhost:22Host colabpHostName wojtekcz-22423.portmap.ioUser rootPort 22423StrictHostKeyChecking noUserKnownHostsFile /dev/nullIdentityFile ~/.ssh/private_key.pemLocalForward 6006 localhost:6006```
 
 ### a. ssh into colabp
 ```
 ssh colabp
 ```
 
-### b. run tmux in iterm
+### b. (optional) run tmux in iterm
 ```
 tmux -CC
 ```
@@ -62,9 +64,9 @@ swift run -c release Motion2label
 ## 3. vscode integration
 
 ### a. install extension
-- Remote-Container
+- Remote-SSH
 
-### b. connect to ssh ```colabp``` host
+### b. Remote-SSH: Connect to Host... ```colabp```
 
 ### c. install extensions (in container)
 - CodeLLDB
