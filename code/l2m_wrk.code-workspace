@@ -10,5 +10,21 @@
 			"path": ".."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.pythonPath": "/usr/bin/python3",
+		"sde.languageServerMode": "sourcekit-lsp",
+		"sourcekit-lsp.serverPath": "/swift-tensorflow-toolchain/usr/bin/sourcekit-lsp",
+		"sourcekit-lsp.toolchainPath": "/swift-tensorflow-toolchain",
+		"swift.languageServerPath": "",
+		"swift.path.swift_driver_bin": "/swift-tensorflow-toolchain/usr/bin/swift",
+		"lldb.executable": "/swift-tensorflow-toolchain/usr/bin/lldb",
+		"lldb.adapterEnv": {
+			"LLDB_DEBUGSERVER_PATH": "/swift-tensorflow-toolchain/usr/bin/lldb-server"
+		},
+		"lldb.launch.expressions": "simple",
+		"lldb.verboseLogging": true,
+		"[swift]": {},
+		"lldb.library": "/swift-tensorflow-toolchain/usr/lib/liblldb.so.10.0.0git",
+		"lldb.libpython": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0"
+	}
 }
