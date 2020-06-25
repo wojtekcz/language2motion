@@ -110,22 +110,28 @@ var optimizer = Adam.init(for: model, learningRate: 5e-4)
 for epoch in 0..<epochs {
     print("Start epoch \(epoch)")
     var iterator = translationTask.dataset.trainDataIterator
-    for step in 0... { // TODO getCount!
-        let batch = withDevice(.cpu) { iterator.next()! }
+
+    var step = 0
+    while let batch1 = iterator.next() {
+        let batch = withDevice(.cpu) { batch1 }
         let loss = translationTask.update(model: &model, using: &optimizer, for: batch)
         print("current loss at step \(step): \(loss)")
-        
+
         if step % 100 == 0 {
+            var step2 = 0
             var validationLosses = [Float]()
             var valIterator = translationTask.dataset.devDataIterator
-            for _ in 0... {
-                let valBatch = withDevice(.cpu){ valIterator.next()! }
+            while let batch2 = valIterator.next() {
+                let valBatch = withDevice(.cpu){ batch2 }
                 let loss = translationTask.validate(model: &model, for: valBatch)
                 validationLosses.append(loss)
+            print("current val loss at step \(step2): \(loss)")
+                step2 += 1
             }
             let averageLoss = validationLosses.reduce(0, +) / Float(validationLosses.count)
             print("Average validation loss at step \(step): \(averageLoss)")
         }
+        step += 1
     }
 }
 
