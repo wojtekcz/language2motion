@@ -1,7 +1,8 @@
 # local setup
 
 ## 1. setup container
-+ install docker
+### 0. install/setup docker
++ dataset in memory requires about 6GB RAM
 
 assuming ~/swift4tf as root for installations
 
@@ -17,26 +18,18 @@ git checkout --track origin/language2motion
 ```
 ### b. build docker image
 
+```
+./docker_build.sh
+```
+
 TODO: add tensorboard requirements
-
-```
-./docker_build.sh download
-```
-
-TODO: move following section out
-or: download toolchain, and use for building docker image
-TODO: set local ip for serving toolchain tgz
-
-```
-./docker_build.sh cached
-```
-
 
 ### c. create (start) docker container
 
 TODO: check docker_run.sh on linux
+
 ```
-./docker_run.sh cpu_macos
+./docker_run.sh macos|gpu
 ```
 
 start
@@ -89,7 +82,8 @@ open link in google chrome
 
 ### c. install extensions
 - Remote-Container
-- Remote-SSH
+
+TODO: - Remote-SSH, for colab integration
 
 ### d. attach to running container
 TODO: screenshot
@@ -100,20 +94,27 @@ TODO: screenshot
 - CodeLLDB
 - Maintained Swift Development Environment
 
+TODO: screenshot
 
-### f. open folder "/" in vscode
+reload
+
+
+### f. open folder ```/``` in vscode
 
 
 ### FIXME: how to use "remote settings location"
 
 ### g. open workspace
 
-TODO: kill "_wrk"
-/notebooks/language2motion.gt/code/l2m_wrk.code-workspace
+```
+/notebooks/language2motion.gt/code/l2m.code-workspace
+```
 
 TODO: screenshot
 
-run/debug Motion2label
+### h. run/debug Motion2label
+
+TODO: screenshot
 
 ## 4. (optional) start tensorbord
 
