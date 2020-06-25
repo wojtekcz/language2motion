@@ -37,7 +37,7 @@ chmod 600 ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
 ssh-agent bash
 ssh-add /root/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
 ```
-## setup project sources and data
+## 3. setup project sources and data
 ### b. clone language2motion repo
 ```
 cd /content
@@ -61,7 +61,7 @@ cd ../code
 swift run -c release Motion2label
 ```
 
-## 3. vscode integration
+## 4. vscode integration
 
 ### a. install extension
 - Remote-SSH
@@ -79,7 +79,7 @@ swift run -c release Motion2label
 /content/language2motion.gt/code/l2m.code-workspace
 ```
 
-## 4. (optional) tensorbord
+## 5. (optional) tensorbord
 
 
 ### a. instal deps
