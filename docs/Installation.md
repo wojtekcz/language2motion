@@ -22,8 +22,6 @@ git checkout --track origin/language2motion
 ./docker_build.sh
 ```
 
-TODO: add tensorboard requirements
-
 ### c. create (start) docker container
 
 TODO: check docker_run.sh on linux
@@ -32,7 +30,7 @@ TODO: check docker_run.sh on linux
 ./docker_run.sh macos|gpu
 ```
 
-start
+### c. start
 
 ```
 docker start swift-jupyter
