@@ -118,17 +118,15 @@ TODO: screenshot
 
 ## 4. (optional) start tensorbord
 
-exec into container
+### a. exec into container
+
+### b. start tensorboard
 
 ```
 cd /notebooks/language2motion.gt/data/
-```
-
-start tensorboard
-
-```
 tensorboard --bind_all --logdir tboard/
 ```
 
 use tensorboard
+
 TODO: screenshot
