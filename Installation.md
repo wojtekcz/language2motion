@@ -120,9 +120,15 @@ TODO: screenshot
 
 exec into container
 
-cd tboard
+```
+cd /notebooks/language2motion.gt/data/
+```
 
 start tensorboard
+
+```
+tensorboard --bind_all --logdir tboard/
+```
 
 use tensorboard
 TODO: screenshot
