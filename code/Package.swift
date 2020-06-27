@@ -20,7 +20,8 @@ let package = Package(
         .executable(name: "PreprocessMotionDataset", targets: ["PreprocessMotionDataset"]),
         .executable(name: "Language2label", targets: ["Language2label"]),
         .executable(name: "Motion2label", targets: ["Motion2label"]),
-        .executable(name: "Transformer-Translation", targets: ["Transformer-Translation"])
+        .executable(name: "Transformer-Translation", targets: ["Transformer-Translation"]),
+        .executable(name: "Lang2lang", targets: ["Lang2lang"])
     ],
     dependencies: [
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0")
@@ -48,7 +49,10 @@ let package = Package(
         .target(
             name: "Transformer-Translation",
             dependencies: ["TranslationModels", "Datasets", "ModelSupport"],
-            path: "Sources/Transformer-Translation"
-            ),
+            path: "Sources/Transformer-Translation"),
+        .target(
+            name: "Lang2lang",
+            dependencies: ["TranslationModels", "Datasets", "ModelSupport"],
+            path: "Sources/Lang2lang"),
     ]
 )
