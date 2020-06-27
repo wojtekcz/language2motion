@@ -40,14 +40,19 @@ var dataset = try Lang2Lang(
     datasetURL: dsURL,
     maxSequenceLength: maxSequenceLength,
     batchSize: batchSize
-) { (example: Lang2Lang.Example) -> TextBatch in
-// TODO: extract preprocess func from BERT
+) { (example: Lang2Lang.Example) -> TranslationBatch in
+    // TODO: extract preprocess func from BERT
     // TODO: tokenize
-    let tokenIds: Tensor<Int32> = Tensor([1,2,3])
-    let tokenTypeIds: Tensor<Int32> = Tensor([1,2,3])
-    let mask: Tensor<Int32> = Tensor([1,2,3])
-    let textBatch = TextBatch(tokenIds: tokenIds, tokenTypeIds: tokenTypeIds, mask: mask)
-    return textBatch
+    // TODO: create real TranslationBatch
+    let sourceTensor: Tensor<Int32> = Tensor([1,2,3])
+    let targetTensor: Tensor<Int32> = Tensor([1,2,3])
+    let sourcePadId: Int32 = 0
+    let targetPadId: Int32 = 0
+    // let mask: Tensor<Int32> = Tensor([1,2,3])
+    // let textBatch = TextBatch(tokenIds: tokenIds, tokenTypeIds: tokenTypeIds, mask: mask)
+    // source: Tensor<Int32>, target: Tensor<Int32>, sourcePadId: Int32, targetPadId: Int32
+    let singleBatch = TranslationBatch(source: sourceTensor, target: targetTensor, sourcePadId: sourcePadId, targetPadId: targetPadId)
+    return singleBatch
         // bertClassifier.bert.preprocess(
         // sequences: [example.text],
         // maxSequenceLength: maxSequenceLength)
