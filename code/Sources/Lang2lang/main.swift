@@ -29,7 +29,7 @@ var model = TransformerModel(
 )
 
 // load dataset
-let batchSize = 10
+let batchSize = 1000
 let maxSequenceLength =  50
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
@@ -44,8 +44,8 @@ var dataset = try Lang2Lang(
     // TODO: extract preprocess func from BERT
     // TODO: tokenize
     // TODO: create real TranslationBatch
-    let sourceTensor: Tensor<Int32> = Tensor([1,2,3])
-    let targetTensor: Tensor<Int32> = Tensor([1,2,3])
+    let sourceTensor: Tensor<Int32> = Tensor([[1,2,3]])
+    let targetTensor: Tensor<Int32> = Tensor([[1,2,3]])
     let sourcePadId: Int32 = 0
     let targetPadId: Int32 = 0
     // let mask: Tensor<Int32> = Tensor([1,2,3])
@@ -63,20 +63,17 @@ print("Dataset acquired.")
 // get example
 print(dataset.trainExamples[0])
 
-print()
 // get a batch
-// print("\nOne batch (LabeledMotionBatch):")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch = batches[0]
-// print("type: \(type(of:batch))")
-// print("\nOne motionBatch")
-// let motionBatch = batch.data
-// print("type: \(type(of:motionBatch))")
-// print("motionFrames.shape: \(motionBatch.motionFrames.shape)")
-// print("motionFlag.shape: \(motionBatch.motionFlag.shape)")
+print("\nOne batch (TranslationBatch):")
+var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+let epoch = epochIterator.next()
+let batches = Array(epoch!.1)
+let batch = batches[0]
+print("type: \(type(of:batch))")
+print("tokenIds.shape: \(batch.tokenIds.shape)")
+print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
 
+print()
 
 // run one batch
 // print("\nRun one batch:")
