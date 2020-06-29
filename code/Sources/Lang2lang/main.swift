@@ -2,6 +2,7 @@
 // + implement validation
 // + implement inference/decoding
 // TODO: use X10
+// TODO: train with label texts as target
 
 import TensorFlow
 import TextModels
@@ -12,10 +13,10 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_6"
+let runName = "run_8"
 let batchSize = 4000
 let maxSequenceLength =  50
-let nEpochs = 8
+let nEpochs = 1
 let learningRate: Float = 2e-5
 
 print("runName: \(runName)")
@@ -26,6 +27,15 @@ print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+
+// X10 warmup
+let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+let eagerTensorSum = eagerTensor1 + eagerTensor2
+print(eagerTensorSum)
+print(eagerTensor1.device)
+let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+print(x10Tensor2.device)
 
 // instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -50,6 +60,10 @@ var model = TransformerModel(
     headCount: headCount, 
     dropoutProbability: dropoutProbability
 )
+
+let device = Device.defaultXLA
+print(device)
+model.move(to: device)
 
 // load dataset
 print("\nLoading dataset...")
@@ -87,9 +101,20 @@ print("Dataset acquired.")
 // print("output.shape: \(output.shape)")
 
 var optimizer = Adam(for: model, learningRate: learningRate)
+optimizer = Adam(copying: optimizer, to: device)
 
 let logdirURL = dataURL.appendingPathComponent("tboard/Lang2lang/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
+
+@differentiable(wrt: logits)
+public func softmaxCrossEntropy2(logits: Tensor<Float>, labels: Tensor<Int32>, ignoreIndex: Int32) -> Tensor<Float> {
+    // FIXME: use logits.device, move code back to Utilities.swift
+    let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(labels.shape.first!), stride: 1, on: device)
+    let indices = ids.gathering(where: labels .!= Tensor(ignoreIndex, on: device))
+    let maskedLogits = logits.gathering(atIndices: indices, alongAxis: 0)
+    let maskedTargets = labels.gathering(atIndices: indices, alongAxis: 0)
+    return softmaxCrossEntropy(logits: maskedLogits, labels: maskedTargets)
+}
 
 func update(model: inout TransformerModel, using optimizer: inout Adam<TransformerModel>, for batch: TranslationBatch) -> Float {
     let labels = batch.targetTruth.reshaped(to: [-1])
@@ -97,7 +122,7 @@ func update(model: inout TransformerModel, using optimizer: inout Adam<Transform
     let padIndex = textProcessor.padId
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
-            softmaxCrossEntropy(logits: $0.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex)
+            softmaxCrossEntropy2(logits: $0.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex)
         }
         optimizer.update(&model, along: grad)
         return loss.scalarized()
@@ -111,7 +136,7 @@ func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Flo
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
     let padIndex = textProcessor.padId
     let result = withLearningPhase(.inference) { () -> Float in
-        softmaxCrossEntropy(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
+        softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
     }
     return result
 }
@@ -128,9 +153,10 @@ time() {
             print("epochBatches.count: \(epochBatches.count)")
         }
 
-        for batch in epochBatches {
+        for eagerBatch in epochBatches {
+            let batch = TranslationBatch(copying: eagerBatch, to: device)
             let loss = update(model: &model, using: &optimizer, for: batch)
-            // print("current loss at step \(trainingStepCount): \(loss)")
+            print("current loss at step \(trainingStepCount): \(loss)")
             trainingLossSum += loss
             trainingBatchCount += 1
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
@@ -151,7 +177,8 @@ time() {
         var devBatchCount = 0
         var totalGuessCount = 0
 
-        for batch in dataset.validationBatches {
+        for eagerBatch in dataset.validationBatches {
+            let batch = TranslationBatch(copying: eagerBatch, to: device)
             let loss = validate(model: &model, for: batch)
             let valBatchSize = batch.tokenIds.shape[0]
 

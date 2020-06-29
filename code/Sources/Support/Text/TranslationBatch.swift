@@ -70,3 +70,14 @@ public func subsequentMask(size: Int) -> Tensor<Int32> {
     return Tensor<Int32>(ones: TensorShape(attentionShape))
         .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
 }
+
+extension TranslationBatch {
+  public init(copying batch: TranslationBatch, to device: Device) {
+    self.tokenIds = Tensor<Int32>(copying: batch.tokenIds, to: device)
+    self.targetTokenIds = Tensor<Int32>(copying: batch.targetTokenIds, to: device)
+    self.targetMask = Tensor<Float>(copying: batch.targetMask, to: device)
+    self.mask = Tensor<Float>(copying: batch.mask, to: device)
+    self.targetTruth = Tensor<Int32>(copying: batch.targetTruth, to: device)
+    self.tokenCount = batch.tokenCount
+  }
+}
