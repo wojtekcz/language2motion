@@ -1,5 +1,5 @@
-// TODO: + implement training
-// TODO: implement validation
+// + implement training
+// + implement validation
 // TODO: implement inference/decoding
 // TODO: use X10
 
@@ -86,8 +86,6 @@ print("==============")
 let output = model(batch)
 print("output.shape: \(output.shape)")
 
-// TODO: * implement training
-
 var optimizer = Adam(for: model, learningRate: learningRate)
 
 let logdirURL = dataURL.appendingPathComponent("tboard/Lang2lang/\(runName)", isDirectory: true)
@@ -107,6 +105,17 @@ func update(model: inout TransformerModel, using optimizer: inout Adam<Transform
     return result
 }
 
+/// returns validation loss
+func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Float {
+    let labels = batch.targetTruth.reshaped(to: [-1])
+    let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
+    let padIndex = textProcessor.padId
+    let result = withLearningPhase(.inference) { () -> Float in
+        softmaxCrossEntropy(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
+    }
+    return result
+}
+
 print("Training Transformer for the Lang2lang task!")
 var trainingStepCount = 0
 time() {
@@ -120,18 +129,10 @@ time() {
         }
 
         for batch in epochBatches {
-            // let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-            // let (loss, gradients) = valueWithGradient(at: model) { model -> Tensor<Float> in
-            //     let logits = model(documents)
-            //     return softmaxCrossEntropy(logits: logits, labels: labels)
-            // }
-
             let loss = update(model: &model, using: &optimizer, for: batch)
             print("current loss at step \(trainingStepCount): \(loss)")
-
-            trainingLossSum += loss//.scalarized()
+            trainingLossSum += loss
             trainingBatchCount += 1
-            // optimizer.update(&model, along: gradients)
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
             trainingStepCount += 1
         }
@@ -145,36 +146,27 @@ time() {
         if epoch == 0 {
             print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
         }
-        // Context.local.learningPhase = .inference
-        // var devLossSum: Float = 0
-        // var devBatchCount = 0
-        // var correctGuessCount = 0
-        // var totalGuessCount = 0
+        Context.local.learningPhase = .inference
+        var devLossSum: Float = 0
+        var devBatchCount = 0
+        var totalGuessCount = 0
 
-        // for batch in dataset.validationBatches {
-        //     let valBatchSize = batch.data.tokenIds.shape[0]
+        for batch in dataset.validationBatches {
+            let loss = validate(model: &model, for: batch)
+            let valBatchSize = batch.tokenIds.shape[0]
 
-        //     let (documents, labels) = (batch.data, Tensor<Int32>(batch.label))
-        //     let logits = model(documents)
-        //     let loss = softmaxCrossEntropy(logits: logits, labels: labels)
-        //     devLossSum += loss.scalarized()
-        //     devBatchCount += 1
-
-        //     let correctPredictions = logits.argmax(squeezingAxis: 1) .== labels
-
-        //     correctGuessCount += Int(Tensor<Int32>(correctPredictions).sum().scalarized())
-        //     totalGuessCount += valBatchSize
-        // }
+            devLossSum += loss
+            devBatchCount += 1
+            totalGuessCount += valBatchSize
+        }
         
-        // let testAccuracy = Float(correctGuessCount) / Float(totalGuessCount)
-        // print(
-        //     """
-        //     Accuracy: \(correctGuessCount)/\(totalGuessCount) (\(testAccuracy)) \
-        //     Eval loss: \(devLossSum / Float(devBatchCount))
-        //     """
-        // )
-        // summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-        // summaryWriter.writeScalarSummary(tag: "EpochTestAccuracy", step: epoch+1, value: testAccuracy)
+        print(
+            """
+            totalGuessCount: \(totalGuessCount) \
+            Eval loss: \(devLossSum / Float(devBatchCount))
+            """
+        )
+        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
     }
     summaryWriter.flush()
 }
