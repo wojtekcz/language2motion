@@ -125,6 +125,7 @@ func update(model: inout TransformerModel, using optimizer: inout Adam<Transform
             softmaxCrossEntropy2(logits: $0.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex)
         }
         optimizer.update(&model, along: grad)
+        LazyTensorBarrier()
         return loss.scalarized()
     }
     return result
@@ -138,6 +139,7 @@ func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Flo
     let result = withLearningPhase(.inference) { () -> Float in
         softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
     }
+    LazyTensorBarrier()
     return result
 }
 
