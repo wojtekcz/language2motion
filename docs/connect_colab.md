@@ -19,7 +19,17 @@ scp ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local colabp:/root/.ssh
 
 ### 0. setup ssh connection ```~/.ssh/config```
 ```
-# ============= colab via portmap.io ===============# ssh -i ~/.ssh/wojtekcz.first.pem wojtekcz.first@wojtekcz-22423.portmap.io -N -R 22423:localhost:22Host colabpHostName wojtekcz-22423.portmap.ioUser rootPort 22423StrictHostKeyChecking noUserKnownHostsFile /dev/nullIdentityFile ~/.ssh/private_key.pemLocalForward 6006 localhost:6006```
+# ============= colab via portmap.io ===============
+# ssh -i ~/.ssh/wojtekcz.first.pem wojtekcz.first@wojtekcz-22423.portmap.io -N -R 22423:localhost:22
+Host colabp
+HostName wojtekcz-22423.portmap.io
+User root
+Port 22423
+StrictHostKeyChecking no
+UserKnownHostsFile /dev/null
+IdentityFile ~/.ssh/private_key.pem
+LocalForward 6006 localhost:6006
+```
 
 ### a. ssh into colabp
 ```
@@ -52,6 +62,7 @@ cd /content/language2motion.gt/data/
 wget https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.tgz
 wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv
 wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/vocab.txt
+wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.balanced.515.csv
 tar xzvf motion_dataset_v3.norm.10Hz.tgz
 ```
 
