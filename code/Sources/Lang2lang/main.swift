@@ -1,14 +1,25 @@
-// TODO: instantiate transformer model
-// TODO: create one batch (randomly initialized, maybe)
+// + instantiate transformer model
+// + create one batch (randomly initialized)
+// TODO: * create real TranslationBatch
 // TODO: run one batch through the model
-// TODO: maybe use jupyter notebook
 
 import TensorFlow
+import TextModels
 import TranslationModels
 import Foundation
 import ModelSupport
 import Datasets
 
+
+let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+
+let maxSequenceLength =  50
+
+// instantiate text processor
+let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
+let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
+let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
+let processor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
 
 // instantiate model
 let sourceVocabSize = 100
@@ -29,33 +40,18 @@ var model = TransformerModel(
 )
 
 // load dataset
-let batchSize = 1000
-let maxSequenceLength =  50
-
-let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+let batchSize = 100
 let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
+
 
 print("\nLoading dataset...")
 var dataset = try Lang2Lang(
     datasetURL: dsURL,
     maxSequenceLength: maxSequenceLength,
     batchSize: batchSize
-) { (example: Lang2Lang.Example) -> TranslationBatch in
-    // TODO: extract preprocess func from BERT
-    // TODO: tokenize
-    // TODO: create real TranslationBatch
-    let sourceTensor: Tensor<Int32> = Tensor([[1,2,3]])
-    let targetTensor: Tensor<Int32> = Tensor([[1,2,3]])
-    let sourcePadId: Int32 = 0
-    let targetPadId: Int32 = 0
-    // let mask: Tensor<Int32> = Tensor([1,2,3])
-    // let textBatch = TextBatch(tokenIds: tokenIds, tokenTypeIds: tokenTypeIds, mask: mask)
-    // source: Tensor<Int32>, target: Tensor<Int32>, sourcePadId: Int32, targetPadId: Int32
-    let singleBatch = TranslationBatch(source: sourceTensor, target: targetTensor, sourcePadId: sourcePadId, targetPadId: targetPadId)
+) { (example: Lang2Lang.Example) -> TranslationBatch in    
+    let singleBatch = processor.preprocess(example: example)
     return singleBatch
-        // bertClassifier.bert.preprocess(
-        // sequences: [example.text],
-        // maxSequenceLength: maxSequenceLength)
 }
 
 print("Dataset acquired.")

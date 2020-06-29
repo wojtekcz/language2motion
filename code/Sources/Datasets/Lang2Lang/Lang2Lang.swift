@@ -4,7 +4,7 @@ import TensorFlow
 import PythonKit
 
 
-public struct Lang2Lang <Entropy: RandomNumberGenerator> {
+public struct Lang2Lang {
     /// Lang2Lang example.
     public struct Example {
         public let id: String
@@ -36,7 +36,7 @@ public struct Lang2Lang <Entropy: RandomNumberGenerator> {
     /// The type of the collection of batches.
     public typealias Batches = Slices<Sampling<Samples, ArraySlice<Int>>>
     /// The type of the training sequence of epochs.
-    public typealias TrainEpochs = LazyMapSequence<TrainingEpochs<Samples, Entropy>, 
+    public typealias TrainEpochs = LazyMapSequence<TrainingEpochs<Samples, SystemRandomNumberGenerator>, 
         LazyMapSequence<Batches, TranslationBatch>>
     /// The sequence of training data (epochs of batches).
     public var trainingEpochs: TrainEpochs
@@ -75,7 +75,6 @@ extension Lang2Lang {
         datasetURL: URL,
         maxSequenceLength: Int,
         batchSize: Int,
-        entropy: Entropy,
         exampleMap: @escaping (Example) -> TranslationBatch
     ) throws {
         // Load the data file.
@@ -93,6 +92,7 @@ extension Lang2Lang {
         self.batchSize = batchSize
 
         // Create the training sequence of epochs.
+        let entropy = SystemRandomNumberGenerator()
         trainingEpochs = TrainingEpochs(
         samples: trainingSamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, TranslationBatch> in
@@ -110,7 +110,7 @@ extension Lang2Lang {
     }
 
     static func reduceDataBatches(_ batches: [TranslationBatch]) -> TranslationBatch {
-    return TranslationBatch(tokenIds: Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) }), // this should be fine
+        return TranslationBatch(tokenIds: Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) }), // this should be fine
                         targetTokenIds: Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) }),
                         mask: Tensor(batches.map{ $0.mask.squeezingShape(at: 0) }),
                         targetMask: Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) }),
@@ -118,25 +118,4 @@ extension Lang2Lang {
                         tokenCount: batches.map { $0.tokenCount }.reduce(0, +))
     }
 
-}
-
-extension Lang2Lang where Entropy == SystemRandomNumberGenerator {
-    /// Creates an instance in `taskDirectoryURL` with batches of size `batchSize`
-    /// by `maximumSequenceLength`.
-    ///
-    /// - Parameter exampleMap: a transform that processes `Example` in `TranslationBatch`.
-    public init(
-        datasetURL: URL,
-        maxSequenceLength: Int,
-        batchSize: Int,
-        exampleMap: @escaping (Example) -> TranslationBatch
-    ) throws {
-        try self.init(
-        datasetURL: datasetURL,
-        maxSequenceLength: maxSequenceLength,
-        batchSize: batchSize,
-        entropy: SystemRandomNumberGenerator(),
-        exampleMap: exampleMap
-        )
-    }
 }

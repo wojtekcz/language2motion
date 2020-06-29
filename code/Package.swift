@@ -52,7 +52,7 @@ let package = Package(
             path: "Sources/Transformer-Translation"),
         .target(
             name: "Lang2lang",
-            dependencies: ["TranslationModels", "Datasets", "ModelSupport"],
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport"],
             path: "Sources/Lang2lang"),
     ]
 )
