@@ -14,10 +14,10 @@ public struct TextProcessor {
     let maxSequenceLength: Int?
     let vocabulary: Vocabulary
     let tokenizer: Tokenizer
-    private let padId: Int32
-    private let bosId: Int32
-    private let eosId: Int32
-    private let unkId: Int32
+    public let padId: Int32
+    public let bosId: Int32
+    public let eosId: Int32
+    public let unkId: Int32
 
     public init(vocabulary: Vocabulary, tokenizer: Tokenizer, maxSequenceLength: Int? = nil) {
         self.vocabulary = vocabulary
