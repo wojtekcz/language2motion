@@ -12,10 +12,10 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_5"
+let runName = "run_6"
 let batchSize = 4000
 let maxSequenceLength =  50
-let nEpochs = 3
+let nEpochs = 8
 let learningRate: Float = 2e-5
 
 print("runName: \(runName)")
@@ -66,25 +66,25 @@ var dataset = try Lang2Lang(
 print("Dataset acquired.")
 
 // get example
-print("example: \(dataset.trainExamples[0])")
+// print("example: \(dataset.trainExamples[0])")
 
 // get a batch
-print("\nOne batch (TranslationBatch):")
-var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch = epochIterator.next()
-let batches = Array(epoch!.1)
-let batch = batches[0]
-print("type: \(type(of:batch))")
-print("tokenIds.shape: \(batch.tokenIds.shape)")
-print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
+// print("\nOne batch (TranslationBatch):")
+// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+// let epoch = epochIterator.next()
+// let batches = Array(epoch!.1)
+// let batch = batches[0]
+// print("type: \(type(of:batch))")
+// print("tokenIds.shape: \(batch.tokenIds.shape)")
+// print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
 
-print()
+// print()
 
 // run one batch
-print("\nRun one batch:")
-print("==============")
-let output = model(batch)
-print("output.shape: \(output.shape)")
+// print("\nRun one batch:")
+// print("==============")
+// let output = model(batch)
+// print("output.shape: \(output.shape)")
 
 var optimizer = Adam(for: model, learningRate: learningRate)
 
@@ -130,7 +130,7 @@ time() {
 
         for batch in epochBatches {
             let loss = update(model: &model, using: &optimizer, for: batch)
-            print("current loss at step \(trainingStepCount): \(loss)")
+            // print("current loss at step \(trainingStepCount): \(loss)")
             trainingLossSum += loss
             trainingBatchCount += 1
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
