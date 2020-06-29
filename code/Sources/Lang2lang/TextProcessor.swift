@@ -29,19 +29,26 @@ public struct TextProcessor {
         self.unkId = Int32(self.vocabulary.id(forToken: UNKNOWN_WORD)!)
     }
 
+    /// pads source and target sequences to max sequence length
     public func preprocess(example: Lang2Lang.Example) -> TranslationBatch {
         
-        let encodedSource = self.tokenizer.tokenize(example.sourceSentence)
-            .prefix(self.maxSequenceLength!)
+        var encodedSource = self.tokenizer.tokenize(example.sourceSentence)
+            .prefix(self.maxSequenceLength! - 2)
             .map{ Int32(self.vocabulary.id(forToken: $0) ?? Int(self.unkId))}
         
+        encodedSource = [bosId] + encodedSource + [eosId]
+        let sPaddingCount = encodedSource.count < maxSequenceLength! ? maxSequenceLength! - encodedSource.count : 0
+        let sPadding = [Int32](repeating: padId, count: sPaddingCount)
+        encodedSource = encodedSource + sPadding
+        assert(encodedSource.count == maxSequenceLength, "encodedSource.count \(encodedSource.count) does not equal maxSequenceLength \(maxSequenceLength!)")
+
         var encodedTarget = self.tokenizer.tokenize(example.targetSentence)
             .prefix(self.maxSequenceLength! - 2)
             .map{ Int32(self.vocabulary.id(forToken: $0) ?? Int(self.unkId))}
         encodedTarget = [bosId] + encodedTarget + [eosId]
-        let paddingCount = encodedTarget.count < maxSequenceLength! ? maxSequenceLength! - encodedTarget.count : 0
-        let padding = [Int32](repeating: padId, count: paddingCount)
-        encodedTarget = encodedTarget + padding
+        let tPaddingCount = encodedTarget.count < maxSequenceLength! ? maxSequenceLength! - encodedTarget.count : 0
+        let tPadding = [Int32](repeating: padId, count: tPaddingCount)
+        encodedTarget = encodedTarget + tPadding
         assert(encodedTarget.count == maxSequenceLength, "encodedTarget.count \(encodedTarget.count) does not equal maxSequenceLength \(maxSequenceLength!)")
         
         let sourceTensor = Tensor<Int32>.init(encodedSource).expandingShape(at: 0)
@@ -52,81 +59,16 @@ public struct TextProcessor {
         let targetTensor = Tensor<Int32>.init( encodedTarget).expandingShape(at: 0)
         let singleBatch = TranslationBatch(source: sourceTensor, target: targetTensor, sourcePadId: padId, targetPadId: padId)
         
-        print("original source:", example.sourceSentence)
-        print("decoded source:", decode(tensor: singleBatch.tokenIds, vocab: vocabulary))
+        // print("original source:", example.sourceSentence)
+        // print("decoded source:", decode(tensor: singleBatch.tokenIds, vocab: vocabulary))
 
-        print("max len = \(maxSequenceLength!)")
-        print("encoded target \(encodedTarget.count) last: \(encodedTarget.last!)")
-        print("original target:", example.targetSentence)
-        print("decoded target:", decode(tensor: singleBatch.targetTokenIds, vocab: vocabulary))
-        print("decoded truth:", decode(tensor: singleBatch.targetTruth, vocab: vocabulary))
+        // print("max len = \(maxSequenceLength!)")
+        // print("encoded target \(encodedTarget.count) last: \(encodedTarget.last!)")
+        // print("original target:", example.targetSentence)
+        // print("decoded target:", decode(tensor: singleBatch.targetTokenIds, vocab: vocabulary))
+        // print("decoded truth:", decode(tensor: singleBatch.targetTruth, vocab: vocabulary))
         return singleBatch
     }
-
-    /// Preprocesses an array of text sequences and prepares them for processing with BERT.
-    /// Preprocessing mainly consists of tokenization.
-    ///
-    /// - Parameters:
-    ///   - sequences: Text sequences (not tokenized).
-    ///   - maxSequenceLength: Maximum sequence length supported by the text perception module.
-    ///     This is mainly used for padding the preprocessed sequences. If not provided, it
-    ///     defaults to this model's maximum supported sequence length.
-    ///   - tokenizer: Tokenizer to use while preprocessing.
-    ///
-    /// - Returns: Text batch that can be processed by BERT.
-    // public func preprocess(sequences: [String], maxSequenceLength: Int? = nil) -> Tensor<Int32> {
-    //     let maxSequenceLength = maxSequenceLength ?? self.maxSequenceLength
-    //     var sequences = sequences.map(tokenizer.tokenize)
-
-    //     // Truncate the sequences based on the maximum allowed sequence length, while accounting
-    //     // for the '[CLS]' token and for `sequences.count` '[SEP]' tokens. The following is a
-    //     // simple heuristic which will truncate the longer sequence one token at a time. This makes 
-    //     // more sense than truncating an equal percent of tokens from each sequence, since if one
-    //     // sequence is very short then each token that is truncated likely contains more
-    //     // information than respective tokens in longer sequences.
-    //     var totalLength = sequences.map { $0.count }.reduce(0, +)
-    //     let totalLengthLimit = maxSequenceLength! - 1 - sequences.count
-    //     while totalLength >= totalLengthLimit {
-    //         let maxIndex = sequences.enumerated().max(by: { $0.1.count < $1.1.count })!.0
-    //         sequences[maxIndex] = [String](sequences[maxIndex].dropLast())
-    //         totalLength = sequences.map { $0.count }.reduce(0, +)
-    //     }
-
-    //     // The convention in BERT is:
-    //     //   (a) For sequence pairs:
-    //     //       tokens:       [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]
-    //     //       tokenTypeIds: 0     0  0    0    0     0       0 0     1  1  1  1   1 1
-    //     //   (b) For single sequences:
-    //     //       tokens:       [CLS] the dog is hairy . [SEP]
-    //     //       tokenTypeIds: 0     0   0   0  0     0 0
-    //     // where "tokenTypeIds" are used to indicate whether this is the first sequence or the
-    //     // second sequence. The embedding vectors for `tokenTypeId = 0` and `tokenTypeId = 1` were
-    //     // learned during pre-training and are added to the WordPiece embedding vector (and
-    //     // position vector). This is not *strictly* necessary since the [SEP] token unambiguously
-    //     // separates the sequences. However, it makes it easier for the model to learn the concept
-    //     // of sequences.
-    //     //
-    //     // For classification tasks, the first vector (corresponding to `[CLS]`) is used as the
-    //     // "sentence embedding". Note that this only makes sense because the entire model is
-    //     // fine-tuned under this assumption.
-    //     var tokens = ["[CLS]"]
-    //     for (sequenceId, sequence) in sequences.enumerated() {
-    //         for token in sequence {
-    //             tokens.append(token)
-    //         }
-    //         tokens.append("[SEP]")
-    //     }
-    //     let tokenIds = tokens.map { Int32(vocabulary.id(forToken: $0)!) }
-
-    //     // The mask is set to `true` for real tokens and `false` for padding tokens. This is so
-    //     // that only real tokens are attended to.
-    //     let mask = [Int32](repeating: 1, count: tokenIds.count)
-
-    //     return TextBatch(
-    //         tokenIds: Tensor(tokenIds).expandingShape(at: 0),
-    //         tokenTypeIds: Tensor(tokenTypeIds).expandingShape(at: 0),
-    //         mask: Tensor(mask).expandingShape(at: 0))
-    // }
 }
 
 func decode(tensor: Tensor<Int32>, vocab: Vocabulary) -> String {

@@ -1,7 +1,7 @@
 // + instantiate transformer model
 // + create one batch (randomly initialized)
-// TODO: * create real TranslationBatch
-// TODO: run one batch through the model
+// + create real TranslationBatch
+// + run one batch through the model
 
 import TensorFlow
 import TextModels
@@ -11,9 +11,11 @@ import ModelSupport
 import Datasets
 
 
-let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-
 let maxSequenceLength =  50
+let batchSize = 200
+
+let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
 
 // instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
@@ -22,8 +24,8 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: 
 let processor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
 
 // instantiate model
-let sourceVocabSize = 100
-let targetVocabSize = 100
+let sourceVocabSize = vocabulary.count
+let targetVocabSize = vocabulary.count
 let layerCount: Int = 6
 let modelSize: Int = 256
 let feedForwardSize: Int = 1024
@@ -40,11 +42,8 @@ var model = TransformerModel(
 )
 
 // load dataset
-let batchSize = 100
-let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
-
-
 print("\nLoading dataset...")
+
 var dataset = try Lang2Lang(
     datasetURL: dsURL,
     maxSequenceLength: maxSequenceLength,
@@ -72,7 +71,7 @@ print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
 print()
 
 // run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let classifierOutput = motionClassifier(motionBatch)
-// print("classifierOutput.shape: \(classifierOutput.shape)")
+print("\nRun one batch:")
+print("==============")
+let output = model(batch)
+print("output.shape: \(output.shape)")
