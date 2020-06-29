@@ -1,6 +1,6 @@
 // + implement training
 // + implement validation
-// TODO: implement inference/decoding
+// + implement inference/decoding
 // TODO: use X10
 
 import TensorFlow
@@ -12,10 +12,10 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_2"
+let runName = "run_5"
 let batchSize = 4000
 let maxSequenceLength =  50
-let nEpochs = 20
+let nEpochs = 3
 let learningRate: Float = 2e-5
 
 print("runName: \(runName)")
@@ -116,7 +116,7 @@ func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Flo
     return result
 }
 
-print("Training Transformer for the Lang2lang task!")
+print("\nTraining Transformer for the Lang2lang task!")
 var trainingStepCount = 0
 time() {
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
@@ -170,5 +170,62 @@ time() {
     }
     summaryWriter.flush()
 }
+
+func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
+    let memory = model.encode(input: input)
+    var ys = Tensor(repeating: startSymbol, shape: [1,1])
+    for _ in 0..<maxLength {
+        let decoderInput = TranslationBatch(tokenIds: input.tokenIds,
+                                     targetTokenIds: ys,
+                                     mask: input.mask,
+                                     targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
+                                     targetTruth: input.targetTruth,
+                                     tokenCount: input.tokenCount)
+        let out = model.decode(input: decoderInput, memory: memory)
+        let prob = model.generate(input: out[0...,-1])
+        let nextWord = Int32(prob.argmax().scalarized())
+        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1)
+    }
+    return ys
+}
+
+// encode/decode one example
+print("\nEncoding/decoding one example")
+func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
+   var words = [String]()
+   for scalar in tensor.scalars {
+       if Int(scalar) == endId {
+           break
+       } else if let token = vocab.token(forId: Int(scalar)) {
+           words.append(token)
+       }
+   }
+   return words.joined(separator: " ")
+}
+
+var epochIterator2 = dataset.trainingEpochs.enumerated().makeIterator()
+let epoch2 = epochIterator2.next()
+let batches2 = Array(epoch2!.1)
+let batch2 = batches2[0]
+
+let exampleIndex = 1
+let source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingShape(at: 0),
+                      targetTokenIds: batch2.targetTokenIds[exampleIndex].expandingShape(at: 0),
+                      mask: batch2.mask[exampleIndex].expandingShape(at: 0),
+                      targetMask: batch2.targetMask[exampleIndex].expandingShape(at: 0),
+                      targetTruth: batch2.targetTruth[exampleIndex].expandingShape(at: 0),
+                      tokenCount: batch2.tokenCount)
+let startId = textProcessor.bosId
+let endId = textProcessor.eosId
+
+Context.local.learningPhase = .inference
+
+var outputStr = decode(tensor: source.tokenIds, vocab: textProcessor.vocabulary)
+print("source, outputStr: \(outputStr)")
+
+let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: startId)
+
+outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+print("greedyDecode(), outputStr: \(outputStr)")
 
 print("\nFinito.")
