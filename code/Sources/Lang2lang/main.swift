@@ -1,5 +1,7 @@
-// TODO: * implement training
+// TODO: + implement training
+// TODO: implement validation
 // TODO: implement inference/decoding
+// TODO: use X10
 
 import TensorFlow
 import TextModels
@@ -10,8 +12,8 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_1"
-let batchSize = 200
+let runName = "run_2"
+let batchSize = 4000
 let maxSequenceLength =  50
 let nEpochs = 20
 let learningRate: Float = 2e-5
@@ -23,10 +25,10 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
+let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 // instantiate text processor
-let vocabularyURL = dataURL.appendingPathComponent("uncased_L-12_H-768_A-12/vocab.txt")
+let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
 let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
