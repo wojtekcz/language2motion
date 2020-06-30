@@ -15,7 +15,7 @@ import SummaryWriter
 
 let runName = "run_1"
 // let batchSize = 4000
-let batchSize = 200
+let batchSize = 400
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 2e-5
@@ -133,7 +133,9 @@ func update(model: inout TransformerModel, using optimizer: inout Adam<Transform
         print(4)
         optimizer.update(&model, along: grad)
         print(5)
+        time {
         LazyTensorBarrier()
+        }
         print(6)
         return loss.scalarized()
     }
@@ -167,7 +169,7 @@ time() {
         for eagerBatch in epochBatches {
             print("batch")
             let batch = TranslationBatch(copying: eagerBatch, to: device)
-            let loss = update(model: &model, using: &optimizer, for: batch)
+            let loss: Float = 0.0 //update(model: &model, using: &optimizer, for: batch)
             print("current loss at step \(trainingStepCount): \(loss)")
             trainingLossSum += loss
             trainingBatchCount += 1
@@ -191,7 +193,7 @@ time() {
 
         for eagerBatch in dataset.validationBatches {
             let batch = TranslationBatch(copying: eagerBatch, to: device)
-            let loss = validate(model: &model, for: batch)
+            let loss: Float = 0.0 //validate(model: &model, for: batch)
             let valBatchSize = batch.tokenIds.shape[0]
 
             devLossSum += loss
@@ -213,17 +215,20 @@ time() {
 func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
     let memory = model.encode(input: input)
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
+    ys = Tensor(copying: ys, to: device)
     for _ in 0..<maxLength {
-        let decoderInput = TranslationBatch(tokenIds: input.tokenIds,
+        var decoderInput = TranslationBatch(tokenIds: input.tokenIds,
                                      targetTokenIds: ys,
                                      mask: input.mask,
                                      targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
                                      targetTruth: input.targetTruth,
                                      tokenCount: input.tokenCount)
+        decoderInput = TranslationBatch(copying: decoderInput, to: device)
         let out = model.decode(input: decoderInput, memory: memory)
         let prob = model.generate(input: out[0...,-1])
         let nextWord = Int32(prob.argmax().scalarized())
-        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1)
+        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1], on: device)], alongAxis: 1)
+        ys = Tensor(copying: ys, to: device)
     }
     return ys
 }
@@ -248,12 +253,13 @@ let batches2 = Array(epoch2!.1)
 let batch2 = batches2[0]
 
 let exampleIndex = 1
-let source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingShape(at: 0),
+var source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingShape(at: 0),
                       targetTokenIds: batch2.targetTokenIds[exampleIndex].expandingShape(at: 0),
                       mask: batch2.mask[exampleIndex].expandingShape(at: 0),
                       targetMask: batch2.targetMask[exampleIndex].expandingShape(at: 0),
                       targetTruth: batch2.targetTruth[exampleIndex].expandingShape(at: 0),
                       tokenCount: batch2.tokenCount)
+source = TranslationBatch(copying: source, to: device)
 let startId = textProcessor.bosId
 let endId = textProcessor.eosId
 
@@ -266,5 +272,7 @@ let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: 
 
 outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
 print("greedyDecode(), outputStr: \(outputStr)")
+
+LazyTensorBarrier()
 
 print("\nFinito.")
