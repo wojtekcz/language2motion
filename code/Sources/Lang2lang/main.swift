@@ -13,12 +13,13 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_1"
-// let batchSize = 4000
-let batchSize = 200
+let runName = "run_16"
+let batchSize = 4000
+// let batchSize = 200
 let maxSequenceLength =  50
-let nEpochs = 1
-let learningRate: Float = 2e-5
+let nEpochs = 10
+// let learningRate: Float = 2e-5
+let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -109,36 +110,49 @@ let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 @differentiable(wrt: logits)
 public func softmaxCrossEntropy2(logits: Tensor<Float>, labels: Tensor<Int32>, ignoreIndex: Int32) -> Tensor<Float> {
+    // print("softmaxCrossEntropy2() - start")
     // FIXME: use logits.device, move code back to Utilities.swift
-    let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(labels.shape.first!), stride: 1, on: device)
-    let indices = ids.gathering(where: labels .!= Tensor(ignoreIndex, on: device))
-    let maskedLogits = logits.gathering(atIndices: indices, alongAxis: 0)
-    let maskedTargets = labels.gathering(atIndices: indices, alongAxis: 0)
-    return softmaxCrossEntropy(logits: maskedLogits, labels: maskedTargets)
+    // print("  LazyTensorBarrier()")
+    // time {
+    //     LazyTensorBarrier()
+    // }
+    // let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(labels.shape.first!), stride: 1, on: device)    
+    // let indices = ids.gathering(where: labels .!= Tensor(ignoreIndex, on: device))
+    // let maskedLogits = logits.gathering(atIndices: indices, alongAxis: 0)
+    // let maskedTargets = labels.gathering(atIndices: indices, alongAxis: 0)
+    // print("  maskedLogits.shape: \(maskedLogits.shape)")
+    // print("  maskedTargets.shape: \(maskedTargets.shape)")
+    let sce = softmaxCrossEntropy(logits: logits, labels: labels)
+    // print("sce: \(sce)")
+    // let maskedSCE = softmaxCrossEntropy(logits: maskedLogits, labels: maskedTargets)
+    // print("maskedSCE: \(maskedSCE)")
+    // print("softmaxCrossEntropy2() - stop")
+    return sce
 }
 
 func update(model: inout TransformerModel, using optimizer: inout Adam<TransformerModel>, for batch: TranslationBatch) -> Float {
-    print(1)
+    // print("update() - start")
     let labels = batch.targetTruth.reshaped(to: [-1])
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
+    // print("  resultSize: \(resultSize)")
     let padIndex = textProcessor.padId
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
-            print(2)
-            let sce = softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex)
-            print(3)
+            let logits = model.generate(input: batch).reshaped(to: [resultSize, -1])
+            // print("  logits.shape: \(logits.shape)")
+            // print("  labels.shape: \(labels.shape)")
+            let sce = softmaxCrossEntropy2(logits: logits, labels: labels,ignoreIndex: padIndex)
             return sce
         }
-        print(4)
         optimizer.update(&model, along: grad)
-        print(5)
+        // print("  LazyTensorBarrier()")
         time {
-        LazyTensorBarrier()
+            LazyTensorBarrier()
         }
-        print(6)
         return loss.scalarized()
     }
+    // print("update() - stop")
     return result
 }
 
@@ -150,15 +164,71 @@ func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Flo
     let result = withLearningPhase(.inference) { () -> Float in
         softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
     }
-    time {
-    LazyTensorBarrier()
-    }
+    // print("LazyTensorBarrier() - validate")
+    // time {
+        LazyTensorBarrier()
+    // }
     return result
+}
+
+// setup decoding
+var epochIterator2 = dataset.trainingEpochs.enumerated().makeIterator()
+let epoch2 = epochIterator2.next()
+let batches2 = Array(epoch2!.1)
+let batch2 = batches2[0]
+
+let exampleIndex = 1
+var source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingShape(at: 0),
+                      targetTokenIds: batch2.targetTokenIds[exampleIndex].expandingShape(at: 0),
+                      mask: batch2.mask[exampleIndex].expandingShape(at: 0),
+                      targetMask: batch2.targetMask[exampleIndex].expandingShape(at: 0),
+                      targetTruth: batch2.targetTruth[exampleIndex].expandingShape(at: 0),
+                      tokenCount: batch2.tokenCount)
+
+
+func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
+    let memory = model.encode(input: input)
+    var ys = Tensor(repeating: startSymbol, shape: [1,1])
+    // ys = Tensor(copying: ys, to: device)
+    for _ in 0..<maxLength {
+        let decoderInput = TranslationBatch(tokenIds: input.tokenIds,
+                                     targetTokenIds: ys,
+                                     mask: input.mask,
+                                     targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
+                                     targetTruth: input.targetTruth,
+                                     tokenCount: input.tokenCount)
+        // decoderInput = TranslationBatch(copying: decoderInput, to: device)
+        let out = model.decode(input: decoderInput, memory: memory)
+        let prob = model.generate(input: out[0...,-1])
+        let nextWord = Int32(prob.argmax().scalarized())
+        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1) // , on: device
+        // ys = Tensor(copying: ys, to: device)
+    }
+    return ys
+}
+
+var outputStr = decode(tensor: source.tokenIds, vocab: textProcessor.vocabulary)
+print("decode(source.tokenIds): \(outputStr)")
+outputStr = decode(tensor: source.targetTokenIds, vocab: textProcessor.vocabulary)
+print("decode(source.targetTokenIds): \(outputStr)")
+
+
+func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
+   var words = [String]()
+   for scalar in tensor.scalars {
+       if Int(scalar) == textProcessor.eosId {
+           break
+       } else if let token = vocab.token(forId: Int(scalar)) {
+           words.append(token)
+       }
+   }
+   return words.joined(separator: " ")
 }
 
 print("\nTraining Transformer for the Lang2lang task!")
 var trainingStepCount = 0
 time() {
+    // print("LazyTensorBarrier() - before training loops")
     LazyTensorBarrier()
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
         print("[Epoch \(epoch + 1)]")
@@ -170,7 +240,12 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            print("batch")
+            print("==> step \(trainingStepCount)")
+            // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
+            // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
+            // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
+            // print("eagerBatch.targetTruth.shape: \(eagerBatch.targetTruth.shape)")
+            // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
             let batch = TranslationBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
             print("current loss at step \(trainingStepCount): \(loss)")
@@ -203,7 +278,7 @@ time() {
             devBatchCount += 1
             totalGuessCount += valBatchSize
         }
-        
+
         print(
             """
             totalGuessCount: \(totalGuessCount) \
@@ -211,72 +286,26 @@ time() {
             """
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
+
+        print("\nEncoding/decoding one example") // on eager device
+        Context.local.learningPhase = .inference
+        source = TranslationBatch(copying: source, to: Device.defaultTFEager)
+        model.move(to: Device.defaultTFEager)
+        let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+        outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+        print("greedyDecode(): \"\(outputStr)\"")
+        model.move(to: device)
     }
     summaryWriter.flush()
 }
 
-func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
-    let memory = model.encode(input: input)
-    var ys = Tensor(repeating: startSymbol, shape: [1,1])
-    ys = Tensor(copying: ys, to: device)
-    for _ in 0..<maxLength {
-        var decoderInput = TranslationBatch(tokenIds: input.tokenIds,
-                                     targetTokenIds: ys,
-                                     mask: input.mask,
-                                     targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
-                                     targetTruth: input.targetTruth,
-                                     tokenCount: input.tokenCount)
-        decoderInput = TranslationBatch(copying: decoderInput, to: device)
-        let out = model.decode(input: decoderInput, memory: memory)
-        let prob = model.generate(input: out[0...,-1])
-        let nextWord = Int32(prob.argmax().scalarized())
-        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1], on: device)], alongAxis: 1)
-        ys = Tensor(copying: ys, to: device)
-    }
-    return ys
-}
-
 // encode/decode one example
-print("\nEncoding/decoding one example")
-func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
-   var words = [String]()
-   for scalar in tensor.scalars {
-       if Int(scalar) == endId {
-           break
-       } else if let token = vocab.token(forId: Int(scalar)) {
-           words.append(token)
-       }
-   }
-   return words.joined(separator: " ")
-}
-
-var epochIterator2 = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch2 = epochIterator2.next()
-let batches2 = Array(epoch2!.1)
-let batch2 = batches2[0]
-
-let exampleIndex = 1
-var source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingShape(at: 0),
-                      targetTokenIds: batch2.targetTokenIds[exampleIndex].expandingShape(at: 0),
-                      mask: batch2.mask[exampleIndex].expandingShape(at: 0),
-                      targetMask: batch2.targetMask[exampleIndex].expandingShape(at: 0),
-                      targetTruth: batch2.targetTruth[exampleIndex].expandingShape(at: 0),
-                      tokenCount: batch2.tokenCount)
-let startId = textProcessor.bosId
-let endId = textProcessor.eosId
-
-Context.local.learningPhase = .inference
-
-var outputStr = decode(tensor: source.tokenIds, vocab: textProcessor.vocabulary)
-print("source, outputStr: \(outputStr)")
-LazyTensorBarrier()
-
-source = TranslationBatch(copying: source, to: device)
-let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: startId)
-
-outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
-print("greedyDecode(), outputStr: \(outputStr)")
-
-LazyTensorBarrier()
+// print("\nEncoding/decoding one example")
+// Context.local.learningPhase = .inference
+// source = TranslationBatch(copying: source, to: device)
+// model.move(to: Device.defaultTFEager)
+// let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+// outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+// print("greedyDecode(), outputStr: \(outputStr)")
 
 print("\nFinito.")
