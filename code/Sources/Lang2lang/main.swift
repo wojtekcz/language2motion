@@ -13,11 +13,11 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_1"
+let runName = "run_2"
 let batchSize = 4000
 // let batchSize = 200
 let maxSequenceLength =  50
-let nEpochs = 10
+let nEpochs = 40
 // let learningRate: Float = 2e-5
 let learningRate: Float = 5e-4
 
@@ -147,9 +147,9 @@ func update(model: inout TransformerModel, using optimizer: inout Adam<Transform
         }
         optimizer.update(&model, along: grad)
         // print("  LazyTensorBarrier()")
-        time {
+        // time {
             LazyTensorBarrier()
-        }
+        // }
         return loss.scalarized()
     }
     // print("update() - stop")
@@ -240,7 +240,7 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            print("==> step \(trainingStepCount)")
+            // print("==> step \(trainingStepCount)")
             // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
             // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
             // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
@@ -248,7 +248,7 @@ time() {
             // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
             let batch = TranslationBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            print("current loss at step \(trainingStepCount): \(loss)")
+            // print("current loss at step \(trainingStepCount): \(loss)")
             trainingLossSum += loss
             trainingBatchCount += 1
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
