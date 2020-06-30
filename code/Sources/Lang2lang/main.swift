@@ -1,8 +1,8 @@
 // + implement training
 // + implement validation
 // + implement inference/decoding
+// + train with label texts as target
 // TODO: * use X10
-// TODO: * train with label texts as target
 
 import TensorFlow
 import TextModels
@@ -169,7 +169,7 @@ time() {
         for eagerBatch in epochBatches {
             print("batch")
             let batch = TranslationBatch(copying: eagerBatch, to: device)
-            let loss: Float = 0.0 //update(model: &model, using: &optimizer, for: batch)
+            let loss: Float = update(model: &model, using: &optimizer, for: batch)
             print("current loss at step \(trainingStepCount): \(loss)")
             trainingLossSum += loss
             trainingBatchCount += 1
@@ -193,7 +193,7 @@ time() {
 
         for eagerBatch in dataset.validationBatches {
             let batch = TranslationBatch(copying: eagerBatch, to: device)
-            let loss: Float = 0.0 //validate(model: &model, for: batch)
+            let loss: Float = validate(model: &model, for: batch)
             let valBatchSize = batch.tokenIds.shape[0]
 
             devLossSum += loss
