@@ -4,8 +4,6 @@ TODO: paste portmap.io instructions
 ## 1. setup colab VM
 
 ### a. notebook swift ssh
-TODO: add notebook to project repo
-
 * open notebook swift ssh on colab, 
 * make sure runtime type is gpu
 * run notebook up to ssh tunnel cell
@@ -92,13 +90,7 @@ swift run -c release Motion2label
 
 ## 5. (optional) tensorbord
 
-
-### a. instal deps
-```
-pip install google-auth-oauthlib==0.4.1 grpcio==1.24.3
-```
-
-### b. start tensorboard
+### a. start tensorboard
 ```
 cd /content/language2motion.gt/data
 tensorboard --logdir tboard
