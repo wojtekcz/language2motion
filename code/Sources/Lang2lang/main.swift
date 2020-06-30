@@ -15,7 +15,7 @@ import SummaryWriter
 
 let runName = "run_1"
 // let batchSize = 4000
-let batchSize = 400
+let batchSize = 200
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 2e-5
@@ -150,13 +150,16 @@ func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Flo
     let result = withLearningPhase(.inference) { () -> Float in
         softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
     }
+    time {
     LazyTensorBarrier()
+    }
     return result
 }
 
 print("\nTraining Transformer for the Lang2lang task!")
 var trainingStepCount = 0
 time() {
+    LazyTensorBarrier()
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
         print("[Epoch \(epoch + 1)]")
         Context.local.learningPhase = .training
@@ -259,7 +262,6 @@ var source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingS
                       targetMask: batch2.targetMask[exampleIndex].expandingShape(at: 0),
                       targetTruth: batch2.targetTruth[exampleIndex].expandingShape(at: 0),
                       tokenCount: batch2.tokenCount)
-source = TranslationBatch(copying: source, to: device)
 let startId = textProcessor.bosId
 let endId = textProcessor.eosId
 
@@ -267,7 +269,9 @@ Context.local.learningPhase = .inference
 
 var outputStr = decode(tensor: source.tokenIds, vocab: textProcessor.vocabulary)
 print("source, outputStr: \(outputStr)")
+LazyTensorBarrier()
 
+source = TranslationBatch(copying: source, to: device)
 let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: startId)
 
 outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)

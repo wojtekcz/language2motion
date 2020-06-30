@@ -36,7 +36,9 @@ public struct TransformerModel: Module {
     
     @differentiable
     public func callAsFunction(_ input: TranslationBatch) -> Tensor<Float> {
+        print(12)
         let encodedMemory = self.encode(input: input)
+        print(13)
         return self.decode(input: input, memory: encodedMemory)
     }
     
@@ -49,14 +51,19 @@ public struct TransformerModel: Module {
     
     @differentiable
     public func decode(input: TranslationBatch, memory: Tensor<Float>) -> Tensor<Float> {
+        print(14)
         let embedded = self.targetEmbed(input.targetTokenIds)
         let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
-        return self.decoder(decoderInput)
+        print(15)
+        let a = self.decoder(decoderInput)
+        print(16)
+        return a
     }
     
     @differentiable
     public func generate(input: TranslationBatch) -> Tensor<Float> {
-        self.generator(self.callAsFunction(input))
+        print(11)
+        return self.generator(self.callAsFunction(input))
     }
     @differentiable
     public func generate(input: Tensor<Float>) -> Tensor<Float> {
