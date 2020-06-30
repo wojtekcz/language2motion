@@ -1,8 +1,8 @@
 // + implement training
 // + implement validation
 // + implement inference/decoding
-// TODO: use X10
-// TODO: train with label texts as target
+// TODO: * use X10
+// TODO: * train with label texts as target
 
 import TensorFlow
 import TextModels
@@ -13,8 +13,9 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_8"
-let batchSize = 4000
+let runName = "run_1"
+// let batchSize = 4000
+let batchSize = 200
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 2e-5
@@ -117,15 +118,23 @@ public func softmaxCrossEntropy2(logits: Tensor<Float>, labels: Tensor<Int32>, i
 }
 
 func update(model: inout TransformerModel, using optimizer: inout Adam<TransformerModel>, for batch: TranslationBatch) -> Float {
+    print(1)
     let labels = batch.targetTruth.reshaped(to: [-1])
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
     let padIndex = textProcessor.padId
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
-            softmaxCrossEntropy2(logits: $0.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex)
+            (model) -> Tensor<Float> in
+            print(2)
+            let sce = softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex)
+            print(3)
+            return sce
         }
+        print(4)
         optimizer.update(&model, along: grad)
+        print(5)
         LazyTensorBarrier()
+        print(6)
         return loss.scalarized()
     }
     return result
@@ -156,6 +165,7 @@ time() {
         }
 
         for eagerBatch in epochBatches {
+            print("batch")
             let batch = TranslationBatch(copying: eagerBatch, to: device)
             let loss = update(model: &model, using: &optimizer, for: batch)
             print("current loss at step \(trainingStepCount): \(loss)")

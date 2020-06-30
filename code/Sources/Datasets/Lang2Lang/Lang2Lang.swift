@@ -56,7 +56,8 @@ extension Lang2Lang {
             let row = rowObj.tuple2.1
             let sample_id: String = "\(row.sample_id)" // Int to String
             let text: String = String(row.text)!
-            return Example(id: sample_id, sourceSentence: text, targetSentence: text)
+            let label: String = String(row.label)!
+            return Example(id: sample_id, sourceSentence: text, targetSentence: label)
         }
     }
 }
