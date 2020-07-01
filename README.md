@@ -7,7 +7,7 @@ Also it's an attempt to answer the question if Swift for Tensorflow is ready for
 The use-case is based on a paper "[Learning a bidirectional mapping between human whole-body motion and natural language using deep recurrent neural networks"](https://arxiv.org/abs/1705.06400) by Matthias Plappert. He created a nice dataset of few thousand motions "[The KIT Motion-Language Dataset (paper)](https://arxiv.org/abs/1607.03827)", [website](https://motion-annotation.humanoids.kit.edu/dataset/).
 
 ## The rough plan
-- motion 2 language
+- somethinh 2 label
   - image 2 label
     - [x] build image2label dataset with images representing motions
     - [x] assign 5 dummy(ish) classes with PCA and k-means on motion annotations
@@ -21,12 +21,12 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] 1-channel ResNet on motion + classifier
     - [x] ResNet feature extractor + Transformer encoder on motion features + classifier - didn't work
     - [x] Transformer encoder on motion + classifier
-  - motion 2 language
-    - [ ] * Transformer encoder on motion
-    - [ ] * Transformer decoder for annotation
-    - do image captioning (with RNN decoder)
 - language 2 language
-    - [x] Transformer seq2seq on annotations
+    - [x] Transformer seq2seq from annotation to label text
+    - [x] Transformer seq2seq from annotation to (same) annotation
+- motion 2 language
+  - [ ] * Transformer from motion to label text
+  - [ ] Transformer from motion to annotation
 - language 2 motion
   - Transformer encoder on annotation
   - Transformer decoder on motion
