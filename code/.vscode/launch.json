@@ -17,6 +17,16 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Motion2lang",
+            "program": "/root/.build/debug/Motion2lang",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build2",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Motion2label",
             "program": "/root/.build/debug/Motion2label",
             "args": [],
