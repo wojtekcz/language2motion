@@ -2,7 +2,7 @@
 // + implement validation
 // + implement inference/decoding
 // + train with label texts as target
-// TODO: * use X10
+// + use X10
 
 import TensorFlow
 import TextModels
