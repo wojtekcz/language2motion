@@ -22,11 +22,11 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] ResNet feature extractor + Transformer encoder on motion features + classifier - didn't work
     - [x] Transformer encoder on motion + classifier
   - motion 2 language
-    - [ ] Transformer encoder on motion
-    - [ ] Transformer decoder for annotation
+    - [ ] * Transformer encoder on motion
+    - [ ] * Transformer decoder for annotation
     - do image captioning (with RNN decoder)
 - language 2 language
-    - [ ] * Transformer seq2seq on annotations
+    - [x] Transformer seq2seq on annotations
 - language 2 motion
   - Transformer encoder on annotation
   - Transformer decoder on motion
