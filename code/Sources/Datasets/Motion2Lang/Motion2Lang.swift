@@ -8,21 +8,30 @@ public struct Motion2Lang {
     /// Motion2Lang example.
     public struct Example {
         public let id: String
-        public let sourceSentence: String
+        // public let sourceSentence: String
+        public let motionSample: MotionSample
         public let targetSentence: String
 
-        public init(id: String, sourceSentence: String, targetSentence: String) {
+        public init(
+            id: String, 
+            // sourceSentence: String, 
+            motionSample: MotionSample,
+            targetSentence: String
+        ) {
             self.id = id
-            self.sourceSentence = sourceSentence
+            // self.sourceSentence = sourceSentence
+            self.motionSample = motionSample
             self.targetSentence = targetSentence
         }
     }
+
+    public let motionDataset: MotionDataset
 
     public let trainExamples: [Example]
     public let valExamples: [Example]
 
     public typealias Samples = LazyMapSequence<[Example], MotionLangBatch>
-    public let datasetURL: URL
+
     /// The training texts.
     public let trainingSamples: Samples
     /// The validation texts.
@@ -50,42 +59,76 @@ public struct Motion2Lang {
 
 extension Motion2Lang {
 
-    static func Df2Example(df: PythonObject) -> [Example] {
+    // static func Df2Example(df: PythonObject) -> [Example] {
+    //     return Python.list(df.iterrows()).map {
+    //         (rowObj: PythonObject) -> Example in 
+    //         let row = rowObj.tuple2.1
+    //         let sample_id: String = "\(row.sample_id)" // Int to String
+    //         let text: String = String(row.text)!
+    //         // let label: String = String(row.label)!
+    //         // return Example(id: sample_id, sourceSentence: text, targetSentence: text)
+    //         return Example(id: sample_id, motionSample: text, targetSentence: text)
+    //     }
+    // }
+    public struct LangRec {
+        let sampleID: Int
+        let text: String
+        let label: String
+    }
+    static func transformDF(df: PythonObject) -> [LangRec] {
         return Python.list(df.iterrows()).map {
-            (rowObj: PythonObject) -> Example in 
+            (rowObj: PythonObject) -> LangRec in 
             let row = rowObj.tuple2.1
-            let sample_id: String = "\(row.sample_id)" // Int to String
+            let sample_id: Int = Int(row.sample_id)!
             let text: String = String(row.text)!
-            // let label: String = String(row.label)!
-            return Example(id: sample_id, sourceSentence: text, targetSentence: text)
+            let label: String = String(row.label)!
+            // return Example(id: sample_id, sourceSentence: text, targetSentence: text)
+            return LangRec(sampleID: sample_id, text: text, label: label)
         }
+    }
+
+    static func getExample(langRec: LangRec, motionSample: MotionSample) -> Example {
+        let sample_id: String = "\(langRec.sampleID)" // Int to String
+        return Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
     }
 }
 
 extension Motion2Lang {
-    /// Creates an instance of `datasetURL` dataset with batches of size `batchSize`
-    /// by `maximumSequenceLength`.
+    /// Creates an instance of `motionDatasetURL` motion dataset with `langDatasetURL` labels,
+    /// with batches of size `batchSize` by `maximumSequenceLength`.
     ///
     /// - Parameters:
-    ///   - entropy: a source of randomness used to shuffle sample ordering. It
-    ///     will be stored in `self`, so if it is only pseudorandom and has value
-    ///     semantics, the sequence of epochs is determinstic and not dependent on
-    ///     other operations.
     ///   - exampleMap: a transform that processes `Example` in `MotionLangBatch`.
     public init(
-        datasetURL: URL,
-        maxSequenceLength: Int,
+        motionDatasetURL: URL,
+        langDatasetURL: URL,
+        maxSequenceLength: Int, // TODO: separate motion from text sequence length?
         batchSize: Int,
         exampleMap: @escaping (Example) -> MotionLangBatch
     ) throws {
-        // Load the data file.
-        self.datasetURL = datasetURL
-        let df = pd.read_csv(datasetURL.path)
+        // Load the data files.
+        motionDataset = MotionDataset(from: motionDatasetURL)
+        print(motionDataset.description)
+        let df = pd.read_csv(langDatasetURL.path)
         let (train_df, test_df) = model_selection.train_test_split(df, test_size: 0.2).tuple2
         
-        // validationSamples = Python.list(test_df.iterrows()).map { (text: String($0[1].text)!, label: String($0[1].label)!) }
-        trainExamples = Motion2Lang.Df2Example(df: train_df)
-        valExamples = Motion2Lang.Df2Example(df: test_df)
+        // create LangRecs
+        let trainLangRecs = Motion2Lang.transformDF(df: train_df)
+        let valLangRecs = Motion2Lang.transformDF(df: test_df)
+
+        // TODO: create Examples
+        var _motionsDict: [Int: MotionSample] = [:]
+        for ms in motionDataset.motionSamples {
+            _motionsDict[ms.sampleID] = ms
+        }
+
+        trainExamples = trainLangRecs.map {
+            Motion2Lang.getExample(langRec: $0, motionSample: _motionsDict[$0.sampleID]!)
+        }
+        valExamples = valLangRecs.map {
+            Motion2Lang.getExample(langRec: $0, motionSample: _motionsDict[$0.sampleID]!)
+        }
+
         trainingSamples = trainExamples.lazy.map(exampleMap)
         validationSamples = valExamples.lazy.map(exampleMap)
       

@@ -22,7 +22,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 // X10 warmup
 // let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
@@ -65,7 +66,8 @@ let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, 
 print("\nLoading dataset...")
 
 var dataset = try Motion2Lang(
-    datasetURL: dsURL,
+    motionDatasetURL: motionDatasetURL,
+    langDatasetURL: langDatasetURL,
     maxSequenceLength: maxSequenceLength,
     batchSize: batchSize
 ) { (example: Motion2Lang.Example) -> MotionLangBatch in    

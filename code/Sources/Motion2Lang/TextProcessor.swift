@@ -32,7 +32,7 @@ public struct TextProcessor {
     /// pads source and target sequences to max sequence length
     public func preprocess(example: Motion2Lang.Example) -> MotionLangBatch {
         
-        var encodedSource = self.tokenizer.tokenize(example.sourceSentence)
+        var encodedSource = self.tokenizer.tokenize("ala ma kota") // FIXME
             .prefix(self.maxSequenceLength! - 2)
             .map{ Int32(self.vocabulary.id(forToken: $0) ?? Int(self.unkId))}
         
