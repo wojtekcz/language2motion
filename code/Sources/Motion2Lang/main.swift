@@ -22,7 +22,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.100.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 // X10 warmup
