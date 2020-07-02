@@ -69,6 +69,7 @@ tar xzvf motion_dataset_v3.norm.10Hz.tgz
 cd /content/language2motion.gt/code
 swift run -c release Motion2label
 swift run -c release Lang2lang
+swift run -c release Motion2lang
 ```
 
 ## 4. vscode integration
