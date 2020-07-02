@@ -120,20 +120,20 @@ struct SublayerConnection: Layer {
     }
 }
 
-struct PositionwiseFeedForward: Layer {
+public struct PositionwiseFeedForward: Layer {
     // "Implements FFN equation."
     var dense1: Dense<Float>
     var dense2: Dense<Float>
     @noDerivative let dropout: Dropout<Float>
     
-    init(dimensionalityModel:Int, innerLayerDimensionality:Int, dropProbability: Double=0.1) {
+    public init(dimensionalityModel:Int, innerLayerDimensionality:Int, dropProbability: Double=0.1) {
         dense1 = Dense(inputSize: dimensionalityModel, outputSize: innerLayerDimensionality, weightInitializer: glorotUniform())
         dense2 = Dense(inputSize: innerLayerDimensionality, outputSize: dimensionalityModel, weightInitializer: glorotUniform())
         dropout = Dropout<Float>(probability: dropProbability)
     }
     
     @differentiable
-    func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         return relu(dense1(input)).sequenced(through: dense2, dropout)
     }
 }
@@ -142,7 +142,7 @@ struct PositionwiseFeedForward: Layer {
 public struct PositionalEncoding: ParameterlessLayer {
     @noDerivative var encoding: Parameter<Float> // maybe should be an embedding?
     @noDerivative var dropout: Dropout<Float>
-    init(size: Int, dropoutProbability: Double = 0, maxLength:Int=5000) {
+    public init(size: Int, dropoutProbability: Double = 0, maxLength:Int=5000) {
         dropout = Dropout(probability: dropoutProbability)
         let position = Tensor(rangeFrom: 0, to: Float(maxLength), stride: 1).expandingShape(at: 1)
         let divStart = stride(from: 0, to: size, by: 2).map{ Float($0)}

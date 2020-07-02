@@ -8,19 +8,19 @@
 
 import TensorFlow
 
-struct TransformerEncoderLayer:Layer {
+public struct TransformerEncoderLayer:Layer {
     var selfAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
     sublayers: [SublayerConnection]
     
-    init(size: Int, selfAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double) {
+    public init(size: Int, selfAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double) {
         self.selfAttention = selfAttention
         self.feedForward = feedForward
         self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 2)
     }
     
     @differentiable
-    func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
         // SR-11882
         let selfNoDerivative = withoutDerivative(at: self)
         let inputNoDerivative = withoutDerivative(at: input)
@@ -38,7 +38,7 @@ struct TransformerEncoderLayer:Layer {
 public struct Encoder: Layer {
     var layers: [TransformerEncoderLayer]
     var norm: LayerNorm<Float>
-    init(layer: TransformerEncoderLayer, layerCount: Int) {
+    public init(layer: TransformerEncoderLayer, layerCount: Int) {
         self.layers = [TransformerEncoderLayer](repeating: layer, count: layerCount)
         self.norm = LayerNorm(featureCount: layerCount, axis: 2)
     }

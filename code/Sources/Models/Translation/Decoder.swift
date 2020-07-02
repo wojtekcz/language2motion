@@ -8,13 +8,13 @@
 
 import TensorFlow
 
-struct TransformerDecoderLayer: Layer {
+public struct TransformerDecoderLayer: Layer {
     var selfAttention: MultiHeadAttention,
     sourceAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
     sublayers: [SublayerConnection]
     
-    init(size: Int, selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double) {
+    public init(size: Int, selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double) {
         self.selfAttention = selfAttention
         self.sourceAttention = sourceAttention
         self.feedForward = feedForward
@@ -22,7 +22,7 @@ struct TransformerDecoderLayer: Layer {
     }
     
     @differentiable
-    func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
         // SR-11882
         // we have to pass the input as a param in the Sublayer input because we still need to diferentiate
         // targetMask, memory, and sourceMask
@@ -54,7 +54,7 @@ struct TransformerDecoderLayer: Layer {
 public struct Decoder: Layer {
     var layers: [TransformerDecoderLayer]
     var norm: LayerNorm<Float>
-    init(layer: TransformerDecoderLayer, layerCount: Int) {
+    public init(layer: TransformerDecoderLayer, layerCount: Int) {
         self.layers = [TransformerDecoderLayer](repeating: layer, count: layerCount)
         self.norm = LayerNorm(featureCount: layerCount, axis: 2)
     }

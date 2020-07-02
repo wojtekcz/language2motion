@@ -86,7 +86,7 @@ public func debugDerivative(_ x: Tensor<Float>) -> (value: Tensor<Float>, pullba
 
 public struct Generator: Layer {
     var dense: Dense<Float>
-    init(dimModel: Int, vocabSize: Int) {
+    public init(dimModel: Int, vocabSize: Int) {
         self.dense = Dense(inputSize: dimModel, outputSize: vocabSize, weightInitializer: glorotUniform())
     }
     
