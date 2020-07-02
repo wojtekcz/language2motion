@@ -8,9 +8,9 @@ import SummaryWriter
 import MotionModels
 
 
-let runName = "run_1"
+let runName = "run_2"
 // let batchSize = 4000
-let batchSize = 2000
+let batchSize = 3000
 // let batchSize = 200
 let maxSequenceLength =  50
 let nEpochs = 20
@@ -24,8 +24,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
-// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
+// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// X10 warmup
@@ -64,7 +64,8 @@ var model = MotionLangTransformer(
     dropoutProbability: dropoutProbability
 )
 
-let device = Device.defaultXLA
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print(device)
 model.move(to: device)
 
@@ -183,7 +184,11 @@ let batches2 = Array(epoch2!.1)
 let batch2 = batches2[0]
 
 let exampleIndex = 1 // FIXME: utilize exampleIndex
-var source = batch2 //Motion2Lang.reduceDataBatches(batches2)
+// var source = batch2 //Motion2Lang.reduceDataBatches(batches2)
+
+let oneExample = dataset.trainExamples[0]
+let singleExampleBatch = textProcessor.preprocess(example: oneExample)
+var source = Motion2Lang.reduceDataBatches([singleExampleBatch])
 
 print()
 
@@ -222,6 +227,15 @@ func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
 
 var outputStr = decode(tensor: source.targetTokenIds, vocab: textProcessor.vocabulary)
 print("decode(source.targetTokenIds): \(outputStr)")
+
+Context.local.learningPhase = .inference
+source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
+model.move(to: Device.defaultTFEager)
+let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+print("greedyDecode(): \"\(outputStr)\"")
+
+
 
 print("\nTraining Transformer for the Motion2lang task!")
 var trainingStepCount = 0
@@ -284,14 +298,14 @@ time() {
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
 
-        // print("\nEncoding/decoding one example") // on eager device
-        // Context.local.learningPhase = .inference
-        // source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
-        // model.move(to: Device.defaultTFEager)
-        // let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-        // outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
-        // print("greedyDecode(): \"\(outputStr)\"")
-        // model.move(to: device)
+        print("\nEncoding/decoding one example") // on eager device
+        Context.local.learningPhase = .inference
+        source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
+        model.move(to: Device.defaultTFEager)
+        let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+        outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+        print("greedyDecode(): \"\(outputStr)\"")
+        model.move(to: device)
     }
     summaryWriter.flush()
 }
