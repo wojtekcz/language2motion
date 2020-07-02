@@ -9,11 +9,11 @@ import MotionModels
 
 
 let runName = "run_2"
-// let batchSize = 4000
-let batchSize = 3000
+let batchSize = 6000
+// let batchSize = 3000
 // let batchSize = 200
 let maxSequenceLength =  50
-let nEpochs = 20
+let nEpochs = 40
 // let learningRate: Float = 2e-5
 let learningRate: Float = 5e-4
 
@@ -24,8 +24,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// X10 warmup
@@ -64,8 +64,8 @@ var model = MotionLangTransformer(
     dropoutProbability: dropoutProbability
 )
 
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print(device)
 model.move(to: device)
 
@@ -234,6 +234,7 @@ model.move(to: Device.defaultTFEager)
 let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
 outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
 print("greedyDecode(): \"\(outputStr)\"")
+model.move(to: device)
 
 
 
@@ -251,7 +252,7 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            print("==> step \(trainingStepCount)")
+            // print("==> step \(trainingStepCount)")
             // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
             // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
             // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
@@ -259,7 +260,7 @@ time() {
             // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
             let batch = MotionLangBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            print("current loss at step \(trainingStepCount): \(loss)")
+            // print("current loss at step \(trainingStepCount): \(loss)")
             trainingLossSum += loss
             trainingBatchCount += 1
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
