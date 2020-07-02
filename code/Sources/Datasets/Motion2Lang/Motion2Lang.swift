@@ -8,18 +8,11 @@ public struct Motion2Lang {
     /// Motion2Lang example.
     public struct Example {
         public let id: String
-        // public let sourceSentence: String
         public let motionSample: MotionSample
         public let targetSentence: String
 
-        public init(
-            id: String, 
-            // sourceSentence: String, 
-            motionSample: MotionSample,
-            targetSentence: String
-        ) {
+        public init(id: String, motionSample: MotionSample, targetSentence: String) {
             self.id = id
-            // self.sourceSentence = sourceSentence
             self.motionSample = motionSample
             self.targetSentence = targetSentence
         }
@@ -152,19 +145,24 @@ extension Motion2Lang {
         }
     }
 
-    static func reduceDataBatches(_ batches: [MotionLangBatch]) -> MotionLangBatch {
+    public static func reduceDataBatches(_ batches: [MotionLangBatch]) -> MotionLangBatch {
         var maxLength: Int? = 50 // FIXME: move this out
         maxLength = maxLength ?? batches.map { $0.motionFrames.shape[1] }.max()!
 
         let motionFrames: Tensor<Float> = Tensor(batches.map{$0.motionFrames.paddedOrCropped(to: maxLength!)})
-        let motionFlag: Tensor<Int32> = Tensor(batches.map{$0.motionFlag.paddedOrCropped(to: maxLength!)})
+
+        // let mask: Tensor<Float> = Tensor(batches.map{$0.mask.paddedOrCropped(to: maxLength!)})        
+        // getting mask from motionFrames, so it's
+        let mask: Tensor<Float> = motionFrames[0...,0...,MotionFrame.cjpMotionFlagIdx].expandingShape(at: 1)
+
+        // let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{$0.origMotionFramesCount})
 
         let targetTokenIds: Tensor<Int32> = Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) })
         let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
         let targetTruth: Tensor<Int32> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
         return MotionLangBatch(motionFrames: motionFrames, 
-                        motionFlag: motionFlag,
+                        mask: mask,
                         origMotionFramesCount: origMotionFramesCount,
                         targetTokenIds: targetTokenIds,
                         targetMask: targetMask,
