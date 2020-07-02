@@ -58,18 +58,6 @@ public struct Motion2Lang {
 //===-----------------------------------------------------------------------------------------===//
 
 extension Motion2Lang {
-
-    // static func Df2Example(df: PythonObject) -> [Example] {
-    //     return Python.list(df.iterrows()).map {
-    //         (rowObj: PythonObject) -> Example in 
-    //         let row = rowObj.tuple2.1
-    //         let sample_id: String = "\(row.sample_id)" // Int to String
-    //         let text: String = String(row.text)!
-    //         // let label: String = String(row.label)!
-    //         // return Example(id: sample_id, sourceSentence: text, targetSentence: text)
-    //         return Example(id: sample_id, motionSample: text, targetSentence: text)
-    //     }
-    // }
     public struct LangRec {
         let sampleID: Int
         let text: String
@@ -82,7 +70,6 @@ extension Motion2Lang {
             let sample_id: Int = Int(row.sample_id)!
             let text: String = String(row.text)!
             let label: String = String(row.label)!
-            // return Example(id: sample_id, sourceSentence: text, targetSentence: text)
             return LangRec(sampleID: sample_id, text: text, label: label)
         }
     }
@@ -102,7 +89,7 @@ extension Motion2Lang {
     public init(
         motionDatasetURL: URL,
         langDatasetURL: URL,
-        maxSequenceLength: Int, // TODO: separate motion from text sequence length?
+        maxSequenceLength: Int, // TODO: separate motion length from text sequence length?
         batchSize: Int,
         minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
@@ -155,25 +142,32 @@ extension Motion2Lang {
         samples: trainingSamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, MotionLangBatch> in
             batches.lazy.map{ 
-            // $0.paddedAndCollated(to: maxSequenceLength)
                 Motion2Lang.reduceDataBatches(Array($0))
             }
         }
         
         // Create the validation collection of batches.
         validationBatches = validationSamples.inBatches(of: batchSize / maxSequenceLength).lazy.map{ 
-            //$0.paddedAndCollated(to: maxSequenceLength)
             Motion2Lang.reduceDataBatches(Array($0))
         }
     }
 
     static func reduceDataBatches(_ batches: [MotionLangBatch]) -> MotionLangBatch {
-        return MotionLangBatch(tokenIds: Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) }), // this should be fine
-                        targetTokenIds: Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) }),
-                        mask: Tensor(batches.map{ $0.mask.squeezingShape(at: 0) }),
-                        targetMask: Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) }),
-                        targetTruth: Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) }),
-                        tokenCount: batches.map { $0.tokenCount }.reduce(0, +))
-    }
+        var maxLength: Int? = 50 // FIXME: move this out
+        maxLength = maxLength ?? batches.map { $0.motionFrames.shape[1] }.max()!
 
+        let motionFrames: Tensor<Float> = Tensor(batches.map{$0.motionFrames.paddedOrCropped(to: maxLength!)})
+        let motionFlag: Tensor<Int32> = Tensor(batches.map{$0.motionFlag.paddedOrCropped(to: maxLength!)})
+        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{$0.origMotionFramesCount})
+
+        let targetTokenIds: Tensor<Int32> = Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) })
+        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
+        let targetTruth: Tensor<Int32> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
+        return MotionLangBatch(motionFrames: motionFrames, 
+                        motionFlag: motionFlag,
+                        origMotionFramesCount: origMotionFramesCount,
+                        targetTokenIds: targetTokenIds,
+                        targetMask: targetMask,
+                        targetTruth: targetTruth)
+    }
 }

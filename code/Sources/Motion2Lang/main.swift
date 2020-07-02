@@ -86,14 +86,19 @@ print("example.motionSample.motionFramesArray.shape: \(example.motionSample.moti
 print("example.targetSentence: \(example.targetSentence)")
 
 // get a batch
-// print("\nOne batch (MotionLangBatch):")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch = batches[0]
-// print("type: \(type(of:batch))")
-// print("tokenIds.shape: \(batch.tokenIds.shape)")
-// print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
+print("\nOne batch (MotionLangBatch):")
+var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+let epoch = epochIterator.next()
+let batches = Array(epoch!.1)
+let batch: MotionLangBatch = batches[0]
+print("type: \(type(of:batch))")
+print("motionFrames.shape: \(batch.motionFrames.shape)")
+print("motionFlag.shape: \(batch.motionFlag.shape)")
+print("origMotionFramesCount.shape: \(batch.origMotionFramesCount.shape)")
+print("origMotionFramesCount: \(batch.origMotionFramesCount)")
+print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
+print("targetMask.shape: \(batch.targetMask.shape)")
+print("targetTruth.shape: \(batch.targetTruth.shape)")
 
 print()
 
