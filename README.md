@@ -25,8 +25,8 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] Transformer seq2seq from annotation to label text
     - [x] Transformer seq2seq from annotation to (same) annotation
 - motion 2 language
-  - [ ] * Transformer from motion to label text
-  - [ ] Transformer from motion to annotation
+  - [x] Transformer from motion to annotation
+  - [ ] Transformer from motion to label text
 - language 2 motion
   - Transformer encoder on annotation
   - Transformer decoder on motion
