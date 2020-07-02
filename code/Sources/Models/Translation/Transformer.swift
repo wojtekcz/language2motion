@@ -9,11 +9,11 @@
 import TensorFlow
 import ModelSupport
 public struct TransformerModel: Module {
-    var encoder: Encoder
-    var decoder: Decoder
-    var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>
-    var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding>
-    var generator: Generator
+    public var encoder: Encoder
+    public var decoder: Decoder
+    public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>
+    public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding>
+    public var generator: Generator
     public init(sourceVocabSize: Int, targetVocabSize: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
@@ -84,14 +84,14 @@ public func debugDerivative(_ x: Tensor<Float>) -> (value: Tensor<Float>, pullba
 }
 
 
-struct Generator: Layer {
+public struct Generator: Layer {
     var dense: Dense<Float>
     init(dimModel: Int, vocabSize: Int) {
         self.dense = Dense(inputSize: dimModel, outputSize: vocabSize, weightInitializer: glorotUniform())
     }
     
     @differentiable
-    func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         return logSoftmax(dense(input))
     }
 }

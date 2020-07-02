@@ -35,7 +35,7 @@ struct TransformerEncoderLayer:Layer {
     }
 }
 
-struct Encoder: Layer {
+public struct Encoder: Layer {
     var layers: [TransformerEncoderLayer]
     var norm: LayerNorm<Float>
     init(layer: TransformerEncoderLayer, layerCount: Int) {
@@ -44,7 +44,7 @@ struct Encoder: Layer {
     }
     
     @differentiable
-    func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
         var transformerInput = input.sequence
         
         for layerIndex in 0..<(withoutDerivative(at: layers) { $0.count }) {

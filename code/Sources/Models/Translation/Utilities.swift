@@ -139,7 +139,7 @@ struct PositionwiseFeedForward: Layer {
 }
 
 
-struct PositionalEncoding: ParameterlessLayer {
+public struct PositionalEncoding: ParameterlessLayer {
     @noDerivative var encoding: Parameter<Float> // maybe should be an embedding?
     @noDerivative var dropout: Dropout<Float>
     init(size: Int, dropoutProbability: Double = 0, maxLength:Int=5000) {
@@ -156,7 +156,7 @@ struct PositionalEncoding: ParameterlessLayer {
     }
     
     @differentiable
-    func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         return self.dropout(input + encoding.value[0..., 0..<input.shape[1]])
     }
 }

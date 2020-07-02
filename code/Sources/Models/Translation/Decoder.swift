@@ -51,7 +51,7 @@ struct TransformerDecoderLayer: Layer {
     }
 }
 
-struct Decoder: Layer {
+public struct Decoder: Layer {
     var layers: [TransformerDecoderLayer]
     var norm: LayerNorm<Float>
     init(layer: TransformerDecoderLayer, layerCount: Int) {
@@ -60,7 +60,7 @@ struct Decoder: Layer {
     }
     
     @differentiable
-    func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
         var transformerInput = input.sequence
         let memoryInput = input.memory
         
