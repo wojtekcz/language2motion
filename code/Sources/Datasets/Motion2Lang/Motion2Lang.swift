@@ -87,7 +87,7 @@ extension Motion2Lang {
         }
     }
 
-    static func getExample(langRec: LangRec, motionSample: MotionSample) -> Example {
+    static func getExample(motionSample: MotionSample, langRec: LangRec) -> Example {
         let sample_id: String = "\(langRec.sampleID)" // Int to String
         return Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
     }
@@ -104,29 +104,43 @@ extension Motion2Lang {
         langDatasetURL: URL,
         maxSequenceLength: Int, // TODO: separate motion from text sequence length?
         batchSize: Int,
+        minMotionLength: Int = 10,
+        trainTestSplit: Double = 0.8,
         exampleMap: @escaping (Example) -> MotionLangBatch
     ) throws {
         // Load the data files.
         motionDataset = MotionDataset(from: motionDatasetURL)
         print(motionDataset.description)
         let df = pd.read_csv(langDatasetURL.path)
-        let (train_df, test_df) = model_selection.train_test_split(df, test_size: 0.2).tuple2
-        
+
+        // filter out samples without annotations
+        var motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
+        print("keeping \(motionSamples.count) annotatated motions")
+
+        // filter out shortest samples
+        motionSamples = motionSamples.filter { $0.motionFramesArray.shape[0] >= minMotionLength }
+        print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
+
+        // split into train/test sets
+        var trainMotionSamples: [MotionSample] = []
+        var testMotionSamples: [MotionSample] = []
+        (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
+
         // create LangRecs
-        let trainLangRecs = Motion2Lang.transformDF(df: train_df)
-        let valLangRecs = Motion2Lang.transformDF(df: test_df)
+        let langRecs = Motion2Lang.transformDF(df: df)
 
-        // TODO: create Examples
-        var _motionsDict: [Int: MotionSample] = [:]
-        for ms in motionDataset.motionSamples {
-            _motionsDict[ms.sampleID] = ms
+        // [sampleID:LangRec] mapping
+        var _langRecsDict: [Int: LangRec] = [:]
+        for langRec in langRecs {
+            _langRecsDict[langRec.sampleID] = langRec
         }
 
-        trainExamples = trainLangRecs.map {
-            Motion2Lang.getExample(langRec: $0, motionSample: _motionsDict[$0.sampleID]!)
+        // create Examples
+        trainExamples = trainMotionSamples.map {
+            Motion2Lang.getExample(motionSample: $0, langRec: _langRecsDict[$0.sampleID]!)
         }
-        valExamples = valLangRecs.map {
-            Motion2Lang.getExample(langRec: $0, motionSample: _motionsDict[$0.sampleID]!)
+        valExamples = testMotionSamples.map {
+            Motion2Lang.getExample(motionSample: $0, langRec: _langRecsDict[$0.sampleID]!)
         }
 
         trainingSamples = trainExamples.lazy.map(exampleMap)

@@ -78,7 +78,11 @@ var dataset = try Motion2Lang(
 print("Dataset acquired.")
 
 // get example
-// print("example: \(dataset.trainExamples[0])")
+let example = dataset.trainExamples[0]
+print("example.id: \(example.id)")
+print("example.motionSample.timestepsArray.last: \(example.motionSample.timestepsArray.last!)")
+print("example.motionSample.motionFramesArray.shape: \(example.motionSample.motionFramesArray.shape)")
+print("example.targetSentence: \(example.targetSentence)")
 
 // get a batch
 // print("\nOne batch (MotionLangBatch):")
@@ -90,7 +94,7 @@ print("Dataset acquired.")
 // print("tokenIds.shape: \(batch.tokenIds.shape)")
 // print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
 
-// print()
+print()
 
 // run one batch
 // print("\nRun one batch:")
