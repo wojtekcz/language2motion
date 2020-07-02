@@ -5,6 +5,7 @@ import Foundation
 import ModelSupport
 import Datasets
 import SummaryWriter
+import MotionModels
 
 
 let runName = "run_1"
@@ -42,22 +43,22 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: 
 let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
 
 // instantiate model
-// let sourceVocabSize = vocabulary.count
-// let targetVocabSize = vocabulary.count
-// let layerCount: Int = 6
-// let modelSize: Int = 256
-// let feedForwardSize: Int = 1024
-// let headCount: Int = 8
-// let dropoutProbability: Double = 0.1
-// var model = TransformerModel(
-//     sourceVocabSize: sourceVocabSize, 
-//     targetVocabSize: targetVocabSize,
-//     layerCount: layerCount, 
-//     modelSize: modelSize, 
-//     feedForwardSize: feedForwardSize, 
-//     headCount: headCount, 
-//     dropoutProbability: dropoutProbability
-// )
+let sourceVocabSize = vocabulary.count
+let targetVocabSize = vocabulary.count
+let layerCount: Int = 6
+let modelSize: Int = 256
+let feedForwardSize: Int = 1024
+let headCount: Int = 8
+let dropoutProbability: Double = 0.1
+var model = TransformerModel(
+    sourceVocabSize: sourceVocabSize, 
+    targetVocabSize: targetVocabSize,
+    layerCount: layerCount, 
+    modelSize: modelSize, 
+    feedForwardSize: feedForwardSize, 
+    headCount: headCount, 
+    dropoutProbability: dropoutProbability
+)
 
 // let device = Device.defaultXLA
 // print(device)
@@ -103,10 +104,10 @@ print("targetTruth.shape: \(batch.targetTruth.shape)")
 print()
 
 // run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let output = model(batch)
-// print("output.shape: \(output.shape)")
+print("\nRun one batch:")
+print("==============")
+let output = model(batch)
+print("output.shape: \(output.shape)")
 
 // var optimizer = Adam(for: model, learningRate: learningRate)
 // optimizer = Adam(copying: optimizer, to: device)

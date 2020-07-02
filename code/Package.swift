@@ -44,7 +44,7 @@ let package = Package(
             exclude: ["STBImage"]),
         .target(name: "STBImage", path: "Sources/Support/STBImage"),
         .target(name: "TextModels", dependencies: ["Datasets"], path: "Sources/Models/Text"),
-        .target(name: "MotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels"], path: "Sources/Models/Motion"),
+        .target(name: "MotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/Motion"),
         .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
         .target(name: "TranslationModels", dependencies: ["Datasets"], path: "Sources/Models/Translation"),
         .target(
@@ -57,7 +57,7 @@ let package = Package(
             path: "Sources/Lang2lang"),
         .target(
             name: "Motion2lang",
-            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter"],
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionModels"],
             path: "Sources/Motion2lang"),
     ]
 )
