@@ -84,7 +84,7 @@ swift run -c release Lang2lang
 
 <!-- ### c. open folder ```/``` -->
 
-### c. open workspace
+### c. File/Open workspace...
 ```
 /content/language2motion.gt/code/l2m.code-workspace
 ```
