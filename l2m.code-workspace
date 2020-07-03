@@ -2,12 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../data"
-		},
-		{
-			"path": ".."
 		}
 	],
 	"settings": {
@@ -25,9 +19,7 @@
 		"sde.swiftBuildingParams": [
 			"build",
 			"-c",
-			"debug",
-			"--build-path",
-			"/root/.build"
+			"debug"
 		],
 		"sde.buildOnSave": false,
 		"sourcekit-lsp.serverPath": "/swift-tensorflow-toolchain/usr/bin/sourcekit-lsp",

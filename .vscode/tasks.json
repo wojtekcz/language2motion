@@ -14,9 +14,7 @@
             "args": [
                 "build",
                 "-c",
-                "debug",
-                "--build-path",
-                "/root/.build"
+                "debug"
             ]
         },
         {
@@ -26,9 +24,7 @@
             "args": [
                 "build",
                 "-c",
-                "debug",
-                "--build-path",
-                "/root/.build"
+                "debug"
             ]
         },
         {
@@ -42,9 +38,7 @@
                 "debug",
                 "--enable-test-discovery",
                 "--target",
-                "MotionDatasetTests",
-                "--build-path",
-                "/root/.build"
+                "MotionDatasetTests"
             ]
         }
     ]
