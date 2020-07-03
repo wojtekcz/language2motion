@@ -66,7 +66,7 @@ tar xzvf motion_dataset_v3.norm.10Hz.tgz
 
 ### d. run Motion2label script
 ```
-cd /content/language2motion.gt/code
+cd /content/language2motion.gt
 swift run -c release Motion2label
 swift run -c release Lang2lang
 swift run -c release Motion2lang
@@ -87,7 +87,7 @@ swift run -c release Motion2lang
 
 ### c. File/Open workspace...
 ```
-/content/language2motion.gt/code/l2m.code-workspace
+/content/language2motion.gt/l2m.code-workspace
 ```
 
 ## 5. (optional) tensorbord

@@ -56,7 +56,7 @@ tar xzvf motion_dataset_v3.norm.10Hz.tgz
 
 ### d. run Motion2label script
 ```
-cd ../code
+cd ..
 swift run Motion2label
 ```
 
@@ -90,7 +90,7 @@ reload
 
 ### g. open workspace
 ```
-/notebooks/language2motion.gt/code/l2m.code-workspace
+/notebooks/language2motion.gt/l2m.code-workspace
 ```
 
 TODO: screenshot
