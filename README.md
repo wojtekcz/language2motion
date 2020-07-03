@@ -36,9 +36,10 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
 * processed: 
   * [motion_dataset_v3.norm.10Hz.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.tgz)
 
-* annotations and labels: 
+* annotations and labels:
   * [labels_ds_v2.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv)
   * [labels_ds_v2.balanced.515.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.balanced.515.csv)
+* vocabulary
   * [vocab.txt](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/vocab.txt)
 
 
