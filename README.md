@@ -48,3 +48,8 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
 
 ## Runtime env
 * [custom swift-jupyter](https://github.com/wojtekcz/swift-jupyter/tree/language2motion)
+
+* [Installation](docs/Installation.md)
+
+* [connect_colab](docs/connect_colab.md)
+* [connect_gcp_instance](docs/connect_gcp_instance.md)
