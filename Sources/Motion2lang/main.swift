@@ -213,26 +213,14 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
     return ys
 }
 
-func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
-   var words = [String]()
-   for scalar in tensor.scalars {
-       if Int(scalar) == textProcessor.eosId {
-           break
-       } else if let token = vocab.token(forId: Int(scalar)) {
-           words.append(token)
-       }
-   }
-   return words.joined(separator: " ")
-}
-
-var outputStr = decode(tensor: source.targetTokenIds, vocab: textProcessor.vocabulary)
+var outputStr = textProcessor.decode(tensor: source.targetTokenIds)
 print("decode(source.targetTokenIds): \(outputStr)")
 
 Context.local.learningPhase = .inference
 source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
 model.move(to: Device.defaultTFEager)
 let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+outputStr = textProcessor.decode(tensor: out)
 print("greedyDecode(): \"\(outputStr)\"")
 model.move(to: device)
 
@@ -304,7 +292,7 @@ time() {
         source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
         model.move(to: Device.defaultTFEager)
         let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-        outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+        outputStr = textProcessor.decode(tensor: out)
         print("greedyDecode(): \"\(outputStr)\"")
         model.move(to: device)
     }

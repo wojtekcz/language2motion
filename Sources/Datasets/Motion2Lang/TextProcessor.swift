@@ -1,19 +1,18 @@
 import Foundation
 import TensorFlow
 import ModelSupport
-import Datasets
-import TextModels
-
-let BOS_WORD = "[CLS]"
-let EOS_WORD = "[SEP]"
-let BLANK_WORD = "[PAD]"
-let UNKNOWN_WORD = "[UNK]"
 
 
 public struct TextProcessor {
-    let maxSequenceLength: Int?
-    let vocabulary: Vocabulary
-    let tokenizer: Tokenizer
+
+    let BOS_WORD = "[CLS]"
+    let EOS_WORD = "[SEP]"
+    let BLANK_WORD = "[PAD]"
+    let UNKNOWN_WORD = "[UNK]"
+
+    public let maxSequenceLength: Int?
+    public let vocabulary: Vocabulary
+    public let tokenizer: Tokenizer
     public let padId: Int32
     public let bosId: Int32
     public let eosId: Int32
@@ -80,20 +79,21 @@ public struct TextProcessor {
         // print("decoded truth:", decode(tensor: singleBatch.targetTruth, vocab: vocabulary))
         return singleBatch
     }
-}
 
-func decode(tensor: Tensor<Int32>, vocab: Vocabulary) -> String {
-  let endId = Int32(vocab.id(forToken: EOS_WORD)!)
-   var words = [String]()
-   for scalar in tensor.scalars {
-       if Int(scalar) == endId {
-           break
-       } else
-        if let token = vocab.token(forId: Int(scalar)) {
-           words.append(token)
-       }
-   }
-   return words.joined(separator: " ")
+    public func decode(tensor: Tensor<Int32>) -> String {
+        let endId = Int32(vocabulary.id(forToken: EOS_WORD)!)
+        var words = [String]()
+        for scalar in tensor.scalars {
+            if Int(scalar) == endId {
+                break
+            } else
+                if let token = vocabulary.token(forId: Int(scalar)) {
+                words.append(token)
+            }
+        }
+        return words.joined(separator: " ")
+    }
+
 }
 
 extension Vocabulary {
