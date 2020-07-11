@@ -300,7 +300,7 @@ function initMarkers() {
 			// Create line.
 			var material = new THREE.LineBasicMaterial({
 				color: 0x0000ff,
-				linewidth: 2.0
+				linewidth: 4.0
 			});
 			var geometry = new THREE.Geometry();
 			geometry.vertices.push(
