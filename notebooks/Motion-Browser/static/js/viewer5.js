@@ -279,7 +279,7 @@ function initMarkers() {
 	markers = []
 	for (var i = 0; i < n_markers; i++) {
 		var geometry = new THREE.SphereGeometry(0.1, 32, 32 );
-		var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+		var material = new THREE.MeshBasicMaterial( { color: 0x9900FF } );
 		var marker = new THREE.Mesh(geometry, material);
 		markers.push(marker);
 		scene.add(marker);
@@ -299,7 +299,7 @@ function initMarkers() {
 			
 			// Create line.
 			var material = new THREE.LineBasicMaterial({
-				color: 0xff0000,
+				color: 0x9900FF,
 				linewidth: 4.0
 			});
 			var geometry = new THREE.Geometry();
