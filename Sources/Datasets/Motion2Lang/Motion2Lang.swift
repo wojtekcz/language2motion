@@ -7,9 +7,9 @@ import PythonKit
 public struct Motion2Lang {
 
     public struct LangRec {
-        let sampleID: Int
-        let text: String
-        let label: String
+        public let sampleID: Int
+        public let text: String
+        public let label: String
     }
 
     /// Motion2Lang example.
