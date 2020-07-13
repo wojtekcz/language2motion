@@ -128,7 +128,10 @@ extension Motion2Lang {
         // [sampleID:MotionSample] mapping
         var _motionSampleDict: [Int: MotionSample] = [:]
         for ms in motionDataset.motionSamples {
-            _motionSampleDict[ms.sampleID] = ms
+            // only assign first (downsampled) sample
+            if _motionSampleDict[ms.sampleID] == nil {
+                _motionSampleDict[ms.sampleID] = ms
+            }
         }
         motionSampleDict = _motionSampleDict
 
