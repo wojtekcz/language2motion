@@ -25,7 +25,7 @@ let package = Package(
         .executable(name: "Motion2lang", targets: ["Motion2lang"]),
     ],
     dependencies: [
-        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0")
+        .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.10.2")
     ],
     targets: [
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
