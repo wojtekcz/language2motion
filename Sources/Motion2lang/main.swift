@@ -7,14 +7,12 @@ import Datasets
 import SummaryWriter
 import MotionModels
 
-
-let runName = "run_2"
+/// Set training params
+let runName = "run_1"
 let batchSize = 6000
 // let batchSize = 3000
-// let batchSize = 200
 let maxSequenceLength =  50
-let nEpochs = 40
-// let learningRate: Float = 2e-5
+let nEpochs = 1
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
@@ -25,10 +23,16 @@ print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
-// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset.motion_flag.normalized.downsampled.sampled.490.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
-/// X10 warmup
+/// Select eager or X10 backend
+
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
+print(device)
+
+
+/// X10 warm-up
 let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
 let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
 let eagerTensorSum = eagerTensor1 + eagerTensor2
@@ -64,12 +68,9 @@ var model = MotionLangTransformer(
     dropoutProbability: dropoutProbability
 )
 
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
-print(device)
 model.move(to: device)
 
-// load dataset
+/// load dataset
 print("\nLoading dataset...")
 
 var dataset = try Motion2Lang(
@@ -84,13 +85,7 @@ var dataset = try Motion2Lang(
 
 print("Dataset acquired.")
 
-// get example
-let example = dataset.trainExamples[0]
-print("example.id: \(example.id)")
-print("example.motionSample.timestepsArray.last: \(example.motionSample.timestepsArray.last!)")
-print("example.motionSample.motionFramesArray.shape: \(example.motionSample.motionFramesArray.shape)")
-print("example.targetSentence: \(example.targetSentence)")
-
+/// Test model with one batch
 // get a batch
 // print("\nOne batch (MotionLangBatch):")
 // var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
@@ -114,54 +109,29 @@ print("example.targetSentence: \(example.targetSentence)")
 // let output = model(deviceBatch)
 // print("output.shape: \(output.shape)")
 
+/// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)
 
 let logdirURL = dataURL.appendingPathComponent("tboard/Motion2lang/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
-@differentiable(wrt: logits)
-public func softmaxCrossEntropy2(logits: Tensor<Float>, labels: Tensor<Int32>, ignoreIndex: Int32) -> Tensor<Float> {
-    // print("softmaxCrossEntropy2() - start")
-    // FIXME: use logits.device, move code back to Utilities.swift
-    // print("  LazyTensorBarrier()")
-    // time {
-    //     LazyTensorBarrier()
-    // }
-    // let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(labels.shape.first!), stride: 1, on: device)    
-    // let indices = ids.gathering(where: labels .!= Tensor(ignoreIndex, on: device))
-    // let maskedLogits = logits.gathering(atIndices: indices, alongAxis: 0)
-    // let maskedTargets = labels.gathering(atIndices: indices, alongAxis: 0)
-    // print("  maskedLogits.shape: \(maskedLogits.shape)")
-    // print("  maskedTargets.shape: \(maskedTargets.shape)")
-    let sce = softmaxCrossEntropy(logits: logits, labels: labels)
-    // print("sce: \(sce)")
-    // let maskedSCE = softmaxCrossEntropy(logits: maskedLogits, labels: maskedTargets)
-    // print("maskedSCE: \(maskedSCE)")
-    // print("softmaxCrossEntropy2() - stop")
-    return sce
-}
-
+/// Training helpers
 func update(model: inout MotionLangTransformer, using optimizer: inout Adam<MotionLangTransformer>, for batch: MotionLangBatch) -> Float {
-    // print("update() - start")
     let labels = batch.targetTruth.reshaped(to: [-1])
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
-    // print("  resultSize: \(resultSize)")
     let padIndex = textProcessor.padId
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
             let logits = model.generate(input: batch).reshaped(to: [resultSize, -1])
-            // print("  logits.shape: \(logits.shape)")
-            // print("  labels.shape: \(labels.shape)")
-            let sce = softmaxCrossEntropy2(logits: logits, labels: labels,ignoreIndex: padIndex)
+            let sce = softmaxCrossEntropy(logits: logits, labels: labels)
             return sce
         }
         optimizer.update(&model, along: grad)
         LazyTensorBarrier()
         return loss.scalarized()
     }
-    // print("update() - stop")
     return result
 }
 
@@ -171,26 +141,13 @@ func validate(model: inout MotionLangTransformer, for batch: MotionLangBatch) ->
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
     let padIndex = textProcessor.padId
     let result = withLearningPhase(.inference) { () -> Float in
-        softmaxCrossEntropy2(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels,ignoreIndex: padIndex).scalarized()
+        softmaxCrossEntropy(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels).scalarized()
     }
     LazyTensorBarrier()
     return result
 }
 
-// setup decoding
-var epochIterator2 = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch2 = epochIterator2.next()
-let batches2 = Array(epoch2!.1)
-let batch2 = batches2[0]
-
-let exampleIndex = 1 // FIXME: utilize exampleIndex
-// var source = batch2 //Motion2Lang.reduceDataBatches(batches2)
-
-let oneExample = dataset.trainExamples[0]
-let singleExampleBatch = textProcessor.preprocess(example: oneExample)
-var source = Motion2Lang.reduceDataBatches([singleExampleBatch])
-
-print()
+/// Set up decoding
 
 func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
     let memory = model.encode(input: input)
@@ -213,19 +170,76 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
     return ys
 }
 
-var outputStr = textProcessor.decode(tensor: source.targetTokenIds)
-print("decode(source.targetTokenIds): \(outputStr)")
+import PythonKit
 
-Context.local.learningPhase = .inference
-source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
-model.move(to: Device.defaultTFEager)
-let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-outputStr = textProcessor.decode(tensor: out)
-print("greedyDecode(): \"\(outputStr)\"")
-model.move(to: device)
+public struct LangRec {
+    let sampleID: Int
+    let text: String
+    let label: String
+}
 
+func transformDF(df: PythonObject) -> [LangRec] {
+    return Python.list(df.iterrows()).map {
+        (rowObj: PythonObject) -> LangRec in 
+        let row = rowObj.tuple2.1
+        let sample_id: Int = Int(row.sample_id)!
+        let text: String = String(row.text)!
+        let label: String = String(row.label)!
+        return LangRec(sampleID: sample_id, text: text, label: label)
+    }
+}
 
+let pd = Python.import("pandas")
 
+let df = pd.read_csv(langDatasetURL.path)
+
+// create LangRecs
+let langRecs = transformDF(df: df)
+
+// [sampleID:LangRec] mapping
+var _langRecsDict: [Int: LangRec] = [:]
+for langRec in langRecs {
+    _langRecsDict[langRec.sampleID] = langRec
+}
+
+// [sampleID:MotionSample] mapping
+var _motionSampleDict: [Int: MotionSample] = [:]
+for ms in dataset.motionDataset.motionSamples {
+    _motionSampleDict[ms.sampleID] = ms
+}
+
+func getExample(motionSample: MotionSample, langRec: LangRec) -> Motion2Lang.Example {
+    let sample_id: String = "\(langRec.sampleID)" // Int to String
+    return Motion2Lang.Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
+}
+
+func greedyDecodeSample(_ sample_id: Int) {
+    // get example
+    let ms = _motionSampleDict[sample_id]!
+    let langRec = _langRecsDict[sample_id]!
+    let example = getExample(motionSample: ms, langRec: langRec)
+    print("example.id: \(example.id)")
+    print("example.motionSample.timestepsArray.last: \(example.motionSample.timestepsArray.last!)")
+    print("example.motionSample.motionFramesArray.shape: \(example.motionSample.motionFramesArray.shape)")
+    print("example.targetSentence: \(example.targetSentence)")
+
+    let singleExampleBatch = textProcessor.preprocess(example: example)
+    var source = Motion2Lang.reduceDataBatches([singleExampleBatch])
+    print("\nEncoding/decoding one example") // on eager device
+    Context.local.learningPhase = .inference
+    source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
+    model.move(to: Device.defaultTFEager)
+    let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+    let outputStr = textProcessor.decode(tensor: out)
+    print("greedyDecode(): \"\(outputStr)\"")
+    model.move(to: device)
+}
+
+// get example
+let example = dataset.trainExamples[0]
+greedyDecodeSample(Int(example.id)!)
+
+/// Training loop
 print("\nTraining Transformer for the Motion2lang task!")
 var trainingStepCount = 0
 time() {
@@ -240,15 +254,14 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            // print("==> step \(trainingStepCount)")
-            // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
-            // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
-            // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
-            // print("eagerBatch.targetTruth.shape: \(eagerBatch.targetTruth.shape)")
-            // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
+            if (trainingStepCount < 5) {
+                print("==> step \(trainingStepCount)")
+            }
             let batch = MotionLangBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            // print("current loss at step \(trainingStepCount): \(loss)")
+            if (trainingStepCount < 5) {
+                print("current loss at step \(trainingStepCount): \(loss)")
+            }
             trainingLossSum += loss
             trainingBatchCount += 1
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
@@ -286,26 +299,16 @@ time() {
             """
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-
-        print("\nEncoding/decoding one example") // on eager device
-        Context.local.learningPhase = .inference
-        source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
-        model.move(to: Device.defaultTFEager)
-        let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-        outputStr = textProcessor.decode(tensor: out)
-        print("greedyDecode(): \"\(outputStr)\"")
-        model.move(to: device)
+        greedyDecodeSample(Int(example.id)!)
     }
     summaryWriter.flush()
 }
 
-// encode/decode one example
-// print("\nEncoding/decoding one example")
-// Context.local.learningPhase = .inference
-// source = MotionLangBatch(copying: source, to: device)
-// model.move(to: Device.defaultTFEager)
-// let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-// outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
-// print("greedyDecode(), outputStr: \(outputStr)")
+print("\nFinished training.")
+
+/// Generate motion description
+
+let sample_id = 446
+greedyDecodeSample(sample_id)
 
 print("\nFinito.")
