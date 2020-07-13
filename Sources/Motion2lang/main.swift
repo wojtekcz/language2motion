@@ -120,7 +120,6 @@ let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 func update(model: inout MotionLangTransformer, using optimizer: inout Adam<MotionLangTransformer>, for batch: MotionLangBatch) -> Float {
     let labels = batch.targetTruth.reshaped(to: [-1])
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
-    let padIndex = textProcessor.padId
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
@@ -139,7 +138,6 @@ func update(model: inout MotionLangTransformer, using optimizer: inout Adam<Moti
 func validate(model: inout MotionLangTransformer, for batch: MotionLangBatch) -> Float {
     let labels = batch.targetTruth.reshaped(to: [-1])
     let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
-    let padIndex = textProcessor.padId
     let result = withLearningPhase(.inference) { () -> Float in
         softmaxCrossEntropy(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels).scalarized()
     }
@@ -170,54 +168,11 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
     return ys
 }
 
-import PythonKit
-
-public struct LangRec {
-    let sampleID: Int
-    let text: String
-    let label: String
-}
-
-func transformDF(df: PythonObject) -> [LangRec] {
-    return Python.list(df.iterrows()).map {
-        (rowObj: PythonObject) -> LangRec in 
-        let row = rowObj.tuple2.1
-        let sample_id: Int = Int(row.sample_id)!
-        let text: String = String(row.text)!
-        let label: String = String(row.label)!
-        return LangRec(sampleID: sample_id, text: text, label: label)
-    }
-}
-
-let pd = Python.import("pandas")
-
-let df = pd.read_csv(langDatasetURL.path)
-
-// create LangRecs
-let langRecs = transformDF(df: df)
-
-// [sampleID:LangRec] mapping
-var _langRecsDict: [Int: LangRec] = [:]
-for langRec in langRecs {
-    _langRecsDict[langRec.sampleID] = langRec
-}
-
-// [sampleID:MotionSample] mapping
-var _motionSampleDict: [Int: MotionSample] = [:]
-for ms in dataset.motionDataset.motionSamples {
-    _motionSampleDict[ms.sampleID] = ms
-}
-
-func getExample(motionSample: MotionSample, langRec: LangRec) -> Motion2Lang.Example {
-    let sample_id: String = "\(langRec.sampleID)" // Int to String
-    return Motion2Lang.Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
-}
-
 func greedyDecodeSample(_ sample_id: Int) {
     // get example
-    let ms = _motionSampleDict[sample_id]!
-    let langRec = _langRecsDict[sample_id]!
-    let example = getExample(motionSample: ms, langRec: langRec)
+    let ms = dataset.motionSampleDict[sample_id]!
+    let langRec = dataset.langRecsDict[sample_id]!
+    let example = Motion2Lang.getExample(motionSample: ms, langRec: langRec)
     print("example.id: \(example.id)")
     print("example.motionSample.timestepsArray.last: \(example.motionSample.timestepsArray.last!)")
     print("example.motionSample.motionFramesArray.shape: \(example.motionSample.motionFramesArray.shape)")

@@ -5,6 +5,13 @@ import PythonKit
 
 
 public struct Motion2Lang {
+
+    public struct LangRec {
+        let sampleID: Int
+        let text: String
+        let label: String
+    }
+
     /// Motion2Lang example.
     public struct Example {
         public let id: String
@@ -19,6 +26,11 @@ public struct Motion2Lang {
     }
 
     public let motionDataset: MotionDataset
+
+    public let langRecs: [LangRec]
+    public let langRecsDict: [Int: LangRec]
+
+    public let motionSampleDict: [Int: MotionSample]
 
     public let trainExamples: [Example]
     public let valExamples: [Example]
@@ -51,11 +63,6 @@ public struct Motion2Lang {
 //===-----------------------------------------------------------------------------------------===//
 
 extension Motion2Lang {
-    public struct LangRec {
-        let sampleID: Int
-        let text: String
-        let label: String
-    }
     static func transformDF(df: PythonObject) -> [LangRec] {
         return Python.list(df.iterrows()).map {
             (rowObj: PythonObject) -> LangRec in 
@@ -67,7 +74,7 @@ extension Motion2Lang {
         }
     }
 
-    static func getExample(motionSample: MotionSample, langRec: LangRec) -> Example {
+    public static func getExample(motionSample: MotionSample, langRec: LangRec) -> Example {
         let sample_id: String = "\(langRec.sampleID)" // Int to String
         return Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
     }
@@ -107,13 +114,23 @@ extension Motion2Lang {
         (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
 
         // create LangRecs
-        let langRecs = Motion2Lang.transformDF(df: df)
+        let _langRecs = Motion2Lang.transformDF(df: df)
 
         // [sampleID:LangRec] mapping
         var _langRecsDict: [Int: LangRec] = [:]
-        for langRec in langRecs {
+        for langRec in _langRecs {
             _langRecsDict[langRec.sampleID] = langRec
         }
+
+        langRecs = _langRecs
+        langRecsDict = _langRecsDict
+
+        // [sampleID:MotionSample] mapping
+        var _motionSampleDict: [Int: MotionSample] = [:]
+        for ms in motionDataset.motionSamples {
+            _motionSampleDict[ms.sampleID] = ms
+        }
+        motionSampleDict = _motionSampleDict
 
         // create Examples
         trainExamples = trainMotionSamples.map {
