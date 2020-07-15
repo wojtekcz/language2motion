@@ -57,6 +57,16 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Lang2motion",
+            "program": "${workspaceFolder}/.build/debug/Lang2motion",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build2",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Transformer-Translation",
             "program": "${workspaceFolder}/.build/debug/Transformer-Translation",
             "args": [],
