@@ -33,7 +33,7 @@ print(device)
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
+let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
 
 /// instantiate model
 let sourceVocabSize = vocabulary.count
@@ -61,12 +61,12 @@ model.move(to: device)
 /// load dataset
 print("\nLoading dataset...")
 
-var dataset = try Motion2Lang(
+var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     langDatasetURL: langDatasetURL,
     maxSequenceLength: maxSequenceLength,
     batchSize: batchSize
-) { (example: Motion2Lang.Example) -> MotionLangBatch in    
+) { (example: Lang2Motion.Example) -> LangMotionBatch in    
     let singleBatch = textProcessor.preprocess(example: example)
     return singleBatch
 }
@@ -79,20 +79,20 @@ print("\nOne batch (MotionLangBatch):")
 var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
 let epoch = epochIterator.next()
 let batches = Array(epoch!.1)
-let batch: MotionLangBatch = batches[0]
+let batch: LangMotionBatch = batches[0]
 print("type: \(type(of:batch))")
-print("motionFrames.shape: \(batch.motionFrames.shape)")
-// print("motionFlag.shape: \(batch.motionFlag.shape)")
-print("mask.shape: \(batch.mask.shape)")
-print("origMotionFramesCount.shape: \(batch.origMotionFramesCount.shape)")
-print("origMotionFramesCount: \(batch.origMotionFramesCount)")
-print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
-print("targetMask.shape: \(batch.targetMask.shape)")
-print("targetTruth.shape: \(batch.targetTruth.shape)")
+// print("motionFrames.shape: \(batch.motionFrames.shape)")
+// // print("motionFlag.shape: \(batch.motionFlag.shape)")
+// print("mask.shape: \(batch.mask.shape)")
+// print("origMotionFramesCount.shape: \(batch.origMotionFramesCount.shape)")
+// print("origMotionFramesCount: \(batch.origMotionFramesCount)")
+// print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
+// print("targetMask.shape: \(batch.targetMask.shape)")
+// print("targetTruth.shape: \(batch.targetTruth.shape)")
 
-/// run one batch
-print("\nRun one batch:")
-print("==============")
-let deviceBatch = MotionLangBatch(copying: batch, to: device)
-let output = model(deviceBatch)
-print("output.shape: \(output.shape)")
+// /// run one batch
+// print("\nRun one batch:")
+// print("==============")
+// let deviceBatch = MotionLangBatch(copying: batch, to: device)
+// let output = model(deviceBatch)
+// print("output.shape: \(output.shape)")
