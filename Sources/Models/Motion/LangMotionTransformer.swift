@@ -49,6 +49,18 @@ public struct LangMotionTransformer: Module {
     
     @differentiable
     public func encode(input: LangMotionBatch) -> Tensor<Float> {
+        let embedded = self.sourceEmbed(input.tokenIds)
+        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask)
+        return self.encoder(encoderInput)
+    }
+    
+    @differentiable
+    public func decode(input: LangMotionBatch, memory: Tensor<Float>) -> Tensor<Float> {
+        // let embedded = self.targetEmbed(input.targetTokenIds)
+        // let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
+        // return self.decoder(decoderInput)
+
+        // FROM encode() -----------------
         // let origBatchSize = input.motionFrames.shape[0]
         // let length = input.motionFrames.shape[1]
         // let numFrames = input.motionFrames.shape[2]
@@ -63,15 +75,7 @@ public struct LangMotionTransformer: Module {
         // motionFeatures = positionalEncoding(motionFeatures)
 
         // let encoderInput: TransformerInput = TransformerInput(sequence: motionFeatures, attentionMask: input.mask)
-        // return self.encoder(encoderInput)
-        return Tensor([[1, 2, 3]])
-    }
-    
-    @differentiable
-    public func decode(input: LangMotionBatch, memory: Tensor<Float>) -> Tensor<Float> {
-        // let embedded = self.targetEmbed(input.targetTokenIds)
-        // let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
-        // return self.decoder(decoderInput)
+        // FROM encode() -----------------
         return Tensor([[1, 2, 3]])
     }
     
