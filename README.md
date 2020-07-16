@@ -26,10 +26,9 @@ The use-case is based on a paper "[Learning a bidirectional mapping between huma
     - [x] Transformer seq2seq from annotation to (same) annotation
 - motion 2 language
   - [x] Transformer from motion to annotation
-  - [ ] Transformer from motion to label text
 - language 2 motion
-  - Transformer encoder on annotation
-  - Transformer decoder on motion
+  - [ ] *Transformer encoder on annotation
+  - [ ] Transformer decoder on motion
 
 ## Dataset files
 * original: [2017-06-22.zip](https://motion-annotation.humanoids.kit.edu/downloads/4/)
