@@ -20,6 +20,7 @@ public struct LangMotionBatch: KeyPathIterable {
                 targetMotionFrames: Tensor<Float>, targetMask: Tensor<Float>,
                 targetTruth: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
         self.sampleID = sampleID
+
         self.tokenIds = tokenIds
         self.mask = mask
         self.tokenCount = tokenCount
@@ -28,5 +29,20 @@ public struct LangMotionBatch: KeyPathIterable {
         self.targetMask = targetMask
         self.targetTruth = targetTruth
         self.origMotionFramesCount = origMotionFramesCount
+    }
+}
+
+extension LangMotionBatch {
+    public init(copying batch: LangMotionBatch, to device: Device) {
+        self.sampleID = Tensor<Int32>(copying: batch.sampleID, to: device)
+
+        self.tokenIds = Tensor<Int32>(copying: batch.tokenIds, to: device)
+        self.mask = Tensor<Float>(copying: batch.mask, to: device)
+        self.tokenCount = Tensor<Int32>(copying: batch.tokenCount, to: device)
+
+        self.targetMotionFrames = Tensor<Float>(copying: batch.targetMotionFrames, to: device)
+        self.targetMask = Tensor<Float>(copying: batch.targetMask, to: device)
+        self.targetTruth = Tensor<Float>(copying: batch.targetTruth, to: device)
+        self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
     }
 }
