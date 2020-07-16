@@ -9,7 +9,7 @@ import MotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 2
+let batchSize = 4
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 5e-4
