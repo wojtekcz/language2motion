@@ -56,33 +56,26 @@ public struct LangMotionTransformer: Module {
     
     @differentiable
     public func decode(input: LangMotionBatch, memory: Tensor<Float>) -> Tensor<Float> {
-        // let embedded = self.targetEmbed(input.targetTokenIds)
-        // let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
-        // return self.decoder(decoderInput)
+        let shape = input.targetMotionFrames.shape
+        let origBatchSize = shape[0]
+        let numFrames = shape[1]
+        let numFeatures = shape[2]
 
-        // FROM encode() -----------------
-        // let origBatchSize = input.motionFrames.shape[0]
-        // let length = input.motionFrames.shape[1]
-        // let numFrames = input.motionFrames.shape[2]
-        // let hiddenSize = self.modelSize
+        let tmpBatchSize = origBatchSize * numFrames
+        let tmpMotionFrames = input.targetMotionFrames.reshaped(to: [tmpBatchSize, numFeatures])
 
-        // let tmpBatchSize = origBatchSize * length
-        // let tmpMotionFrames = input.motionFrames.reshaped(to: [tmpBatchSize, numFrames])
+        // FIXME: make targetEmbed() work
+        let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
+        var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
+        motionFeatures = positionalEncoding(motionFeatures)
 
-        // //FIXME: make targetEmbed() work
-        // let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
-        // var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, length, hiddenSize])
-        // motionFeatures = positionalEncoding(motionFeatures)
-
-        // let encoderInput: TransformerInput = TransformerInput(sequence: motionFeatures, attentionMask: input.mask)
-        // FROM encode() -----------------
-        return Tensor([[1, 2, 3]])
+        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
+        return self.decoder(decoderInput)
     }
     
     @differentiable
-    public func generate(input: MotionLangBatch) -> Tensor<Float> {
-        // return self.generator(self.callAsFunction(input))
-        return Tensor([[1, 2, 3]])
+    public func generate(input: LangMotionBatch) -> Tensor<Float> {
+        return self.generator(self.callAsFunction(input))
     }
     @differentiable
     public func generate(input: Tensor<Float>) -> Tensor<Float> {
