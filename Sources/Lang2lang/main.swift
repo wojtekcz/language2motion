@@ -81,26 +81,43 @@ var dataset = try Lang2Lang(
 
 print("Dataset acquired.")
 
-// get example
-// print("example: \(dataset.trainExamples[0])")
+func printBatch(_ batch: TranslationBatch) {
+    print("type: \(type(of:batch))")
+
+    print("source")
+    print("  tokenIds.shape: \(batch.tokenIds.shape)")
+    print("  mask.shape: \(batch.mask.shape)")
+
+    print("target")
+    print("  targetTokenIds.shape: \(batch.targetTokenIds.shape)")
+    print("  targetMask.shape: \(batch.targetMask.shape)")
+    print("  targetTruth.shape: \(batch.targetTruth.shape)")
+    print("  tokenCount: \(batch.tokenCount)")
+}
+
+/// one example to single batch
+print("\nSingle batch")
+print("============")
+let example = dataset.trainExamples[0]
+print("example: \(example)")
+print("example.sourceSentence: \"\(example.sourceSentence)\"")
+
+let singleBatch = textProcessor.preprocess(example: example)
+printBatch(singleBatch)
 
 // get a batch
-// print("\nOne batch (TranslationBatch):")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch = batches[0]
-// print("type: \(type(of:batch))")
-// print("tokenIds.shape: \(batch.tokenIds.shape)")
-// print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
-
-// print()
+print("\nOne batch:")
+var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+let epoch = epochIterator.next()
+let batches = Array(epoch!.1)
+let batch: TranslationBatch = batches[0]
+printBatch(batch)
 
 // run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let output = model(batch)
-// print("output.shape: \(output.shape)")
+print("\nRun one batch:")
+print("==============")
+let output = model(batch)
+print("output.shape: \(output.shape)")
 
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)
