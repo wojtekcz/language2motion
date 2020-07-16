@@ -9,7 +9,7 @@ import MotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 100
+let batchSize = 9
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 5e-4
@@ -73,22 +73,40 @@ var dataset = try Lang2Motion(
 
 print("Dataset acquired.")
 
+func printBatch(_ batch: LangMotionBatch) {
+    print("type: \(type(of:batch))")
+    print("sampleID: shape \(batch.sampleID.shape), value \(batch.sampleID)")
+
+    print("source")
+    print("  tokenIds.shape: \(batch.tokenIds.shape)")
+    print("  mask.shape: \(batch.mask.shape)")
+    print("  tokenCount.shape: \(batch.tokenCount.shape), \(batch.tokenCount)")
+
+    print("target")
+    print("  targetMotionFrames.shape: \(batch.targetMotionFrames.shape)")
+    print("  targetMask.shape: \(batch.targetMask.shape)")
+    print("  targetTruth.shape: \(batch.targetTruth.shape)")
+    print("  origMotionFramesCount: shape \(batch.origMotionFramesCount.shape), value \(batch.origMotionFramesCount)")
+}
+
+/// one example to single batch
+print("\nSingle batch")
+print("============")
+let example = dataset.trainExamples[0]
+print("example.sentence: \"\(example.sentence)\"")
+
+let singleBatch = textProcessor.preprocess(example: example)
+printBatch(singleBatch)
+
 /// Test model with one batch
 /// get a batch
-print("\nOne batch (MotionLangBatch):")
+print("\nOne batch:")
+print("=========")
 var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
 let epoch = epochIterator.next()
 let batches = Array(epoch!.1)
 let batch: LangMotionBatch = batches[0]
-print("type: \(type(of:batch))")
-// print("motionFrames.shape: \(batch.motionFrames.shape)")
-// // print("motionFlag.shape: \(batch.motionFlag.shape)")
-// print("mask.shape: \(batch.mask.shape)")
-// print("origMotionFramesCount.shape: \(batch.origMotionFramesCount.shape)")
-// print("origMotionFramesCount: \(batch.origMotionFramesCount)")
-// print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
-// print("targetMask.shape: \(batch.targetMask.shape)")
-// print("targetTruth.shape: \(batch.targetTruth.shape)")
+printBatch(batch)
 
 // /// run one batch
 // print("\nRun one batch:")

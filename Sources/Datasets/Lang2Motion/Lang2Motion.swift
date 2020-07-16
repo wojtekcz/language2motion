@@ -12,12 +12,12 @@ public struct Lang2Motion {
     }
 
     public struct Example {
-        public let id: String
+        public let sampleID: Int
         public let sentence: String
         public let motionSample: MotionSample
 
-        public init(id: String, sentence: String, motionSample: MotionSample) {
-            self.id = id
+        public init(sampleID: Int, sentence: String, motionSample: MotionSample) {
+            self.sampleID = sampleID
             self.sentence = sentence
             self.motionSample = motionSample
         }
@@ -69,8 +69,7 @@ extension Lang2Motion {
     }
 
     public static func getExample(motionSample: MotionSample, langRec: LangRec) -> Example {
-        let sample_id: String = "\(langRec.sampleID)" // Int to String
-        return Example(id: sample_id, sentence: langRec.text, motionSample: motionSample)
+        return Example(sampleID: langRec.sampleID, sentence: langRec.text, motionSample: motionSample)
     }
 }
 
@@ -142,7 +141,7 @@ extension Lang2Motion {
         // Create the training sequence of epochs.
         let entropy = SystemRandomNumberGenerator()
         trainingEpochs = TrainingEpochs(
-        samples: trainingSamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
+        samples: trainingSamples, batchSize: batchSize, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LangMotionBatch> in
             batches.lazy.map{ 
                 Lang2Motion.reduceDataBatches(Array($0))
@@ -150,33 +149,38 @@ extension Lang2Motion {
         }
         
         // Create the validation collection of batches.
-        validationBatches = validationSamples.inBatches(of: batchSize / maxSequenceLength).lazy.map{ 
+        validationBatches = validationSamples.inBatches(of: batchSize).lazy.map{ 
             Lang2Motion.reduceDataBatches(Array($0))
         }
     }
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
         // var maxLength: Int? = 50 // FIXME: move this out
+        // FIXME: can't pad source text to max length in a batch, because of X10 triggering recompilation on tensor shape change
         // maxLength = maxLength ?? batches.map { $0.motionFrames.shape[1] }.max()!
-
-        // let motionFrames: Tensor<Float> = Tensor(batches.map{$0.motionFrames.paddedOrCropped(to: maxLength!)})
 
         // // let mask: Tensor<Float> = Tensor(batches.map{$0.mask.paddedOrCropped(to: maxLength!)})        
         // // getting mask from motionFrames, so it's
         // let mask: Tensor<Float> = motionFrames[0...,0...,MotionFrame.cjpMotionFlagIdx].expandingShape(at: 1)
-
         // // let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
-        // let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{$0.origMotionFramesCount})
 
-        // let targetTokenIds: Tensor<Int32> = Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) })
         // let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
-        // let targetTruth: Tensor<Int32> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
-        return LangMotionBatch()
-        // motionFrames: motionFrames, 
-        //                 mask: mask,
-        //                 origMotionFramesCount: origMotionFramesCount,
-        //                 targetTokenIds: targetTokenIds,
-        //                 targetMask: targetMask,
-        //                 targetTruth: targetTruth)
+
+        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
+        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) })
+        let mask: Tensor<Float> = Tensor([[1, 2, 3]])
+        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.tokenCount.squeezingShape(at: 0) })
+
+        let targetMotionFrames: Tensor<Float> = Tensor(batches.map{ $0.targetMotionFrames })
+        let targetMask: Tensor<Float> = Tensor([[1, 2, 3]])
+        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.targetTruth })
+        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })
+
+        let batch = LangMotionBatch(sampleID: sampleID, 
+                tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
+                targetMotionFrames: targetMotionFrames, targetMask: targetMask,
+                targetTruth: targetTruth, origMotionFramesCount: origMotionFramesCount) // motionFrames: motionFrames, motionFlag: motionFlag,  origMotionFramesCount: origMotionFramesCount, target: targetTensor, targetPadId: padId)
+
+        return batch
     }
 }
