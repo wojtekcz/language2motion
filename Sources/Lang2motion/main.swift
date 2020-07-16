@@ -9,7 +9,7 @@ import MotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 9
+let batchSize = 2
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 5e-4
@@ -21,7 +21,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
+// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.490.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
@@ -45,7 +46,7 @@ let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
-var model = MotionLangTransformer(
+var model = LangMotionTransformer(
     sourceVocabSize: sourceVocabSize, 
     inputSize: inputSize,
     targetVocabSize: targetVocabSize,
@@ -108,9 +109,9 @@ let batches = Array(epoch!.1)
 let batch: LangMotionBatch = batches[0]
 printBatch(batch)
 
-// /// run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let deviceBatch = MotionLangBatch(copying: batch, to: device)
-// let output = model(deviceBatch)
-// print("output.shape: \(output.shape)")
+/// run one batch
+print("\nRun one batch:")
+print("==============")
+let deviceBatch = LangMotionBatch(copying: batch, to: device)
+let output = model(deviceBatch)
+print("output.shape: \(output.shape)")
