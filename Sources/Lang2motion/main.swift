@@ -81,7 +81,7 @@ func printBatch(_ batch: LangMotionBatch) {
     print("source")
     print("  tokenIds.shape: \(batch.tokenIds.shape)")
     print("  mask.shape: \(batch.mask.shape)")
-    print("  tokenCount.shape: \(batch.tokenCount.shape), \(batch.tokenCount)")
+    print("  tokenCount: shape \(batch.tokenCount.shape), value \(batch.tokenCount)")
 
     print("target")
     print("  targetMotionFrames.shape: \(batch.targetMotionFrames.shape)")

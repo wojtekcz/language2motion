@@ -159,21 +159,14 @@ extension Lang2Motion {
         // FIXME: can't pad source text to max length in a batch, because of X10 triggering recompilation on tensor shape change
         // maxLength = maxLength ?? batches.map { $0.motionFrames.shape[1] }.max()!
 
-        // // let mask: Tensor<Float> = Tensor(batches.map{$0.mask.paddedOrCropped(to: maxLength!)})        
-        // // getting mask from motionFrames, so it's
-        // let mask: Tensor<Float> = motionFrames[0...,0...,MotionFrame.cjpMotionFlagIdx].expandingShape(at: 1)
-        // // let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
-
-        // let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
-
         let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
         let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) })
         let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
         let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.tokenCount.squeezingShape(at: 0) })
 
-        let targetMotionFrames: Tensor<Float> = Tensor(batches.map{ $0.targetMotionFrames })
-        let targetMask: Tensor<Float> = Tensor([[1, 2, 3]])
-        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.targetTruth })
+        let targetMotionFrames: Tensor<Float> = Tensor(batches.map{ $0.targetMotionFrames.squeezingShape(at: 0) })
+        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
+        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })
 
         let batch = LangMotionBatch(sampleID: sampleID, 

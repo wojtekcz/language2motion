@@ -30,6 +30,20 @@ public struct LangMotionBatch: KeyPathIterable {
         self.targetTruth = targetTruth
         self.origMotionFramesCount = origMotionFramesCount
     }
+
+    public static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
+        var targetMask = Tensor(zerosLike: target)
+            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
+            .expandingShape(at: -2)
+        targetMask *= subsequentMask3(size: target.shape.last!)
+        return Tensor<Float>(targetMask)
+    }
+}
+
+public func subsequentMask3(size: Int) -> Tensor<Int32> {
+    let attentionShape = [1, size, size]
+    return Tensor<Int32>(ones: TensorShape(attentionShape))
+        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
 }
 
 extension LangMotionBatch {
