@@ -41,7 +41,7 @@ public struct LangMotionTransformer: Module {
         self.modelSize = modelSize
     }
 
-@differentiable
+    @differentiable
     public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
         let encodedMemory = self.encode(input: input)
         return self.decode(input: input, memory: encodedMemory)
