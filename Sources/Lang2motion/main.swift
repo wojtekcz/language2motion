@@ -68,6 +68,11 @@ var model = LangMotionTransformer(
 
 model.move(to: device)
 
+let nbJoints = 48
+let nbMixtures = 20
+var mixtureModel = MotionGaussianMixtureModel(inputSize: inputSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
+mixtureModel.move(to: device)
+
 /// load dataset
 print("\nLoading dataset...")
 
@@ -122,8 +127,10 @@ printBatch(batch)
 print("\nRun one batch:")
 print("==============")
 let deviceBatch = LangMotionBatch(copying: batch, to: device)
-let output = model(deviceBatch)
-print("output.shape: \(output.shape)")
+let decoded = model(deviceBatch)
+print("decoded.shape: \(decoded.shape)")
+let allDecoderOutputs = mixtureModel(decoded)
+print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
 
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)

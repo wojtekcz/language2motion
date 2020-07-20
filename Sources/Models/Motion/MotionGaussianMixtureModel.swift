@@ -27,34 +27,10 @@ public struct MotionGaussianMixtureModel: Layer {
         // and stop bit
         linearStop = Dense<Float>(inputSize: inputSize, outputSize: 1)
     }
-    // def forward_step(self, x):  # bs x input_size
-    //     # Note: we run this one step at a time
-
-    //     # Processing gaussian mixture params:
-    //     mixture_means = self.linear_mixture_means(x)
-    //     mixture_vars = self.softplus(self.linear_mixture_vars(x))
-    //     mixture_weights = self.softmax(self.linear_mixture_weights(x))
-    //     # stop
-    //     stop = self.sigmoid(self.linear_stop(x))
-    //     # merge
-    //     mixture_merged = torch.cat((mixture_means, mixture_vars, mixture_weights, stop), 1)
-
-    //     return mixture_merged  # bs x output_size
-
-    // def forward(self, x, all_decoder_outputs):  # batch_size x max_len x input_size, batch_size x max_len x output_size
-    //     max_target_length = x.shape[1]
-
-    //     # add neutral position vector?
-    //     # Run through mixture_model one time step at a time
-    //     for t in range(max_target_length-1):
-    //         decoder_output = x[:, t].clone().detach()
-    //         mixture_merged = self.forward_step(decoder_output)
-    //         all_decoder_outputs[:, t] = mixture_merged  # Store this step's outputs
-    //     return all_decoder_outputs
 
     @differentiable
-    public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        let x = input
+    func forwardStep(_ x: Tensor<Float>) -> Tensor<Float> {
+        // bs x input_size
         // Processing gaussian mixture params:
         let mixtureMeans = linearMixtureMeans(x)
         let mixtureVars = softplus(linearMixtureVars(x))
@@ -63,7 +39,23 @@ public struct MotionGaussianMixtureModel: Layer {
         let stop = sigmoid(linearStop(x))
         // merge
         let mixtureMerged = Tensor(concatenating: [mixtureMeans, mixtureVars, mixtureWeights, stop])
-        return mixtureMerged
+        return mixtureMerged // bs x output_size
+    }
+
+    @differentiable
+    public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
+        let x = input
+        let bs = x.shape[0]
+        let max_target_length = x.shape[1]
+        var all_decoder_outputs = Tensor<Float>(zeros: [bs, max_target_length, self.outputSize])
+        // add neutral position vector?
+        // Run through mixture_model one time step at a time
+        for t in 0..<max_target_length-1 {
+            let decoder_output: Tensor<Float> = x[0..., t]
+
+            all_decoder_outputs[0..., t] = self.forwardStep(decoder_output)
+        }
+        return all_decoder_outputs
     }
 
     static func getOutputSize(nbJoints: Int, nbMixtures: Int) -> Int {
