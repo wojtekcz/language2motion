@@ -54,7 +54,7 @@ let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
-var model = LangMotionTransformer(
+var transformer = LangMotionTransformer(
     vocabSize: vocabSize, 
     inputSize: inputSize,
     layerCount: layerCount, 
@@ -64,12 +64,33 @@ var model = LangMotionTransformer(
     dropoutProbability: dropoutProbability
 )
 
-model.move(to: device)
-
 let nbJoints = 48
 let nbMixtures = 20
-var mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
-mixtureModel.move(to: device)
+var mixtureModel = MotionGaussianMixtureModel(inputSize: nbJoints, nbJoints: nbJoints, nbMixtures: nbMixtures)
+// mixtureModel.move(to: device)
+
+public struct LangMotionModel: Module {
+    public var transformer: LangMotionTransformer
+    public var mixtureModel: MotionGaussianMixtureModel
+
+    public init(transformer: LangMotionTransformer, mixtureModel: MotionGaussianMixtureModel) {
+        self.transformer = transformer
+        self.mixtureModel = mixtureModel
+    }
+
+    @differentiable
+    public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
+        return self.transformer(input)
+    }
+
+    @differentiable
+    public func generate(input: LangMotionBatch) -> Tensor<Float> {
+        return self.mixtureModel(self.transformer.generator(self.callAsFunction(input)))
+    }
+}
+
+var model = LangMotionModel(transformer: transformer, mixtureModel: mixtureModel)
+model.move(to: device)
 
 /// load dataset
 print("\nLoading dataset...")
@@ -125,9 +146,14 @@ printBatch(batch)
 print("\nRun one batch:")
 print("==============")
 let deviceBatch = LangMotionBatch(copying: batch, to: device)
-let decoded = model(deviceBatch)
-print("decoded.shape: \(decoded.shape)")
-let allDecoderOutputs = mixtureModel(decoded)
+// let decoded = model(deviceBatch)
+// print("decoded.shape: \(decoded.shape)")
+// let generated = transformer.generate(input: deviceBatch)
+// print("generated.shape: \(generated.shape)")
+// let allDecoderOutputs = mixtureModel(generated)
+// print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
+
+let allDecoderOutputs = model.generate(input: deviceBatch)
 print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
 
 /// Optimizer
@@ -137,27 +163,45 @@ optimizer = Adam(copying: optimizer, to: device)
 let logdirURL = dataURL.appendingPathComponent("tboard/Lang2motion/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
+let args = LossArgs(
+        nb_joints: nbJoints,
+        nb_mixtures: nbMixtures,
+        mixture_regularizer_type: "None",  // ["cv", "l2", "None"]
+        mixture_regularizer: 0.0
+)
+
+// loss = normal_mixture_surrogate_loss(
+//     y_true=batch.trg_y,
+//     y_pred=all_decoder_outputs.contiguous()
+// )
+
 /// Training helpers
-func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch) -> Float {
-    // let labels = batch.targetTruth.reshaped(to: [-1])
-    // let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
-    // let result = withLearningPhase(.training) { () -> Float in
-    //     let (loss, grad) = valueWithGradient(at: model) {
-    //         (model) -> Tensor<Float> in
-    //         let logits = model.generate(input: batch).reshaped(to: [resultSize, -1])
-    //         let sce = softmaxCrossEntropy(logits: logits, labels: labels)
-    //         return sce
-    //     }
-    //     optimizer.update(&model, along: grad)
-    //     LazyTensorBarrier()
-    //     return loss.scalarized()
-    // }
-    // return result
-    return 0.0
+func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotionModel>, for batch: LangMotionBatch) -> Float {
+    let y_true = batch.targetTruth
+    let result = withLearningPhase(.training) { () -> Float in
+        let (loss, grad) = valueWithGradient(at: model) {
+            (model) -> Tensor<Float> in
+            let y_pred = model.generate(input: batch)
+            let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
+            let n_items: Float = Float(loss.shape[0] * loss.shape[1])
+            // let ones = Tensor<Float>(ones: loss.shape)
+            // let nans = loss.isNaN
+            // let loss_notNaN = loss.replacing(with:ones, where:nans)
+            // let avg_loss = loss_notNaN.sum() / n_items
+            let avg_loss = loss.sum() / n_items
+            print("avg_loss: \(avg_loss)")
+            return avg_loss
+        }
+        optimizer.update(&model, along: grad)
+        LazyTensorBarrier()
+        return loss.scalarized()
+    }
+    return result
+    // return 0.0
 }
 
 /// returns validation loss
-func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) -> Float {
+func validate(model: inout LangMotionModel, for batch: LangMotionBatch) -> Float {
     // let labels = batch.targetTruth.reshaped(to: [-1])
     // let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
     // let result = withLearningPhase(.inference) { () -> Float in

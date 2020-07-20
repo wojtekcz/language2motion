@@ -1,6 +1,6 @@
 import TensorFlow
 
-public struct MotionGaussianMixtureModel: Layer {
+public struct MotionGaussianMixtureModel: Module {
 
     @noDerivative public var inputSize: Int
     @noDerivative public var nbJoints: Int
@@ -56,13 +56,11 @@ public struct MotionGaussianMixtureModel: Layer {
 
             let decoder_output = self.forwardStep(decoder_input)
             all_outputs.append(decoder_output)
-            // all_decoder_outputs[0..., t] = self.forwardStep(decoder_output)
         }
+        all_outputs.append(Tensor<Float>(zeros: [bs, self.outputSize]))
+
         let all_outputs_tensor = Tensor<Float>(stacking: all_outputs, alongAxis: 1)
-        // print("all_decoder_outputs.shape: \(all_decoder_outputs.shape)")
-        // print("all_outputs_tensor.shape: \(all_outputs_tensor.shape)")
         return all_outputs_tensor
-        // return all_decoder_outputs
     }
 
     static func getOutputSize(nbJoints: Int, nbMixtures: Int) -> Int {
