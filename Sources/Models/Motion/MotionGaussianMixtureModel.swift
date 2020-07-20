@@ -38,7 +38,7 @@ public struct MotionGaussianMixtureModel: Layer {
         // stop
         let stop = sigmoid(linearStop(x))
         // merge
-        let mixtureMerged = Tensor(concatenating: [mixtureMeans, mixtureVars, mixtureWeights, stop])
+        let mixtureMerged = Tensor(concatenating: [mixtureMeans, mixtureVars, mixtureWeights, stop], alongAxis: 1)
         return mixtureMerged // bs x output_size
     }
 
@@ -47,15 +47,22 @@ public struct MotionGaussianMixtureModel: Layer {
         let x = input
         let bs = x.shape[0]
         let max_target_length = x.shape[1]
-        var all_decoder_outputs = Tensor<Float>(zeros: [bs, max_target_length, self.outputSize])
+        // var all_decoder_outputs = Tensor<Float>(zeros: [bs, max_target_length, self.outputSize])
         // add neutral position vector?
         // Run through mixture_model one time step at a time
+        var all_outputs: [Tensor<Float>] = []
         for t in 0..<max_target_length-1 {
-            let decoder_output: Tensor<Float> = x[0..., t]
+            let decoder_input: Tensor<Float> = x[0..., t]
 
-            all_decoder_outputs[0..., t] = self.forwardStep(decoder_output)
+            let decoder_output = self.forwardStep(decoder_input)
+            all_outputs.append(decoder_output)
+            // all_decoder_outputs[0..., t] = self.forwardStep(decoder_output)
         }
-        return all_decoder_outputs
+        let all_outputs_tensor = Tensor<Float>(stacking: all_outputs, alongAxis: 1)
+        // print("all_decoder_outputs.shape: \(all_decoder_outputs.shape)")
+        // print("all_outputs_tensor.shape: \(all_outputs_tensor.shape)")
+        return all_outputs_tensor
+        // return all_decoder_outputs
     }
 
     static func getOutputSize(nbJoints: Int, nbMixtures: Int) -> Int {

@@ -47,10 +47,10 @@ let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer,
 
 /// instantiate model
 let sourceVocabSize = vocabulary.count
-let inputSize = 48 // TODO: get value from dataset
+let inputSize = 48 // TODO: get value from dataset // rename to nbJoints
 let targetVocabSize = vocabulary.count
 let layerCount: Int = 6
-let modelSize: Int = 256
+let modelSize: Int = 256 // hiddenSize
 let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
@@ -70,7 +70,7 @@ model.move(to: device)
 
 let nbJoints = 48
 let nbMixtures = 20
-var mixtureModel = MotionGaussianMixtureModel(inputSize: inputSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
+var mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
 mixtureModel.move(to: device)
 
 /// load dataset
