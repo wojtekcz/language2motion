@@ -170,11 +170,6 @@ let args = LossArgs(
         mixture_regularizer: 0.0
 )
 
-// loss = normal_mixture_surrogate_loss(
-//     y_true=batch.trg_y,
-//     y_pred=all_decoder_outputs.contiguous()
-// )
-
 /// Training helpers
 func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotionModel>, for batch: LangMotionBatch) -> Float {
     let y_true = batch.targetTruth
@@ -189,7 +184,7 @@ func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotion
             // let loss_notNaN = loss.replacing(with:ones, where:nans)
             // let avg_loss = loss_notNaN.sum() / n_items
             let avg_loss = loss.sum() / n_items
-            print("avg_loss: \(avg_loss)")
+            // print("avg_loss: \(avg_loss)")
             return avg_loss
         }
         optimizer.update(&model, along: grad)
@@ -197,19 +192,20 @@ func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotion
         return loss.scalarized()
     }
     return result
-    // return 0.0
 }
 
 /// returns validation loss
 func validate(model: inout LangMotionModel, for batch: LangMotionBatch) -> Float {
-    // let labels = batch.targetTruth.reshaped(to: [-1])
-    // let resultSize = batch.targetTruth.shape.last! * batch.targetTruth.shape.first!
-    // let result = withLearningPhase(.inference) { () -> Float in
-    //     softmaxCrossEntropy(logits: model.generate(input: batch).reshaped(to: [resultSize, -1]), labels: labels).scalarized()
-    // }
-    // LazyTensorBarrier()
-    // return result
-    return 0.0
+    let y_true = batch.targetTruth
+    let result = withLearningPhase(.inference) { () -> Float in
+        let y_pred = model.generate(input: batch)
+        let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
+        let n_items: Float = Float(loss.shape[0] * loss.shape[1])
+        let avg_loss = loss.sum() / n_items
+        return avg_loss.scalarized()
+    }
+    LazyTensorBarrier()
+    return result
 }
 
 /// Training loop
