@@ -46,9 +46,8 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: 
 let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
 
 /// instantiate model
-let sourceVocabSize = vocabulary.count
+let vocabSize = vocabulary.count
 let inputSize = 48 // TODO: get value from dataset // rename to nbJoints
-let targetVocabSize = vocabulary.count
 let layerCount: Int = 6
 let modelSize: Int = 256 // hiddenSize
 let feedForwardSize: Int = 1024
@@ -56,9 +55,8 @@ let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
 var model = LangMotionTransformer(
-    sourceVocabSize: sourceVocabSize, 
+    vocabSize: vocabSize, 
     inputSize: inputSize,
-    targetVocabSize: targetVocabSize,
     layerCount: layerCount, 
     modelSize: modelSize, 
     feedForwardSize: feedForwardSize, 

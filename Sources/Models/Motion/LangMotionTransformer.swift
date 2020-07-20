@@ -16,8 +16,7 @@ public struct LangMotionTransformer: Module {
     public var generator: Generator
     @noDerivative public var modelSize: Int
 
-    // TODO: kill targetVocabSize
-    public init(sourceVocabSize: Int, inputSize: Int, targetVocabSize: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
+    public init(vocabSize: Int, inputSize: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
                                            targetSize: modelSize,
@@ -34,10 +33,10 @@ public struct LangMotionTransformer: Module {
         self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         motionDense = Dense<Float>(inputSize: inputSize, outputSize: modelSize)
         // self.motionEmbed = Dense<Float>(inputSize: inputSize, outputSize: modelSize)
-        self.sourceEmbed = Sequential(Embedding(vocabularySize: sourceVocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
+        self.sourceEmbed = Sequential(Embedding(vocabularySize: vocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
         // self.sourceEmbed = Sequential(motionDense, positionalEncoding)
         // self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)
-        self.generator = Generator(dimModel: modelSize, vocabSize: targetVocabSize)
+        self.generator = Generator(dimModel: modelSize, vocabSize: inputSize)
         self.modelSize = modelSize
     }
 
