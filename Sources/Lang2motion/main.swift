@@ -9,9 +9,9 @@ import MotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 60
+let batchSize = 300
 let maxSequenceLength =  50
-let nEpochs = 1
+let nEpochs = 10
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
@@ -21,7 +21,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
 // let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.490.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
