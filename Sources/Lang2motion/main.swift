@@ -9,7 +9,7 @@ import MotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 4
+let batchSize = 60
 let maxSequenceLength =  50
 let nEpochs = 1
 let learningRate: Float = 5e-4
@@ -21,8 +21,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.490.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.490.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
@@ -134,18 +134,18 @@ printBatch(singleBatch)
 
 /// Test model with one batch
 /// get a batch
-print("\nOne batch:")
-print("=========")
-var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch = epochIterator.next()
-let batches = Array(epoch!.1)
-let batch: LangMotionBatch = batches[0]
-printBatch(batch)
+// print("\nOne batch:")
+// print("=========")
+// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+// let epoch = epochIterator.next()
+// let batches = Array(epoch!.1)
+// let batch: LangMotionBatch = batches[0]
+// printBatch(batch)
 
 /// run one batch
-print("\nRun one batch:")
-print("==============")
-let deviceBatch = LangMotionBatch(copying: batch, to: device)
+// print("\nRun one batch:")
+// print("==============")
+// let deviceBatch = LangMotionBatch(copying: batch, to: device)
 // let decoded = model(deviceBatch)
 // print("decoded.shape: \(decoded.shape)")
 // let generated = transformer.generate(input: deviceBatch)
@@ -153,8 +153,8 @@ let deviceBatch = LangMotionBatch(copying: batch, to: device)
 // let allDecoderOutputs = mixtureModel(generated)
 // print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
 
-let allDecoderOutputs = model.generate(input: deviceBatch)
-print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
+// let allDecoderOutputs = model.generate(input: deviceBatch)
+// print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
 
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
