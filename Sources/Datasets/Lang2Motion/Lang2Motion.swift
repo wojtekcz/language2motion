@@ -23,7 +23,7 @@ public struct Lang2Motion {
         }
     }
 
-        public let motionDataset: MotionDataset
+    public let motionDataset: MotionDataset
 
     public let langRecs: [LangRec]
     public let langRecsDict: [Int: LangRec]
@@ -39,10 +39,7 @@ public struct Lang2Motion {
     public let trainingSamples: Samples
     /// The validation texts.
     public let validationSamples: Samples
-    // public let validationSamples: [(text: String, label: String)]
 
-    /// The sequence length to which every sentence will be padded.
-    public let maxSequenceLength: Int
     public let batchSize: Int
 
     /// The type of the collection of batches.
@@ -78,7 +75,6 @@ extension Lang2Motion {
     public init(
         motionDatasetURL: URL,
         langDatasetURL: URL,
-        maxSequenceLength: Int, // TODO: separate motion length from text sequence length?
         batchSize: Int,
         minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
@@ -135,7 +131,6 @@ extension Lang2Motion {
         trainingSamples = trainExamples.lazy.map(exampleMap)
         validationSamples = valExamples.lazy.map(exampleMap)
 
-        self.maxSequenceLength = maxSequenceLength
         self.batchSize = batchSize
 
         // Create the training sequence of epochs.
@@ -155,10 +150,6 @@ extension Lang2Motion {
     }
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
-        // var maxLength: Int? = 50 // FIXME: move this out
-        // FIXME: can't pad source text to max length in a batch, because of X10 triggering recompilation on tensor shape change
-        // maxLength = maxLength ?? batches.map { $0.motionFrames.shape[1] }.max()!
-
         let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
         let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) })
         let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })

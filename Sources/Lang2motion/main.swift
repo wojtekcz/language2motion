@@ -10,13 +10,15 @@ import MotionModels
 /// Set training params
 let runName = "run_1"
 let batchSize = 300
-let maxSequenceLength =  50
+let maxTextSequenceLength =  50
+let maxMotionLength =  50
 let nEpochs = 10
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
-print("maxSequenceLength: \(maxSequenceLength)")
+print("maxTextSequenceLength: \(maxTextSequenceLength)")
+print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
@@ -44,13 +46,13 @@ print(device)
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer, maxSequenceLength: maxSequenceLength)
+let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer, maxTextSequenceLength: maxTextSequenceLength, maxMotionLength: maxMotionLength)
 
 /// instantiate model
 let vocabSize = vocabulary.count
 let nbJoints = 48 // TODO: get value from dataset
 let layerCount: Int = 6
-let modelSize: Int = 256 // hiddenSize
+let modelSize: Int = 256
 let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
@@ -78,7 +80,6 @@ print("\nLoading dataset...")
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     langDatasetURL: langDatasetURL,
-    maxSequenceLength: maxSequenceLength,
     batchSize: batchSize
 ) { (example: Lang2Motion.Example) -> LangMotionBatch in    
     let singleBatch = textProcessor.preprocess(example: example)
