@@ -192,6 +192,7 @@ func validate(model: inout LangMotionModel, for batch: LangMotionBatch) -> Float
 /// Training loop
 print("\nTraining Transformer for the Lang2motion task!")
 var trainingStepCount = 0
+let print_every = 10
 time() {
     LazyTensorBarrier()
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
@@ -204,12 +205,12 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            if (trainingStepCount < 5) {
+            if (trainingStepCount < 5 || trainingStepCount % print_every == 0) {
                 print("==> step \(trainingStepCount)")
             }
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            if (trainingStepCount < 5) {
+            if (trainingStepCount < 5 || trainingStepCount % print_every == 0) {
                 print("current loss at step \(trainingStepCount): \(loss)")
             }
             trainingLossSum += loss
