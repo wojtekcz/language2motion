@@ -7,6 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Lang2motion",
+            "program": "${workspaceFolder}/.build/debug/Lang2motion",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "swift-build2",
+            "initCommands": ["settings set target.disable-aslr false"]
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "PreprocessMotionDataset",
             "program": "${workspaceFolder}/.build/debug/PreprocessMotionDataset",
             "args": [],
@@ -49,16 +59,6 @@
             "request": "launch",
             "name": "Lang2lang",
             "program": "${workspaceFolder}/.build/debug/Lang2lang",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "swift-build2",
-            "initCommands": ["settings set target.disable-aslr false"]
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Lang2motion",
-            "program": "${workspaceFolder}/.build/debug/Lang2motion",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "swift-build2",
