@@ -48,7 +48,7 @@ let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer,
 
 /// instantiate model
 let vocabSize = vocabulary.count
-let inputSize = 48 // TODO: get value from dataset // rename to nbJoints
+let nbJoints = 48 // TODO: get value from dataset
 let layerCount: Int = 6
 let modelSize: Int = 256 // hiddenSize
 let feedForwardSize: Int = 1024
@@ -57,7 +57,7 @@ let dropoutProbability: Double = 0.1
 
 var transformer = LangMotionTransformer(
     vocabSize: vocabSize, 
-    inputSize: inputSize,
+    nbJoints: nbJoints,
     layerCount: layerCount, 
     modelSize: modelSize, 
     feedForwardSize: feedForwardSize, 
@@ -65,30 +65,9 @@ var transformer = LangMotionTransformer(
     dropoutProbability: dropoutProbability
 )
 
-let nbJoints = 48
 let nbMixtures = 20
 var mixtureModel = MotionGaussianMixtureModel(inputSize: nbJoints, nbJoints: nbJoints, nbMixtures: nbMixtures)
 // mixtureModel.move(to: device)
-
-public struct LangMotionModel: Module {
-    public var transformer: LangMotionTransformer
-    public var mixtureModel: MotionGaussianMixtureModel
-
-    public init(transformer: LangMotionTransformer, mixtureModel: MotionGaussianMixtureModel) {
-        self.transformer = transformer
-        self.mixtureModel = mixtureModel
-    }
-
-    @differentiable
-    public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
-        return self.transformer(input)
-    }
-
-    @differentiable
-    public func generate(input: LangMotionBatch) -> Tensor<Float> {
-        return self.mixtureModel(self.transformer.generator(self.callAsFunction(input)))
-    }
-}
 
 var model = LangMotionModel(transformer: transformer, mixtureModel: mixtureModel)
 model.move(to: device)
