@@ -57,8 +57,7 @@ public struct TextProcessor2 {
 
         // target: motion
         // **************
-        // TODO: stop random cropping
-        let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray).paddedOrCropped(to: maxMotionLength).expandingShape(at: 0)
+        let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray).paddedAndCropped(to: maxMotionLength).expandingShape(at: 0)
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(example.motionSample.motionFramesArray.shape[0])])
 
         let rangeExceptLast = 0..<(motionFrames.shape[1] - 1)
