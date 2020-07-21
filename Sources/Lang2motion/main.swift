@@ -22,10 +22,16 @@ print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
+enum DatasetSize: String {
+    case full = ""
+    case mini = "mini."
+    case s490 = "490."
+}
+
+let datasetSize: DatasetSize = .s490
+
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
-// let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.490.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.\(datasetSize.rawValue)plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
