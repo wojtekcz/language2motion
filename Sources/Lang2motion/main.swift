@@ -9,9 +9,10 @@ import MotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 300
-let maxTextSequenceLength =  50
-let maxMotionLength =  50
+let batchSize = 4
+// let batchSize = 300
+let maxTextSequenceLength =  20
+let maxMotionLength =  100
 let nEpochs = 10
 let learningRate: Float = 5e-4
 
@@ -74,6 +75,7 @@ var transformer = LangMotionTransformer(
 )
 
 let nbMixtures = 20
+// TODO: integrate MotionGaussianMixtureModel with Generator
 var mixtureModel = MotionGaussianMixtureModel(inputSize: nbJoints, nbJoints: nbJoints, nbMixtures: nbMixtures)
 // mixtureModel.move(to: device)
 
