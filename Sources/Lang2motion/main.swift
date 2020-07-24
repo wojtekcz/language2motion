@@ -151,13 +151,15 @@ print("====================")
 let generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
 print("generated.shape: \(generated.shape)")
 
-let (log_probabilities, done) = performNormalMixtureSampling(
+let (motion, log_probs, done) = performNormalMixtureSampling(
     preds: generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
 
-print("log_probabilities.count: \(log_probabilities.count)")
+print("motion.shape: \(motion.shape)")
+print("log_probs.count: \(log_probs.count)")
 print("done.count: \(done.count)")
 print("done: \(done)")
-print("log_probabilities: \(log_probabilities)")
+print("log_probs: \(log_probs)")
+print("motion: \(motion)")
 
 exit(0)
 

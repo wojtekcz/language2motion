@@ -36,12 +36,13 @@ func bernoulli_pdf(sample: Int, p: Float) -> Float {
     return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
-func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (log_probabilities: [Float], done: [Bool]) {
+func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: [Bool]) {
     let TINY: Float = 1e-8
     let _preds = preds.reshaped(to:
         [preds.shape[0], 2 * nb_joints * nb_mixtures + nb_mixtures + 1])
 
-    var log_probabilities: [Float] = [Float](repeating:0.0, count: _preds.shape[0]-1)
+    var motion: Tensor<Float> = Tensor<Float>(zeros: [_preds.shape[0]-1, nb_joints])
+    var log_probs: [Float] = [Float](repeating:0.0, count: _preds.shape[0]-1)
     var done: [Bool] = [Bool](repeating: false, count: _preds.shape[0]-1)
 
     let all_means = _preds[0..., 0..<nb_joints * nb_mixtures]
@@ -72,7 +73,6 @@ func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtu
         assert(m.shape == v.shape)
         // https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html
         let s = np.random.normal(m.scalars, v.scalars)
-        // print(s)
         samples[width_idx, 0...] = Tensor<Float>(Array(s)!)
         means[width_idx, 0...] = m
         variances[width_idx, 0...] = v
@@ -86,11 +86,14 @@ func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtu
         }
         // https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.random.binomial.html
         let sampled_stop: Int = Int(np.random.binomial(n: 1, p: stop))!
-        log_probabilities[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
-        log_probabilities[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
+        let combined = Tensor<Float>(concatenating: [sample[0..<nb_joints-1], Tensor<Float>([Float(sampled_stop)])])
+        assert(combined.shape == [nb_joints])
+        motion[idx] = combined
+        log_probs[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
+        log_probs[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
         done[idx] = (sampled_stop == 0)
     }
-    return (log_probabilities: log_probabilities, done: done)
+    return (motion: motion, log_probs: log_probs, done: done)
 }
 
 func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
