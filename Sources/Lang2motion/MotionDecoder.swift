@@ -21,35 +21,28 @@ func randomNumber(probabilities: [Double]) -> Int {
     return (probabilities.count - 1)
 }
 
-// def gaussian_pdf(sample, means, variances):
-//     assert sample.ndim == 1
-//     assert sample.shape == means.shape
-//     assert sample.shape == variances.shape
-
-//     return 1. / (np.sqrt(2. * np.pi * variances)) * np.exp(-np.square(sample - means) / (2. * variances))
-func gaussian_pdf(sample: Float, means: Float, variances: Float) -> Float {
-    // let a1 = np.sqrt(2.0 * np.pi * variances)
-    // let a2 = np.exp(-np.square(sample - means)
-    // return Float(1.0) / a1 * a2 / (2.0 * variances)
-    return 0.0
+func gaussian_pdf(sample: Tensor<Float>, means: Tensor<Float>, variances: Tensor<Float>) -> Tensor<Float> {
+    // one-dim tensors
+    assert(sample.shape.count == 1)
+    assert(sample.shape == means.shape)
+    assert(sample.shape == variances.shape)
+    let a1 = sqrt(Float(2.0) * Float(np.pi)! * variances)
+    let a2 = -(sample - means).squared()
+    return Float(1.0) / a1 * exp(a2 / (2.0 * variances))
 }
 
-
-// def bernoulli_pdf(sample, p):
-//     return float(sample) * p + float(1. - sample) * (1. - p)
-func bernoulli_pdf(sample: Float, p: Float) -> Float {
-    return 0.0
+func bernoulli_pdf(sample: Int, p: Float) -> Float {
+    let fSample = Float(sample)
+    return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
-    // let b_pdf1 = Float(1.0) - y_true_stop
-    // let b_pdf2 = Float(1.0) - stop
-    // let bernoulli_pdf = y_true_stop * stop + b_pdf1 * b_pdf2
-
-
-func perform_normal_mixture_sampling(preds: Tensor<Float>, decoder: Any, nb_joints: Int, 
-                                     previous_outputs: [[Tensor<Float>]], log_probabilities: [[Float]],
-                                     done: [Bool], nb_mixtures: Int) -> ([[Tensor<Float>]], [[Float]], [Bool]) {
-// def perform_normal_mixture_sampling(preds, decoder, nb_joints, previous_outputs, log_probabilities, done, args):
+// TODO: simplify input params
+// TODO: add output names to a tuple
+func performNormalMixtureSampling(preds: Tensor<Float>, decoder: Any, nb_joints: Int, 
+                                  previous_outputs: [[Tensor<Float>]], log_probabilities: [Float],
+                                  done: [Bool], nb_mixtures: Int) -> ([[Tensor<Float>]], [Float], [Bool]) {
+    var _log_probabilities = log_probabilities
+    var _done = done
     let TINY: Float = 1e-8
     let _preds = preds.reshaped(to:
         [preds.shape[0], 2 * nb_joints * nb_mixtures + nb_mixtures + 1])
@@ -70,7 +63,7 @@ func perform_normal_mixture_sampling(preds: Tensor<Float>, decoder: Any, nb_join
     for width_idx in 0..<_preds.shape[0] {
         // Decide which mixture to sample from
         let p = weights[width_idx].scalars.map { Double($0)}
-        // assert p.shape == (nb_mixtures,)
+        assert(p.count == nb_mixtures)
         let mixture_idx = randomNumber(probabilities: p) //np.random.choice(range(nb_mixtures), p=p)
 
         /// Sample from it.
@@ -90,23 +83,21 @@ func perform_normal_mixture_sampling(preds: Tensor<Float>, decoder: Any, nb_join
     // for idx, (sample, stop) in enumerate(zip(samples, stops)):
     for idx in 0..<samples.shape[0] {
         let sample = samples[idx]
-        let stop = stops[idx]
+        let stop: Float = stops[idx].scalar!
         if done[idx] {
             continue
         }
         // https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.random.binomial.html
-        let sampled_stop = np.random.binomial(n: 1, p: stop.scalars)
-        let combined = Tensor<Float>(concatenating: [sample, Tensor<Float>(numpy: sampled_stop)!])
+        let sampled_stop: Int = Int(np.random.binomial(n: 1, p: stop))!
+        let combined = Tensor<Float>(concatenating: [sample, Tensor<Float>([Float(sampled_stop)])])
         assert(combined.shape == [nb_joints + 1])
         _previous_outputs[idx].append(combined)
-        // let a2 = np.log(gaussian_pdf(sample.scalars, means[idx], variances[idx]))
-        // let a1: Float = np.sum(a2)
 
-        // log_probabilities[idx] += a1
-        // log_probabilities[idx] += np.log(bernoulli_pdf(sampled_stop, stop))
-        // done[idx] = (sampled_stop == 0)
+        _log_probabilities[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
+        _log_probabilities[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
+        _done[idx] = (sampled_stop == 0)
     }
-    return (_previous_outputs, log_probabilities, done)
+    return (_previous_outputs, _log_probabilities, _done)
 }
 
 func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
