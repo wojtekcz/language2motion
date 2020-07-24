@@ -2,7 +2,7 @@ import Foundation
 import Datasets
 
 let grouppedJoints = false
-let normalized = true
+let normalized = false
 let sampled: Int? = nil // nil
 // let factor = 1
 // let maxFrames = 50000
