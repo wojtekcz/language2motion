@@ -14,8 +14,8 @@ import SummaryWriter
 
 
 let runName = "run_2"
-let batchSize = 4000
-// let batchSize = 200
+// let batchSize = 4000
+let batchSize = 200
 let maxSequenceLength =  50
 let nEpochs = 40
 // let learningRate: Float = 2e-5
@@ -28,7 +28,8 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+// let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
 
 // X10 warmup
 let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
@@ -63,7 +64,8 @@ var model = TransformerModel(
     dropoutProbability: dropoutProbability
 )
 
-let device = Device.defaultXLA
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print(device)
 model.move(to: device)
 
