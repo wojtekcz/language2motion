@@ -145,6 +145,22 @@ printBatch(singleBatch)
 // let allDecoderOutputs = model.generate(input: deviceBatch)
 // print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
 
+/// decode single batch
+print("\nDecode single batch:")
+print("====================")
+let generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
+print("generated.shape: \(generated.shape)")
+
+let (log_probabilities, done) = performNormalMixtureSampling(
+    preds: generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+
+print("log_probabilities.count: \(log_probabilities.count)")
+print("done.count: \(done.count)")
+print("done: \(done)")
+print("log_probabilities: \(log_probabilities)")
+
+exit(0)
+
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)

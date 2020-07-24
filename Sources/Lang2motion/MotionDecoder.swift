@@ -36,31 +36,29 @@ func bernoulli_pdf(sample: Int, p: Float) -> Float {
     return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
-// TODO: simplify input params
-// TODO: add output names to a tuple
-func performNormalMixtureSampling(preds: Tensor<Float>, decoder: Any, nb_joints: Int, 
-                                  previous_outputs: [[Tensor<Float>]], log_probabilities: [Float],
-                                  done: [Bool], nb_mixtures: Int) -> ([[Tensor<Float>]], [Float], [Bool]) {
-    var _log_probabilities = log_probabilities
-    var _done = done
+func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (log_probabilities: [Float], done: [Bool]) {
     let TINY: Float = 1e-8
     let _preds = preds.reshaped(to:
         [preds.shape[0], 2 * nb_joints * nb_mixtures + nb_mixtures + 1])
+
+    var log_probabilities: [Float] = [Float](repeating:0.0, count: _preds.shape[0]-1)
+    var done: [Bool] = [Bool](repeating: false, count: _preds.shape[0]-1)
+
     let all_means = _preds[0..., 0..<nb_joints * nb_mixtures]
     let all_variances = _preds[0..., nb_joints *
                               nb_mixtures..<2 * nb_joints * nb_mixtures] + TINY
     let weights = _preds[0..., 2 * nb_joints * nb_mixtures..<2 *
                         nb_joints * nb_mixtures + nb_mixtures]
-    assert(all_means.shape[-1] == nb_joints * nb_mixtures)
-    assert(all_variances.shape[-1] == nb_joints * nb_mixtures)
-    assert(weights.shape[-1] == nb_mixtures)
+    assert(all_means.shape[1] == nb_joints * nb_mixtures)
+    assert(all_variances.shape[1] == nb_joints * nb_mixtures)
+    assert(weights.shape[1] == nb_mixtures)
     let stops = _preds[0..., -1]
 
     /// Sample joint values.
     var samples = Tensor<Float>(zeros: [_preds.shape[0], nb_joints])
     var means = Tensor<Float>(zeros: [_preds.shape[0], nb_joints])
     var variances = Tensor<Float>(zeros: [_preds.shape[0], nb_joints])
-    for width_idx in 0..<_preds.shape[0] {
+    for width_idx in 0..<_preds.shape[0]-1 { // FIXME: why -1?
         // Decide which mixture to sample from
         let p = weights[width_idx].scalars.map { Double($0)}
         assert(p.count == nb_mixtures)
@@ -74,14 +72,13 @@ func performNormalMixtureSampling(preds: Tensor<Float>, decoder: Any, nb_joints:
         assert(m.shape == v.shape)
         // https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html
         let s = np.random.normal(m.scalars, v.scalars)
-        samples[width_idx, 0...] = Tensor(numpy: s)!
+        // print(s)
+        samples[width_idx, 0...] = Tensor<Float>(Array(s)!)
         means[width_idx, 0...] = m
         variances[width_idx, 0...] = v
     }
 
-    var _previous_outputs = previous_outputs
-    // for idx, (sample, stop) in enumerate(zip(samples, stops)):
-    for idx in 0..<samples.shape[0] {
+    for idx in 0..<samples.shape[0]-1 {
         let sample = samples[idx]
         let stop: Float = stops[idx].scalar!
         if done[idx] {
@@ -89,15 +86,11 @@ func performNormalMixtureSampling(preds: Tensor<Float>, decoder: Any, nb_joints:
         }
         // https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.random.binomial.html
         let sampled_stop: Int = Int(np.random.binomial(n: 1, p: stop))!
-        let combined = Tensor<Float>(concatenating: [sample, Tensor<Float>([Float(sampled_stop)])])
-        assert(combined.shape == [nb_joints + 1])
-        _previous_outputs[idx].append(combined)
-
-        _log_probabilities[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
-        _log_probabilities[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
-        _done[idx] = (sampled_stop == 0)
+        log_probabilities[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
+        log_probabilities[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
+        done[idx] = (sampled_stop == 0)
     }
-    return (_previous_outputs, _log_probabilities, _done)
+    return (log_probabilities: log_probabilities, done: done)
 }
 
 func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
@@ -128,27 +121,21 @@ func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: 
     //     t_repeated_context = torch.Tensor(repeated_context.squeeze(axis=1))
     //     t_previous_output = torch.Tensor(previous_output.squeeze(axis=1))
     //     t_encoder_outputs = torch.Tensor(encoder_outputs.detach().numpy().repeat(args.width, 1))
-    //     decoder_output, v_decoder_hidden, decoder_attn = \
-    //         decoder(t_repeated_context, t_previous_output, v_decoder_hidden, t_encoder_outputs)
-    //     preds = np.expand_dims(decoder_output.detach().numpy(), axis=1)
+        // decoder_output, v_decoder_hidden, decoder_attn = \
+        //     decoder(t_repeated_context, t_previous_output, v_decoder_hidden, t_encoder_outputs)
+
+        // decoder_output = decoder.predict_on_batch([repeated_context, previous_output])
+
+        // preds = np.expand_dims(decoder_output.detach().numpy(), axis=1)
     //     assert preds.shape[0] == args.width
     //     for idx, (pred, d) in enumerate(zip(preds, done)):
     //         if d:
     //             continue
     //         predictions[idx].append(pred)
 
-    //     # Perform actual decoding.
-    //     if args.decoder == 'normal':
-    //         fn = perform_normal_sampling
-    //     elif args.decoder == 'regression':
-    //         fn = perform_regression
-    //     elif args.decoder == 'normal-mixture':
-    //         fn = perform_normal_mixture_sampling
-    //     else:
-    //         fn = None
-    //         raise ValueError('Unknown decoder "{}"'.format(args.decoder))
-    //     previous_outputs, log_probabilities, done = fn(
-    //         preds, decoder, nb_joints, previous_outputs, log_probabilities, done, args)
+        // Perform actual decoding.
+        // let (previous_outputs, log_probabilities, done) = performNormalMixtureSampling(
+        //     preds: preds, nb_joints: nb_joints, nb_mixtures: nb_joints, maxMotionLength: 50)
 
     //     if args.motion_representation == 'hybrid':
     //         # For each element of the beam, add the new delta (index -1) to the previous element (index -2)
