@@ -47,6 +47,11 @@ public class MotionDataset: Codable {
         print("motionSamples.count: \(motionSamples.count)")
     }
 
+    public init(datasetFolderURL: URL, motionSamples: [MotionSample]) {
+        self.datasetFolderURL = datasetFolderURL
+        self.motionSamples = motionSamples
+    }
+
     // TODO: code throwing errors
     public init(from serializedDatasetURL: URL) {
         let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
