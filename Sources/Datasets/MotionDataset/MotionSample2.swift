@@ -6,24 +6,23 @@ public struct MotionSample2: Codable {
     public let jointNames: [String]
     public let annotations: [String]
 
-    // TODO: change ShapedArrays to Tensors
-    public let timestepsArray: ShapedArray<Float> // 1D, time steps
-    public let motionFramesArray: ShapedArray<Float> // 2D, [motion frames x joint positions], without motion flag
+    public let timesteps: Tensor<Float> // 1D, time steps
+    public let motion: Tensor<Float> // 2D, [motion frames x joint positions], without motion flag
 
     enum CodingKeys: String, CodingKey {
         case sampleID
         case jointNames
         case annotations
-        case timestepsArray
-        case motionFramesArray
+        case timesteps
+        case motion
     }
 
-    public init(sampleID: Int, annotations: [String], jointNames: [String], timestepsArray: ShapedArray<Float>, motionFramesArray: ShapedArray<Float>) {
+    public init(sampleID: Int, annotations: [String], jointNames: [String], timesteps: Tensor<Float>, motion: Tensor<Float>) {
         self.sampleID = sampleID
         self.jointNames = jointNames
         self.annotations = annotations
-        self.timestepsArray = timestepsArray
-        self.motionFramesArray = motionFramesArray
+        self.timesteps = timesteps
+        self.motion = motion
     }
 
     public init(from decoder: Decoder) throws {
@@ -31,8 +30,8 @@ public struct MotionSample2: Codable {
         sampleID = try values.decode(Int.self, forKey: .sampleID)
         jointNames = try values.decode(Array<String>.self, forKey: .jointNames)
         annotations = try values.decode(Array<String>.self, forKey: .annotations)
-        timestepsArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .timestepsArray).shapedArray
-        motionFramesArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .motionFramesArray).shapedArray
+        timesteps = try! values.decode(FastCodableTensor.self, forKey: .timesteps).tensor
+        motion = try! values.decode(FastCodableTensor.self, forKey: .motion).tensor
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -40,11 +39,11 @@ public struct MotionSample2: Codable {
         try container.encode(sampleID, forKey: .sampleID)
         try container.encode(jointNames, forKey: .jointNames)
         try container.encode(annotations, forKey: .annotations)
-        try container.encode(FastCodableShapedArray<Float>(shapedArray: timestepsArray), forKey: .timestepsArray)
-        try container.encode(FastCodableShapedArray<Float>(shapedArray: motionFramesArray), forKey: .motionFramesArray)
+        try container.encode(FastCodableTensor(timesteps), forKey: .timesteps)
+        try container.encode(FastCodableTensor(motion), forKey: .motion)
     }
 
     public var description: String {
-        return "MotionSample2(timesteps: \(timestepsArray[-1].scalar!), motion: \(motionFramesArray.shape[0]), annotations: \(annotations.count))"
+        return "MotionSample2(timesteps: \(timesteps[-1].scalar!), motion: \(motion.shape[0]), annotations: \(annotations.count))"
     }
 }

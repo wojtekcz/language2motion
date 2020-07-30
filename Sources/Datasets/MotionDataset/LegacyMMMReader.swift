@@ -46,7 +46,7 @@ public struct LegacyMMMReader {
         return motionFrames
     }
 
-    public static func getJointPositions(motionFrames: [MotionFrame], grouppedJoints: Bool, normalized: Bool) -> ShapedArray<Float> {
+    public static func getJointPositions(motionFrames: [MotionFrame], grouppedJoints: Bool, normalized: Bool) -> Tensor<Float> {
         var a: Array<Array<Float>>? = nil
         if grouppedJoints {
             a = motionFrames.map {$0.grouppedJointPositions()}
@@ -60,9 +60,9 @@ public struct LegacyMMMReader {
             let mf = t[0..., mfIdx...mfIdx]
             t = 2.0 * (sigmoid(t) - 0.5) // make range [-1.0, 1.0]
             t[0..., mfIdx...mfIdx] = mf
-            return t.array
+            return t
         } else {
-            return a!.makeShapedArray()
+            return a!.makeTensor()
         }
     }
 
@@ -77,9 +77,9 @@ public struct LegacyMMMReader {
             motionFrames = Array(motionFrames[0..<maxFrames])
             timesteps = Array(timesteps[0..<maxFrames])
         }
-        let timestepsArray = ShapedArray<Float>(shape: [timesteps.count], scalars: timesteps)
-        let motionFramesArray = LegacyMMMReader.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
+        let timestepsTensor = Tensor<Float>(shape: [timesteps.count], scalars: timesteps)
+        let motion = LegacyMMMReader.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
 
-        return MotionSample2(sampleID: sampleID, annotations: annotations, jointNames: jointNames, timestepsArray: timestepsArray, motionFramesArray: motionFramesArray)
+        return MotionSample2(sampleID: sampleID, annotations: annotations, jointNames: jointNames, timesteps: timestepsTensor, motion: motion)
     }
 }
