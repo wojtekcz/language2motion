@@ -149,8 +149,12 @@ public struct MotionFrame {
         [self.jointPositions[44]]
     }
 
-    public func combinedJointPositions() -> [Float] {
-        // 44 joint positions + 3 root rotation values + motion flag
-        return jointPositions[0..<44] + rootRotation + [self.jointPositions[44]]
+    public func combinedJointPositions(withMotionFlag: Bool = true) -> [Float] {
+        // 44 joint positions + 3 root rotation values (+ optional motion flag)
+        var combined = jointPositions[0..<44] + rootRotation
+        if withMotionFlag {
+            combined += [self.jointPositions[44]]
+        }
+        return Array(combined)
     }
 }

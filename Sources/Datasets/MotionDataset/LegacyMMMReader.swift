@@ -66,7 +66,12 @@ public struct LegacyMMMReader {
         }
     }
 
-    public static func motionSample2(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, maxFrames: Int = 50000) -> MotionSample2 {
+    public static func getMotion(motionFrames: [MotionFrame]) -> Tensor<Float> {
+        let combined: Array<Array<Float>> = motionFrames.map { $0.combinedJointPositions(withMotionFlag: false) }
+        return combined.makeTensor()
+    }
+
+    public static func motionSampleFromMMM(sampleID: Int, mmmURL: URL, annotationsURL: URL, maxFrames: Int = 500) -> MotionSample2 {
         let mmm_doc = LegacyMMMReader.loadMMM(fileURL: mmmURL)
         let jointNames = LegacyMMMReader.getJointNames(mmm_doc: mmm_doc)
         var motionFrames = LegacyMMMReader.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
@@ -78,8 +83,48 @@ public struct LegacyMMMReader {
             timesteps = Array(timesteps[0..<maxFrames])
         }
         let timestepsTensor = Tensor<Float>(shape: [timesteps.count], scalars: timesteps)
-        let motion = LegacyMMMReader.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
+        let motion = LegacyMMMReader.getMotion(motionFrames: motionFrames)
 
         return MotionSample2(sampleID: sampleID, annotations: annotations, jointNames: jointNames, timesteps: timestepsTensor, motion: motion)
+    }
+}
+
+extension LegacyMMMReader {
+    public static func downsampledMutlipliedMotionSamples(sampleID: Int, mmmURL: URL, annotationsURL: URL, freq: Int = 10, maxFrames: Int = 500) -> [MotionSample2] {
+        let mmm_doc = LegacyMMMReader.loadMMM(fileURL: mmmURL)
+        let jointNames = LegacyMMMReader.getJointNames(mmm_doc: mmm_doc)
+
+        let motionFrames = LegacyMMMReader.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
+        let annotations = LegacyMMMReader.getAnnotations(fileURL: annotationsURL)
+        let timesteps: [Float] = motionFrames.map { $0.timestep }
+
+        // calculate factor
+        let origFreq = Float(timesteps.count)/timesteps.last!
+        let factor = Int(origFreq)/freq
+        
+        var motionFramesBuckets = [[MotionFrame]](repeating: [], count: factor)
+        var timestepsBuckets = [[Float]](repeating: [], count: factor)
+
+        for idx in 0..<motionFrames.count {
+            let bucket = idx % factor
+            if motionFramesBuckets[bucket].count < maxFrames {
+                motionFramesBuckets[bucket].append(motionFrames[idx])
+                timestepsBuckets[bucket].append(timesteps[idx])
+            }
+        }
+        // filter out empty buckets
+        let nBuckets = (motionFrames.count>=factor) ? factor : motionFrames.count
+
+        return (0..<nBuckets).map {
+            let timesteps = Tensor<Float>(shape: [timesteps.count], scalars: timesteps)
+            let motion = LegacyMMMReader.getMotion(motionFrames: motionFramesBuckets[$0])
+            return MotionSample2(
+                sampleID: sampleID, 
+                annotations: annotations, 
+                jointNames: jointNames, 
+                timesteps: timesteps,
+                motion: motion
+            )
+        }
     }
 }

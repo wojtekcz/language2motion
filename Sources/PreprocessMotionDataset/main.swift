@@ -12,11 +12,11 @@ let freqStr = (freq != nil) ? "\(freq!)Hz." : ""
 print("Running MotionData preprocessing (\(String(describing:sampled)))...")
 
 var date = Date()
-let motionDataset = MotionDataset(datasetFolderURL: datasetFolderURL, sampled: sampled, freq: freq, maxFrames: maxFrames)
+let motionDataset = MotionDataset2Processor.loadDatasetFromFolder(datasetFolderURL: datasetFolderURL, sampled: sampled, freq: freq, maxFrames: maxFrames)
 print(abs(date.timeIntervalSinceNow))
 
 let numberStr = "\(motionDataset.motionSamples.count)."
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.motion_flag.\(freqStr)\(sampledStr)\(numberStr)plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset2.\(freqStr)\(sampledStr)\(numberStr)plist")
 
 date = Date()
 print("Encoding to property list..., writing to file '\(serializedDatasetURL.path)'")
