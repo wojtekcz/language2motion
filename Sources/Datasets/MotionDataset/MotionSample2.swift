@@ -30,8 +30,8 @@ public struct MotionSample2: Codable {
         sampleID = try values.decode(Int.self, forKey: .sampleID)
         jointNames = try values.decode(Array<String>.self, forKey: .jointNames)
         annotations = try values.decode(Array<String>.self, forKey: .annotations)
-        timesteps = try! values.decode(FastCodableTensor.self, forKey: .timesteps).tensor
-        motion = try! values.decode(FastCodableTensor.self, forKey: .motion).tensor
+        timesteps = try! values.decode(FastCodableTensor<Float>.self, forKey: .timesteps).tensor
+        motion = try! values.decode(FastCodableTensor<Float>.self, forKey: .motion).tensor
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -39,8 +39,8 @@ public struct MotionSample2: Codable {
         try container.encode(sampleID, forKey: .sampleID)
         try container.encode(jointNames, forKey: .jointNames)
         try container.encode(annotations, forKey: .annotations)
-        try container.encode(FastCodableTensor(timesteps), forKey: .timesteps)
-        try container.encode(FastCodableTensor(motion), forKey: .motion)
+        try container.encode(FastCodableTensor<Float>(timesteps), forKey: .timesteps)
+        try container.encode(FastCodableTensor<Float>(motion), forKey: .motion)
     }
 
     public var description: String {

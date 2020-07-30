@@ -2,12 +2,12 @@ import Foundation
 import TensorFlow
 
 
-public struct FastCodableTensor: Codable {
+public struct FastCodableTensor<Scalar>: Codable where Scalar: TensorFlowScalar {
     // Fast implementation of Codable Tensor
     // encoding scalars as Data object
-    public let tensor: Tensor<Float>
+    public let tensor: Tensor<Scalar>
     
-    public init (_ tensor: Tensor<Float>) {
+    public init (_ tensor: Tensor<Scalar>) {
         self.tensor = tensor
     }
     
@@ -20,8 +20,8 @@ public struct FastCodableTensor: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let shape = try container.decode(TensorShape.self, forKey: .shape)
         let data = try container.decode(Data.self, forKey: .scalarsData)
-        let scalars: [Float] = Array(data: data)!
-        tensor = Tensor(shape: shape, scalars: scalars)
+        let scalars: [Scalar] = Array(data: data)!
+        tensor = Tensor<Scalar>(shape: shape, scalars: scalars)
     }
     
     public func encode(to encoder: Encoder) throws {
