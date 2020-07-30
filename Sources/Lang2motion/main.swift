@@ -148,12 +148,14 @@ print("generated.shape: \(single_generated.shape)")
 let (motion, log_probs, done) = performNormalMixtureSampling(
     preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
 
+let descaled_motion = dataset.scaler.inverse_transform(motion)
+
 print("motion.shape: \(motion.shape)")
 print("log_probs.count: \(log_probs.count)")
 print("done.count: \(done.count)")
 print("done: \(done)")
 print("log_probs: \(log_probs)")
-print("motion: \(motion)")
+print("descaled_motion: \(descaled_motion)")
 
 exit(0)
 

@@ -7,7 +7,7 @@ public struct MotionSample2: Codable {
     public let annotations: [String]
 
     public let timesteps: Tensor<Float> // 1D, time steps
-    public let motion: Tensor<Float> // 2D, [motion frames x joint positions], without motion flag
+    public var motion: Tensor<Float> // 2D, [motion frames x joint positions], without motion flag
 
     enum CodingKeys: String, CodingKey {
         case sampleID

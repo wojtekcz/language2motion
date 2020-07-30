@@ -24,6 +24,7 @@ public struct Lang2Motion {
     }
 
     public let motionDataset: MotionDataset2
+    public let scaler: Scaler
 
     public let langRecs: [LangRec]
     public let langRecsDict: [Int: LangRec]
@@ -83,6 +84,18 @@ extension Lang2Motion {
         // Load the data files.
         motionDataset = MotionDataset2(from: motionDatasetURL)
         print(motionDataset.description)
+
+        // scale motions
+        let motions = motionDataset.motionSamples.map { $0.motion }
+        let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
+        let scaledMotions = motions.map { _scaler.transform($0) }
+
+        for idx in 0..<motionDataset.motionSamples.count {
+            motionDataset.motionSamples[idx].motion = scaledMotions[idx]
+        }
+        scaler = _scaler
+
+        // TODO: get annotations from motionDataset.motionSamples[].annotations
         let df = pd.read_csv(langDatasetURL.path)
 
         // filter out samples without annotations
