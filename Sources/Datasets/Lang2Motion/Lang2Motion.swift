@@ -85,16 +85,6 @@ extension Lang2Motion {
         motionDataset = MotionDataset2(from: motionDatasetURL)
         print(motionDataset.description)
 
-        // scale motions
-        let motions = motionDataset.motionSamples.map { $0.motion }
-        let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
-        let scaledMotions = motions.map { _scaler.transform($0) }
-
-        for idx in 0..<motionDataset.motionSamples.count {
-            motionDataset.motionSamples[idx].motion = scaledMotions[idx]
-        }
-        scaler = _scaler
-
         // TODO: get annotations from motionDataset.motionSamples[].annotations
         let df = pd.read_csv(langDatasetURL.path)
 
@@ -105,6 +95,18 @@ extension Lang2Motion {
         // filter out shortest samples
         motionSamples = motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
         print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
+
+        // scale motions
+        print("Scaling motions...")
+        let motions = motionSamples.map { $0.motion }
+        let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
+        let scaledMotions = motions.map { _scaler.transform($0) }
+
+        for idx in 0..<motionSamples.count {
+            motionSamples[idx].motion = scaledMotions[idx]
+        }
+        scaler = _scaler
+        print("Motions scaled.")
 
         // split into train/test sets
         var trainMotionSamples: [MotionSample2] = []
