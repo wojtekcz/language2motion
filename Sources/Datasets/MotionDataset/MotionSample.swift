@@ -192,3 +192,43 @@ extension MotionSample {
         }
     }
 }
+
+extension MotionSample {
+    public static func downsampledMutlipliedMotionSamples2(sampleID: Int, mmmURL: URL, annotationsURL: URL, freq: Int = 10, maxFrames: Int = 500) -> [MotionSample] {
+        let mmm_doc = MotionSample.loadMMM(fileURL: mmmURL)
+        let jointNames = MotionSample.getJointNames(mmm_doc: mmm_doc)
+
+        let motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
+        let annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
+        let timesteps: [Float] = motionFrames.map { $0.timestep }
+
+        // calculate factor
+        let origFreq = Float(timesteps.count)/timesteps.last!
+        let factor = Int(origFreq)/freq
+        
+        var motionFramesBuckets = [[MotionFrame]](repeating: [], count: factor)
+        var timestepsBuckets = [[Float]](repeating: [], count: factor)
+
+        for idx in 0..<motionFrames.count {
+            let bucket = idx % factor
+            if motionFramesBuckets[bucket].count < maxFrames {
+                motionFramesBuckets[bucket].append(motionFrames[idx])
+                timestepsBuckets[bucket].append(timesteps[idx])
+            }
+        }
+        // filter out empty buckets
+        let nBuckets = (motionFrames.count>=factor) ? factor : motionFrames.count
+
+        return (0..<nBuckets).map {
+            MotionSample(
+                sampleID: sampleID, 
+                motionFrames: motionFramesBuckets[$0], 
+                annotations: annotations, 
+                jointNames: jointNames, 
+                timesteps: timestepsBuckets[$0], 
+                grouppedJoints: false, 
+                normalized: false
+            )
+        }
+    }
+}

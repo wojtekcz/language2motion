@@ -73,3 +73,44 @@ public class MotionDataset: Codable {
         return "MotionDataset(motionSamples: \(motionSamples.count))"
     }
 }
+
+extension MotionDataset {
+    public convenience init(datasetFolderURL: URL, sampled: Int? = nil, freq: Int? = 10, maxFrames: Int = 500, maxSampleID: Int = 3966) {
+        var motionSamples: [MotionSample] = []
+        let fm = FileManager()
+        
+        var sampleIDs: [Int] = Array<Int>((0...maxSampleID))
+        if sampled != nil {
+            sampleIDs = Array(sampleIDs.choose(sampled!))
+        }
+        
+        for sampleID in sampleIDs {
+            let mmmFilename = String(format: "%05d_mmm.xml", sampleID)
+            let annotationsFilename = String(format: "%05d_annotations.json", sampleID)
+            print("Sample \(sampleID), \(mmmFilename), \(annotationsFilename)")
+            
+            let mmmURL = datasetFolderURL.appendingPathComponent(mmmFilename)
+            let annotationsURL = datasetFolderURL.appendingPathComponent(annotationsFilename)
+            
+            if fm.fileExists(atPath: mmmURL.path) {
+                if freq == nil {
+                    let motionSample = MotionSample(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: false, normalized: false, maxFrames: maxFrames)
+                    motionSamples.append(motionSample)
+                } else {
+                    let _motionSamples = MotionSample.downsampledMutlipliedMotionSamples2(
+                        sampleID: sampleID, 
+                        mmmURL: mmmURL, 
+                        annotationsURL: annotationsURL, 
+                        freq: freq!, 
+                        maxFrames: maxFrames
+                    )
+                    motionSamples.append(contentsOf: _motionSamples)
+                }
+            } else {
+                print("** Sample \(sampleID) doesn't exist.")
+            }
+        }
+        print("motionSamples.count: \(motionSamples.count)")
+        self.init(datasetFolderURL: datasetFolderURL, motionSamples: motionSamples)
+    }
+}
