@@ -57,14 +57,15 @@ public struct TextProcessor2 {
 
         // target: motion
         // **************
-        let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray).paddedAndCropped(to: maxMotionLength).expandingShape(at: 0)
-        let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(example.motionSample.motionFramesArray.shape[0])])
+        var (motionFrames, motionFlag) = Tensor<Float>(example.motionSample.motion).paddedAndCropped(to: maxMotionLength)
+        motionFrames = motionFrames.expandingShape(at: 0)
+        motionFlag = motionFlag.expandingShape(at: 0)
+        let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(example.motionSample.motion.shape[0])])
 
         let rangeExceptLast = 0..<(motionFrames.shape[1] - 1)
         let targetMotionFrames = motionFrames[0..., rangeExceptLast, 0...]
 
-        let mfIdx = MotionFrame.cjpMotionFlagIdx
-        let motionFlag = Tensor<Int32>(targetMotionFrames[0..., 0..., mfIdx...mfIdx]).squeezingShape(at: 2)
+        motionFlag = motionFlag[0..., rangeExceptLast]
         let targetMask = LangMotionBatch.makeStandardMask(target: motionFlag, pad: 0)
 
         let targetTruth: Tensor<Float> = motionFrames[0..., 1..., 0...]

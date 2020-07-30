@@ -25,14 +25,15 @@ print("learningRate: \(learningRate)")
 
 enum DatasetSize: String {
     case full = ""
+    case midi = "midi."
     case mini = "mini."
-    case s490 = "490."
 }
 
-let datasetSize: DatasetSize = .s490
+let datasetSize: DatasetSize = .mini
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.\(datasetSize.rawValue)plist")
+// motion_dataset2.10Hz.39728.plist
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
@@ -57,7 +58,7 @@ let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer,
 
 /// instantiate model
 let vocabSize = vocabulary.count
-let nbJoints = 48 // TODO: get value from dataset
+let nbJoints = 47 // TODO: get value from dataset
 let layerCount: Int = 6
 let modelSize: Int = 256
 let feedForwardSize: Int = 1024
@@ -123,36 +124,29 @@ printBatch(singleBatch)
 
 /// Test model with one batch
 /// get a batch
-// print("\nOne batch:")
-// print("=========")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch: LangMotionBatch = batches[0]
-// printBatch(batch)
+print("\nOne batch:")
+print("=========")
+var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+let epoch = epochIterator.next()
+let batches = Array(epoch!.1)
+let batch: LangMotionBatch = batches[0]
+printBatch(batch)
 
 /// run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let deviceBatch = LangMotionBatch(copying: batch, to: device)
-// let decoded = model(deviceBatch)
-// print("decoded.shape: \(decoded.shape)")
-// let generated = transformer.generate(input: deviceBatch)
-// print("generated.shape: \(generated.shape)")
-// let allDecoderOutputs = mixtureModel(generated)
-// print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
-
-// let allDecoderOutputs = model.generate(input: deviceBatch)
-// print("allDecoderOutputs.shape: \(allDecoderOutputs.shape)")
+print("\nRun one batch:")
+print("==============")
+let deviceBatch = LangMotionBatch(copying: batch, to: device)
+let batch_generated = model.generate(input: deviceBatch)
+print("batch_generated.shape: \(batch_generated.shape)")
 
 /// decode single batch
 print("\nDecode single batch:")
 print("====================")
-let generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
-print("generated.shape: \(generated.shape)")
+let single_generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
+print("generated.shape: \(single_generated.shape)")
 
 let (motion, log_probs, done) = performNormalMixtureSampling(
-    preds: generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+    preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
 
 print("motion.shape: \(motion.shape)")
 print("log_probs.count: \(log_probs.count)")

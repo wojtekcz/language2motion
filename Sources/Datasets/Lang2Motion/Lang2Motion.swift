@@ -14,21 +14,21 @@ public struct Lang2Motion {
     public struct Example {
         public let sampleID: Int
         public let sentence: String
-        public let motionSample: MotionSample
+        public let motionSample: MotionSample2
 
-        public init(sampleID: Int, sentence: String, motionSample: MotionSample) {
+        public init(sampleID: Int, sentence: String, motionSample: MotionSample2) {
             self.sampleID = sampleID
             self.sentence = sentence
             self.motionSample = motionSample
         }
     }
 
-    public let motionDataset: MotionDataset
+    public let motionDataset: MotionDataset2
 
     public let langRecs: [LangRec]
     public let langRecsDict: [Int: LangRec]
 
-    public let motionSampleDict: [Int: MotionSample]
+    public let motionSampleDict: [Int: MotionSample2]
 
     public let trainExamples: [Example]
     public let valExamples: [Example]
@@ -65,7 +65,7 @@ extension Lang2Motion {
         }
     }
 
-    public static func getExample(motionSample: MotionSample, langRec: LangRec) -> Example {
+    public static func getExample(motionSample: MotionSample2, langRec: LangRec) -> Example {
         return Example(sampleID: langRec.sampleID, sentence: langRec.text, motionSample: motionSample)
     }
 }
@@ -81,7 +81,7 @@ extension Lang2Motion {
         exampleMap: @escaping (Example) -> LangMotionBatch
     ) throws {
         // Load the data files.
-        motionDataset = MotionDataset(from: motionDatasetURL)
+        motionDataset = MotionDataset2(from: motionDatasetURL)
         print(motionDataset.description)
         let df = pd.read_csv(langDatasetURL.path)
 
@@ -90,12 +90,12 @@ extension Lang2Motion {
         print("keeping \(motionSamples.count) annotatated motions")
 
         // filter out shortest samples
-        motionSamples = motionSamples.filter { $0.motionFramesArray.shape[0] >= minMotionLength }
+        motionSamples = motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
         print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
 
         // split into train/test sets
-        var trainMotionSamples: [MotionSample] = []
-        var testMotionSamples: [MotionSample] = []
+        var trainMotionSamples: [MotionSample2] = []
+        var testMotionSamples: [MotionSample2] = []
         (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
 
         // create LangRecs
@@ -110,8 +110,8 @@ extension Lang2Motion {
         langRecs = _langRecs
         langRecsDict = _langRecsDict
 
-        // [sampleID:MotionSample] mapping
-        var _motionSampleDict: [Int: MotionSample] = [:]
+        // [sampleID:MotionSample2] mapping
+        var _motionSampleDict: [Int: MotionSample2] = [:]
         for ms in motionDataset.motionSamples {
             // only assign first (downsampled) sample
             if _motionSampleDict[ms.sampleID] == nil {

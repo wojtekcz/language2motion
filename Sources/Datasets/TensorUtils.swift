@@ -6,10 +6,10 @@ extension Tensor where Scalar: Numeric {
         let currentWidth = self.shape[0]
         let maxCropping = Swift.max(currentWidth - width, 0)
         let nCropping = (maxCropping>0) ? Int.random(in: 0 ..< maxCropping) : 0
-        return paddedAndCropped(to: width, nCropping: nCropping)
+        return paddedAndCropped(to: width, nCropping: nCropping).motion
     }
 
-    public func paddedAndCropped(to width: Int, nCropping: Int = 0) -> Tensor<Scalar> {
+    public func paddedAndCropped(to width: Int, nCropping: Int = 0) -> (motion: Tensor<Scalar>, motionFlag: Tensor<Int32>) {
         // pads one- or two-dimensional tensor along 0-th axis
         let rank = self.shape.count
         let currentWidth = self.shape[0]
@@ -18,6 +18,9 @@ extension Tensor where Scalar: Numeric {
         if rank > 1 {
             sizes.append((before: 0, after: 0))
         }
-        return self[nCropping..<nCropping+width].padded(forSizes: sizes)
+        let motion = self[nCropping..<nCropping+width].padded(forSizes: sizes)
+        var motionFlag = Tensor<Int32>(repeating: 1, shape: [currentWidth])
+        motionFlag = motionFlag[nCropping..<nCropping+width].padded(forSizes: [(before: 0, after: paddingSize)], with: 0)
+        return (motion: motion, motionFlag: motionFlag)
     }
 }
