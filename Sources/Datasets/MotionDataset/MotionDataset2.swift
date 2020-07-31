@@ -1,5 +1,11 @@
 import Foundation
 
+public enum DatasetSize: String {
+    case full = ""
+    case midi = "midi."
+    case mini = "mini."
+}
+
 public class MotionDataset2: Codable {
     public let datasetFolderURL: URL
     public var motionSamples: [MotionSample2]

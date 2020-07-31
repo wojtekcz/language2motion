@@ -23,11 +23,6 @@ print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
-enum DatasetSize: String {
-    case full = ""
-    case midi = "midi."
-    case mini = "mini."
-}
 
 let datasetSize: DatasetSize = .mini
 
