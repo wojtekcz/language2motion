@@ -3,7 +3,7 @@ import PythonKit
 
 let np  = Python.import("numpy")
 
-func randomNumber(probabilities: [Double]) -> Int {
+public func randomNumber(probabilities: [Double]) -> Int {
     // https://stackoverflow.com/questions/30309556/generate-random-numbers-with-a-given-distribution
     // Sum of all probabilities (so that we don't have to require that the sum is 1.0):
     let sum = probabilities.reduce(0, +)
@@ -21,7 +21,7 @@ func randomNumber(probabilities: [Double]) -> Int {
     return (probabilities.count - 1)
 }
 
-func gaussian_pdf(sample: Tensor<Float>, means: Tensor<Float>, variances: Tensor<Float>) -> Tensor<Float> {
+public func gaussian_pdf(sample: Tensor<Float>, means: Tensor<Float>, variances: Tensor<Float>) -> Tensor<Float> {
     // one-dim tensors
     assert(sample.shape.count == 1)
     assert(sample.shape == means.shape)
@@ -31,12 +31,12 @@ func gaussian_pdf(sample: Tensor<Float>, means: Tensor<Float>, variances: Tensor
     return Float(1.0) / a1 * exp(a2 / (2.0 * variances))
 }
 
-func bernoulli_pdf(sample: Int, p: Float) -> Float {
+public func bernoulli_pdf(sample: Int, p: Float) -> Float {
     let fSample = Float(sample)
     return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
-func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
+public func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
     let TINY: Float = 1e-8
     let _preds = preds.reshaped(to:
         [preds.shape[0], 2 * nb_joints * nb_mixtures + nb_mixtures + 1])
@@ -96,7 +96,7 @@ func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtu
     return (motion: motion, log_probs: log_probs, done: Tensor(done))
 }
 
-func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
+public func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
 // def decode(context, nb_joints, language, references, args, init=None):
     // # Prepare data structures for graph search.
     // if init is None:
