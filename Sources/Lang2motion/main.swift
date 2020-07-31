@@ -27,7 +27,6 @@ print("learningRate: \(learningRate)")
 let datasetSize: DatasetSize = .mini
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-// motion_dataset2.10Hz.39728.plist
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
