@@ -109,58 +109,89 @@ func printBatch(_ batch: LangMotionBatch) {
 }
 
 /// one example to single batch
-print("\nSingle batch")
-print("============")
-let example = dataset.trainExamples[0]
-print("example.sentence: \"\(example.sentence)\"")
+// print("\nSingle batch")
+// print("============")
+// let example = dataset.trainExamples[0]
+// print("example.sentence: \"\(example.sentence)\"")
 
-let singleBatch = textProcessor.preprocess(example: example)
-printBatch(singleBatch)
+// let singleBatch = textProcessor.preprocess(example: example)
+// printBatch(singleBatch)
 
 /// Test model with one batch
 /// get a batch
-print("\nOne batch:")
-print("=========")
-var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch = epochIterator.next()
-let batches = Array(epoch!.1)
-let batch: LangMotionBatch = batches[0]
-printBatch(batch)
+// print("\nOne batch:")
+// print("=========")
+// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+// let epoch = epochIterator.next()
+// let batches = Array(epoch!.1)
+// let batch: LangMotionBatch = batches[0]
+// printBatch(batch)
 
 /// run one batch
-print("\nRun one batch:")
-print("==============")
-let deviceBatch = LangMotionBatch(copying: batch, to: device)
-let batch_generated = model.generate(input: deviceBatch)
-print("batch_generated.shape: \(batch_generated.shape)")
+// print("\nRun one batch:")
+// print("==============")
+// let deviceBatch = LangMotionBatch(copying: batch, to: device)
+// let batch_generated = model.generate(input: deviceBatch)
+// print("batch_generated.shape: \(batch_generated.shape)")
 
 /// decode single batch
-print("\nDecode single batch:")
-print("====================")
-let single_generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
-print("generated.shape: \(single_generated.shape)")
+// print("\nDecode single batch:")
+// print("====================")
+// let single_generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
+// print("generated.shape: \(single_generated.shape)")
 
-let (motion, log_probs, done) = performNormalMixtureSampling(
-    preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+// let (motion, log_probs, done) = performNormalMixtureSampling(
+//     preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
 
-let descaled_motion = dataset.scaler.inverse_transform(motion)
+// let descaled_motion = dataset.scaler.inverse_transform(motion)
 
-print("motion.shape: \(motion.shape)")
-print("log_probs.count: \(log_probs.count)")
-print("done.count: \(done.count)")
-print("done: \(done)")
-print("log_probs: \(log_probs)")
-print("descaled_motion: \(descaled_motion)")
+// print("motion.shape: \(motion.shape)")
+// print("log_probs.count: \(log_probs.count)")
+// print("done.shape: \(done.shape)")
+// print("done: \(done)")
+// print("log_probs: \(log_probs)")
+// print("descaled_motion: \(descaled_motion)")
 
-motion.motionToImg(url: dataURL.appendingPathComponent("motion_images/foo6.png"), 
-    padTo: maxMotionLength, 
-    descr: "\(example.sentence)")
+// motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8.png"), 
+//             motion: motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
 
-descaled_motion.motionToImg(url: dataURL.appendingPathComponent("motion_images/foo6_descaled.png"), 
-    padTo: maxMotionLength, 
-    descr: "\(example.sentence)")
+// motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8_descaled.png"), 
+//             motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
 
-exit(0)
+public func greedyDecodeMotion(sentence: String, prefix: String = "prefix") {
+    // FIXME: for generation don't supply motion in a batch, maybe neutral motion frame only
+    let randomMotionSample = dataset.trainExamples[0].motionSample
+    let example = Lang2Motion.Example(sampleID: -1, sentence: sentence, motionSample: randomMotionSample)
+    print("sentence: \"\(sentence)\"")
+
+    let singleBatch = textProcessor.preprocess(example: example)
+    printBatch(singleBatch)
+
+    print("\nDecode single batch:")
+    print("====================")
+    Context.local.learningPhase = .inference
+    let single_generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
+    print("generated.shape: \(single_generated.shape)")
+
+    let (motion, log_probs, done) = performNormalMixtureSampling(
+        preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+
+    let descaled_motion = dataset.scaler.inverse_transform(motion)
+
+    print("motion.shape: \(motion.shape)")
+    print("log_probs.count: \(log_probs.count)")
+    print("done.shape: \(done.shape)")
+    print("done: \(done)")
+    // print("log_probs: \(log_probs)")
+    // print("descaled_motion: \(descaled_motion)")
+
+    let imageURL = dataURL.appendingPathComponent("motion_images/\(prefix).png")
+    motionToImg(url: imageURL, motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(prefix), \(example.sentence)")
+    print("Saved image: \(imageURL.path)")
+}
+
+// greedyDecodeMotion(sentence: "human is walking", prefix: "foo9")
+// exit(0)
 
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
@@ -275,7 +306,7 @@ time() {
             """
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-        // greedyDecodeSample(Int(example.id)!)
+        greedyDecodeMotion(sentence: "human is walking", prefix: "epoch_\(epoch+1)")
     }
     summaryWriter.flush()
 }

@@ -36,14 +36,14 @@ func bernoulli_pdf(sample: Int, p: Float) -> Float {
     return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
-func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: [Bool]) {
+func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
     let TINY: Float = 1e-8
     let _preds = preds.reshaped(to:
         [preds.shape[0], 2 * nb_joints * nb_mixtures + nb_mixtures + 1])
 
     var motion: Tensor<Float> = Tensor<Float>(zeros: [_preds.shape[0]-1, nb_joints])
     var log_probs: [Float] = [Float](repeating:0.0, count: _preds.shape[0]-1)
-    var done: [Bool] = [Bool](repeating: false, count: _preds.shape[0]-1)
+    var done: [Int32] = [Int32](repeating: 0, count: _preds.shape[0]-1)
 
     let all_means = _preds[0..., 0..<nb_joints * nb_mixtures]
     let all_variances = _preds[0..., nb_joints *
@@ -81,7 +81,7 @@ func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtu
     for idx in 0..<samples.shape[0]-1 {
         let sample = samples[idx]
         let stop: Float = stops[idx].scalar!
-        if done[idx] {
+        if done[idx] != 0 {
             continue
         }
         // https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.random.binomial.html
@@ -91,9 +91,9 @@ func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtu
         motion[idx] = combined
         log_probs[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
         log_probs[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
-        done[idx] = (sampled_stop == 0)
+        done[idx] = (sampled_stop == 0) ? 1 : 0
     }
-    return (motion: motion, log_probs: log_probs, done: done)
+    return (motion: motion, log_probs: log_probs, done: Tensor(done))
 }
 
 func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
