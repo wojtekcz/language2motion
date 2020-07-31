@@ -152,6 +152,14 @@ print("done: \(done)")
 print("log_probs: \(log_probs)")
 print("descaled_motion: \(descaled_motion)")
 
+motion.motionToImg(url: dataURL.appendingPathComponent("motion_images/foo6.png"), 
+    padTo: maxMotionLength, 
+    descr: "\(example.sentence)")
+
+descaled_motion.motionToImg(url: dataURL.appendingPathComponent("motion_images/foo6_descaled.png"), 
+    padTo: maxMotionLength, 
+    descr: "\(example.sentence)")
+
 exit(0)
 
 /// Optimizer
