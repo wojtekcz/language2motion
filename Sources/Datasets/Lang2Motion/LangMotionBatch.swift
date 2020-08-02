@@ -2,20 +2,25 @@ import Foundation
 import TensorFlow
 
 public struct LangMotionBatch: KeyPathIterable {
-    public let sampleID: Tensor<Int32>
+    public let sampleID: Tensor<Int32>   // bs
 
     // source
-    public var tokenIds: Tensor<Int32>
-    public var mask: Tensor<Float>
-    public let tokenCount: Tensor<Int32>
+    // (padded)
+    public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
+    public var mask: Tensor<Float>       // bs x 1 x maxTextSequenceLength
+    public let tokenCount: Tensor<Int32> // bs
     
     // target
-    public var targetMotionFrames: Tensor<Float>
-    public var targetMask: Tensor<Float>
-    public var targetTruth: Tensor<Float> // TODO: target truth should be a STRUCT with motion and stop components
+    // (padded)
+    public var targetMotionFrames: Tensor<Float>    // bs x maxMotionLength-1 x nbJoints
+    public var targetMask: Tensor<Float>            // bs x maxMotionLength-1 x maxMotionLength-1
+
+    public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
+    // TODO: target truth should be a STRUCT with motion and stop components
     // TODO: how targetMask is used and consumed?
     // used by transformer decoder? by mixture model?
-    public let origMotionFramesCount: Tensor<Int32>
+
+    public let origMotionFramesCount: Tensor<Int32> // bs
 
     public init(sampleID: Tensor<Int32>, 
                 tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>, 
