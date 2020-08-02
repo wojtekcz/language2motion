@@ -62,3 +62,21 @@ extension LangMotionBatch {
         self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
     }
 }
+
+extension LangMotionBatch {
+    public static func printBatch(_ batch: LangMotionBatch) {
+        print("type: \(type(of:batch))")
+        print("sampleID: shape \(batch.sampleID.shape), value \(batch.sampleID)")
+
+        print("source")
+        print("  tokenIds.shape: \(batch.tokenIds.shape)")
+        print("  mask.shape: \(batch.mask.shape)")
+        print("  tokenCount: shape \(batch.tokenCount.shape), value \(batch.tokenCount)")
+
+        print("target")
+        print("  targetMotionFrames.shape: \(batch.targetMotionFrames.shape)")
+        print("  targetMask.shape: \(batch.targetMask.shape)")
+        print("  targetTruth.shape: \(batch.targetTruth.shape)")
+        print("  origMotionFramesCount: shape \(batch.origMotionFramesCount.shape), value \(batch.origMotionFramesCount)")
+    }
+}

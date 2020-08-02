@@ -50,7 +50,7 @@ public struct MotionGaussianMixtureModel: Module {
         let max_target_length = x.shape[1]
         // var all_decoder_outputs = Tensor<Float>(zeros: [bs, max_target_length, self.outputSize])
         // add neutral position vector?
-        // TODO: use time sequence layer
+        // TODO: use time distributed layers
         // Run through mixture_model one time step at a time
         var all_outputs: [Tensor<Float>] = []
         for t in 0..<max_target_length-1 {
