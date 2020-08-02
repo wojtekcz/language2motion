@@ -38,6 +38,7 @@ public struct MotionGaussianMixtureModel: Module {
         // stop
         let stop = sigmoid(linearStop(x))
         // merge
+        // TODO: output struct
         let mixtureMerged = Tensor(concatenating: [mixtureMeans, mixtureVars, mixtureWeights, stop], alongAxis: 1)
         return mixtureMerged // bs x output_size
     }

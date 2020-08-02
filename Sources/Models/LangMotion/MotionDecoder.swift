@@ -36,6 +36,7 @@ public func bernoulli_pdf(sample: Int, p: Float) -> Float {
     return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
+// TODO: consume preds as STRUCT
 public func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
     let TINY: Float = 1e-8
     let _preds = preds.reshaped(to:

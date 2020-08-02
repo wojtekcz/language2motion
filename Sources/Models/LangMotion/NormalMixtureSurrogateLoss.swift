@@ -14,6 +14,8 @@ public struct LossArgs {
      }
 }
 
+// TODO: consume y_pred as STRUCT
+// TODO: y_true STRUCT should have motion and stop components
 @differentiable
 public func normalMixtureSurrogateLoss(y_true: Tensor<Float>, y_pred: Tensor<Float>, args: LossArgs) -> Tensor<Float> {
     let TINY: Float = 1e-8
@@ -60,7 +62,8 @@ public func normalMixtureSurrogateLoss(y_true: Tensor<Float>, y_pred: Tensor<Flo
     } else {
         mixture_reg = 0.0
     }
-
+    // TODO: divide loss (component?) by maxMotionLength
+    // TODO: move loss averaging here
     let loss = -(log_mixture_pdf + log_bernoulli_pdf) +
         args.mixture_regularizer * mixture_reg
     return loss

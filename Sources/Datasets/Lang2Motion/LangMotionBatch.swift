@@ -12,7 +12,9 @@ public struct LangMotionBatch: KeyPathIterable {
     // target
     public var targetMotionFrames: Tensor<Float>
     public var targetMask: Tensor<Float>
-    public var targetTruth: Tensor<Float>
+    public var targetTruth: Tensor<Float> // TODO: target truth should be a STRUCT with motion and stop components
+    // TODO: how targetMask is used and consumed?
+    // used by transformer decoder? by mixture model?
     public let origMotionFramesCount: Tensor<Int32>
 
     public init(sampleID: Tensor<Int32>, 
