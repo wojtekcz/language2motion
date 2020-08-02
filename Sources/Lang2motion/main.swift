@@ -5,7 +5,7 @@ import Foundation
 import ModelSupport
 import Datasets
 import SummaryWriter
-import MotionModels
+import LangMotionModels
 
 /// Set training params
 let runName = "run_1"

@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "ModelSupport", targets: ["ModelSupport"]),
         .library(name: "TextModels", targets: ["TextModels"]),
         .library(name: "MotionModels", targets: ["MotionModels"]),
+        .library(name: "LangMotionModels", targets: ["LangMotionModels"]),
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
         .library(name: "TranslationModels", targets: ["TranslationModels"]),
         .executable(name: "PreprocessMotionDataset", targets: ["PreprocessMotionDataset"]),
@@ -46,6 +47,7 @@ let package = Package(
         .target(name: "STBImage", path: "Sources/Support/STBImage"),
         .target(name: "TextModels", dependencies: ["Datasets"], path: "Sources/Models/Text"),
         .target(name: "MotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/Motion"),
+        .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/LangMotion"),
         .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
         .target(name: "TranslationModels", dependencies: ["Datasets"], path: "Sources/Models/Translation"),
         .target(
@@ -62,7 +64,7 @@ let package = Package(
             path: "Sources/Motion2lang"),
         .target(
             name: "Lang2motion",
-            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionModels"],
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels"],
             path: "Sources/Lang2motion"),
     ]
 )
