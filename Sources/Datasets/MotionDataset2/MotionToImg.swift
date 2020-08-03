@@ -19,13 +19,16 @@ extension Tensor where Scalar: NumpyScalarCompatible, Scalar: Numeric {
     }
 }
 
-public func motionToImg(url: URL, motion: Tensor<Float>, motionFlag: Tensor<Int32>, padTo: Int = 500, descr: String = "") {
-    let currentWidth = motion.shape[0]
-    let paddingSize = Swift.max(padTo - currentWidth, 0)
+public func motionToImg(url: URL, motion: Tensor<Float>, motionFlag: Tensor<Int32>?, padTo: Int = 500, descr: String = "") {
     let motion = motion.paddedTo(padTo: padTo)
-    let motionFlag = motionFlag.paddedTo(padTo: padTo)
-    let motionFlag2 = Tensor<Float>(motionFlag).expandingShape(at: 1)*motion.max()
-    let joined = Tensor(concatenating: [motionFlag2, motion], alongAxis: 1)
+    var joined: Tensor<Float>
+    if motionFlag != nil {
+        let motionFlag = motionFlag!.paddedTo(padTo: padTo)
+        let motionFlag2 = Tensor<Float>(motionFlag).expandingShape(at: 1)*motion.max()
+        joined = Tensor(concatenating: [motionFlag2, motion], alongAxis: 1)
+    } else {
+        joined = motion
+    }
     
     let x = plt.subplots()
     let ax = x[1]
