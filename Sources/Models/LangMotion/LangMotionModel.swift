@@ -17,7 +17,7 @@ public struct LangMotionModel: Module {
     }
 
     @differentiable
-    public func generate(input: LangMotionBatch) -> Tensor<Float> {
+    public func generate(input: LangMotionBatch) -> MixtureModelPreds {
         return self.mixtureModel(self.transformer.generator(self.callAsFunction(input)))
     }
 }

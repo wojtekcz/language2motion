@@ -57,23 +57,24 @@ public struct TextProcessor2 {
 
         // target: motion
         // **************
-        var (motionFrames, motionFlag) = Tensor<Float>(example.motionSample.motion).paddedAndCropped(to: maxMotionLength)
-        motionFrames = motionFrames.expandingShape(at: 0)
+        var (motion, motionFlag) = Tensor<Float>(example.motionSample.motion).paddedAndCropped(to: maxMotionLength)
+        motion = motion.expandingShape(at: 0)
         motionFlag = motionFlag.expandingShape(at: 0)
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(example.motionSample.motion.shape[0])])
 
-        let rangeExceptLast = 0..<(motionFrames.shape[1] - 1)
-        let targetMotionFrames = motionFrames[0..., rangeExceptLast, 0...]
+        let rangeExceptLast = 0..<(motion.shape[1] - 1)
+        let targetMotion = motion[0..., rangeExceptLast, 0...]
 
         motionFlag = motionFlag[0..., rangeExceptLast]
         let targetMask = LangMotionBatch.makeStandardMask(target: motionFlag, pad: 0)
 
-        let targetTruth: Tensor<Float> = motionFrames[0..., 1..., 0...]
+        let targetTruth: Tensor<Float> = motion[0..., 1..., 0...]
+        let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
 
         let singleBatch = LangMotionBatch(sampleID: sampleID, 
                 tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
-                targetMotionFrames: targetMotionFrames, targetMask: targetMask,
-                targetTruth: targetTruth, origMotionFramesCount: origMotionFramesCount)
+                targetMotion: targetMotion, targetMask: targetMask,
+                targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         return singleBatch
     }
 }

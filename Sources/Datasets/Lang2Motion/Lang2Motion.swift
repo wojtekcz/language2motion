@@ -170,16 +170,16 @@ extension Lang2Motion {
         let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
         let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.tokenCount.squeezingShape(at: 0) })
 
-        let targetMotionFrames: Tensor<Float> = Tensor(batches.map{ $0.targetMotionFrames.squeezingShape(at: 0) })
+        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.targetMotion.squeezingShape(at: 0) })
         let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
         let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
+        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.targetTruthStop.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })
 
         let batch = LangMotionBatch(sampleID: sampleID, 
                 tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
-                targetMotionFrames: targetMotionFrames, targetMask: targetMask,
-                targetTruth: targetTruth, origMotionFramesCount: origMotionFramesCount) // motionFrames: motionFrames, motionFlag: motionFlag,  origMotionFramesCount: origMotionFramesCount, target: targetTensor, targetPadId: padId)
-
+                targetMotion: targetMotion, targetMask: targetMask,
+                targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         return batch
     }
 }

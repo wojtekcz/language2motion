@@ -36,31 +36,24 @@ public func bernoulli_pdf(sample: Int, p: Float) -> Float {
     return fSample * p + Float(1.0 - fSample) * (1.0 - p)
 }
 
-// TODO: consume preds as STRUCT
-public func performNormalMixtureSampling(preds: Tensor<Float>, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
+public func performNormalMixtureSampling(preds: MixtureModelPreds, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
     let TINY: Float = 1e-8
-    let _preds = preds.reshaped(to:
-        [preds.shape[0], 2 * nb_joints * nb_mixtures + nb_mixtures + 1])
+    let motionLength = preds.mixtureMeans.shape[1]
 
-    var motion: Tensor<Float> = Tensor<Float>(zeros: [_preds.shape[0]-1, nb_joints])
-    var log_probs: [Float] = [Float](repeating:0.0, count: _preds.shape[0]-1)
-    var done: [Int32] = [Int32](repeating: 0, count: _preds.shape[0]-1)
+    var motion: Tensor<Float> = Tensor<Float>(zeros: [motionLength-1, nb_joints])
+    var log_probs: [Float] = [Float](repeating:0.0, count: motionLength-1)
+    var done: [Int32] = [Int32](repeating: 0, count: motionLength-1)
 
-    let all_means = _preds[0..., 0..<nb_joints * nb_mixtures]
-    let all_variances = _preds[0..., nb_joints *
-                              nb_mixtures..<2 * nb_joints * nb_mixtures] + TINY
-    let weights = _preds[0..., 2 * nb_joints * nb_mixtures..<2 *
-                        nb_joints * nb_mixtures + nb_mixtures]
-    assert(all_means.shape[1] == nb_joints * nb_mixtures)
-    assert(all_variances.shape[1] == nb_joints * nb_mixtures)
-    assert(weights.shape[1] == nb_mixtures)
-    let stops = _preds[0..., -1]
+    let all_means = preds.mixtureMeans.squeezingShape(at: 0)
+    let all_variances = preds.mixtureVars.squeezingShape(at: 0) + TINY
+    let weights = preds.mixtureWeights.squeezingShape(at: 0)
+    let stops = preds.stops[0, 0..., 0]
 
     /// Sample joint values.
-    var samples = Tensor<Float>(zeros: [_preds.shape[0], nb_joints])
-    var means = Tensor<Float>(zeros: [_preds.shape[0], nb_joints])
-    var variances = Tensor<Float>(zeros: [_preds.shape[0], nb_joints])
-    for width_idx in 0..<_preds.shape[0]-1 { // FIXME: why -1?
+    var samples = Tensor<Float>(zeros: [motionLength, nb_joints])
+    var means = Tensor<Float>(zeros: [motionLength, nb_joints])
+    var variances = Tensor<Float>(zeros: [motionLength, nb_joints])
+    for width_idx in 0..<motionLength-1 { // FIXME: why -1?
         // Decide which mixture to sample from
         let p = weights[width_idx].scalars.map { Double($0)}
         assert(p.count == nb_mixtures)

@@ -12,10 +12,11 @@ public struct LangMotionBatch: KeyPathIterable {
     
     // target
     // (padded)
-    public var targetMotionFrames: Tensor<Float>    // bs x maxMotionLength-1 x nbJoints
+    public var targetMotion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
     public var targetMask: Tensor<Float>            // bs x maxMotionLength-1 x maxMotionLength-1
 
     public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
+    public var targetTruthStop: Tensor<Float>       // bs x maxMotionLength-1
     // TODO: target truth should be a STRUCT with motion and stop components
     // TODO: how targetMask is used and consumed?
     // used by transformer decoder? by mixture model?
@@ -24,17 +25,18 @@ public struct LangMotionBatch: KeyPathIterable {
 
     public init(sampleID: Tensor<Int32>, 
                 tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>, 
-                targetMotionFrames: Tensor<Float>, targetMask: Tensor<Float>,
-                targetTruth: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
+                targetMotion: Tensor<Float>, targetMask: Tensor<Float>,
+                targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
         self.sampleID = sampleID
 
         self.tokenIds = tokenIds
         self.mask = mask
         self.tokenCount = tokenCount
 
-        self.targetMotionFrames = targetMotionFrames
+        self.targetMotion = targetMotion
         self.targetMask = targetMask
         self.targetTruth = targetTruth
+        self.targetTruthStop = targetTruthStop
         self.origMotionFramesCount = origMotionFramesCount
     }
 
@@ -61,9 +63,10 @@ extension LangMotionBatch {
         self.mask = Tensor<Float>(copying: batch.mask, to: device)
         self.tokenCount = Tensor<Int32>(copying: batch.tokenCount, to: device)
 
-        self.targetMotionFrames = Tensor<Float>(copying: batch.targetMotionFrames, to: device)
+        self.targetMotion = Tensor<Float>(copying: batch.targetMotion, to: device)
         self.targetMask = Tensor<Float>(copying: batch.targetMask, to: device)
         self.targetTruth = Tensor<Float>(copying: batch.targetTruth, to: device)
+        self.targetTruthStop = Tensor<Float>(copying: batch.targetTruthStop, to: device)
         self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
     }
 }
@@ -79,9 +82,10 @@ extension LangMotionBatch {
         print("  tokenCount: shape \(batch.tokenCount.shape), value \(batch.tokenCount)")
 
         print("target")
-        print("  targetMotionFrames.shape: \(batch.targetMotionFrames.shape)")
+        print("  targetMotion.shape: \(batch.targetMotion.shape)")
         print("  targetMask.shape: \(batch.targetMask.shape)")
         print("  targetTruth.shape: \(batch.targetTruth.shape)")
+        print("  targetTruthStop.shape: \(batch.targetTruthStop.shape)")
         print("  origMotionFramesCount: shape \(batch.origMotionFramesCount.shape), value \(batch.origMotionFramesCount)")
     }
 }

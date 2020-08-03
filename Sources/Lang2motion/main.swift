@@ -10,7 +10,7 @@ import LangMotionModels
 /// Set training params
 let runName = "run_1"
 let batchSize = 4
-// let batchSize = 300
+// let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 10
@@ -98,7 +98,7 @@ print("Dataset acquired.")
 // print("example.sentence: \"\(example.sentence)\"")
 
 // let singleBatch = textProcessor.preprocess(example: example)
-// printBatch(singleBatch)
+// LangMotionBatch.printBatch(singleBatch)
 
 /// Test model with one batch
 /// get a batch
@@ -120,8 +120,8 @@ print("Dataset acquired.")
 /// decode single batch
 // print("\nDecode single batch:")
 // print("====================")
-// let single_generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
-// print("generated.shape: \(single_generated.shape)")
+// let singlePreds: MixtureModelPreds = model.generate(input: LangMotionBatch(copying: singleBatch, to: device))
+// singlePreds.printPreds()
 
 // let (motion, log_probs, done) = performNormalMixtureSampling(
 //     preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
@@ -145,23 +145,23 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix") {
     // FIXME: for generation don't supply motion in a batch, maybe neutral motion frame only
     let randomMotionSample = dataset.trainExamples[0].motionSample
     let example = Lang2Motion.Example(sampleID: -1, sentence: sentence, motionSample: randomMotionSample)
-    print("sentence: \"\(sentence)\"")
+    print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
     let singleBatch = textProcessor.preprocess(example: example)
     LangMotionBatch.printBatch(singleBatch)
 
-    print("\nDecode single batch:")
-    print("====================")
+    print("\nGenerate:")
+    print("=========")
     Context.local.learningPhase = .inference
-    let single_generated = model.generate(input: LangMotionBatch(copying: singleBatch, to: device)).squeezingShape(at: 0)
-    print("generated.shape: \(single_generated.shape)")
+    let singlePreds = model.generate(input: LangMotionBatch(copying: singleBatch, to: device))//.squeezingShape(at: 0)
+    singlePreds.printPreds()
 
     let (motion, log_probs, done) = performNormalMixtureSampling(
-        preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+        preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
 
     let descaled_motion = dataset.scaler.inverse_transform(motion)
 
-    print("motion.shape: \(motion.shape)")
+    print("\nmotion.shape: \(motion.shape)")
     print("log_probs.count: \(log_probs.count)")
     print("done.shape: \(done.shape)")
     print("done: \(done)")
@@ -192,7 +192,7 @@ let args = LossArgs(
 
 /// Training helpers
 func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotionModel>, for batch: LangMotionBatch) -> Float {
-    let y_true = batch.targetTruth
+    let y_true = TargetTruth(motion: batch.targetTruth, stops: batch.targetTruthStop)
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
@@ -216,7 +216,7 @@ func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotion
 
 /// returns validation loss
 func validate(model: inout LangMotionModel, for batch: LangMotionBatch) -> Float {
-    let y_true = batch.targetTruth
+    let y_true = TargetTruth(motion: batch.targetTruth, stops: batch.targetTruthStop)
     let result = withLearningPhase(.inference) { () -> Float in
         let y_pred = model.generate(input: batch)
         let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
@@ -232,6 +232,7 @@ func validate(model: inout LangMotionModel, for batch: LangMotionBatch) -> Float
 print("\nTraining Transformer for the Lang2motion task!")
 var trainingStepCount = 0
 let print_every = 10
+let limit_print_to_step = 5
 time() {
     LazyTensorBarrier()
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
@@ -244,12 +245,12 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            if (trainingStepCount < 5 || trainingStepCount % print_every == 0) {
+            if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
                 print("==> step \(trainingStepCount)")
             }
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            if (trainingStepCount < 5 || trainingStepCount % print_every == 0) {
+            if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
                 print("current loss at step \(trainingStepCount): \(loss)")
             }
             trainingLossSum += loss
@@ -275,7 +276,7 @@ time() {
         for eagerBatch in dataset.validationBatches {
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.targetMotionFrames.shape[0]
+            let valBatchSize = batch.targetMotion.shape[0]
 
             devLossSum += loss
             devBatchCount += 1
