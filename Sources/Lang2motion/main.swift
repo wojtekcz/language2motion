@@ -156,7 +156,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix") {
     let singlePreds = model.generate(input: LangMotionBatch(copying: singleBatch, to: device))//.squeezingShape(at: 0)
     singlePreds.printPreds()
 
-    let (motion, log_probs, done) = performNormalMixtureSampling(
+    let (motion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
         preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
 
     let descaled_motion = dataset.scaler.inverse_transform(motion)
