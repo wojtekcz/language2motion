@@ -11,7 +11,7 @@ import MotionModels
 let runName = "run_1"
 let batchSize = 6000
 // let batchSize = 3000
-let maxSequenceLength =  50
+let maxSequenceLength =  10
 let nEpochs = 1
 let learningRate: Float = 5e-4
 
@@ -22,13 +22,13 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
 
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print(device)
 
 
@@ -151,7 +151,9 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
     let memory = model.encode(input: input)
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
     // ys = Tensor(copying: ys, to: device)
-    for _ in 0..<maxLength {
+    for i in 0..<maxLength {
+        print("loop \(i)")
+        print("  ys: \(ys)")
         let decoderInput = MotionLangBatch(motionFrames: input.motionFrames,
                                      mask: input.mask,
                                      origMotionFramesCount: input.origMotionFramesCount,
@@ -160,6 +162,8 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
                                      targetTruth: input.targetTruth)
         // decoderInput = MotionLangBatch(copying: decoderInput, to: device)
         let out = model.decode(input: decoderInput, memory: memory)
+        print("out.shape: \(out.shape)")
+        print("out[0...,-1].shape: \(out[0...,-1].shape)")
         let prob = model.generate(input: out[0...,-1])
         let nextWord = Int32(prob.argmax().scalarized())
         ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1) // , on: device
@@ -184,7 +188,7 @@ func greedyDecodeSample(_ sample_id: Int) {
     Context.local.learningPhase = .inference
     source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
     model.move(to: Device.defaultTFEager)
-    let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+    let out = greedyDecode(model: model, input: source, maxLength: maxSequenceLength, startSymbol: textProcessor.bosId)
     let outputStr = textProcessor.decode(tensor: out)
     print("greedyDecode(): \"\(outputStr)\"")
     model.move(to: device)
