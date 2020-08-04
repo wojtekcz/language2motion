@@ -2,7 +2,7 @@ import Foundation
 import TensorFlow
 import Datasets
 import TextModels
-import MotionModels
+import MotionClassifiers
 import ImageClassificationModels
 import ModelSupport
 import SummaryWriter

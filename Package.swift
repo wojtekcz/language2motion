@@ -14,7 +14,8 @@ let package = Package(
         .library(name: "Datasets", targets: ["Datasets"]),
         .library(name: "ModelSupport", targets: ["ModelSupport"]),
         .library(name: "TextModels", targets: ["TextModels"]),
-        .library(name: "MotionModels", targets: ["MotionModels"]),
+        .library(name: "MotionClassifiers", targets: ["MotionClassifiers"]),
+        .library(name: "MotionLangModels", targets: ["MotionLangModels"]),
         .library(name: "LangMotionModels", targets: ["LangMotionModels"]),
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
         .library(name: "TranslationModels", targets: ["TranslationModels"]),
@@ -36,7 +37,7 @@ let package = Package(
             name: "Language2label", dependencies: ["TextModels", "Datasets", "SummaryWriter"],
             path: "Sources/Language2label"),
         .target(
-            name: "Motion2label", dependencies: ["ImageClassificationModels", "TextModels", "Datasets", "ModelSupport", "MotionModels", "SummaryWriter"],
+            name: "Motion2label", dependencies: ["ImageClassificationModels", "TextModels", "Datasets", "ModelSupport", "MotionClassifiers", "SummaryWriter"],
             path: "Sources/Motion2label"),
         .target(name: "Batcher", path: "Sources/Batcher"),
         .target(name: "Datasets", dependencies: ["ModelSupport", "Batcher"], path: "Sources/Datasets"),
@@ -46,7 +47,8 @@ let package = Package(
             exclude: ["STBImage"]),
         .target(name: "STBImage", path: "Sources/Support/STBImage"),
         .target(name: "TextModels", dependencies: ["Datasets"], path: "Sources/Models/Text"),
-        .target(name: "MotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/Motion"),
+        .target(name: "MotionLangModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/MotionLang"),
+        .target(name: "MotionClassifiers", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/MotionClassifiers"),
         .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/LangMotion"),
         .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
         .target(name: "TranslationModels", dependencies: ["Datasets"], path: "Sources/Models/Translation"),
@@ -60,7 +62,7 @@ let package = Package(
             path: "Sources/Lang2lang"),
         .target(
             name: "Motion2lang",
-            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionModels"],
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionLangModels"],
             path: "Sources/Motion2lang"),
         .target(
             name: "Lang2motion",
