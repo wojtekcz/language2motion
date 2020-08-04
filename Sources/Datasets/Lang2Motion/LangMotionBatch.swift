@@ -20,6 +20,13 @@ public struct LangMotionBatch: KeyPathIterable {
             mask = Tensor<Float>(copying: source.mask, to: device)
             tokenCount = Tensor<Int32>(copying: source.tokenCount, to: device)
         }
+
+        public func printSource() {
+            print("source")
+            print("  tokenIds.shape: \(self.tokenIds.shape)")
+            print("  mask.shape: \(self.mask.shape)")
+            print("  tokenCount: shape \(self.tokenCount.shape), value \(self.tokenCount)")
+        }
     }
 
     // source
@@ -96,20 +103,19 @@ extension LangMotionBatch {
 }
 
 extension LangMotionBatch {
-    public static func printBatch(_ batch: LangMotionBatch) {
-        print("type: \(type(of:batch))")
-        print("sampleID: shape \(batch.sampleID.shape), value \(batch.sampleID)")
+    public func printBatch() {
+        print("sampleID: shape \(self.sampleID.shape), value \(self.sampleID)")
 
         print("source")
-        print("  tokenIds.shape: \(batch.source.tokenIds.shape)")
-        print("  mask.shape: \(batch.source.mask.shape)")
-        print("  tokenCount: shape \(batch.source.tokenCount.shape), value \(batch.source.tokenCount)")
+        print("  tokenIds.shape: \(self.source.tokenIds.shape)")
+        print("  mask.shape: \(self.source.mask.shape)")
+        print("  tokenCount: shape \(self.source.tokenCount.shape), value \(self.source.tokenCount)")
 
         print("target")
-        print("  targetMotion.shape: \(batch.targetMotion.shape)")
-        print("  targetMask.shape: \(batch.targetMask.shape)")
-        print("  targetTruth.shape: \(batch.targetTruth.shape)")
-        print("  targetTruthStop.shape: \(batch.targetTruthStop.shape)")
-        print("  origMotionFramesCount: shape \(batch.origMotionFramesCount.shape), value \(batch.origMotionFramesCount)")
+        print("  targetMotion.shape: \(self.targetMotion.shape)")
+        print("  targetMask.shape: \(self.targetMask.shape)")
+        print("  targetTruth.shape: \(self.targetTruth.shape)")
+        print("  targetTruthStop.shape: \(self.targetTruthStop.shape)")
+        print("  origMotionFramesCount: shape \(self.origMotionFramesCount.shape), value \(self.origMotionFramesCount)")
     }
 }

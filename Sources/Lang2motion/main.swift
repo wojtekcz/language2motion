@@ -148,7 +148,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix") {
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
     let singleBatch = textProcessor.preprocess(example: example)
-    LangMotionBatch.printBatch(singleBatch)
+    singleBatch.printBatch()
 
     print("\nGenerate:")
     print("=========")
