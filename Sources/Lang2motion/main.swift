@@ -141,40 +141,54 @@ print("Dataset acquired.")
 // motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8_descaled.png"), 
 //             motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
 
-public func greedyDecodeMotion(sentence: String, prefix: String = "prefix") {
-    // FIXME: for generation don't supply motion in a batch, maybe neutral motion frame only
-    let randomMotionSample = dataset.trainExamples[0].motionSample
-    let example = Lang2Motion.Example(sampleID: -1, sentence: sentence, motionSample: randomMotionSample)
+public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", showMotion: Bool = false) {
+    // TODO: incorporate done/stop signal
+    // TODO: save mmm file
+    Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
-    let singleBatch = textProcessor.preprocess(example: example)
-    singleBatch.printBatch()
+    let source = textProcessor.preprocess(sentence: sentence)
+    source.printSource()
+
+    print("\nEncode:")
+    print("======")
+    let memory = model.transformer.encode(input: source)
+    print("  memory.count: \(memory.shape)")
 
     print("\nGenerate:")
     print("=========")
-    Context.local.learningPhase = .inference
-    let singlePreds = model.generate(input: LangMotionBatch(copying: singleBatch, to: device))//.squeezingShape(at: 0)
-    singlePreds.printPreds()
+    // tensor for neutral motion frame
+    var ys: Tensor<Float> = Tensor<Float>(repeating:0.0, shape: [1, 1, nbJoints])
+    for _ in 0..<maxMotionLength {
+        // prepare input
+        let targetMask = Tensor<Float>(subsequentMask(size: ys.shape[1]))
+        let target = LangMotionBatch.Target(motion: ys, mask: targetMask)
 
-    let (motion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
-        preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+        // decode motion
+        let out = model.transformer.decode(sourceMask: source.mask, target: target, memory: memory)
+        let singlePreds = model.mixtureModel(model.transformer.generate(input: out[0...,-1].expandingShape(at: 0)))
+        
+        // perform sampling
+        let (sampledMotion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
+            preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+        
+        // concatenate motion
+        ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)        
+    }
 
-    let descaled_motion = dataset.scaler.inverse_transform(motion)
+    // descale motion    
+    let descaled_motion = dataset.scaler.inverse_transform(ys.squeezingShape(at:0))
+    print("  descaled_motion.shape: \(descaled_motion.shape)")
 
-    print("\nmotion.shape: \(motion.shape)")
-    print("log_probs.count: \(log_probs.count)")
-    print("done.shape: \(done.shape)")
-    print("done: \(done)")
-    // print("log_probs: \(log_probs)")
-    // print("descaled_motion: \(descaled_motion)")
-
-    let imageURL = dataURL.appendingPathComponent("motion_images/\(prefix).png")
-    motionToImg(url: imageURL, motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(prefix), \(example.sentence)")
-    print("Saved image: \(imageURL.path)")
+    let imageURL = !showMotion ? dataURL.appendingPathComponent("motion_images/\(prefix).png") : nil
+    motionToImg(url: imageURL, motion: descaled_motion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
+    if !showMotion {
+        print("Saved image: \(imageURL!.path)")
+    }
 }
 
-// greedyDecodeMotion(sentence: "human is walking", prefix: "foo9")
-// exit(0)
+greedyDecodeMotion(sentence: "human is walking", prefix: "foo9")
+exit(0)
 
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
