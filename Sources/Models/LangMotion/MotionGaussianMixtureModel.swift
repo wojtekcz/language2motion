@@ -44,28 +44,15 @@ public struct MotionGaussianMixtureModel: Module {
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> MixtureModelPreds {
-        let x = input
-        let bs = x.shape[0]
-        let max_target_length = x.shape[1]
-        // var all_decoder_outputs = Tensor<Float>(zeros: [bs, max_target_length, self.outputSize])
-        // add neutral position vector?
+        let targetLength = input.shape[1]
         // TODO: use time distributed layers
         // Run through mixture_model one time step at a time
         var all_outputs: [MixtureModelPreds] = []
-        for t in 0..<max_target_length-1 {
-            let decoder_input: Tensor<Float> = x[0..., t]
-
+        for t in 0..<targetLength {
+            let decoder_input: Tensor<Float> = input[0..., t]
             let decoder_output = self.forwardStep(decoder_input)
             all_outputs.append(decoder_output)
         }
-        all_outputs.append(
-            MixtureModelPreds(
-                mixtureMeans: Tensor<Float>(zeros: [bs, self.linearMixtureMeans.weight.shape[1]]),
-                mixtureVars: Tensor<Float>(zeros: [bs, self.linearMixtureVars.weight.shape[1]]),
-                mixtureWeights: Tensor<Float>(zeros: [bs, self.linearMixtureWeights.weight.shape[1]]),
-                stops: Tensor<Float>(zeros: [bs, self.linearStop.weight.shape[1]])
-            )
-        )
         
         let all_outputs_struct = MixtureModelPreds(stacking: all_outputs, alongAxis: 1)
         return all_outputs_struct

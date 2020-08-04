@@ -41,9 +41,9 @@ public class MotionDecoder {
         let TINY: Float = 1e-8
         let motionLength = preds.mixtureMeans.shape[1]
 
-        var motion: Tensor<Float> = Tensor<Float>(zeros: [motionLength-1, nb_joints])
-        var log_probs: [Float] = [Float](repeating:0.0, count: motionLength-1)
-        var done: [Int32] = [Int32](repeating: 0, count: motionLength-1)
+        var motion: Tensor<Float> = Tensor<Float>(zeros: [motionLength, nb_joints])
+        var log_probs: [Float] = [Float](repeating:0.0, count: motionLength)
+        var done: [Int32] = [Int32](repeating: 0, count: motionLength)
 
         let all_means = preds.mixtureMeans.squeezingShape(at: 0)
         let all_variances = preds.mixtureVars.squeezingShape(at: 0) + TINY
@@ -54,7 +54,7 @@ public class MotionDecoder {
         var samples = Tensor<Float>(zeros: [motionLength, nb_joints])
         var means = Tensor<Float>(zeros: [motionLength, nb_joints])
         var variances = Tensor<Float>(zeros: [motionLength, nb_joints])
-        for width_idx in 0..<motionLength-1 { // FIXME: why -1?
+        for width_idx in 0..<motionLength {
             // Decide which mixture to sample from
             let p = weights[width_idx].scalars.map { Double($0)}
             assert(p.count == nb_mixtures)
@@ -73,7 +73,7 @@ public class MotionDecoder {
             variances[width_idx, 0...] = v
         }
 
-        for idx in 0..<samples.shape[0]-1 {
+        for idx in 0..<motionLength {
             let sample = samples[idx]
             let stop: Float = stops[idx].scalar!
             if done[idx] != 0 {
