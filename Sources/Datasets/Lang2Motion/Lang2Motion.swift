@@ -166,9 +166,9 @@ extension Lang2Motion {
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
         let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
-        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
-        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.tokenCount.squeezingShape(at: 0) })
+        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenIds.squeezingShape(at: 0) })
+        let mask: Tensor<Float> = Tensor(batches.map{ $0.source.mask.squeezingShape(at: 0) })
+        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenCount.squeezingShape(at: 0) })
 
         let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.targetMotion.squeezingShape(at: 0) })
         let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })

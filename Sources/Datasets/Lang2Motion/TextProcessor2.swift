@@ -29,13 +29,8 @@ public struct TextProcessor2 {
         self.unkId = Int32(self.vocabulary.id(forToken: UNKNOWN_WORD)!)
     }
 
-    // TODO: refactor motion out
-    public func preprocess(example: Lang2Motion.Example) -> LangMotionBatch {
-        let sampleID: Tensor<Int32> = Tensor([Int32(example.sampleID)])
-
-        // source: text
-        // ************
-        var encodedSource = self.tokenizer.tokenize(example.sentence)
+    public func preprocess(sentence: String) -> LangMotionBatch.Source {
+        var encodedSource = self.tokenizer.tokenize(sentence)
             .prefix(maxTextSequenceLength - 2)
             .map{ Int32(self.vocabulary.id(forToken: $0) ?? Int(self.unkId))}
 
@@ -55,6 +50,16 @@ public struct TextProcessor2 {
 
         let tokenCount: Tensor<Int32> = Tensor([Int32(origTokenCount)])
 
+        let singleSource = LangMotionBatch.Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+        return singleSource
+    }
+
+    // TODO: refactor motion out
+    public func preprocess(example: Lang2Motion.Example) -> LangMotionBatch {
+        let sampleID: Tensor<Int32> = Tensor([Int32(example.sampleID)])
+
+        let source = self.preprocess(sentence: example.sentence)
+
         // target: motion
         // **************
         var (motion, motionFlag) = Tensor<Float>(example.motionSample.motion).paddedAndCropped(to: maxMotionLength)
@@ -72,7 +77,7 @@ public struct TextProcessor2 {
         let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
 
         let singleBatch = LangMotionBatch(sampleID: sampleID, 
-                tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
+                source: source, 
                 targetMotion: targetMotion, targetMask: targetMask,
                 targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         return singleBatch

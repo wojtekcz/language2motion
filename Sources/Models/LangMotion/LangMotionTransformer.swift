@@ -42,12 +42,12 @@ public struct LangMotionTransformer: Module {
 
     @differentiable
     public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
-        let encodedMemory = self.encode(input: input)
+        let encodedMemory = self.encode(input: input.source)
         return self.decode(input: input, memory: encodedMemory)
     }
     
     @differentiable
-    public func encode(input: LangMotionBatch) -> Tensor<Float> {
+    public func encode(input: LangMotionBatch.Source) -> Tensor<Float> {
         let embedded = self.sourceEmbed(input.tokenIds)
         let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask)
         return self.encoder(encoderInput)
@@ -68,7 +68,7 @@ public struct LangMotionTransformer: Module {
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
         motionFeatures = positionalEncoding(motionFeatures)
 
-        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
+        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: input.source.mask, targetMask: input.targetMask, memory: memory)
         return self.decoder(decoderInput)
     }
     

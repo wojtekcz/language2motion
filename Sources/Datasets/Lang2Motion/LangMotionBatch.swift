@@ -4,11 +4,27 @@ import TensorFlow
 public struct LangMotionBatch: KeyPathIterable {
     public let sampleID: Tensor<Int32>   // bs
 
+    public struct Source {
+        public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
+        public var mask: Tensor<Float>       // bs x 1 x maxTextSequenceLength
+        public let tokenCount: Tensor<Int32> // bs
+
+        public init(tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>) {
+            self.tokenIds = tokenIds
+            self.mask = mask
+            self.tokenCount = tokenCount
+        }
+
+        public init(copying source: Source, to device: Device) {
+            tokenIds = Tensor<Int32>(copying: source.tokenIds, to: device)
+            mask = Tensor<Float>(copying: source.mask, to: device)
+            tokenCount = Tensor<Int32>(copying: source.tokenCount, to: device)
+        }
+    }
+
     // source
     // (padded)
-    public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
-    public var mask: Tensor<Float>       // bs x 1 x maxTextSequenceLength
-    public let tokenCount: Tensor<Int32> // bs
+    public let source: Source
     
     // target
     // (padded)
@@ -29,9 +45,20 @@ public struct LangMotionBatch: KeyPathIterable {
                 targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
         self.sampleID = sampleID
 
-        self.tokenIds = tokenIds
-        self.mask = mask
-        self.tokenCount = tokenCount
+        self.source = Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+
+        self.targetMotion = targetMotion
+        self.targetMask = targetMask
+        self.targetTruth = targetTruth
+        self.targetTruthStop = targetTruthStop
+        self.origMotionFramesCount = origMotionFramesCount
+    }
+
+    public init(sampleID: Tensor<Int32>, source: Source, 
+                targetMotion: Tensor<Float>, targetMask: Tensor<Float>,
+                targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
+        self.sampleID = sampleID
+        self.source = source
 
         self.targetMotion = targetMotion
         self.targetMask = targetMask
@@ -58,10 +85,7 @@ public func subsequentMask3(size: Int) -> Tensor<Int32> {
 extension LangMotionBatch {
     public init(copying batch: LangMotionBatch, to device: Device) {
         self.sampleID = Tensor<Int32>(copying: batch.sampleID, to: device)
-
-        self.tokenIds = Tensor<Int32>(copying: batch.tokenIds, to: device)
-        self.mask = Tensor<Float>(copying: batch.mask, to: device)
-        self.tokenCount = Tensor<Int32>(copying: batch.tokenCount, to: device)
+        self.source = Source(copying: batch.source, to: device)
 
         self.targetMotion = Tensor<Float>(copying: batch.targetMotion, to: device)
         self.targetMask = Tensor<Float>(copying: batch.targetMask, to: device)
@@ -77,9 +101,9 @@ extension LangMotionBatch {
         print("sampleID: shape \(batch.sampleID.shape), value \(batch.sampleID)")
 
         print("source")
-        print("  tokenIds.shape: \(batch.tokenIds.shape)")
-        print("  mask.shape: \(batch.mask.shape)")
-        print("  tokenCount: shape \(batch.tokenCount.shape), value \(batch.tokenCount)")
+        print("  tokenIds.shape: \(batch.source.tokenIds.shape)")
+        print("  mask.shape: \(batch.source.mask.shape)")
+        print("  tokenCount: shape \(batch.source.tokenCount.shape), value \(batch.source.tokenCount)")
 
         print("target")
         print("  targetMotion.shape: \(batch.targetMotion.shape)")
