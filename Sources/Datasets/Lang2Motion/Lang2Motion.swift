@@ -170,8 +170,8 @@ extension Lang2Motion {
         let mask: Tensor<Float> = Tensor(batches.map{ $0.source.mask.squeezingShape(at: 0) })
         let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenCount.squeezingShape(at: 0) })
 
-        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.targetMotion.squeezingShape(at: 0) })
-        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
+        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.target.motion.squeezingShape(at: 0) })
+        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.target.mask.squeezingShape(at: 0) })
         let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
         let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.targetTruthStop.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })

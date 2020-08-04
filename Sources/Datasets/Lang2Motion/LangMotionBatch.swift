@@ -33,10 +33,30 @@ public struct LangMotionBatch: KeyPathIterable {
     // (padded)
     public let source: Source
     
+    public struct Target {
+        public var motion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
+        public var mask: Tensor<Float>            // bs x maxMotionLength-1 x maxMotionLength-1
+
+        public init(motion: Tensor<Float>, mask: Tensor<Float>) {
+            self.motion = motion
+            self.mask = mask
+        }
+
+        public init(copying target: Target, to device: Device) {
+            motion = Tensor<Float>(copying: target.motion, to: device)
+            mask = Tensor<Float>(copying: target.mask, to: device)
+        }
+
+        public func printTarget() {
+            print("target")
+            print("  motion.shape: \(self.motion.shape)")
+            print("  mask.shape: \(self.mask.shape)")
+        }
+    }
+
     // target
     // (padded)
-    public var targetMotion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
-    public var targetMask: Tensor<Float>            // bs x maxMotionLength-1 x maxMotionLength-1
+    public var target: Target
 
     public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
     public var targetTruthStop: Tensor<Float>       // bs x maxMotionLength-1
@@ -51,24 +71,20 @@ public struct LangMotionBatch: KeyPathIterable {
                 targetMotion: Tensor<Float>, targetMask: Tensor<Float>,
                 targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
         self.sampleID = sampleID
-
         self.source = Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+        self.target = Target(motion: targetMotion, mask: targetMask)
 
-        self.targetMotion = targetMotion
-        self.targetMask = targetMask
         self.targetTruth = targetTruth
         self.targetTruthStop = targetTruthStop
         self.origMotionFramesCount = origMotionFramesCount
     }
 
-    public init(sampleID: Tensor<Int32>, source: Source, 
-                targetMotion: Tensor<Float>, targetMask: Tensor<Float>,
+    public init(sampleID: Tensor<Int32>, source: Source, target: Target,
                 targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
         self.sampleID = sampleID
         self.source = source
 
-        self.targetMotion = targetMotion
-        self.targetMask = targetMask
+        self.target = target
         self.targetTruth = targetTruth
         self.targetTruthStop = targetTruthStop
         self.origMotionFramesCount = origMotionFramesCount
@@ -93,9 +109,8 @@ extension LangMotionBatch {
     public init(copying batch: LangMotionBatch, to device: Device) {
         self.sampleID = Tensor<Int32>(copying: batch.sampleID, to: device)
         self.source = Source(copying: batch.source, to: device)
+        self.target = Target(copying: batch.target, to: device)
 
-        self.targetMotion = Tensor<Float>(copying: batch.targetMotion, to: device)
-        self.targetMask = Tensor<Float>(copying: batch.targetMask, to: device)
         self.targetTruth = Tensor<Float>(copying: batch.targetTruth, to: device)
         self.targetTruthStop = Tensor<Float>(copying: batch.targetTruthStop, to: device)
         self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
@@ -112,8 +127,8 @@ extension LangMotionBatch {
         print("  tokenCount: shape \(self.source.tokenCount.shape), value \(self.source.tokenCount)")
 
         print("target")
-        print("  targetMotion.shape: \(self.targetMotion.shape)")
-        print("  targetMask.shape: \(self.targetMask.shape)")
+        print("  targetMotion.shape: \(self.target.motion.shape)")
+        print("  targetMask.shape: \(self.target.mask.shape)")
         print("  targetTruth.shape: \(self.targetTruth.shape)")
         print("  targetTruthStop.shape: \(self.targetTruthStop.shape)")
         print("  origMotionFramesCount: shape \(self.origMotionFramesCount.shape), value \(self.origMotionFramesCount)")

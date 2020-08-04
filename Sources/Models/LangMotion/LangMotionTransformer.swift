@@ -43,7 +43,7 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
         let encodedMemory = self.encode(input: input.source)
-        return self.decode(input: input, memory: encodedMemory)
+        return self.decode(sourceMask: input.source.mask, target: input.target, memory: encodedMemory)
     }
     
     @differentiable
@@ -54,21 +54,19 @@ public struct LangMotionTransformer: Module {
     }
     
     @differentiable
-    public func decode(input: LangMotionBatch, memory: Tensor<Float>) -> Tensor<Float> {
-        let shape = input.targetMotion.shape
-        let origBatchSize = shape[0]
-        let numFrames = shape[1]
-        let numFeatures = shape[2]
+    public func decode(sourceMask: Tensor<Float>, target: LangMotionBatch.Target, memory: Tensor<Float>) -> Tensor<Float> {
+        let shape = target.motion.shape
+        let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
 
         let tmpBatchSize = origBatchSize * numFrames
-        let tmpMotionFrames = input.targetMotion.reshaped(to: [tmpBatchSize, numFeatures])
+        let tmpMotionFrames = target.motion.reshaped(to: [tmpBatchSize, nbJoints])
 
         // FIXME: make targetEmbed() work
         let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
         motionFeatures = positionalEncoding(motionFeatures)
 
-        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: input.source.mask, targetMask: input.targetMask, memory: memory)
+        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: target.mask, memory: memory)
         return self.decoder(decoderInput)
     }
     

@@ -72,13 +72,13 @@ public struct TextProcessor2 {
 
         motionFlag = motionFlag[0..., rangeExceptLast]
         let targetMask = LangMotionBatch.makeStandardMask(target: motionFlag, pad: 0)
+        let target = LangMotionBatch.Target(motion: targetMotion, mask: targetMask)
 
         let targetTruth: Tensor<Float> = motion[0..., 1..., 0...]
         let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
 
         let singleBatch = LangMotionBatch(sampleID: sampleID, 
-                source: source, 
-                targetMotion: targetMotion, targetMask: targetMask,
+                source: source, target: target,
                 targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         return singleBatch
     }

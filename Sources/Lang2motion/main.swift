@@ -276,7 +276,7 @@ time() {
         for eagerBatch in dataset.validationBatches {
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.targetMotion.shape[0]
+            let valBatchSize = batch.target.motion.shape[0]
 
             devLossSum += loss
             devBatchCount += 1
