@@ -13,7 +13,6 @@ public struct LangMotionTransformer: Module {
     // public var sourceEmbed: Sequential<Dense<Float>, PositionalEncoding> 
     public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
     // public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding> // kill it
-    public var generator: Generator
     @noDerivative public var modelSize: Int
 
     public init(vocabSize: Int, nbJoints: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
@@ -36,7 +35,6 @@ public struct LangMotionTransformer: Module {
         self.sourceEmbed = Sequential(Embedding(vocabularySize: vocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
         // self.sourceEmbed = Sequential(motionDense, positionalEncoding)
         // self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)
-        self.generator = Generator(dimModel: modelSize, vocabSize: nbJoints)
         self.modelSize = modelSize
     }
 
@@ -68,14 +66,5 @@ public struct LangMotionTransformer: Module {
 
         let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: target.mask, memory: memory)
         return self.decoder(decoderInput)
-    }
-    
-    @differentiable
-    public func generate(input: LangMotionBatch) -> Tensor<Float> {
-        return self.generator(self.callAsFunction(input))
-    }
-    @differentiable
-    public func generate(input: Tensor<Float>) -> Tensor<Float> {
-        self.generator(input)
     }
 }

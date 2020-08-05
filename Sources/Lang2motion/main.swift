@@ -72,7 +72,7 @@ var transformer = LangMotionTransformer(
 
 let nbMixtures = 20
 // TODO: integrate MotionGaussianMixtureModel with Generator
-var mixtureModel = MotionGaussianMixtureModel(inputSize: nbJoints, nbJoints: nbJoints, nbMixtures: nbMixtures)
+var mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
 // mixtureModel.move(to: device)
 
 var model = LangMotionModel(transformer: transformer, mixtureModel: mixtureModel)
@@ -166,7 +166,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
 
         // decode motion
         let out = model.transformer.decode(sourceMask: source.mask, target: target, memory: memory)
-        let singlePreds = model.mixtureModel(model.transformer.generate(input: out[0...,-1].expandingShape(at: 0)))
+        let singlePreds = model.mixtureModel(out[0...,-1].expandingShape(at: 0))
         
         // perform sampling
         let (sampledMotion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
