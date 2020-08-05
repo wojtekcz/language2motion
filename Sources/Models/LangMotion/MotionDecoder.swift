@@ -79,11 +79,9 @@ public class MotionDecoder {
             if done[idx] != 0 {
                 continue
             }
+            motion[idx] = sample
             // https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.random.binomial.html
             let sampled_stop: Int = Int(np.random.binomial(n: 1, p: stop))!
-            let combined = Tensor<Float>(concatenating: [sample[0..<nb_joints-1], Tensor<Float>([Float(sampled_stop)])])
-            assert(combined.shape == [nb_joints])
-            motion[idx] = combined
             log_probs[idx] += log(gaussian_pdf(sample: sample, means: means[idx], variances: variances[idx])).sum().scalar!
             log_probs[idx] += log(bernoulli_pdf(sample: sampled_stop, p: stop))
             done[idx] = (sampled_stop == 0) ? 1 : 0
