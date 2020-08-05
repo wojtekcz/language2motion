@@ -76,9 +76,9 @@ public class MotionDecoder {
         for idx in 0..<motionLength {
             let sample = samples[idx]
             let stop: Float = stops[idx].scalar!
-            if done[idx] != 0 {
-                continue
-            }
+            // if done[idx] != 0 {
+            //     continue
+            // }
             motion[idx] = sample
             // https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.random.binomial.html
             let sampled_stop: Int = Int(np.random.binomial(n: 1, p: stop))!
