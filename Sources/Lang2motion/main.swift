@@ -2,6 +2,7 @@ import TensorFlow
 import TextModels
 import TranslationModels
 import Foundation
+import FoundationXML
 import ModelSupport
 import Datasets
 import SummaryWriter
@@ -143,7 +144,6 @@ print("Dataset acquired.")
 
 public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", showMotion: Bool = false) {
     // TODO: incorporate done/stop signal
-    // TODO: save mmm file
     Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
@@ -180,10 +180,18 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
     let descaled_motion = dataset.scaler.inverse_transform(ys.squeezingShape(at:0))
     print("  descaled_motion.shape: \(descaled_motion.shape)")
 
-    let imageURL = !showMotion ? dataURL.appendingPathComponent("motion_images/\(prefix).png") : nil
+    let imageURL = dataURL.appendingPathComponent("motion_images/\(prefix).png")
     motionToImg(url: imageURL, motion: descaled_motion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
-    if !showMotion {
-        print("Saved image: \(imageURL!.path)")
+    print("Saved image: \(imageURL.path)")
+
+    let jointNames = dataset.trainExamples[0].motionSample.jointNames
+    let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaled_motion)
+    let mmmURL = dataURL.appendingPathComponent("motion_images/\(prefix).mmm.xml")
+    try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+    print("Saved motion: \(mmmURL.path)")
+
+    if showMotion {
+        motionToImg(url: nil, motion: descaled_motion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
     }
 }
 
