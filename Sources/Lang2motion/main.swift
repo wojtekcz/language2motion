@@ -137,7 +137,7 @@ print("Dataset acquired.")
 // motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8_descaled.png"), 
 //             motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
 
-public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", showMotion: Bool = false) {
+public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", saveMotion: Bool = false) {
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
@@ -146,25 +146,26 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
     source.printSource()
 
     let decodedMotion = MotionDecoder.greedyDecodeMotion(source: source, transformer: model, nbJoints: nbJoints, nbMixtures: nbMixtures, maxMotionLength: maxMotionLength)
+    print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
     print("  descaledMotion.shape: \(descaledMotion.shape)")
+    print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
 
-    let imageURL = dataURL.appendingPathComponent("motion_images/\(prefix).png")
-    motionToImg(url: imageURL, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
-    print("Saved image: \(imageURL.path)")
+    var imageURL: URL? = dataURL.appendingPathComponent("motion_images/\(prefix).png")
+    if !saveMotion { imageURL = nil }
+    motionToImg(url: imageURL, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)", cmapRange: 3.0)
 
-    let jointNames = dataset.trainExamples[0].motionSample.jointNames
-    let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
-    let mmmURL = dataURL.appendingPathComponent("motion_images/\(prefix).mmm.xml")
-    try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-    print("Saved motion: \(mmmURL.path)")
-
-    if showMotion {
-        motionToImg(url: nil, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
+    if saveMotion {
+        print("Saved image: \(imageURL!.path)")
+        let jointNames = dataset.trainExamples[0].motionSample.jointNames
+        let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
+        let mmmURL = dataURL.appendingPathComponent("motion_images/\(prefix).mmm.xml")
+        try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+        print("Saved motion: \(mmmURL.path)")
     }
 }
 
-// greedyDecodeMotion(sentence: "human is walking", prefix: "foo9")
+// greedyDecodeMotion(sentence: "human is walking", prefix: "foo10", saveMotion: true)
 // exit(0)
 
 /// Optimizer
