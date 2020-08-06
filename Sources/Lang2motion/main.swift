@@ -54,28 +54,23 @@ let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer,
 /// instantiate model
 let vocabSize = vocabulary.count
 let nbJoints = 47 // TODO: get value from dataset
+let nbMixtures = 20
 let layerCount: Int = 6
 let modelSize: Int = 256
 let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
-var transformer = LangMotionTransformer(
+var model = LangMotionTransformer(
     vocabSize: vocabSize, 
     nbJoints: nbJoints,
+    nbMixtures: nbMixtures,
     layerCount: layerCount, 
     modelSize: modelSize, 
     feedForwardSize: feedForwardSize, 
     headCount: headCount, 
     dropoutProbability: dropoutProbability
 )
-
-let nbMixtures = 20
-// TODO: integrate MotionGaussianMixtureModel with Generator
-var mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
-// mixtureModel.move(to: device)
-
-var model = LangMotionModel(transformer: transformer, mixtureModel: mixtureModel)
 model.move(to: device)
 
 /// load dataset
@@ -152,7 +147,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
 
     print("\nEncode:")
     print("======")
-    let memory = model.transformer.encode(input: source)
+    let memory = model.encode(input: source)
     print("  memory.count: \(memory.shape)")
 
     print("\nGenerate:")
@@ -165,7 +160,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
         let target = LangMotionBatch.Target(motion: ys, mask: targetMask)
 
         // decode motion
-        let out = model.transformer.decode(sourceMask: source.mask, target: target, memory: memory)
+        let out = model.decode(sourceMask: source.mask, target: target, memory: memory)
         let singlePreds = model.mixtureModel(out[0...,-1].expandingShape(at: 0))
         
         // perform sampling
@@ -195,8 +190,8 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
     }
 }
 
-greedyDecodeMotion(sentence: "human is walking", prefix: "foo9")
-exit(0)
+// greedyDecodeMotion(sentence: "human is walking", prefix: "foo9")
+// exit(0)
 
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
@@ -213,7 +208,7 @@ let args = LossArgs(
 )
 
 /// Training helpers
-func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotionModel>, for batch: LangMotionBatch) -> Float {
+func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch) -> Float {
     let y_true = TargetTruth(motion: batch.targetTruth, stops: batch.targetTruthStop)
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
@@ -236,8 +231,7 @@ func update(model: inout LangMotionModel, using optimizer: inout Adam<LangMotion
     return result
 }
 
-/// returns validation loss
-func validate(model: inout LangMotionModel, for batch: LangMotionBatch) -> Float {
+func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) -> Float {
     let y_true = TargetTruth(motion: batch.targetTruth, stops: batch.targetTruthStop)
     let result = withLearningPhase(.inference) { () -> Float in
         let y_pred = model.generate(input: batch)

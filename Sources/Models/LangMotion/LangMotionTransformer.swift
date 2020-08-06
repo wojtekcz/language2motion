@@ -13,9 +13,10 @@ public struct LangMotionTransformer: Module {
     // public var sourceEmbed: Sequential<Dense<Float>, PositionalEncoding> 
     public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
     // public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding> // kill it
+    public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var modelSize: Int
 
-    public init(vocabSize: Int, nbJoints: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
+    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
                                            targetSize: modelSize,
@@ -35,6 +36,7 @@ public struct LangMotionTransformer: Module {
         self.sourceEmbed = Sequential(Embedding(vocabularySize: vocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
         // self.sourceEmbed = Sequential(motionDense, positionalEncoding)
         // self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)
+        self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
         self.modelSize = modelSize
     }
 
@@ -66,5 +68,10 @@ public struct LangMotionTransformer: Module {
 
         let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: target.mask, memory: memory)
         return self.decoder(decoderInput)
+    }
+
+    @differentiable
+    public func generate(input: LangMotionBatch) -> MixtureModelPreds {
+        return self.mixtureModel(self.callAsFunction(input))
     }
 }
