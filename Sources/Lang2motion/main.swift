@@ -150,17 +150,17 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
     print("  descaledMotion.shape: \(descaledMotion.shape)")
 
     let imageURL = dataURL.appendingPathComponent("motion_images/\(prefix).png")
-    motionToImg(url: imageURL, motion: descaled_motion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
+    motionToImg(url: imageURL, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
     print("Saved image: \(imageURL.path)")
 
     let jointNames = dataset.trainExamples[0].motionSample.jointNames
-    let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaled_motion)
+    let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
     let mmmURL = dataURL.appendingPathComponent("motion_images/\(prefix).mmm.xml")
     try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
     print("Saved motion: \(mmmURL.path)")
 
     if showMotion {
-        motionToImg(url: nil, motion: descaled_motion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
+        motionToImg(url: nil, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")
     }
 }
 
