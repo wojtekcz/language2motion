@@ -1,5 +1,6 @@
 import TensorFlow
 import PythonKit
+import Datasets
 
 let np  = Python.import("numpy")
 
@@ -87,6 +88,35 @@ public class MotionDecoder {
             done[idx] = (sampled_stop == 0) ? 1 : 0
         }
         return (motion: motion, log_probs: log_probs, done: Tensor(done))
+    }
+
+    public static func greedyDecodeMotion(source: LangMotionBatch.Source, transformer: LangMotionTransformer, nbJoints: Int, nbMixtures: Int, maxMotionLength: Int) -> Tensor<Float> {
+        print("\nEncode:")
+        print("======")
+        let memory = transformer.encode(input: source)
+        print("  memory.count: \(memory.shape)")
+
+        print("\nGenerate:")
+        print("=========")
+        // start with tensor for neutral motion frame
+        var ys: Tensor<Float> = Tensor<Float>(repeating:0.0, shape: [1, 1, nbJoints])
+        for _ in 0..<maxMotionLength {
+            // prepare input
+            let targetMask = Tensor<Float>(subsequentMask(size: ys.shape[1]))
+            let target = LangMotionBatch.Target(motion: ys, mask: targetMask)
+
+            // decode motion
+            let out = transformer.decode(sourceMask: source.mask, target: target, memory: memory)
+            let singlePreds = transformer.mixtureModel(out[0...,-1].expandingShape(at: 0))
+            
+            // perform sampling
+            let (sampledMotion, _, _) = MotionDecoder.performNormalMixtureSampling(
+                preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+            
+            // concatenate motion
+            ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)        
+        }
+        return ys.squeezingShape(at:0)
     }
 
     public static func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {

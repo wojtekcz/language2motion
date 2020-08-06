@@ -15,6 +15,8 @@ public struct LangMotionTransformer: Module {
     // public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding> // kill it
     public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var modelSize: Int
+    @noDerivative public var nbJoints: Int
+    @noDerivative public var nbMixtures: Int
 
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
         
@@ -38,6 +40,8 @@ public struct LangMotionTransformer: Module {
         // self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)
         self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
         self.modelSize = modelSize
+        self.nbJoints = nbJoints        
+        self.nbMixtures = nbMixtures
     }
 
     @differentiable
@@ -56,7 +60,7 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func decode(sourceMask: Tensor<Float>, target: LangMotionBatch.Target, memory: Tensor<Float>) -> Tensor<Float> {
         let shape = target.motion.shape
-        let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
+        let (origBatchSize, numFrames) = (shape[0], shape[1])
 
         let tmpBatchSize = origBatchSize * numFrames
         let tmpMotionFrames = target.motion.reshaped(to: [tmpBatchSize, nbJoints])

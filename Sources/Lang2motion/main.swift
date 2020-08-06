@@ -145,35 +145,9 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", show
     let source = textProcessor.preprocess(sentence: sentence)
     source.printSource()
 
-    print("\nEncode:")
-    print("======")
-    let memory = model.encode(input: source)
-    print("  memory.count: \(memory.shape)")
-
-    print("\nGenerate:")
-    print("=========")
-    // tensor for neutral motion frame
-    var ys: Tensor<Float> = Tensor<Float>(repeating:0.0, shape: [1, 1, nbJoints])
-    for _ in 0..<maxMotionLength {
-        // prepare input
-        let targetMask = Tensor<Float>(subsequentMask(size: ys.shape[1]))
-        let target = LangMotionBatch.Target(motion: ys, mask: targetMask)
-
-        // decode motion
-        let out = model.decode(sourceMask: source.mask, target: target, memory: memory)
-        let singlePreds = model.mixtureModel(out[0...,-1].expandingShape(at: 0))
-        
-        // perform sampling
-        let (sampledMotion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
-            preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
-        
-        // concatenate motion
-        ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)        
-    }
-
-    // descale motion    
-    let descaled_motion = dataset.scaler.inverse_transform(ys.squeezingShape(at:0))
-    print("  descaled_motion.shape: \(descaled_motion.shape)")
+    let decodedMotion = MotionDecoder.greedyDecodeMotion(source: source, transformer: model, nbJoints: nbJoints, nbMixtures: nbMixtures, maxMotionLength: maxMotionLength)
+    let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
+    print("  descaledMotion.shape: \(descaledMotion.shape)")
 
     let imageURL = dataURL.appendingPathComponent("motion_images/\(prefix).png")
     motionToImg(url: imageURL, motion: descaled_motion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)")

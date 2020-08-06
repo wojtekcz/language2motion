@@ -134,3 +134,9 @@ extension LangMotionBatch {
         print("  origMotionFramesCount: shape \(self.origMotionFramesCount.shape), value \(self.origMotionFramesCount)")
     }
 }
+
+public func subsequentMask(size: Int) -> Tensor<Int32> {
+    let attentionShape = [1, size, size]
+    return Tensor<Int32>(ones: TensorShape(attentionShape))
+        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
+}
