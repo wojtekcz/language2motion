@@ -10,11 +10,11 @@ import LangMotionModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 4
-// let batchSize = 150
+// let batchSize = 4
+let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 10
+let nEpochs = 15
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
@@ -25,7 +25,7 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 
-let datasetSize: DatasetSize = .mini
+let datasetSize: DatasetSize = .full
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
@@ -137,7 +137,7 @@ print("Dataset acquired.")
 // motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8_descaled.png"), 
 //             motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
 
-public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", saveMotion: Bool = false) {
+public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", saveMotion: Bool = true) {
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
@@ -153,7 +153,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
 
     var imageURL: URL? = dataURL.appendingPathComponent("motion_images/\(prefix).png")
     if !saveMotion { imageURL = nil }
-    motionToImg(url: imageURL, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)", cmapRange: 3.0)
+    motionToImg(url: imageURL, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)", cmapRange: 2.0)
 
     if saveMotion {
         print("Saved image: \(imageURL!.path)")
@@ -236,9 +236,9 @@ time() {
         }
 
         for eagerBatch in epochBatches {
-            if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
-                print("==> step \(trainingStepCount)")
-            }
+            // if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
+            //     print("==> step \(trainingStepCount)")
+            // }
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
             if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
@@ -281,7 +281,9 @@ time() {
             """
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-        greedyDecodeMotion(sentence: "human is walking", prefix: "epoch_\(epoch+1)")
+        if epoch+1 >= 2 {
+            greedyDecodeMotion(sentence: "human is walking", prefix: "epoch_\(epoch+1)", saveMotion: true)
+        }
     }
     summaryWriter.flush()
 }
