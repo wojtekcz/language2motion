@@ -102,7 +102,7 @@ public class MotionDecoder {
         var ys: Tensor<Float> = Tensor<Float>(repeating:0.0, shape: [1, 1, nbJoints])
         for _ in 0..<maxMotionLength {
             // prepare input
-            let targetMask = Tensor<Float>(subsequentMask(size: ys.shape[1]))
+            let targetMask = Tensor<Float>(subsequentMask3(size: ys.shape[1]))
             let target = LangMotionBatch.Target(motion: ys, mask: targetMask)
 
             // decode motion
