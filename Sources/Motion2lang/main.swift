@@ -9,10 +9,9 @@ import MotionLangModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 6000
-// let batchSize = 3000
-let maxSequenceLength =  10
-let nEpochs = 1
+let batchSize = 100
+let maxSequenceLength = 50
+let nEpochs = 10
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
@@ -22,7 +21,7 @@ print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
@@ -33,13 +32,13 @@ print(device)
 
 
 /// X10 warm-up
-let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
-let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
-let eagerTensorSum = eagerTensor1 + eagerTensor2
-print(eagerTensorSum)
-print(eagerTensor1.device)
-let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-print(x10Tensor2.device)
+// let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+// let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+// let eagerTensorSum = eagerTensor1 + eagerTensor2
+// print(eagerTensorSum)
+// print(eagerTensor1.device)
+// let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+// print(x10Tensor2.device)
 
 // instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")

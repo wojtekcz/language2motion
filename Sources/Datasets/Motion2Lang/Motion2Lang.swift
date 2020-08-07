@@ -152,7 +152,7 @@ extension Motion2Lang {
         // Create the training sequence of epochs.
         let entropy = SystemRandomNumberGenerator()
         trainingEpochs = TrainingEpochs(
-        samples: trainingSamples, batchSize: batchSize / maxSequenceLength, entropy: entropy
+        samples: trainingSamples, batchSize: batchSize, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, MotionLangBatch> in
             batches.lazy.map{ 
                 Motion2Lang.reduceDataBatches(Array($0))
@@ -160,7 +160,7 @@ extension Motion2Lang {
         }
         
         // Create the validation collection of batches.
-        validationBatches = validationSamples.inBatches(of: batchSize / maxSequenceLength).lazy.map{ 
+        validationBatches = validationSamples.inBatches(of: batchSize).lazy.map{ 
             Motion2Lang.reduceDataBatches(Array($0))
         }
     }
