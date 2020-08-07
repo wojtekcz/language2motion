@@ -151,9 +151,9 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
     let memory = model.encode(input: input)
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
     // ys = Tensor(copying: ys, to: device)
-    for i in 0..<maxLength {
-        print("loop \(i)")
-        print("  ys: \(ys)")
+    for _ in 0..<maxLength {
+        // print("loop \(i)")
+        // print("  ys: \(ys)")
         let decoderInput = MotionLangBatch(motionFrames: input.motionFrames,
                                      mask: input.mask,
                                      origMotionFramesCount: input.origMotionFramesCount,
@@ -162,8 +162,8 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
                                      targetTruth: input.targetTruth)
         // decoderInput = MotionLangBatch(copying: decoderInput, to: device)
         let out = model.decode(input: decoderInput, memory: memory)
-        print("out.shape: \(out.shape)")
-        print("out[0...,-1].shape: \(out[0...,-1].shape)")
+        // print("out.shape: \(out.shape)")
+        // print("out[0...,-1].shape: \(out[0...,-1].shape)")
         let prob = model.generate(input: out[0...,-1])
         let nextWord = Int32(prob.argmax().scalarized())
         ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1) // , on: device
