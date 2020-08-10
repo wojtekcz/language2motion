@@ -1,6 +1,7 @@
 import TensorFlow
 import Datasets
 import TranslationModels
+import TextModels
 
 
 // Transformer with MotionLangBatch

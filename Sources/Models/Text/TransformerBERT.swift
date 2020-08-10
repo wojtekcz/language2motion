@@ -29,7 +29,7 @@ public struct TransformerInput<Scalar: TensorFlowFloatingPoint>: Differentiable 
 
     /// The batch size of this input. This is optional because it is only needed if the input
     /// sequences have been reshaped to matrices.
-    @noDerivative let batchSize: Int?
+    @noDerivative public let batchSize: Int?
 
     @differentiable
     public init(sequence: Tensor<Scalar>, attentionMask: Tensor<Scalar>, batchSize: Int? = nil) {

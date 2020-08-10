@@ -8,6 +8,8 @@
 
 import TensorFlow
 import ModelSupport
+import TextModels
+
 public struct TransformerModel: Module {
     public var encoder: Encoder
     public var decoder: Decoder

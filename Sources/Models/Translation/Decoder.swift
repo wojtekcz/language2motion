@@ -7,6 +7,7 @@
 //
 
 import TensorFlow
+import TextModels
 
 public struct TransformerDecoderLayer: Layer {
     var selfAttention: MultiHeadAttention,

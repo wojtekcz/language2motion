@@ -40,7 +40,7 @@ struct DecoderContext: Differentiable {
     }
 }
 
-struct SubLayerInput<Scalar: TensorFlowFloatingPoint >: Differentiable {
+public struct SubLayerInput<Scalar: TensorFlowFloatingPoint >: Differentiable {
     var sequence: Tensor<Scalar>
     @noDerivative public let activation: SubLayerInput<Scalar>.Activation
     /// The element-wise activation function type.
@@ -102,15 +102,15 @@ public struct TextBatchInput: KeyPathIterable {
     }
 }
 
-struct SublayerConnection: Layer {
-    var norm: LayerNorm<Float>
-    var dropout: Dropout<Float>
+public struct SublayerConnection: Layer {
+    public var norm: LayerNorm<Float>
+    public var dropout: Dropout<Float>
     init(size: Int, droputProb: Double) {
         self.norm = LayerNorm(featureCount: size, axis: -1, epsilon: 1e-6)
         self.dropout = Dropout(probability: droputProb)
     }
     @differentiable
-    func callAsFunction(_ input: SubLayerInput< Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: SubLayerInput< Float>) -> Tensor<Float> {
         return input.sequence + self.dropout(input.activation(self.norm(input.sequence)))
     }
     
@@ -158,31 +158,6 @@ public struct PositionalEncoding: ParameterlessLayer {
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         return self.dropout(input + encoding.value[0..., 0..<input.shape[1]])
-    }
-}
-
-
-public struct TransformerInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
-    /// Sequence that the transformer encoder operates over. The shape of this tensor is
-    /// `[batchSize, sequenceLength, depth]` or `[batchSize, sequenceLength * depth]`.
-    public var sequence: Tensor<Scalar>
-    
-    /// Mask to apply on the attention scores. This is a tensor with shape
-    /// `[batchSize, sourceSequenceLength, targetSequenceLength]` or
-    /// `[batchSize, sourceSequenceLength * targetSequenceLength]`. The values should be `1` or
-    /// `0`. The attention scores will effectively be set to negative infinity for any positions in
-    /// the mask that are set to `0`, and will be unchanged for positions that are set to `1`.
-    public var attentionMask: Tensor<Scalar>
-    
-    /// The batch size of this input. This is optional because it is only needed if the input
-    /// sequences have been reshaped to matrices.
-    @noDerivative let batchSize: Int?
-    
-    @differentiable
-    public init(sequence: Tensor<Scalar>, attentionMask: Tensor<Scalar>, batchSize: Int? = nil) {
-        self.sequence = sequence
-        self.attentionMask = attentionMask
-        self.batchSize = batchSize
     }
 }
 
