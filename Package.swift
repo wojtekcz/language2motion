@@ -9,6 +9,7 @@ let package = Package(
         .macOS(.v10_13),
     ],
     products: [
+        .library(name: "Checkpoints", targets: ["Checkpoints"]),
         .library(name: "ImageClassificationModels", targets: ["ImageClassificationModels"]),
         .library(name: "Batcher", targets: ["Batcher"]),
         .library(name: "Datasets", targets: ["Datasets"]),
@@ -32,6 +33,9 @@ let package = Package(
     ],
     targets: [
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
+        .target(
+            name: "Checkpoints", dependencies: ["SwiftProtobuf", "ModelSupport"],
+            path: "Sources/Checkpoints"),
         .target(name: "PreprocessMotionDataset", dependencies: ["Datasets"], path: "Sources/PreprocessMotionDataset"),
         .target(
             name: "Language2label", dependencies: ["TextModels", "Datasets", "SummaryWriter"],
@@ -46,7 +50,7 @@ let package = Package(
             name: "ModelSupport", dependencies: ["SwiftProtobuf", "STBImage"], path: "Sources/Support",
             exclude: ["STBImage"]),
         .target(name: "STBImage", path: "Sources/Support/STBImage"),
-        .target(name: "TextModels", dependencies: ["Datasets"], path: "Sources/Models/Text"),
+        .target(name: "TextModels", dependencies: ["Checkpoints", "Datasets"], path: "Sources/Models/Text"),
         .target(name: "MotionLangModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/MotionLang"),
         .target(name: "MotionClassifiers", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/MotionClassifiers"),
         .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/LangMotion"),

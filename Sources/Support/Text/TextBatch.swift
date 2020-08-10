@@ -55,33 +55,23 @@ extension TextBatch: Collatable {
 extension Collection where Element == TextBatch {
   /// Returns the elements of `self`, padded to `maxLength` if specified
   /// or the maximum length of the elements in `self` otherwise.
-  public func paddedAndCollated(to maxLength: Int? = nil) -> TextBatch {
-    if count == 1 { return first! }
+  public func paddedAndCollated(to maxLength: Int? = nil, on device: Device = .default) -> TextBatch {
     let maxLength = maxLength ?? self.map { $0.tokenIds.shape[1] }.max()!
     let paddedTexts = self.map { text -> TextBatch in
       let paddingSize = maxLength - text.tokenIds.shape[1]
       return TextBatch(
-        tokenIds: text.tokenIds.padded(forSizes: [
+        tokenIds: Tensor(copying: text.tokenIds.padded(forSizes: [
           (before: 0, after: 0),
-          (before: 0, after: paddingSize)]),
-        tokenTypeIds: text.tokenTypeIds.padded(forSizes: [
+          (before: 0, after: paddingSize)]), to: device),
+        tokenTypeIds: Tensor(copying: text.tokenTypeIds.padded(forSizes: [
           (before: 0, after: 0),
-          (before: 0, after: paddingSize)]),
-        mask: text.mask.padded(forSizes: [
+          (before: 0, after: paddingSize)]), to: device),
+        mask: Tensor(copying: text.mask.padded(forSizes: [
           (before: 0, after: 0),
-          (before: 0, after: paddingSize)]))
+          (before: 0, after: paddingSize)]), to: device))
     }
+
+    if count == 1 { return paddedTexts.first! }
     return paddedTexts.collated
-  }
-}
-
-
-extension TextBatch {
-  // returns new TextBatch with tensors copied to device
-  public func copyingTensorsToDevice(to device: Device) -> TextBatch {
-    let tokenIds = Tensor(copying: self.tokenIds, to: device)
-    let tokenTypeIds = Tensor(copying: self.tokenTypeIds, to: device)
-    let mask = Tensor(copying: self.mask, to: device)
-    return TextBatch(tokenIds: tokenIds, tokenTypeIds: tokenTypeIds, mask: mask)
   }
 }
