@@ -159,6 +159,41 @@ public struct MultiHeadAttention: Layer, Regularizable {
         self.attentionDropout = Dropout(probability: Double(attentionDropoutProbability))
     }
 
+    public init(
+        sourceSize: Int,
+        targetSize: Int,
+        headCount: Int = 1,
+        headSize: Int = 512,
+        queryActivation: @escaping Activation<Scalar> = identity,
+        keyActivation: @escaping Activation<Scalar> = identity,
+        valueActivation: @escaping Activation<Scalar> = identity,
+        attentionDropoutProbability: Scalar = 0,
+        matrixResult: Bool = false,
+        queryWeight: Tensor<Scalar>,
+        queryBias: Tensor<Scalar>,
+        keyWeight: Tensor<Scalar>,
+        keyBias: Tensor<Scalar>,
+        valueWeight: Tensor<Scalar>,
+        valueBias: Tensor<Scalar>
+    ) {
+        self.sourceSize = sourceSize
+        self.targetSize = targetSize
+        self.headCount = headCount
+        self.headSize = headSize
+        self.queryActivation = queryActivation
+        self.keyActivation = keyActivation
+        self.valueActivation = valueActivation
+        self.matrixResult = matrixResult
+        self.queryWeight = queryWeight
+        self.queryBias = queryBias
+        self.keyWeight = keyWeight
+        self.keyBias = keyBias
+        self.valueWeight = valueWeight
+        self.valueBias = valueBias
+        // TODO: Make dropout generic over the probability type.
+        self.attentionDropout = Dropout(probability: Double(attentionDropoutProbability))
+    }
+
     @differentiable
     public func callAsFunction(_ input: AttentionInput<Scalar>) -> Tensor<Scalar> {
         precondition(

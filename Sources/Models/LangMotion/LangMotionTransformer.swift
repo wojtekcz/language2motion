@@ -9,11 +9,10 @@ import TranslationModels
 public struct LangMotionTransformer: Module {
     public var encoder: Encoder
     public var decoder: Decoder
+    public var embedding: Embedding<Float>
     public var positionalEncoding: PositionalEncoding
     public var motionDense: Dense<Float>
-    // public var sourceEmbed: Sequential<Dense<Float>, PositionalEncoding> 
     public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
-    // public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding> // kill it
     public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var modelSize: Int
     @noDerivative public var nbJoints: Int
@@ -29,28 +28,26 @@ public struct LangMotionTransformer: Module {
         let feedForward = PositionwiseFeedForward(dimensionalityModel: modelSize,
                                                   innerLayerDimensionality: feedForwardSize)
         
-        positionalEncoding = PositionalEncoding(size: modelSize,
-                                                    dropoutProbability: dropoutProbability)
+        self.positionalEncoding = PositionalEncoding(size: modelSize, dropoutProbability: dropoutProbability)
+        self.embedding = Embedding<Float>(vocabularySize: vocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform())
+        self.sourceEmbed = Sequential(embedding, positionalEncoding)
         
         self.encoder = Encoder(layer: .init(size: modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
-        motionDense = Dense<Float>(inputSize: nbJoints, outputSize: modelSize)
-        // self.motionEmbed = Dense<Float>(inputSize: inputSize, outputSize: modelSize)
-        self.sourceEmbed = Sequential(Embedding(vocabularySize: vocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
-        // self.sourceEmbed = Sequential(motionDense, positionalEncoding)
-        // self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)
+        self.motionDense = Dense<Float>(inputSize: nbJoints, outputSize: modelSize)
         self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
         self.modelSize = modelSize
         self.nbJoints = nbJoints        
         self.nbMixtures = nbMixtures
     }
 
-    public init(encoder: Encoder, decoder: Decoder, positionalEncoding: PositionalEncoding, 
+    public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, 
         motionDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
         mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int) 
     {
         self.encoder = encoder
         self.decoder = decoder
+        self.embedding = embedding
         self.positionalEncoding = positionalEncoding
         self.motionDense = motionDense
         self.sourceEmbed = sourceEmbed

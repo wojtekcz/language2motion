@@ -10,7 +10,7 @@ import TensorFlow
 import TextModels
 
 public struct TransformerEncoderLayer2:Layer {
-    var selfAttention: MultiHeadAttention,
+    public var selfAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
     sublayers: [SublayerConnection]
     
@@ -37,13 +37,18 @@ public struct TransformerEncoderLayer2:Layer {
 }
 
 public struct Encoder: Layer {
-    var layers: [TransformerEncoderLayer2]
-    var norm: LayerNorm<Float>
+    public var layers: [TransformerEncoderLayer2]
+    public var norm: LayerNorm<Float>
     public init(layer: TransformerEncoderLayer2, layerCount: Int) {
         self.layers = [TransformerEncoderLayer2](repeating: layer, count: layerCount)
         self.norm = LayerNorm(featureCount: layerCount, axis: 2)
     }
-    
+
+    public init(layers: [TransformerEncoderLayer2], norm: LayerNorm<Float>) {
+        self.layers = layers
+        self.norm = norm
+    }
+
     @differentiable
     public func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
         var transformerInput = input.sequence
