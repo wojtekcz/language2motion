@@ -45,6 +45,21 @@ public struct LangMotionTransformer: Module {
         self.nbMixtures = nbMixtures
     }
 
+    public init(encoder: Encoder, decoder: Decoder, positionalEncoding: PositionalEncoding, 
+        motionDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
+        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int) 
+    {
+        self.encoder = encoder
+        self.decoder = decoder
+        self.positionalEncoding = positionalEncoding
+        self.motionDense = motionDense
+        self.sourceEmbed = sourceEmbed
+        self.mixtureModel = mixtureModel
+        self.modelSize = modelSize
+        self.nbJoints = nbJoints
+        self.nbMixtures = nbMixtures
+    }
+
     @differentiable
     public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
         let encodedMemory = self.encode(input: input.source)

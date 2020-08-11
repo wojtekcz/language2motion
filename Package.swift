@@ -53,7 +53,7 @@ let package = Package(
         .target(name: "TextModels", dependencies: ["Checkpoints", "Datasets"], path: "Sources/Models/Text"),
         .target(name: "MotionLangModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/MotionLang"),
         .target(name: "MotionClassifiers", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/MotionClassifiers"),
-        .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "ImageClassificationModels", "TranslationModels"], path: "Sources/Models/LangMotion"),
+        .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "TranslationModels"], path: "Sources/Models/LangMotion"),
         .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
         .target(name: "TranslationModels", dependencies: ["TextModels", "Datasets"], path: "Sources/Models/Translation"),
         .target(

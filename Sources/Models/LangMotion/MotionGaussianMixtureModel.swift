@@ -5,7 +5,6 @@ public struct MotionGaussianMixtureModel: Module {
     @noDerivative public var inputSize: Int
     @noDerivative public var nbJoints: Int
     @noDerivative public var nbMixtures: Int
-    @noDerivative public var outputSize: Int
 
     public var linearMixtureMeans: Dense<Float>
     public var linearMixtureVars: Dense<Float>
@@ -16,7 +15,6 @@ public struct MotionGaussianMixtureModel: Module {
         self.inputSize = inputSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
-        self.outputSize = MotionGaussianMixtureModel.getOutputSize(nbJoints: nbJoints, nbMixtures: nbMixtures)
 
         // FC layers for learning gaussian mixture distributions params
         // input_size  // hidden_size*n_layers, FIXME: Plappert concatenates output of all rnn layers
@@ -26,6 +24,20 @@ public struct MotionGaussianMixtureModel: Module {
 
         // and stop bit
         linearStop = Dense<Float>(inputSize: inputSize, outputSize: 1)
+    }
+
+    public init(
+        inputSize: Int, nbJoints: Int, nbMixtures: Int,
+        linearMixtureMeans: Dense<Float>, linearMixtureVars: Dense<Float>,
+        linearMixtureWeights: Dense<Float>, linearStop: Dense<Float>
+    ) {
+        self.inputSize = inputSize
+        self.nbJoints = nbJoints
+        self.nbMixtures = nbMixtures
+        self.linearMixtureMeans = linearMixtureMeans
+        self.linearMixtureVars = linearMixtureVars
+        self.linearMixtureWeights = linearMixtureWeights
+        self.linearStop = linearStop
     }
 
     @differentiable
@@ -56,9 +68,5 @@ public struct MotionGaussianMixtureModel: Module {
         
         let all_outputs_struct = MixtureModelPreds(stacking: all_outputs, alongAxis: 1)
         return all_outputs_struct
-    }
-
-    static func getOutputSize(nbJoints: Int, nbMixtures: Int) -> Int {
-        return 2 * nbMixtures * nbJoints + nbMixtures + 1
     }
 }

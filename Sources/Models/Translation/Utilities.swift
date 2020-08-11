@@ -122,9 +122,9 @@ public struct SublayerConnection: Layer {
 
 public struct PositionwiseFeedForward: Layer {
     // "Implements FFN equation."
-    var dense1: Dense<Float>
-    var dense2: Dense<Float>
-    @noDerivative let dropout: Dropout<Float>
+    public var dense1: Dense<Float>
+    public var dense2: Dense<Float>
+    @noDerivative public let dropout: Dropout<Float>
     
     public init(dimensionalityModel:Int, innerLayerDimensionality:Int, dropProbability: Double=0.1) {
         dense1 = Dense(inputSize: dimensionalityModel, outputSize: innerLayerDimensionality, weightInitializer: glorotUniform())
@@ -132,6 +132,12 @@ public struct PositionwiseFeedForward: Layer {
         dropout = Dropout<Float>(probability: dropProbability)
     }
     
+    public init(dense1: Dense<Float>, dense2: Dense<Float>, dropout: Dropout<Float>) {
+        self.dense1 = dense1
+        self.dense2 = dense2
+        self.dropout = dropout
+    }
+
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         return relu(dense1(input)).sequenced(through: dense2, dropout)
