@@ -283,7 +283,7 @@ time() {
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
         try! model.writeCheckpoint(to: logdirURL, name: "model.e\(epoch+1)")
         if epoch+1 >= 2 {
-            greedyDecodeMotion(sentence: "human is walking", prefix: "epoch_\(epoch+1)", saveMotion: true)
+            greedyDecodeMotion(sentence: "human walks and then runs and later sits down", prefix: "epoch_\(epoch+1)", saveMotion: true)
         }
     }
     summaryWriter.flush()
