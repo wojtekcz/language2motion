@@ -10,7 +10,7 @@ import TensorFlow
 import TextModels
 
 public struct TransformerDecoderLayer: Layer {
-    var selfAttention: MultiHeadAttention,
+    public var selfAttention: MultiHeadAttention,
     sourceAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
     sublayers: [SublayerConnection]
@@ -21,7 +21,14 @@ public struct TransformerDecoderLayer: Layer {
         self.feedForward = feedForward
         self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 3)
     }
-    
+
+    public init(selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, sublayers: [SublayerConnection]) {
+        self.selfAttention = selfAttention
+        self.sourceAttention = sourceAttention
+        self.feedForward = feedForward
+        self.sublayers = sublayers
+    }
+
     @differentiable
     public func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
         // SR-11882
@@ -53,13 +60,18 @@ public struct TransformerDecoderLayer: Layer {
 }
 
 public struct Decoder: Layer {
-    var layers: [TransformerDecoderLayer]
-    var norm: LayerNorm<Float>
+    public var layers: [TransformerDecoderLayer]
+    public var norm: LayerNorm<Float>
     public init(layer: TransformerDecoderLayer, layerCount: Int) {
         self.layers = [TransformerDecoderLayer](repeating: layer, count: layerCount)
         self.norm = LayerNorm(featureCount: layerCount, axis: 2)
     }
     
+    public init(layers: [TransformerDecoderLayer], norm: LayerNorm<Float>) {
+        self.layers = layers
+        self.norm = norm
+    }
+
     @differentiable
     public func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
         var transformerInput = input.sequence

@@ -105,9 +105,13 @@ public struct TextBatchInput: KeyPathIterable {
 public struct SublayerConnection: Layer {
     public var norm: LayerNorm<Float>
     public var dropout: Dropout<Float>
-    init(size: Int, droputProb: Double) {
+    public init(size: Int, droputProb: Double) {
         self.norm = LayerNorm(featureCount: size, axis: -1, epsilon: 1e-6)
         self.dropout = Dropout(probability: droputProb)
+    }
+    public init(norm: LayerNorm<Float>, dropout: Dropout<Float>) {
+        self.norm = norm
+        self.dropout = dropout
     }
     @differentiable
     public func callAsFunction(_ input: SubLayerInput< Float>) -> Tensor<Float> {
@@ -131,7 +135,7 @@ public struct PositionwiseFeedForward: Layer {
         dense2 = Dense(inputSize: innerLayerDimensionality, outputSize: dimensionalityModel, weightInitializer: glorotUniform())
         dropout = Dropout<Float>(probability: dropProbability)
     }
-    
+
     public init(dense1: Dense<Float>, dense2: Dense<Float>, dropout: Dropout<Float>) {
         self.dense1 = dense1
         self.dense2 = dense2

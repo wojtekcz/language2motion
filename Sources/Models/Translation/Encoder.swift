@@ -20,6 +20,12 @@ public struct TransformerEncoderLayer2:Layer {
         self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 2)
     }
     
+    public init(selfAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, sublayers: [SublayerConnection]) {
+        self.selfAttention = selfAttention
+        self.feedForward = feedForward
+        self.sublayers = sublayers
+    }
+
     @differentiable
     public func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
         // SR-11882
