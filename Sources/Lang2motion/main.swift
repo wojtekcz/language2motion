@@ -14,7 +14,7 @@ let runName = "run_1"
 let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 15
+let nEpochs = 40
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
