@@ -222,7 +222,7 @@ func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) ->
 /// Training loop
 print("\nTraining Transformer for the Lang2motion task!")
 var trainingStepCount = 0
-let print_every = 10
+let print_every = 50
 let limit_print_to_step = 5
 time() {
     LazyTensorBarrier()
