@@ -37,8 +37,9 @@ I'm using modified [Swift Transformer implementation](https://github.com/acarrer
 ## Dataset files
 * original: [2017-06-22.zip](https://motion-annotation.humanoids.kit.edu/downloads/4/)
 * processed: 
-  * [motion_dataset_v3.norm.10Hz.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.tgz)
-  * [motion_dataset_v3.norm.10Hz.mini.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.mini.tgz)
+  * [motion_dataset_v3.10Hz.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_dataset_v3.10Hz.tgz)
+  * [motion_dataset_v3.10Hz.midi.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_dataset_v3.10Hz.midi.tgz)
+  * [motion_dataset_v3.10Hz.mini.tgz](https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_dataset_v3.10Hz.mini.tgz)
 
 * annotations and labels:
   * [labels_ds_v2.csv](https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv)
