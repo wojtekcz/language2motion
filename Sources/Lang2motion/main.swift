@@ -9,7 +9,7 @@ import SummaryWriter
 import LangMotionModels
 
 /// Set training params
-let runName = "run_3"
+let runName = "run_4"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20
@@ -301,7 +301,7 @@ time() {
             """
         )
         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: current_epoch, value: devLossSum / Float(devBatchCount))
-        try! model.writeCheckpoint(to: logdirURL, name: "model.e\(current_epoch)")
+        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(current_epoch)")
         if current_epoch >= 2 {
             // greedyDecodeMotion(sentence: "human walks and then runs and later sits down", prefix: "epoch_\(current_epoch)", saveMotion: true)
         }
