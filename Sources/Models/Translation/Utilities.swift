@@ -150,6 +150,7 @@ public struct PositionwiseFeedForward: Layer {
 
 
 public struct PositionalEncoding: ParameterlessLayer {
+    public typealias TangentVector = EmptyTangentVector
     @noDerivative var encoding: Parameter<Float> // maybe should be an embedding?
     @noDerivative var dropout: Dropout<Float>
     public init(size: Int, dropoutProbability: Double = 0, maxLength:Int=5000) {
