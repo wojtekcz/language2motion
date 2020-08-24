@@ -48,7 +48,7 @@ docker start swift-jupyter
 ```
 docker exec -it swift-jupyter bash
 cd language2motion.gt/data/
-tensorboard --bind_all --logdir tboard/Motion2lang
+tensorboard --bind_all --logdir runs/Lang2motion/run_4/
 ```
 # 7. on second tmux tab: update language2motion sources
 # a. exec into docker container
