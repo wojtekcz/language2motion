@@ -57,11 +57,11 @@ git clone https://github.com/wojtekcz/language2motion.git language2motion.gt
 <!-- ### c. download data for Motion2label and Language2label scripts
 ```
 cd /content/language2motion.gt/data/
-wget https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.tgz
-wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv
-wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/vocab.txt
-wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.balanced.515.csv
-tar xzvf motion_dataset_v3.norm.10Hz.tgz
+wget -nv --show-progress -N https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_dataset_v3.10Hz.tgz
+wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv
+wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/vocab.txt
+wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.balanced.515.csv
+tar xzvf motion_dataset_v3.10Hz.tgz --skip-old-files
 ``` -->
 
 ### d. run Motion2label script
@@ -70,6 +70,7 @@ cd /content/language2motion.gt
 swift run -c release Motion2label
 swift run -c release Lang2lang
 swift run -c release Motion2lang
+swift run -c release Lang2motion
 ```
 
 ## 4. vscode integration
