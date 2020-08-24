@@ -197,7 +197,8 @@ let config = LangMotionTransformerConfig(
 )
 
 extension LangMotionTransformer {
-    public init(checkpoint: URL, config: LangMotionTransformerConfig) throws {
+    public init(checkpoint: URL, config: LangMotionTransformerConfig, name: String) throws {
+        print("Loading model \"\(name)\" from \"\(checkpoint.path)\"...")
         // Try loading from the given checkpoint.
         do {
             // create reader
@@ -206,8 +207,8 @@ extension LangMotionTransformer {
             ]
 
             let reader: CheckpointReader = try CheckpointReader(
-                checkpointLocation: checkpoint.appendingPathComponent("model1"),
-                modelName: "model1",
+                checkpointLocation: checkpoint.appendingPathComponent(name),
+                modelName: name,
                 additionalFiles: auxiliary)
             
             // TODO: load config (values)

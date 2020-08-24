@@ -9,7 +9,7 @@ import SummaryWriter
 import LangMotionModels
 
 /// Set training params
-let runName = "run_1"
+let runName = "run_3"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20
@@ -30,6 +30,10 @@ let datasetSize: DatasetSize = .full
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+
+let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
+let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory: true)
+try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 
 /// Select eager or X10 backend
 // let device = Device.defaultXLA
@@ -61,16 +65,31 @@ let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
-var model = LangMotionTransformer(
-    vocabSize: vocabSize, 
+// var model = LangMotionTransformer(
+//     vocabSize: vocabSize, 
+//     nbJoints: nbJoints,
+//     nbMixtures: nbMixtures,
+//     layerCount: layerCount, 
+//     modelSize: modelSize, 
+//     feedForwardSize: feedForwardSize, 
+//     headCount: headCount, 
+//     dropoutProbability: dropoutProbability
+// )
+
+/// load model checkpoint
+let config = LangMotionTransformerConfig(
+    vocabSize: vocabSize,
     nbJoints: nbJoints,
     nbMixtures: nbMixtures,
-    layerCount: layerCount, 
-    modelSize: modelSize, 
-    feedForwardSize: feedForwardSize, 
-    headCount: headCount, 
+    layerCount: layerCount,
+    modelSize: modelSize,
+    feedForwardSize: feedForwardSize,
+    headCount: headCount,
     dropoutProbability: dropoutProbability
 )
+
+print("checkpointURL: \(checkpointURL.path)")
+var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e17")
 model.move(to: device)
 
 /// load dataset
@@ -172,7 +191,6 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)
 
-let logdirURL = dataURL.appendingPathComponent("tboard/Lang2motion/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 let args = LossArgs(
@@ -224,10 +242,13 @@ print("\nTraining Transformer for the Lang2motion task!")
 var trainingStepCount = 0
 let print_every = 50
 let limit_print_to_step = 5
+let start_epoch = 17
+var current_epoch = 0
 time() {
     LazyTensorBarrier()
     for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
-        print("[Epoch \(epoch + 1)]")
+        current_epoch = start_epoch + epoch + 1
+        print("[Epoch \(current_epoch)]")
         Context.local.learningPhase = .training
         var trainingLossSum: Float = 0
         var trainingBatchCount = 0
@@ -254,7 +275,7 @@ time() {
             Training loss: \(trainingLossSum / Float(trainingBatchCount))
             """
         )
-        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
+        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: trainingLossSum / Float(trainingBatchCount))
 
         if epoch == 0 {
             print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
@@ -279,10 +300,10 @@ time() {
             Eval loss: \(devLossSum / Float(devBatchCount))
             """
         )
-        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-        try! model.writeCheckpoint(to: logdirURL, name: "model.e\(epoch+1)")
-        if epoch+1 >= 2 {
-            greedyDecodeMotion(sentence: "human walks and then runs and later sits down", prefix: "epoch_\(epoch+1)", saveMotion: true)
+        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: current_epoch, value: devLossSum / Float(devBatchCount))
+        try! model.writeCheckpoint(to: logdirURL, name: "model.e\(current_epoch)")
+        if current_epoch >= 2 {
+            // greedyDecodeMotion(sentence: "human walks and then runs and later sits down", prefix: "epoch_\(current_epoch)", saveMotion: true)
         }
     }
     summaryWriter.flush()
