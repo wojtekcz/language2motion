@@ -4,8 +4,8 @@ import Foundation
 public struct MotionDataset2Processor {
     public static let maxSampleID = 3966
 
-    public static func loadDatasetFromFolder(datasetFolderURL: URL, sampled: Int? = nil, freq: Int? = 10, maxFrames: Int = 500) -> MotionDataset2 {
-        var motionSamples: [MotionSample2] = []
+    public static func loadDatasetFromFolder(datasetFolderURL: URL, sampled: Int? = nil, freq: Int? = 10, maxFrames: Int = 500) -> MotionDataset {
+        var motionSamples: [MotionSample] = []
         let fm = FileManager()
         
         var sampleIDs: [Int] = Array<Int>((0...MotionDataset2Processor.maxSampleID))
@@ -40,6 +40,6 @@ public struct MotionDataset2Processor {
             }
         }
         print("motionSamples.count: \(motionSamples.count)")        
-        return MotionDataset2(datasetFolderURL: datasetFolderURL, motionSamples: motionSamples)
+        return MotionDataset(datasetFolderURL: datasetFolderURL, motionSamples: motionSamples)
     }
 }

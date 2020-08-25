@@ -52,7 +52,7 @@ print(device)
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-let textProcessor = TextProcessor2(vocabulary: vocabulary, tokenizer: tokenizer, maxTextSequenceLength: maxTextSequenceLength, maxMotionLength: maxMotionLength)
+let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxTextSequenceLength: maxTextSequenceLength, maxMotionLength: maxMotionLength)
 
 /// instantiate model
 let vocabSize = vocabulary.count
@@ -98,7 +98,7 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     trainTestSplit: 1.0
-) { (motionSample: MotionSample2) -> LangMotionBatch in    
+) { (motionSample: MotionSample) -> LangMotionBatch in    
     let singleBatch = textProcessor.preprocess(motionSample: motionSample)
     return singleBatch
 }

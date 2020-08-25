@@ -2,7 +2,7 @@ import Foundation
 import TensorFlow
 import ModelSupport
 
-public struct TextProcessor2 {
+public struct TextProcessor {
 
     let BOS_WORD = "[CLS]"
     let EOS_WORD = "[SEP]"
@@ -55,7 +55,7 @@ public struct TextProcessor2 {
     }
 
     // TODO: refactor motion out
-    public func preprocess(motionSample: MotionSample2) -> LangMotionBatch {
+    public func preprocess(motionSample: MotionSample) -> LangMotionBatch {
         let sampleID: Tensor<Int32> = Tensor([Int32(motionSample.sampleID)])
 
         let source = self.preprocess(sentence: motionSample.annotations[0])

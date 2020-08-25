@@ -3,7 +3,7 @@ import TensorFlow
 
 
 public class MMMWriter {
-    // TODO: work with MotionSample2
+    // TODO: work with MotionSample
     
     public static func getSensorModelPoseElem(frequency: Float, RootPositionZ: Int = 520, rootRotation: Tensor<Float>) -> XMLElement {
         // rootRotation shape [numFrames, 3]

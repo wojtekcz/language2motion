@@ -10,19 +10,19 @@ public struct Lang2Motion {
         public let text: String
     }
 
-    // rename MotionSample and related structs to Legacy and MotionSample2 to MotionSample...
-    public let motionDataset: MotionDataset2
+    // rename MotionSample and related structs to Legacy and MotionSample to MotionSample...
+    public let motionDataset: MotionDataset
     public let scaler: Scaler
 
-    public let motionSamples: [MotionSample2]
+    public let motionSamples: [MotionSample]
     public let langRecs: [LangRec]
 
-    public let motionSampleDict: [Int: MotionSample2]
+    public let motionSampleDict: [Int: MotionSample]
 
-    public let trainMotionSamples: [MotionSample2]
-    public let testMotionSamples: [MotionSample2]
+    public let trainMotionSamples: [MotionSample]
+    public let testMotionSamples: [MotionSample]
 
-    public typealias LazySamples = LazyMapSequence<[MotionSample2], LangMotionBatch>
+    public typealias LazySamples = LazyMapSequence<[MotionSample], LangMotionBatch>
 
     public let batchSize: Int
 
@@ -44,10 +44,10 @@ extension Lang2Motion {
         batchSize: Int,
         minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
-        exampleMap: @escaping (MotionSample2) -> LangMotionBatch
+        exampleMap: @escaping (MotionSample) -> LangMotionBatch
     ) throws {
         // Load the data files.
-        motionDataset = MotionDataset2(from: motionDatasetURL)
+        motionDataset = MotionDataset(from: motionDatasetURL)
         print(motionDataset.description)
 
         // filter out samples without annotations
@@ -71,11 +71,11 @@ extension Lang2Motion {
         print("Motions scaled.")
 
         // get all annotations from motionSamples
-        var _motionSamplesWithDistinctAnnotations: [MotionSample2] = []
+        var _motionSamplesWithDistinctAnnotations: [MotionSample] = []
 
         for ms in _motionSamples {
-            let samples = ms.annotations.map { (ann: String) -> MotionSample2 in
-                MotionSample2(sampleID: ms.sampleID, annotations: [ann], jointNames: ms.jointNames, timesteps: ms.timesteps, motion: ms.motion) 
+            let samples = ms.annotations.map { (ann: String) -> MotionSample in
+                MotionSample(sampleID: ms.sampleID, annotations: [ann], jointNames: ms.jointNames, timesteps: ms.timesteps, motion: ms.motion) 
             }
             _motionSamplesWithDistinctAnnotations.append(contentsOf: samples)
         }
@@ -86,8 +86,8 @@ extension Lang2Motion {
         // create LangRecs
         langRecs = _motionSamplesWithDistinctAnnotations.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0]) }
 
-        // [sampleID:MotionSample2] mapping
-        var _motionSampleDict: [Int: MotionSample2] = [:]
+        // [sampleID:MotionSample] mapping
+        var _motionSampleDict: [Int: MotionSample] = [:]
         for ms in motionDataset.motionSamples {
             // only assign first (downsampled) sample
             if _motionSampleDict[ms.sampleID] == nil {
@@ -97,8 +97,8 @@ extension Lang2Motion {
         motionSampleDict = _motionSampleDict
 
         // split into train/test sets
-        let _trainMotionSamples: [MotionSample2]
-        let _testMotionSamples: [MotionSample2]
+        let _trainMotionSamples: [MotionSample]
+        let _testMotionSamples: [MotionSample]
         (_trainMotionSamples, _testMotionSamples) = _motionSamplesWithDistinctAnnotations.trainTestSplitMotionSamples(split: trainTestSplit)
         trainMotionSamples = _trainMotionSamples
         testMotionSamples = _testMotionSamples

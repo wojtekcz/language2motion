@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MotionFrame2 {
+public struct MotionFrame {
     public static let cjpRootRotationIdx = 44
     public static let numCombinedJointPositions = cjpRootRotationIdx + 3 // 47
 
@@ -107,7 +107,7 @@ public struct MotionFrame2 {
     }
 
     public static func grouppedJointPositionIdxs(jointNames: [String]) -> [Int] {
-        let mf = MotionFrame2(timestep: 0.0, rootPosition: [0.0], rootRotation: [0.0], jointPositions: [0.0], jointNames: jointNames)
+        let mf = Self(timestep: 0.0, rootPosition: [0.0], rootRotation: [0.0], jointPositions: [0.0], jointNames: jointNames)
         return mf.torsoHeadNeckIdxs() + 
         mf.armAndHandIdxs(side: "L") +
         mf.legAndFootIdxs(side: "L") +

@@ -6,18 +6,18 @@ public enum DatasetSize: String {
     case mini = "mini."
 }
 
-public class MotionDataset2: Codable {
+public class MotionDataset: Codable {
     public let datasetFolderURL: URL
-    public var motionSamples: [MotionSample2]
+    public var motionSamples: [MotionSample]
 
-    public init(datasetFolderURL: URL, motionSamples: [MotionSample2]) {
+    public init(datasetFolderURL: URL, motionSamples: [MotionSample]) {
         self.datasetFolderURL = datasetFolderURL
         self.motionSamples = motionSamples
     }
 
     public init(from serializedDatasetURL: URL) {
         let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
-        let motionDataset = try! PropertyListDecoder().decode(MotionDataset2.self, from: data)
+        let motionDataset = try! PropertyListDecoder().decode(Self.self, from: data)
         datasetFolderURL = motionDataset.datasetFolderURL
         motionSamples = motionDataset.motionSamples
     }
@@ -30,6 +30,6 @@ public class MotionDataset2: Codable {
     }
 
     public var description: String {
-        return "MotionDataset2(motionSamples: \(motionSamples.count))"
+        return "MotionDataset(motionSamples: \(motionSamples.count))"
     }
 }

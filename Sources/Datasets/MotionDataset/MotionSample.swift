@@ -1,7 +1,7 @@
 import Foundation
 import TensorFlow
 
-public struct MotionSample2: Codable {
+public struct MotionSample: Codable {
     public let sampleID: Int
     public let jointNames: [String]
     public let annotations: [String]
@@ -44,13 +44,13 @@ public struct MotionSample2: Codable {
     }
 
     public var description: String {
-        return "MotionSample2(timesteps: \(timesteps[-1].scalar!), motion: \(motion.shape[0]), annotations: \(annotations.count))"
+        return "MotionSample(timesteps: \(timesteps[-1].scalar!), motion: \(motion.shape[0]), annotations: \(annotations.count))"
     }
 }
 
-extension MotionSample2 {
+extension MotionSample {
     public static func grouppedJoints(motion: Tensor<Float>, jointNames: [String]) -> Tensor<Float> {
-        let gIdxs = MotionFrame2.grouppedJointPositionIdxs(jointNames: jointNames)
+        let gIdxs = MotionFrame.grouppedJointPositionIdxs(jointNames: jointNames)
         return Tensor<Float>(stacking: (0..<gIdxs.count).map { motion[0..., gIdxs[$0]] }, alongAxis: 1)
     }
 

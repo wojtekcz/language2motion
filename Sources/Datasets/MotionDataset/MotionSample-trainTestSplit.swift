@@ -1,6 +1,6 @@
-extension Collection where Iterator.Element == MotionSample2 {
-    func motionSamplesWithIds(_ sampleIds: [Int], mapping: [Int: [Int]]) -> [MotionSample2] {
-        var motionSamples: [MotionSample2] = []
+extension Collection where Iterator.Element == MotionSample {
+    func motionSamplesWithIds(_ sampleIds: [Int], mapping: [Int: [Int]]) -> [MotionSample] {
+        var motionSamples: [MotionSample] = []
         for sampleId in sampleIds {
             let idxs = mapping[sampleId]
             for idx in idxs! {
