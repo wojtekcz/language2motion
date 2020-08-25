@@ -98,8 +98,8 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     trainTestSplit: 1.0
-) { (example: MotionSample2) -> LangMotionBatch in    
-    let singleBatch = textProcessor.preprocess(example: example)
+) { (motionSample: MotionSample2) -> LangMotionBatch in    
+    let singleBatch = textProcessor.preprocess(motionSample: motionSample)
     return singleBatch
 }
 
