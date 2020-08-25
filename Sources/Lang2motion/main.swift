@@ -29,7 +29,6 @@ let datasetSize: DatasetSize = .full
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
-let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
 let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory: true)
@@ -97,7 +96,6 @@ print("\nLoading dataset...")
 
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
-    langDatasetURL: langDatasetURL,
     batchSize: batchSize
 ) { (example: Lang2Motion.Example) -> LangMotionBatch in    
     let singleBatch = textProcessor.preprocess(example: example)

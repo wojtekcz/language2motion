@@ -8,7 +8,6 @@ public struct Lang2Motion {
     public struct LangRec {
         public let sampleID: Int
         public let text: String
-        public let label: String
     }
 
     public struct Example {
@@ -26,8 +25,8 @@ public struct Lang2Motion {
     public let motionDataset: MotionDataset2
     public let scaler: Scaler
 
+    public let motionSamples: [MotionSample2]
     public let langRecs: [LangRec]
-    public let langRecsDict: [Int: LangRec]
 
     public let motionSampleDict: [Int: MotionSample2]
 
@@ -36,7 +35,6 @@ public struct Lang2Motion {
 
     public typealias Samples = LazyMapSequence<[Example], LangMotionBatch>
     
-    public let motionSamples: [MotionSample2]
     public let trainingSamples: Samples
     public let validationSamples: Samples
 
@@ -54,19 +52,8 @@ public struct Lang2Motion {
 }
 
 extension Lang2Motion {
-    static func transformDF(df: PythonObject) -> [LangRec] {
-        return Python.list(df.iterrows()).map {
-            (rowObj: PythonObject) -> LangRec in 
-            let row = rowObj.tuple2.1
-            let sample_id: Int = Int(row.sample_id)!
-            let text: String = String(row.text)!
-            let label: String = String(row.label)!
-            return LangRec(sampleID: sample_id, text: text, label: label)
-        }
-    }
-
-    public static func getExample(motionSample: MotionSample2, langRec: LangRec) -> Example {
-        return Example(sampleID: langRec.sampleID, sentence: langRec.text, motionSample: motionSample)
+    public static func getExample(motionSample: MotionSample2) -> Example {
+        return Example(sampleID: motionSample.sampleID, sentence: motionSample.annotations[0], motionSample: motionSample)
     }
 }
 
@@ -74,7 +61,6 @@ extension Lang2Motion {
 
     public init(
         motionDatasetURL: URL,
-        langDatasetURL: URL,
         batchSize: Int,
         minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
@@ -84,12 +70,9 @@ extension Lang2Motion {
         motionDataset = MotionDataset2(from: motionDatasetURL)
         print(motionDataset.description)
 
-        // TODO: get annotations from motionDataset.motionSamples[].annotations
-        let df = pd.read_csv(langDatasetURL.path)
-
         // filter out samples without annotations
         var _motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
-        print("keeping \(_motionSamples.count) annotatated motions")
+        print("keeping \(_motionSamples.count) annotated motions")
 
         // filter out shortest samples
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
@@ -106,24 +89,27 @@ extension Lang2Motion {
         }
         scaler = _scaler
         print("Motions scaled.")
-        motionSamples = _motionSamples
+
+        // get all annotations from motionSamples
+        var _motionSamplesWithDistinctAnnotations: [MotionSample2] = []
+
+        for ms in _motionSamples {
+            let samples = ms.annotations.map { (ann: String) -> MotionSample2 in
+                MotionSample2(sampleID: ms.sampleID, annotations: [ann], jointNames: ms.jointNames, timesteps: ms.timesteps, motion: ms.motion) 
+            }
+            _motionSamplesWithDistinctAnnotations.append(contentsOf: samples)
+        }
+        print("Having \(_motionSamplesWithDistinctAnnotations.count) annotations with motions")
+
+        motionSamples = _motionSamplesWithDistinctAnnotations
 
         // split into train/test sets
         var trainMotionSamples: [MotionSample2] = []
         var testMotionSamples: [MotionSample2] = []
-        (trainMotionSamples, testMotionSamples) = _motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
+        (trainMotionSamples, testMotionSamples) = _motionSamplesWithDistinctAnnotations.trainTestSplitMotionSamples(split: trainTestSplit)
 
         // create LangRecs
-        let _langRecs = Lang2Motion.transformDF(df: df)
-
-        // [sampleID:LangRec] mapping
-        var _langRecsDict: [Int: LangRec] = [:]
-        for langRec in _langRecs {
-            _langRecsDict[langRec.sampleID] = langRec
-        }
-
-        langRecs = _langRecs
-        langRecsDict = _langRecsDict
+        langRecs = _motionSamplesWithDistinctAnnotations.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0]) }
 
         // [sampleID:MotionSample2] mapping
         var _motionSampleDict: [Int: MotionSample2] = [:]
@@ -137,10 +123,10 @@ extension Lang2Motion {
 
         // create Examples
         trainExamples = trainMotionSamples.map {
-            Lang2Motion.getExample(motionSample: $0, langRec: _langRecsDict[$0.sampleID]!)
+            Lang2Motion.getExample(motionSample: $0)
         }
         valExamples = testMotionSamples.map {
-            Lang2Motion.getExample(motionSample: $0, langRec: _langRecsDict[$0.sampleID]!)
+            Lang2Motion.getExample(motionSample: $0)
         }
 
         trainingSamples = trainExamples.lazy.map(exampleMap)
