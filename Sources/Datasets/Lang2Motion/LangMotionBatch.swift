@@ -79,15 +79,33 @@ public struct LangMotionBatch: KeyPathIterable {
         self.origMotionFramesCount = origMotionFramesCount
     }
 
-    public init(sampleID: Tensor<Int32>, source: Source, target: Target,
-                targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
-        self.sampleID = sampleID
+    public init(sampleID: Int, source: Source, targetMotion: Tensor<Float>, maxMotionLength: Int) {
+        self.sampleID = Tensor([Int32(sampleID)])
         self.source = source
 
+        let (target, targetTruth, targetTruthStop, origMotionFramesCount) = Self.preprocessTargetMotion(motion: targetMotion, maxMotionLength: maxMotionLength)
         self.target = target
         self.targetTruth = targetTruth
         self.targetTruthStop = targetTruthStop
         self.origMotionFramesCount = origMotionFramesCount
+    }
+
+    public static func preprocessTargetMotion(motion: Tensor<Float>, maxMotionLength: Int) -> (target: LangMotionBatch.Target, targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
+        var (motion, motionFlag) = Tensor<Float>(motion).paddedAndCropped(to: maxMotionLength)
+        motion = motion.expandingShape(at: 0)
+        motionFlag = motionFlag.expandingShape(at: 0)
+        let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motion.shape[0])])
+
+        let rangeExceptLast = 0..<(motion.shape[1] - 1)
+        let targetMotion = motion[0..., rangeExceptLast, 0...]
+
+        motionFlag = motionFlag[0..., rangeExceptLast]
+        let targetMask = LangMotionBatch.makeStandardMask(target: motionFlag, pad: 0)
+        let target = LangMotionBatch.Target(motion: targetMotion, mask: targetMask)
+
+        let targetTruth: Tensor<Float> = motion[0..., 1..., 0...]
+        let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
+        return (target: target, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
     }
 
     public static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {

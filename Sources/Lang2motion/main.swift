@@ -52,7 +52,7 @@ print(device)
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, maxTextSequenceLength: maxTextSequenceLength, maxMotionLength: maxMotionLength)
+let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
 
 /// instantiate model
 let vocabSize = vocabulary.count
@@ -99,7 +99,8 @@ var dataset = try Lang2Motion(
     batchSize: batchSize,
     trainTestSplit: 1.0
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
-    let singleBatch = textProcessor.preprocess(motionSample: motionSample)
+    let source = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
+    let singleBatch = LangMotionBatch(sampleID: motionSample.sampleID, source: source, targetMotion: motionSample.motion, maxMotionLength: maxMotionLength)
     return singleBatch
 }
 
@@ -160,7 +161,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
     Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
-    let source = textProcessor.preprocess(sentence: sentence)
+    let source = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
     source.printSource()
 
     let decodedMotion = MotionDecoder.greedyDecodeMotion(source: source, transformer: model, nbJoints: nbJoints, nbMixtures: nbMixtures, maxMotionLength: maxMotionLength)

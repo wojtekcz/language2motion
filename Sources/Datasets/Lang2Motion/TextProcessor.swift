@@ -9,8 +9,6 @@ public struct TextProcessor {
     let BLANK_WORD = "[PAD]"
     let UNKNOWN_WORD = "[UNK]"
 
-    public let maxTextSequenceLength: Int
-    public let maxMotionLength: Int
     public let vocabulary: Vocabulary
     public let tokenizer: Tokenizer
     public let padId: Int32
@@ -18,18 +16,16 @@ public struct TextProcessor {
     public let eosId: Int32
     public let unkId: Int32
 
-    public init(vocabulary: Vocabulary, tokenizer: Tokenizer, maxTextSequenceLength: Int, maxMotionLength: Int) {
+    public init(vocabulary: Vocabulary, tokenizer: Tokenizer) {
         self.vocabulary = vocabulary
         self.tokenizer = tokenizer
-        self.maxTextSequenceLength = maxTextSequenceLength
-        self.maxMotionLength = maxMotionLength
         self.padId = Int32(self.vocabulary.id(forToken: BLANK_WORD)!)
         self.bosId = Int32(self.vocabulary.id(forToken: BOS_WORD)!)
         self.eosId = Int32(self.vocabulary.id(forToken: EOS_WORD)!)
         self.unkId = Int32(self.vocabulary.id(forToken: UNKNOWN_WORD)!)
     }
 
-    public func preprocess(sentence: String) -> LangMotionBatch.Source {
+    public func preprocess(sentence: String, maxTextSequenceLength: Int) -> LangMotionBatch.Source {
         var encodedSource = self.tokenizer.tokenize(sentence)
             .prefix(maxTextSequenceLength - 2)
             .map{ Int32(self.vocabulary.id(forToken: $0) ?? Int(self.unkId))}
@@ -52,34 +48,5 @@ public struct TextProcessor {
 
         let singleSource = LangMotionBatch.Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
         return singleSource
-    }
-
-    // TODO: refactor motion out
-    public func preprocess(motionSample: MotionSample) -> LangMotionBatch {
-        let sampleID: Tensor<Int32> = Tensor([Int32(motionSample.sampleID)])
-
-        let source = self.preprocess(sentence: motionSample.annotations[0])
-
-        // target: motion
-        // **************
-        var (motion, motionFlag) = Tensor<Float>(motionSample.motion).paddedAndCropped(to: maxMotionLength)
-        motion = motion.expandingShape(at: 0)
-        motionFlag = motionFlag.expandingShape(at: 0)
-        let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motionSample.motion.shape[0])])
-
-        let rangeExceptLast = 0..<(motion.shape[1] - 1)
-        let targetMotion = motion[0..., rangeExceptLast, 0...]
-
-        motionFlag = motionFlag[0..., rangeExceptLast]
-        let targetMask = LangMotionBatch.makeStandardMask(target: motionFlag, pad: 0)
-        let target = LangMotionBatch.Target(motion: targetMotion, mask: targetMask)
-
-        let targetTruth: Tensor<Float> = motion[0..., 1..., 0...]
-        let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
-
-        let singleBatch = LangMotionBatch(sampleID: sampleID, 
-                source: source, target: target,
-                targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
-        return singleBatch
     }
 }
