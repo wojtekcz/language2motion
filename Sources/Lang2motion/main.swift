@@ -97,7 +97,7 @@ print("\nLoading dataset...")
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize
-) { (example: Lang2Motion.Example) -> LangMotionBatch in    
+) { (example: MotionSample2) -> LangMotionBatch in    
     let singleBatch = textProcessor.preprocess(example: example)
     return singleBatch
 }
@@ -117,7 +117,7 @@ print("Dataset acquired.")
 /// get a batch
 // print("\nOne batch:")
 // print("=========")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+// var epochIterator = dataset.trainEpochs.enumerated().makeIterator()
 // let epoch = epochIterator.next()
 // let batches = Array(epoch!.1)
 // let batch: LangMotionBatch = batches[0]
@@ -174,7 +174,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
 
     if saveMotion {
         print("Saved image: \(imageURL!.path)")
-        let jointNames = dataset.trainExamples[0].motionSample.jointNames
+        let jointNames = dataset.motionSamples[0].jointNames
         let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
         let mmmURL = dataURL.appendingPathComponent("motion_images/\(prefix).mmm.xml")
         try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
@@ -244,7 +244,7 @@ let start_epoch = 17
 var current_epoch = 0
 time() {
     LazyTensorBarrier()
-    for (epoch, epochBatches) in dataset.trainingEpochs.prefix(nEpochs).enumerated() {
+    for (epoch, epochBatches) in dataset.trainEpochs.prefix(nEpochs).enumerated() {
         current_epoch = start_epoch + epoch + 1
         print("[Epoch \(current_epoch)]")
         Context.local.learningPhase = .training
@@ -276,14 +276,14 @@ time() {
         summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: trainingLossSum / Float(trainingBatchCount))
 
         if epoch == 0 {
-            print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+            print("dataset.testBatches.count: \(dataset.testBatches.count)")
         }
         Context.local.learningPhase = .inference
         var devLossSum: Float = 0
         var devBatchCount = 0
         var totalGuessCount = 0
 
-        for eagerBatch in dataset.validationBatches {
+        for eagerBatch in dataset.testBatches {
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
             let valBatchSize = batch.target.motion.shape[0]

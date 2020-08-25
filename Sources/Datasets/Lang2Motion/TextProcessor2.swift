@@ -55,17 +55,17 @@ public struct TextProcessor2 {
     }
 
     // TODO: refactor motion out
-    public func preprocess(example: Lang2Motion.Example) -> LangMotionBatch {
+    public func preprocess(example: MotionSample2) -> LangMotionBatch {
         let sampleID: Tensor<Int32> = Tensor([Int32(example.sampleID)])
 
-        let source = self.preprocess(sentence: example.sentence)
+        let source = self.preprocess(sentence: example.annotations[0])
 
         // target: motion
         // **************
-        var (motion, motionFlag) = Tensor<Float>(example.motionSample.motion).paddedAndCropped(to: maxMotionLength)
+        var (motion, motionFlag) = Tensor<Float>(example.motion).paddedAndCropped(to: maxMotionLength)
         motion = motion.expandingShape(at: 0)
         motionFlag = motionFlag.expandingShape(at: 0)
-        let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(example.motionSample.motion.shape[0])])
+        let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(example.motion.shape[0])])
 
         let rangeExceptLast = 0..<(motion.shape[1] - 1)
         let targetMotion = motion[0..., rangeExceptLast, 0...]
