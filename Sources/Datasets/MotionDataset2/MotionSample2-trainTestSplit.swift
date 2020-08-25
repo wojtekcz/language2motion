@@ -15,7 +15,7 @@ extension Collection where Iterator.Element == MotionSample2 {
         // splits multiplied samples into train/test buckets, making sure that samples with same ids end up in same bucket
         let allSampleIds = self.map {$0.sampleID}
         let sampleIds = Array(Set(allSampleIds)).sorted()
-        let (trainSampleIds, testSampleIds) = sampleIds.trainTestSplit(split: 0.8)
+        let (trainSampleIds, testSampleIds) = sampleIds.trainTestSplit(split: split)
         var mapping: [Int: [Int]] = [:] // sampleIds -> [collection indices]
         for sampleId in sampleIds {
             mapping[sampleId] = []
