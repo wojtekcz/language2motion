@@ -47,3 +47,14 @@ public struct MotionSample2: Codable {
         return "MotionSample2(timesteps: \(timesteps[-1].scalar!), motion: \(motion.shape[0]), annotations: \(annotations.count))"
     }
 }
+
+extension MotionSample2 {
+    public static func grouppedJoints(motion: Tensor<Float>, jointNames: [String]) -> Tensor<Float> {
+        let gIdxs = MotionFrame2.grouppedJointPositionIdxs(jointNames: jointNames)
+        return Tensor<Float>(stacking: (0..<gIdxs.count).map { motion[0..., gIdxs[$0]] }, alongAxis: 1)
+    }
+
+    public func grouppedJoints(motion: Tensor<Float>) -> Tensor<Float> {
+        return Self.grouppedJoints(motion: motion, jointNames: self.jointNames)
+    }
+}
