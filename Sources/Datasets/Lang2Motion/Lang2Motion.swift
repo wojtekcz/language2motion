@@ -35,10 +35,9 @@ public struct Lang2Motion {
     public let valExamples: [Example]
 
     public typealias Samples = LazyMapSequence<[Example], LangMotionBatch>
-
-    /// The training texts.
+    
+    public let motionSamples: [MotionSample2]
     public let trainingSamples: Samples
-    /// The validation texts.
     public let validationSamples: Samples
 
     public let batchSize: Int
@@ -89,29 +88,30 @@ extension Lang2Motion {
         let df = pd.read_csv(langDatasetURL.path)
 
         // filter out samples without annotations
-        var motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
-        print("keeping \(motionSamples.count) annotatated motions")
+        var _motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
+        print("keeping \(_motionSamples.count) annotatated motions")
 
         // filter out shortest samples
-        motionSamples = motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
-        print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
+        _motionSamples = _motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
+        print("keeping \(_motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
 
         // scale motions
         print("Scaling motions...")
-        let motions = motionSamples.map { $0.motion }
+        let motions = _motionSamples.map { $0.motion }
         let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
         let scaledMotions = motions.map { _scaler.transform($0) }
 
-        for idx in 0..<motionSamples.count {
-            motionSamples[idx].motion = scaledMotions[idx]
+        for idx in 0..<_motionSamples.count {
+            _motionSamples[idx].motion = scaledMotions[idx]
         }
         scaler = _scaler
         print("Motions scaled.")
+        motionSamples = _motionSamples
 
         // split into train/test sets
         var trainMotionSamples: [MotionSample2] = []
         var testMotionSamples: [MotionSample2] = []
-        (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
+        (trainMotionSamples, testMotionSamples) = _motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
 
         // create LangRecs
         let _langRecs = Lang2Motion.transformDF(df: df)
