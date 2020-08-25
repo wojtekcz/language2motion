@@ -3,7 +3,7 @@ import TensorFlow
 import ModelSupport
 
 
-public struct TextProcessor {
+public struct LegacyTextProcessor {
 
     let BOS_WORD = "[CLS]"
     let EOS_WORD = "[SEP]"
@@ -32,7 +32,7 @@ public struct TextProcessor {
     public func preprocess(example: Motion2Lang.Example) -> MotionLangBatch {
         
         let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray)
-        let mfIdx = MotionFrame.cjpMotionFlagIdx
+        let mfIdx = LegacyMotionFrame.cjpMotionFlagIdx
         let motionFlag = Tensor<Int32>(motionFrames[0..., mfIdx...mfIdx].squeezingShape(at: 1))
         let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
 

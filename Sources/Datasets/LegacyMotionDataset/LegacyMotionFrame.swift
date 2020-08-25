@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MotionFrame {
+public struct LegacyMotionFrame {
     public static let jpMotionFlagIdx = 44 // in jointPositions
     // in combinedJointPositions() and grouppedJointPositions()
     public static let cjpRootRotationIdx = 44

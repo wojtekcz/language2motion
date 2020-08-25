@@ -3,9 +3,9 @@ import FoundationXML
 import TensorFlow
 
 
-public struct MotionSample: Codable {
+public struct LegacyMotionSample: Codable {
     public let sampleID: Int
-    public let motionFrames: [MotionFrame]
+    public let motionFrames: [LegacyMotionFrame]
     public let jointNames: [String]
     public let annotations: [String]
 
@@ -22,28 +22,28 @@ public struct MotionSample: Codable {
 
     public init(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, maxFrames: Int = 50000) {
         self.sampleID = sampleID
-        let mmm_doc = MotionSample.loadMMM(fileURL: mmmURL)
-        let jointNames = MotionSample.getJointNames(mmm_doc: mmm_doc)
+        let mmm_doc = Self.loadMMM(fileURL: mmmURL)
+        let jointNames = Self.getJointNames(mmm_doc: mmm_doc)
         self.jointNames = jointNames
-        var motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
+        var motionFrames = Self.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
         self.motionFrames = motionFrames
-        self.annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
+        self.annotations = Self.getAnnotations(fileURL: annotationsURL)
         var timesteps: [Float] = motionFrames.map { $0.timestep }
         if motionFrames.count > maxFrames {
             motionFrames = Array(motionFrames[0..<maxFrames])
             timesteps = Array(timesteps[0..<maxFrames])
         }
         self.timestepsArray = ShapedArray<Float>(shape: [timesteps.count], scalars: timesteps)
-        self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
+        self.motionFramesArray = Self.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
     }
 
-    public init(sampleID: Int, motionFrames: [MotionFrame], annotations: [String], jointNames: [String], timesteps: [Float], grouppedJoints: Bool = true, normalized: Bool = true) {
+    public init(sampleID: Int, motionFrames: [LegacyMotionFrame], annotations: [String], jointNames: [String], timesteps: [Float], grouppedJoints: Bool = true, normalized: Bool = true) {
         self.sampleID = sampleID
         self.jointNames = jointNames
         self.motionFrames = motionFrames
         self.annotations = annotations
         self.timestepsArray = ShapedArray<Float>(shape: [timesteps.count], scalars: timesteps)
-        self.motionFramesArray = MotionSample.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
+        self.motionFramesArray = Self.getJointPositions(motionFrames: motionFrames, grouppedJoints: grouppedJoints, normalized: normalized)
     }
 
     public init(from decoder: Decoder) throws {
@@ -55,21 +55,21 @@ public struct MotionSample: Codable {
         motionFramesArray = try! values.decode(FastCodableShapedArray<Float>.self, forKey: .motionFramesArray).shapedArray
 
         // loop over motionFramesArray and create MotionFrames
-        var motionFrames: [MotionFrame] = []
+        var motionFrames: [LegacyMotionFrame] = []
         let timesteps = timestepsArray.scalars // working with scalars, for performance
         let mfScalars = motionFramesArray.scalars // working with scalars, for performance
         let cj = motionFramesArray.shape[1]
-        assert(cj==MotionFrame.numCombinedJointPositions) // load only up-to-date processed dataset files
+        assert(cj==LegacyMotionFrame.numCombinedJointPositions) // load only up-to-date processed dataset files
         for i in 0..<motionFramesArray.shape[0] {
             let start = i*cj
             let combinedJointPositions: [Float] = Array(mfScalars[start..<(start+cj)])
             // extract jointPositions
-            let rrIdx = MotionFrame.cjpRootRotationIdx
-            let mfIdx = MotionFrame.cjpMotionFlagIdx
+            let rrIdx = LegacyMotionFrame.cjpRootRotationIdx
+            let mfIdx = LegacyMotionFrame.cjpMotionFlagIdx
             let jointPositions: [Float] = combinedJointPositions[0..<rrIdx] + [combinedJointPositions[mfIdx]]
             // extract rootRotation
             let rootRotation: [Float] = Array(combinedJointPositions[rrIdx..<mfIdx])
-            let mf = MotionFrame(
+            let mf = LegacyMotionFrame(
                 timestep: timesteps[i], 
                 rootPosition: nil,
                 rootRotation: rootRotation,
@@ -105,10 +105,10 @@ public struct MotionSample: Codable {
         return jointNode.map {$0.stringValue!.replacingOccurrences(of: "_joint", with: "")}
     }
     
-    public static func getMotionFrames(mmm_doc: XMLDocument, jointNames: [String]) -> [MotionFrame] {
-        var motionFrames: [MotionFrame] = []
+    public static func getMotionFrames(mmm_doc: XMLDocument, jointNames: [String]) -> [LegacyMotionFrame] {
+        var motionFrames: [LegacyMotionFrame] = []
         var count = 0
-        for motionFrame in try! mmm_doc.nodes(forXPath: "/MMM/Motion/MotionFrames/MotionFrame") {
+        for motionFrame in try! mmm_doc.nodes(forXPath: "/MMM/Motion/MotionFrames/LegacyMotionFrame") {
             count += 1
             
             let timestepStr: String = (try! motionFrame.nodes(forXPath:"Timestep"))[0].stringValue!
@@ -121,7 +121,7 @@ public struct MotionSample: Codable {
             let rootRotationStr: String = (try! motionFrame.nodes(forXPath:"RootRotation"))[0].stringValue!
             let rootRotation: [Float] = rootRotationStr.floatArray()
 
-            let mf = MotionFrame(
+            let mf = LegacyMotionFrame(
                 timestep: Float(timestepStr)!,
                 rootPosition: rootPosition,
                 rootRotation: rootRotation,
@@ -133,7 +133,7 @@ public struct MotionSample: Codable {
         return motionFrames
     }
 
-    public static func getJointPositions(motionFrames: [MotionFrame], grouppedJoints: Bool, normalized: Bool) -> ShapedArray<Float> {
+    public static func getJointPositions(motionFrames: [LegacyMotionFrame], grouppedJoints: Bool, normalized: Bool) -> ShapedArray<Float> {
         var a: Array<Array<Float>>? = nil
         if grouppedJoints {
             a = motionFrames.map {$0.grouppedJointPositions()}
@@ -142,7 +142,7 @@ public struct MotionSample: Codable {
         }
         if normalized {
             // don't sigmoid motion flag
-            let mfIdx = MotionFrame.cjpMotionFlagIdx
+            let mfIdx = LegacyMotionFrame.cjpMotionFlagIdx
             var t = a!.makeTensor()
             let mf = t[0..., mfIdx...mfIdx]
             t = 2.0 * (sigmoid(t) - 0.5) // make range [-1.0, 1.0]
@@ -154,20 +154,20 @@ public struct MotionSample: Codable {
     }
 
     public var description: String {
-        return "MotionSample(timestep: \(self.motionFrames.last!.timestep), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
+        return "LegacyMotionSample(timestep: \(self.motionFrames.last!.timestep), motions: \(self.motionFrames.count), annotations: \(self.annotations.count))"
     }
 }
 
-extension MotionSample {
-    public static func downsampledMutlipliedMotionSamples(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, factor: Int = 10, maxFrames: Int = 5000) -> [MotionSample] {
-        let mmm_doc = MotionSample.loadMMM(fileURL: mmmURL)
-        let jointNames = MotionSample.getJointNames(mmm_doc: mmm_doc)
+extension LegacyMotionSample {
+    public static func downsampledMutlipliedMotionSamples(sampleID: Int, mmmURL: URL, annotationsURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, factor: Int = 10, maxFrames: Int = 5000) -> [LegacyMotionSample] {
+        let mmm_doc = Self.loadMMM(fileURL: mmmURL)
+        let jointNames = Self.getJointNames(mmm_doc: mmm_doc)
 
-        let motionFrames = MotionSample.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
-        let annotations = MotionSample.getAnnotations(fileURL: annotationsURL)
+        let motionFrames = Self.getMotionFrames(mmm_doc: mmm_doc, jointNames: jointNames)
+        let annotations = Self.getAnnotations(fileURL: annotationsURL)
         let timesteps: [Float] = motionFrames.map { $0.timestep }
 
-        var motionFramesBuckets = [[MotionFrame]](repeating: [], count: factor)
+        var motionFramesBuckets = [[LegacyMotionFrame]](repeating: [], count: factor)
         var timestepsBuckets = [[Float]](repeating: [], count: factor)
 
         let nFrames = min(motionFrames.count, maxFrames)
@@ -180,7 +180,7 @@ extension MotionSample {
         let nBuckets = (nFrames>=factor) ? factor : nFrames
 
         return (0..<nBuckets).map {
-            MotionSample(
+            LegacyMotionSample(
                 sampleID: sampleID, 
                 motionFrames: motionFramesBuckets[$0], 
                 annotations: annotations, 

@@ -15,22 +15,22 @@ public struct Motion2Lang {
     /// Motion2Lang example.
     public struct Example {
         public let id: String
-        public let motionSample: MotionSample
+        public let motionSample: LegacyMotionSample
         public let targetSentence: String
 
-        public init(id: String, motionSample: MotionSample, targetSentence: String) {
+        public init(id: String, motionSample: LegacyMotionSample, targetSentence: String) {
             self.id = id
             self.motionSample = motionSample
             self.targetSentence = targetSentence
         }
     }
 
-    public let motionDataset: MotionDataset
+    public let motionDataset: LegacyMotionDataset
 
     public let langRecs: [LangRec]
     public let langRecsDict: [Int: LangRec]
 
-    public let motionSampleDict: [Int: MotionSample]
+    public let motionSampleDict: [Int: LegacyMotionSample]
 
     public let trainExamples: [Example]
     public let valExamples: [Example]
@@ -74,7 +74,7 @@ extension Motion2Lang {
         }
     }
 
-    public static func getExample(motionSample: MotionSample, langRec: LangRec) -> Example {
+    public static func getExample(motionSample: LegacyMotionSample, langRec: LangRec) -> Example {
         let sample_id: String = "\(langRec.sampleID)" // Int to String
         return Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
     }
@@ -96,7 +96,7 @@ extension Motion2Lang {
         exampleMap: @escaping (Example) -> MotionLangBatch
     ) throws {
         // Load the data files.
-        motionDataset = MotionDataset(from: motionDatasetURL)
+        motionDataset = LegacyMotionDataset(from: motionDatasetURL)
         print(motionDataset.description)
         let df = pd.read_csv(langDatasetURL.path)
 
@@ -109,8 +109,8 @@ extension Motion2Lang {
         print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
 
         // split into train/test sets
-        var trainMotionSamples: [MotionSample] = []
-        var testMotionSamples: [MotionSample] = []
+        var trainMotionSamples: [LegacyMotionSample] = []
+        var testMotionSamples: [LegacyMotionSample] = []
         (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
 
         // create LangRecs
@@ -125,8 +125,8 @@ extension Motion2Lang {
         langRecs = _langRecs
         langRecsDict = _langRecsDict
 
-        // [sampleID:MotionSample] mapping
-        var _motionSampleDict: [Int: MotionSample] = [:]
+        // [sampleID:LegacyMotionSample] mapping
+        var _motionSampleDict: [Int: LegacyMotionSample] = [:]
         for ms in motionDataset.motionSamples {
             // only assign first (downsampled) sample
             if _motionSampleDict[ms.sampleID] == nil {
@@ -173,7 +173,7 @@ extension Motion2Lang {
 
         // let mask: Tensor<Float> = Tensor(batches.map{$0.mask.paddedOrCropped(to: maxLength!)})        
         // getting mask from motionFrames, so it's
-        let mask: Tensor<Float> = motionFrames[0...,0...,MotionFrame.cjpMotionFlagIdx].expandingShape(at: 1)
+        let mask: Tensor<Float> = motionFrames[0...,0...,LegacyMotionFrame.cjpMotionFlagIdx].expandingShape(at: 1)
 
         // let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{$0.origMotionFramesCount})

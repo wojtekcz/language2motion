@@ -13,12 +13,12 @@ public protocol MotionClassifierProtocol: Differentiable {
 }
 
 extension MotionClassifierProtocol {
-    public func predict(motionSamples: [MotionSample], labels: [String], batchSize: Int, device: Device) -> [Prediction] {
+    public func predict(motionSamples: [LegacyMotionSample], labels: [String], batchSize: Int, device: Device) -> [Prediction] {
         Context.local.learningPhase = .inference
         let validationExamples = motionSamples.map {
             (example) -> MotionBatch in
             let motionFrames = Tensor<Float>(example.motionFramesArray)
-            let mfIdx = MotionFrame.cjpMotionFlagIdx
+            let mfIdx = LegacyMotionFrame.cjpMotionFlagIdx
             let motionFlag = Tensor<Int32>(motionFrames[0..., mfIdx...mfIdx].squeezingShape(at: 1))
             let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
             let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag, origMotionFramesCount: origMotionFramesCount)

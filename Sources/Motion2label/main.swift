@@ -58,7 +58,7 @@ let dataset = try! Motion2Label(
     // TODO: move this to dataset class
     (example: Motion2LabelExample) -> LabeledMotionBatch in
     let motionFrames = Tensor<Float>(example.motionSample.motionFramesArray)
-    let mfIdx = MotionFrame.cjpMotionFlagIdx
+    let mfIdx = LegacyMotionFrame.cjpMotionFlagIdx
     let motionFlag = Tensor<Int32>(motionFrames[0..., mfIdx...mfIdx].squeezingShape(at: 1))
     let origMotionFramesCount = Tensor<Int32>(Int32(motionFrames.shape[0]))
     let motionBatch = MotionBatch(motionFrames: motionFrames, motionFlag: motionFlag, origMotionFramesCount: origMotionFramesCount)

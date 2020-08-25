@@ -1,13 +1,13 @@
 import Foundation
 
-public class MotionDataset: Codable {
+public class LegacyMotionDataset: Codable {
     public let datasetFolderURL: URL
-    public var motionSamples: [MotionSample]
+    public var motionSamples: [LegacyMotionSample]
     public var maxSampleID = 3966
 
     public init(datasetFolderURL: URL, grouppedJoints: Bool = true, normalized: Bool = true, sampled: Int? = nil, factor: Int = 1, maxFrames: Int = 50000) {
         self.datasetFolderURL = datasetFolderURL
-        var motionSamples: [MotionSample] = []
+        var motionSamples: [LegacyMotionSample] = []
         let fm = FileManager()
         
         var sampleIDs: [Int] = Array<Int>((0...maxSampleID))
@@ -25,10 +25,10 @@ public class MotionDataset: Codable {
             
             if fm.fileExists(atPath: mmmURL.path) {
                 if factor == 1 {
-                    let motionSample = MotionSample(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized, maxFrames: maxFrames)
+                    let motionSample = LegacyMotionSample(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, grouppedJoints: grouppedJoints, normalized: normalized, maxFrames: maxFrames)
                     motionSamples.append(motionSample)
                 } else {
-                    let _motionSamples = MotionSample.downsampledMutlipliedMotionSamples(
+                    let _motionSamples = LegacyMotionSample.downsampledMutlipliedMotionSamples(
                         sampleID: sampleID, 
                         mmmURL: mmmURL, 
                         annotationsURL: annotationsURL, 
@@ -47,7 +47,7 @@ public class MotionDataset: Codable {
         print("motionSamples.count: \(motionSamples.count)")
     }
 
-    public init(datasetFolderURL: URL, motionSamples: [MotionSample]) {
+    public init(datasetFolderURL: URL, motionSamples: [LegacyMotionSample]) {
         self.datasetFolderURL = datasetFolderURL
         self.motionSamples = motionSamples
     }
@@ -55,7 +55,7 @@ public class MotionDataset: Codable {
     // TODO: code throwing errors
     public init(from serializedDatasetURL: URL) {
         let data: Data = FileManager.default.contents(atPath: serializedDatasetURL.path)!
-        let motionDataset = try! PropertyListDecoder().decode(MotionDataset.self, from: data)
+        let motionDataset = try! PropertyListDecoder().decode(LegacyMotionDataset.self, from: data)
         datasetFolderURL = motionDataset.datasetFolderURL
         motionSamples = motionDataset.motionSamples
         maxSampleID = motionDataset.maxSampleID

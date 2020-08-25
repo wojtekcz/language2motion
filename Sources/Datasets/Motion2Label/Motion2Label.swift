@@ -12,10 +12,10 @@ public struct Motion2LabelExample {
     public typealias LabelTuple = (idx: Int, label: String)
 
     public let id: String
-    public let motionSample: MotionSample
+    public let motionSample: LegacyMotionSample
     public let label: LabelTuple?
 
-    public init(id: String, motionSample: MotionSample, label: LabelTuple?) {
+    public init(id: String, motionSample: LegacyMotionSample, label: LabelTuple?) {
         self.id = id
         self.motionSample = motionSample
         self.label = label
@@ -26,8 +26,8 @@ public struct Motion2LabelExample {
 public struct Motion2Label <Entropy: RandomNumberGenerator> {
     public typealias Samples = LazyMapSequence<[Motion2LabelExample], LabeledMotionBatch>
 
-    public let motionDataset: MotionDataset
-    public let testMotionSamples: [MotionSample]
+    public let motionDataset: LegacyMotionDataset
+    public let testMotionSamples: [LegacyMotionSample]
     public let trainingExamples: Samples
     public let validationExamples: Samples
 
@@ -49,31 +49,31 @@ public struct Motion2Label <Entropy: RandomNumberGenerator> {
 }
 
 extension Motion2Label {
-    static func filterSamples(_ motionSamples: [MotionSample], classIdx: Int, labelsDict: [Int: String], labels: [String]) -> [MotionSample] {
+    static func filterSamples(_ motionSamples: [LegacyMotionSample], classIdx: Int, labelsDict: [Int: String], labels: [String]) -> [LegacyMotionSample] {
         let motionSamplesForClass = motionSamples.filter {
-            (ms: MotionSample) -> Bool in
+            (ms: LegacyMotionSample) -> Bool in
             let labelTuple = Motion2Label.getLabel(sampleID: ms.sampleID, labelsDict: labelsDict, labels: labels)!
             return labelTuple.idx == classIdx
         }
         return motionSamplesForClass
     }
 
-    static func balanceClassSamples(_ motionSamples: [MotionSample], numPerClass: Int, split: Double = 0.8, labelsDict: [Int: String], labels: [String]) -> (trainSamples: [MotionSample], testSamples: [MotionSample]) {
-        var allTrainSamples: [MotionSample] = []
-        var allTestSamples: [MotionSample] = []
+    static func balanceClassSamples(_ motionSamples: [LegacyMotionSample], numPerClass: Int, split: Double = 0.8, labelsDict: [Int: String], labels: [String]) -> (trainSamples: [LegacyMotionSample], testSamples: [LegacyMotionSample]) {
+        var allTrainSamples: [LegacyMotionSample] = []
+        var allTestSamples: [LegacyMotionSample] = []
 
         for classIdx in (0..<labels.count) { 
             let samplesForClass = Motion2Label.filterSamples(motionSamples, classIdx: classIdx, labelsDict: labelsDict, labels: labels)
 
-            var trainSamples: [MotionSample]
-            var testSamples: [MotionSample]
+            var trainSamples: [LegacyMotionSample]
+            var testSamples: [LegacyMotionSample]
             if samplesForClass.count >= numPerClass { // downsample
                 let sampledSamplesForClass = Array(samplesForClass.choose(numPerClass))
                 (trainSamples, testSamples) = sampledSamplesForClass.trainTestSplitMotionSamples(split: split)
             } else { // upsample
                 (trainSamples, testSamples) = samplesForClass.trainTestSplitMotionSamples(split: split)
                 let maxTrainPerClass = Int(Double(numPerClass)*split)
-                trainSamples = (0..<maxTrainPerClass).map { (a) -> MotionSample in trainSamples.randomElement()! }
+                trainSamples = (0..<maxTrainPerClass).map { (a) -> LegacyMotionSample in trainSamples.randomElement()! }
             }
 
             allTrainSamples.append(contentsOf: trainSamples)
@@ -110,7 +110,7 @@ extension Motion2Label {
         exampleMap: @escaping (Motion2LabelExample) -> LabeledMotionBatch
     ) throws {
         // Load the data files.
-        motionDataset = MotionDataset(from: serializedDatasetURL)
+        motionDataset = LegacyMotionDataset(from: serializedDatasetURL)
         print(motionDataset.description)
         
         let df = pd.read_csv(labelsURL.path)
@@ -130,8 +130,8 @@ extension Motion2Label {
         print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
         
         // split into train/test sets
-        var trainMotionSamples: [MotionSample] = []
-        var testMotionSamples: [MotionSample] = []
+        var trainMotionSamples: [LegacyMotionSample] = []
+        var testMotionSamples: [LegacyMotionSample] = []
         if balanceClassSamples == nil {
             (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
         } else {
@@ -191,7 +191,7 @@ extension Motion2Label {
         return Motion2Label.getLabel(sampleID: sampleID, labelsDict: labelsDict, labels: labels)
     }
 
-    static func getExample(_ ms: MotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> Motion2LabelExample {
+    static func getExample(_ ms: LegacyMotionSample, labelsDict: [Int: String], labels: [String], tensorWidth: Int) -> Motion2LabelExample {
         let label: Motion2LabelExample.LabelTuple? = Motion2Label.getLabel(sampleID: ms.sampleID, labelsDict: labelsDict, labels: labels)
         return Motion2LabelExample(id: "\(ms.sampleID)", motionSample: ms, label: label)
     }
