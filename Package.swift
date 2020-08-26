@@ -26,6 +26,7 @@ let package = Package(
         .executable(name: "Transformer-Translation", targets: ["Transformer-Translation"]),
         .executable(name: "Lang2lang", targets: ["Lang2lang"]),
         .executable(name: "Motion2lang", targets: ["Motion2lang"]),
+        .library(name: "TrainingLoop", targets: ["TrainingLoop"]),
         .executable(name: "Lang2motion", targets: ["Lang2motion"]),
     ],
     dependencies: [
@@ -68,6 +69,7 @@ let package = Package(
             name: "Motion2lang",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionLangModels"],
             path: "Sources/Motion2lang"),
+        .target(name: "TrainingLoop", dependencies: ["ModelSupport"], path: "Sources/TrainingLoop"),
         .target(
             name: "Lang2motion",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels"],
