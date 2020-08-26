@@ -125,16 +125,16 @@ extension Lang2Motion {
     }
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
-        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
         let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenIds.squeezingShape(at: 0) })
         let mask: Tensor<Float> = Tensor(batches.map{ $0.source.mask.squeezingShape(at: 0) })
         let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenCount.squeezingShape(at: 0) })
 
-        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.target.motion.squeezingShape(at: 0) })
-        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.target.mask.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
-        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.targetTruthStop.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })
+        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.target2.sampleID.squeezingShape(at: 0) })
+        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.target2.target.motion.squeezingShape(at: 0) })
+        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.target2.target.mask.squeezingShape(at: 0) })
+        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.target2.targetTruth.squeezingShape(at: 0) })
+        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.target2.targetTruthStop.squeezingShape(at: 0) })
+        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.target2.origMotionFramesCount.squeezingShape(at: 0) })
 
         let batch = LangMotionBatch(sampleID: sampleID, 
                 tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 

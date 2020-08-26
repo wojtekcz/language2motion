@@ -202,7 +202,7 @@ let args = LossArgs(
 
 /// Training helpers
 func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch) -> Float {
-    let y_true = TargetTruth(motion: batch.targetTruth, stops: batch.targetTruthStop)
+    let y_true = TargetTruth(motion: batch.target2.targetTruth, stops: batch.target2.targetTruthStop)
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
@@ -225,7 +225,7 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
 }
 
 func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) -> Float {
-    let y_true = TargetTruth(motion: batch.targetTruth, stops: batch.targetTruthStop)
+    let y_true = TargetTruth(motion: batch.target2.targetTruth, stops: batch.target2.targetTruthStop)
     let result = withLearningPhase(.inference) { () -> Float in
         let y_pred = model.generate(input: batch)
         let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
@@ -288,7 +288,7 @@ time() {
         for eagerBatch in dataset.testBatches {
             let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.target.motion.shape[0]
+            let valBatchSize = batch.target2.target.motion.shape[0]
 
             devLossSum += loss
             devBatchCount += 1

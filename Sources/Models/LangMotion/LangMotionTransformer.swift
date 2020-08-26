@@ -60,7 +60,7 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
         let encodedMemory = self.encode(input: input.source)
-        return self.decode(sourceMask: input.source.mask, target: input.target, memory: encodedMemory)
+        return self.decode(sourceMask: input.source.mask, target: input.target2.target, memory: encodedMemory)
     }
     
     @differentiable

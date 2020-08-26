@@ -1,8 +1,8 @@
 import Foundation
 import TensorFlow
+import ModelSupport
 
 public struct LangMotionBatch: KeyPathIterable {
-    public let sampleID: Tensor<Int32>   // bs
 
     public struct Source {
         public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
@@ -32,7 +32,7 @@ public struct LangMotionBatch: KeyPathIterable {
     // source
     // (padded)
     public let source: Source
-    
+
     public struct Target {
         public var motion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
         public var mask: Tensor<Float>            // bs x maxMotionLength-1 x maxMotionLength-1
@@ -54,43 +54,71 @@ public struct LangMotionBatch: KeyPathIterable {
         }
     }
 
-    // target
+    public struct Target2 {
+        public let sampleID: Tensor<Int32>        // bs
+        public var target: Target
+
+        // public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
+        // public var targetTruthStop: Tensor<Float>       // bs x maxMotionLength-1
+        // TODO: target truth should be a STRUCT with motion and stop components
+        // TODO: how targetMask is used and consumed?
+        // used by transformer decoder? by mixture model?
+
+        public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
+        public var targetTruthStop: Tensor<Float>       // bs x maxMotionLength-1
+        public let origMotionFramesCount: Tensor<Int32> // bs
+
+        public init(sampleID: Tensor<Int32>, target: Target, targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
+            self.sampleID = sampleID
+
+            self.target = target
+
+            self.targetTruth = targetTruth
+            self.targetTruthStop = targetTruthStop
+            self.origMotionFramesCount = origMotionFramesCount
+        }
+
+        public init(copying target2: Target2, to device: Device) {
+            sampleID = Tensor<Int32>(copying: target2.sampleID, to: device)
+
+            target = Target(copying: target2.target, to: device)
+
+            targetTruth = Tensor<Float>(copying: target2.targetTruth, to: device)
+            targetTruthStop = Tensor<Float>(copying: target2.targetTruthStop, to: device)
+            origMotionFramesCount = Tensor<Int32>(copying: target2.origMotionFramesCount, to: device)
+        }
+
+        public func printTarget2() {
+            print("target2")
+            print("  sampleID.shape: \(self.sampleID.shape)")
+
+            print("  targetTruth.shape: \(self.targetTruth.shape)")
+            print("  targetTruthStop.shape: \(self.targetTruthStop.shape)")
+            print("  origMotionFramesCount.shape: \(self.origMotionFramesCount.shape)")
+        }
+    }
+
+    // target2
     // (padded)
-    public var target: Target
-
-    public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
-    public var targetTruthStop: Tensor<Float>       // bs x maxMotionLength-1
-    // TODO: target truth should be a STRUCT with motion and stop components
-    // TODO: how targetMask is used and consumed?
-    // used by transformer decoder? by mixture model?
-
-    public let origMotionFramesCount: Tensor<Int32> // bs
+    public var target2: Target2
 
     public init(sampleID: Tensor<Int32>, 
                 tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>, 
                 targetMotion: Tensor<Float>, targetMask: Tensor<Float>,
                 targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
-        self.sampleID = sampleID
         self.source = Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
-        self.target = Target(motion: targetMotion, mask: targetMask)
-
-        self.targetTruth = targetTruth
-        self.targetTruthStop = targetTruthStop
-        self.origMotionFramesCount = origMotionFramesCount
+        let target = Target(motion: targetMotion, mask: targetMask)
+        self.target2 = Target2(sampleID: sampleID, target: target, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
     }
 
     public init(sampleID: Int, source: Source, targetMotion: Tensor<Float>, maxMotionLength: Int) {
-        self.sampleID = Tensor([Int32(sampleID)])
         self.source = source
-
-        let (target, targetTruth, targetTruthStop, origMotionFramesCount) = Self.preprocessTargetMotion(motion: targetMotion, maxMotionLength: maxMotionLength)
-        self.target = target
-        self.targetTruth = targetTruth
-        self.targetTruthStop = targetTruthStop
-        self.origMotionFramesCount = origMotionFramesCount
+        let target2 = Self.preprocessTargetMotion(sampleID: Tensor([Int32(sampleID)]), motion: targetMotion, maxMotionLength: maxMotionLength)
+        self.target2 = target2
     }
 
-    public static func preprocessTargetMotion(motion: Tensor<Float>, maxMotionLength: Int) -> (target: LangMotionBatch.Target, targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
+    public static func preprocessTargetMotion(sampleID: Tensor<Int32>, motion: Tensor<Float>, maxMotionLength: Int) -> Target2
+    {
         var (motion, motionFlag) = Tensor<Float>(motion).paddedAndCropped(to: maxMotionLength)
         motion = motion.expandingShape(at: 0)
         motionFlag = motionFlag.expandingShape(at: 0)
@@ -101,11 +129,13 @@ public struct LangMotionBatch: KeyPathIterable {
 
         motionFlag = motionFlag[0..., rangeExceptLast]
         let targetMask = LangMotionBatch.makeStandardMask(target: motionFlag, pad: 0)
-        let target = LangMotionBatch.Target(motion: targetMotion, mask: targetMask)
-
         let targetTruth: Tensor<Float> = motion[0..., 1..., 0...]
         let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
-        return (target: target, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+
+        let target = Target(motion: targetMotion, mask: targetMask)
+        let target2 = LangMotionBatch.Target2(sampleID: sampleID, target: target, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+
+        return target2
     }
 
     public static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
@@ -125,30 +155,24 @@ public func subsequentMask3(size: Int) -> Tensor<Int32> {
 
 extension LangMotionBatch {
     public init(copying batch: LangMotionBatch, to device: Device) {
-        self.sampleID = Tensor<Int32>(copying: batch.sampleID, to: device)
         self.source = Source(copying: batch.source, to: device)
-        self.target = Target(copying: batch.target, to: device)
-
-        self.targetTruth = Tensor<Float>(copying: batch.targetTruth, to: device)
-        self.targetTruthStop = Tensor<Float>(copying: batch.targetTruthStop, to: device)
-        self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
+        self.target2 = Target2(copying: batch.target2, to: device)
     }
 }
 
 extension LangMotionBatch {
     public func printBatch() {
-        print("sampleID: shape \(self.sampleID.shape), value \(self.sampleID)")
-
         print("source")
         print("  tokenIds.shape: \(self.source.tokenIds.shape)")
         print("  mask.shape: \(self.source.mask.shape)")
         print("  tokenCount: shape \(self.source.tokenCount.shape), value \(self.source.tokenCount)")
 
-        print("target")
-        print("  targetMotion.shape: \(self.target.motion.shape)")
-        print("  targetMask.shape: \(self.target.mask.shape)")
-        print("  targetTruth.shape: \(self.targetTruth.shape)")
-        print("  targetTruthStop.shape: \(self.targetTruthStop.shape)")
-        print("  origMotionFramesCount: shape \(self.origMotionFramesCount.shape), value \(self.origMotionFramesCount)")
+        print("target2")
+        print("  sampleID: shape \(self.target2.sampleID.shape), value \(self.target2.sampleID)")
+        print("  targetMotion.shape: \(self.target2.target.motion.shape)")
+        print("  targetMask.shape: \(self.target2.target.mask.shape)")
+        print("  targetTruth.shape: \(self.target2.targetTruth.shape)")
+        print("  targetTruthStop.shape: \(self.target2.targetTruthStop.shape)")
+        print("  origMotionFramesCount: shape \(self.target2.origMotionFramesCount.shape), value \(self.target2.origMotionFramesCount)")
     }
 }
