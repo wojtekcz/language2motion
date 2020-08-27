@@ -16,6 +16,7 @@ let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 40
 let learningRate: Float = 5e-4
+let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -23,9 +24,7 @@ print("maxTextSequenceLength: \(maxTextSequenceLength)")
 print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
-
-
-let datasetSize: DatasetSize = .full
+print("datasetSize: \(datasetSize)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
@@ -211,10 +210,6 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
             let y_pred = model(batch)
             let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
             let n_items: Float = Float(loss.shape[0] * loss.shape[1])
-            // let ones = Tensor<Float>(ones: loss.shape)
-            // let nans = loss.isNaN
-            // let loss_notNaN = loss.replacing(with:ones, where:nans)
-            // let avg_loss = loss_notNaN.sum() / n_items
             let avg_loss = loss.sum() / n_items
             // print("avg_loss: \(avg_loss)")
             return avg_loss
@@ -244,7 +239,7 @@ print("\nTraining Transformer for the Lang2motion task!")
 var trainingStepCount = 0
 let print_every = 50
 let limit_print_to_step = 5
-let start_epoch = 17
+let start_epoch = 0
 var current_epoch = 0
 time() {
     LazyTensorBarrier()
