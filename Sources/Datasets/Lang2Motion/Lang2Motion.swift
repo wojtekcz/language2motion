@@ -3,8 +3,6 @@ import ModelSupport
 import TensorFlow
 import PythonKit
 
-public typealias LangMotionBatch2 = LabeledData<LangMotionBatch.Source, LangMotionBatch.Target>
-
 public struct Lang2Motion {
 
     public struct LangRec {
@@ -12,7 +10,6 @@ public struct Lang2Motion {
         public let text: String
     }
 
-    // rename MotionSample and related structs to Legacy and MotionSample to MotionSample...
     public let motionDataset: MotionDataset
     public let scaler: Scaler
 
@@ -24,7 +21,7 @@ public struct Lang2Motion {
     public let trainMotionSamples: [MotionSample]
     public let testMotionSamples: [MotionSample]
 
-    public typealias LazySamples = LazyMapSequence<[MotionSample], LangMotionBatch2>
+    public typealias LazySamples = LazyMapSequence<[MotionSample], LangMotionBatch>
 
     public let batchSize: Int
 
@@ -32,11 +29,11 @@ public struct Lang2Motion {
     public typealias Batches = Slices<Sampling<LazySamples, ArraySlice<Int>>>
     /// The type of the training sequence of epochs.
     public typealias TrainEpochs = LazyMapSequence<TrainingEpochs<LazySamples, SystemRandomNumberGenerator>, 
-        LazyMapSequence<Batches, LangMotionBatch2>>
+        LazyMapSequence<Batches, LangMotionBatch>>
     /// The sequence of training data (epochs of batches).
     public var trainEpochs: TrainEpochs
     /// The test batches.
-    public var testBatches: LazyMapSequence<Slices<LazySamples>, LangMotionBatch2>
+    public var testBatches: LazyMapSequence<Slices<LazySamples>, LangMotionBatch>
 }
 
 extension Lang2Motion {
@@ -46,7 +43,7 @@ extension Lang2Motion {
         batchSize: Int,
         minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
-        exampleMap: @escaping (MotionSample) -> LangMotionBatch2
+        exampleMap: @escaping (MotionSample) -> LangMotionBatch
     ) throws {
         // Load the data files.
         motionDataset = MotionDataset(from: motionDatasetURL)
@@ -114,55 +111,15 @@ extension Lang2Motion {
         let entropy = SystemRandomNumberGenerator()
         trainEpochs = TrainingEpochs(
         samples: trainSamples, batchSize: batchSize, entropy: entropy
-        ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LangMotionBatch2> in
+        ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LangMotionBatch> in
             batches.lazy.map{ 
-                Lang2Motion.reduceDataBatches(Array($0))
+                LangMotionBatch.reduceDataBatches(Array($0))
             }
         }
         
         // Create the test collection of batches.
         testBatches = testSamples.inBatches(of: batchSize).lazy.map{ 
-            Lang2Motion.reduceDataBatches(Array($0))
+            LangMotionBatch.reduceDataBatches(Array($0))
         }
-    }
-
-    public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
-        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.source.sentence.tokenIds.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.source.sentence.mask.squeezingShape(at: 0) })
-        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.source.sentence.tokenCount.squeezingShape(at: 0) })
-        let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.source.motionPart.motion.squeezingShape(at: 0) })
-        let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.source.motionPart.mask.squeezingShape(at: 0) })
-
-        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.target.sampleID.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.target.targetTruth.squeezingShape(at: 0) })
-        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.target.targetTruthStop.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.target.origMotionFramesCount.squeezingShape(at: 0) })
-
-        let batch = LangMotionBatch(sampleID: sampleID, 
-                tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
-                motionPartTensor: motionPartTensor, motionPartMask: motionPartMask,
-                targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
-        return batch
-    }
-
-    public static func reduceDataBatches(_ batches: [LangMotionBatch2]) -> LangMotionBatch2 {
-        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.data.sentence.tokenIds.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.data.sentence.mask.squeezingShape(at: 0) })
-        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.data.sentence.tokenCount.squeezingShape(at: 0) })
-        let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.motion.squeezingShape(at: 0) })
-        let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.mask.squeezingShape(at: 0) })
-
-        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.label.sampleID.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.label.targetTruth.squeezingShape(at: 0) })
-        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.label.targetTruthStop.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.label.origMotionFramesCount.squeezingShape(at: 0) })
-
-        let sentence = LangMotionBatch.Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
-        let motionPart = LangMotionBatch.MotionPart(motion: motionPartTensor, mask: motionPartMask)
-        let data = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-        let label = LangMotionBatch.Target(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
-        let batch = LangMotionBatch2(data: data,label: label)
-
-        return batch
     }
 }

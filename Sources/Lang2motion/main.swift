@@ -97,11 +97,11 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     trainTestSplit: 1.0
-) { (motionSample: MotionSample) -> LangMotionBatch2 in    
+) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
     let (target2, motionPart) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
     let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-    let singleBatch = LangMotionBatch2(data: source,label: target2)
+    let singleBatch = LangMotionBatch(data: source,label: target2)
     return singleBatch
 }
 
@@ -212,7 +212,7 @@ func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: Lan
     return avg_loss
 }
 
-func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch2) -> Float {
+func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch) -> Float {
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
@@ -227,7 +227,7 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
     return result
 }
 
-func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch2) -> Float {
+func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) -> Float {
     let result = withLearningPhase(.inference) { () -> Float in
         let y_pred = model(batch.data)
         let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target: batch.label)
@@ -260,7 +260,7 @@ time() {
             // if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
             //     print("==> step \(trainingStepCount)")
             // }
-            let batch = LangMotionBatch2(copying: eagerBatch, to: device)
+            let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
             if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
                 print("current loss at step \(trainingStepCount): \(loss)")
@@ -286,7 +286,7 @@ time() {
         var totalGuessCount = 0
 
         for eagerBatch in dataset.testBatches {
-            let batch = LangMotionBatch2(copying: eagerBatch, to: device)
+            let batch = LangMotionBatch(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
             let valBatchSize = batch.data.motionPart.motion.shape[0]
 
