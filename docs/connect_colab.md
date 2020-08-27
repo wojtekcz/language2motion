@@ -24,11 +24,6 @@ IdentityFile ~/.ssh/private_key.pem
 LocalForward 6006 localhost:6006
 ```
 
-### a. scp rsa key into colabp
-```
-scp ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local colabp:/root/.ssh
-```
-
 ### b. ssh into colabp
 ```
 ssh colabp
@@ -51,7 +46,12 @@ git config --global user.name "Wojtek Czarnowski"
 git config --global user.email "wojtek.czarnowski@gmail.com"
 ```
 
-### f. (optional) load github credentials
+### f. (optional) scp rsa key into colabp
+```
+scp ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local colabp:/root/.ssh
+```
+
+### g. (optional) load github credentials
 ```
 chmod 600 ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
 ssh-agent bash
