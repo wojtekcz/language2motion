@@ -8,11 +8,6 @@ TODO: paste portmap.io instructions
 * make sure runtime type is gpu
 * run notebook up to ssh tunnel cell
 
-### b. scp rsa key into colabp
-```
-scp ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local colabp:/root/.ssh
-```
-
 ## 2. ssh/terminal
 
 ### 0. setup ssh connection ```~/.ssh/config```
@@ -29,17 +24,22 @@ IdentityFile ~/.ssh/private_key.pem
 LocalForward 6006 localhost:6006
 ```
 
-### a. ssh into colabp
+### a. scp rsa key into colabp
+```
+scp ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local colabp:/root/.ssh
+```
+
+### b. ssh into colabp
 ```
 ssh colabp
 ```
 
-### b. (optional) run tmux in iterm
+### c. (optional) run tmux in iterm
 ```
 tmux -CC
 ```
 
-### c. (optional) load github credentials
+### d. (optional) load github credentials
 ```
 git config --global user.name "Wojtek Czarnowski"
 git config --global user.email "wojtek.czarnowski@gmail.com"
@@ -64,16 +64,13 @@ wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0
 tar xzvf motion_dataset_v3.10Hz.tgz --skip-old-files
 ``` -->
 
-### d. run Motion2label script
+### e. run Lang2motion script
 ```
 cd /content/language2motion.gt
-swift run -c release Motion2label
-swift run -c release Lang2lang
-swift run -c release Motion2lang
 swift run -c release Lang2motion
 ```
 
-## 4. vscode integration
+## 3. vscode integration
 
 ### 0. install extension
 - Remote-SSH
@@ -91,7 +88,7 @@ swift run -c release Lang2motion
 /content/language2motion.gt/l2m.code-workspace
 ```
 
-## 5. (optional) tensorbord
+## 4. (optional) tensorbord
 
 ### a. start tensorboard
 ```
