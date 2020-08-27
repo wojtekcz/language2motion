@@ -98,9 +98,11 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     trainTestSplit: 1.0
-) { (motionSample: MotionSample) -> LangMotionBatch in    
-    let source = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    let singleBatch = LangMotionBatch(sampleID: motionSample.sampleID, source: source, targetMotion: motionSample.motion, maxMotionLength: maxMotionLength)
+) { (motionSample: MotionSample) -> LangMotionBatch2 in    
+    let data = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
+    // TODO: refactor to stop using LangMotionBatch constructor
+    let tmpBatch = LangMotionBatch(sampleID: motionSample.sampleID, source: data, targetMotion: motionSample.motion, maxMotionLength: maxMotionLength)
+    let singleBatch = LangMotionBatch2(data: data,label: tmpBatch.target2)
     return singleBatch
 }
 
@@ -201,12 +203,12 @@ let args = LossArgs(
 )
 
 /// Training helpers
-func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch) -> Float {
-    let y_true = TargetTruth(motion: batch.target2.targetTruth, stops: batch.target2.targetTruthStop)
+func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch2) -> Float {
+    let y_true = TargetTruth(motion: batch.label.targetTruth, stops: batch.label.targetTruthStop)
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
-            let y_pred = model.generate(input: batch)
+            let y_pred = model(batch)
             let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
             let n_items: Float = Float(loss.shape[0] * loss.shape[1])
             // let ones = Tensor<Float>(ones: loss.shape)
@@ -224,10 +226,10 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
     return result
 }
 
-func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) -> Float {
-    let y_true = TargetTruth(motion: batch.target2.targetTruth, stops: batch.target2.targetTruthStop)
+func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch2) -> Float {
+    let y_true = TargetTruth(motion: batch.label.targetTruth, stops: batch.label.targetTruthStop)
     let result = withLearningPhase(.inference) { () -> Float in
-        let y_pred = model.generate(input: batch)
+        let y_pred = model(batch)
         let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
         let n_items: Float = Float(loss.shape[0] * loss.shape[1])
         let avg_loss = loss.sum() / n_items
@@ -260,7 +262,7 @@ time() {
             // if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
             //     print("==> step \(trainingStepCount)")
             // }
-            let batch = LangMotionBatch(copying: eagerBatch, to: device)
+            let batch = LangMotionBatch2(copying: eagerBatch, to: device)
             let loss: Float = update(model: &model, using: &optimizer, for: batch)
             if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
                 print("current loss at step \(trainingStepCount): \(loss)")
@@ -286,9 +288,9 @@ time() {
         var totalGuessCount = 0
 
         for eagerBatch in dataset.testBatches {
-            let batch = LangMotionBatch(copying: eagerBatch, to: device)
+            let batch = LangMotionBatch2(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.target2.target.motion.shape[0]
+            let valBatchSize = batch.label.target.motion.shape[0]
 
             devLossSum += loss
             devBatchCount += 1

@@ -4,7 +4,7 @@ import TextModels
 import TranslationModels
 
 
-// Transformer with LangMotionBatch
+// Transformer with LangMotionBatch2
 
 public struct LangMotionTransformer: Module {
     public var encoder: Encoder
@@ -58,9 +58,10 @@ public struct LangMotionTransformer: Module {
     }
 
     @differentiable
-    public func callAsFunction(_ input: LangMotionBatch) -> Tensor<Float> {
-        let encodedMemory = self.encode(input: input.source)
-        return self.decode(sourceMask: input.source.mask, target: input.target2.target, memory: encodedMemory)
+    public func callAsFunction(_ input: LangMotionBatch2) -> MixtureModelPreds {
+        let encodedMemory = self.encode(input: input.data)
+        let decoded = self.decode(sourceMask: input.data.mask, target: input.label.target, memory: encodedMemory)
+        return self.mixtureModel(decoded)
     }
     
     @differentiable
@@ -85,10 +86,5 @@ public struct LangMotionTransformer: Module {
 
         let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: target.mask, memory: memory)
         return self.decoder(decoderInput)
-    }
-
-    @differentiable
-    public func generate(input: LangMotionBatch) -> MixtureModelPreds {
-        return self.mixtureModel(self.callAsFunction(input))
     }
 }

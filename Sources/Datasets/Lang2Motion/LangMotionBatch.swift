@@ -176,3 +176,11 @@ extension LangMotionBatch {
         print("  origMotionFramesCount: shape \(self.target2.origMotionFramesCount.shape), value \(self.target2.origMotionFramesCount)")
     }
 }
+
+extension LangMotionBatch2 {
+    public init(copying batch: LangMotionBatch2, to device: Device) {
+        let data = LangMotionBatch.Source(copying: batch.data, to: device)
+        let label = LangMotionBatch.Target2(copying: batch.label, to: device)
+        self.init(data: data, label: label)
+    }
+}
