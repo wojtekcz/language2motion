@@ -43,6 +43,7 @@ extension Lang2Motion {
         batchSize: Int,
         minMotionLength: Int = 10,
         trainTestSplit: Double = 0.8,
+        device: Device,
         exampleMap: @escaping (MotionSample) -> LangMotionBatch
     ) throws {
         // Load the data files.
@@ -113,13 +114,14 @@ extension Lang2Motion {
         samples: trainSamples, batchSize: batchSize, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LangMotionBatch> in
             batches.lazy.map{ 
-                LangMotionBatch.reduceDataBatches(Array($0))
+                // TODO: reduceDataBatches to device directly
+                LangMotionBatch(copying: LangMotionBatch.reduceDataBatches(Array($0)), to: device)
             }
         }
         
         // Create the test collection of batches.
         testBatches = testSamples.inBatches(of: batchSize).lazy.map{ 
-            LangMotionBatch.reduceDataBatches(Array($0))
+                LangMotionBatch(copying: LangMotionBatch.reduceDataBatches(Array($0)), to: device)
         }
     }
 }

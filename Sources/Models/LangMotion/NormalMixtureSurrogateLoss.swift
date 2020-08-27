@@ -5,12 +5,14 @@ public struct LossArgs {
     public let nb_mixtures: Int
     public let mixture_regularizer_type: String  // ["cv", "l2", "None"]
     public let mixture_regularizer: Float
+    public let device: Device
 
-    public init(nb_joints: Int, nb_mixtures: Int, mixture_regularizer_type: String, mixture_regularizer: Float) {
+    public init(nb_joints: Int, nb_mixtures: Int, mixture_regularizer_type: String, mixture_regularizer: Float, device: Device) {
         self.nb_joints = nb_joints
         self.nb_mixtures = nb_mixtures
         self.mixture_regularizer_type = mixture_regularizer_type
         self.mixture_regularizer = mixture_regularizer
+        self.device = device
      }
 }
 
@@ -22,6 +24,12 @@ public struct TargetTruth {
         self.motion = motion
         self.stops = stops
      }
+
+    public init(copying targetTruth: TargetTruth, to device: Device) {
+        let motion = Tensor(copying: targetTruth.motion, to: device)
+        let stops = Tensor(copying: targetTruth.stops, to: device)
+        self.init(motion: motion, stops: stops)
+    }
 }
 
 @differentiable
@@ -36,7 +44,7 @@ public func normalMixtureSurrogateLoss(y_true: TargetTruth, y_pred: MixtureModel
     let weights = y_pred.mixtureWeights
     let stops = y_pred.stops.squeezingShape(at: 2)
 
-    var log_mixture_pdf: Tensor<Float> = Tensor<Float>(zeros: [weights.shape[0], weights.shape[1]]) 
+    var log_mixture_pdf: Tensor<Float> = Tensor<Float>(zeros: [weights.shape[0], weights.shape[1]], on: args.device) 
     for mixture_idx in 0..<nb_mixtures {
         let start_idx = mixture_idx * nb_joints
         let means = all_means[0..., 0..., start_idx..<start_idx + nb_joints]

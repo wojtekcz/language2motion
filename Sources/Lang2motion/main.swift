@@ -17,7 +17,7 @@ let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 5
 let learningRate: Float = 5e-4
-let datasetSize: DatasetSize = .full
+let datasetSize: DatasetSize = .mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -35,8 +35,8 @@ let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory:
 try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 
 /// Select eager or X10 backend
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print(device)
 
 // TODO: make sure X10 training works on Colab
@@ -48,6 +48,9 @@ print(device)
 // print(eagerTensor1.device)
 // let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
 // print(x10Tensor2.device)
+
+// The following is a workaround needed until X10 can set log levels and memory growth parameters.
+let _ = _ExecutionContext.global
 
 /// instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -92,7 +95,6 @@ var model = LangMotionTransformer(
 
 // print("checkpointURL: \(checkpointURL.path)")
 // var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e17")
-model.move(to: device)
 
 /// load dataset
 print("\nLoading dataset...")
@@ -100,7 +102,8 @@ print("\nLoading dataset...")
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
-    trainTestSplit: 1.0
+    trainTestSplit: 1.0,
+    device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
     let (target2, motionPart) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
@@ -152,12 +155,13 @@ let args = LossArgs(
         nb_joints: nbJoints,
         nb_mixtures: nbMixtures,
         mixture_regularizer_type: "None",  // ["cv", "l2", "None"]
-        mixture_regularizer: 0.0
+        mixture_regularizer: 0.0,
+        device: device
 )
 
 @differentiable
 func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: LangMotionBatch.Target) -> Tensor<Float> {
-    let y_true = TargetTruth(motion: y_target.targetTruth, stops: y_target.targetTruthStop)
+    let y_true = TargetTruth(copying: TargetTruth(motion: y_target.targetTruth, stops: y_target.targetTruthStop), to: device)
     let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
     let n_items: Float = Float(loss.shape[0] * loss.shape[1])
     let avg_loss = loss.sum() / n_items
@@ -165,7 +169,7 @@ func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: Lan
 }
 
 // Training loop
-print("\nTraining Transformer for the Lang2motion task!")
+print("\nSetting up the training loop")
 let trainingProgress = TrainingProgress(metrics: [.loss])
 var trainingLoop = TrainingLoop(
   training: dataset.trainEpochs,
@@ -174,6 +178,7 @@ var trainingLoop = TrainingLoop(
   lossFunction: embeddedNormalMixtureSurrogateLoss,
   callbacks: [trainingProgress.update])
 
+print("\nTraining Transformer for the Lang2motion task!")
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 try! model.writeCheckpoint(to: checkpointURL, name: "model")
 
