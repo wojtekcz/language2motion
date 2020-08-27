@@ -58,33 +58,33 @@ public struct LangMotionTransformer: Module {
     }
 
     @differentiable
-    public func callAsFunction(_ input: LangMotionBatch2) -> MixtureModelPreds {
-        let encodedMemory = self.encode(input: input.data)
-        let decoded = self.decode(sourceMask: input.data.mask, target: input.label.target, memory: encodedMemory)
+    public func callAsFunction(_ input: LangMotionBatch.Source) -> MixtureModelPreds {
+        let encodedMemory = self.encode(input: input.sentence)
+        let decoded = self.decode(sourceMask: input.sentence.mask, motionPart: input.motionPart, memory: encodedMemory)
         return self.mixtureModel(decoded)
     }
     
     @differentiable
-    public func encode(input: LangMotionBatch.Source) -> Tensor<Float> {
+    public func encode(input: LangMotionBatch.Sentence) -> Tensor<Float> {
         let embedded = self.sourceEmbed(input.tokenIds)
         let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask)
         return self.encoder(encoderInput)
     }
     
     @differentiable
-    public func decode(sourceMask: Tensor<Float>, target: LangMotionBatch.Target, memory: Tensor<Float>) -> Tensor<Float> {
-        let shape = target.motion.shape
+    public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>) -> Tensor<Float> {
+        let shape = motionPart.motion.shape
         let (origBatchSize, numFrames) = (shape[0], shape[1])
 
         let tmpBatchSize = origBatchSize * numFrames
-        let tmpMotionFrames = target.motion.reshaped(to: [tmpBatchSize, nbJoints])
+        let tmpMotionFrames = motionPart.motion.reshaped(to: [tmpBatchSize, nbJoints])
 
         // FIXME: make targetEmbed() work
         let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
         motionFeatures = positionalEncoding(motionFeatures)
 
-        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: target.mask, memory: memory)
+        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
         return self.decoder(decoderInput)
     }
 }

@@ -98,10 +98,10 @@ var dataset = try Lang2Motion(
     batchSize: batchSize,
     trainTestSplit: 1.0
 ) { (motionSample: MotionSample) -> LangMotionBatch2 in    
-    let data = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    // TODO: refactor to stop using LangMotionBatch constructor
-    let tmpBatch = LangMotionBatch(sampleID: motionSample.sampleID, source: data, targetMotion: motionSample.motion, maxMotionLength: maxMotionLength)
-    let singleBatch = LangMotionBatch2(data: data,label: tmpBatch.target2)
+    let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
+    let (target2, motionPart) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+    let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
+    let singleBatch = LangMotionBatch2(data: source,label: target2)
     return singleBatch
 }
 
@@ -162,10 +162,10 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
     Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
-    let source = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
-    source.printSource()
+    let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
+    processedSentence.printSentence()
 
-    let decodedMotion = MotionDecoder.greedyDecodeMotion(source: source, transformer: model, nbJoints: nbJoints, nbMixtures: nbMixtures, maxMotionLength: maxMotionLength)
+    let decodedMotion = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, transformer: model, nbJoints: nbJoints, nbMixtures: nbMixtures, maxMotionLength: maxMotionLength)
     print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
     print("  descaledMotion.shape: \(descaledMotion.shape)")
@@ -216,7 +216,7 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
-            let y_pred = model(batch)
+            let y_pred = model(batch.data)
             let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target2: batch.label)
             return loss
         }
@@ -229,7 +229,7 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
 
 func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch2) -> Float {
     let result = withLearningPhase(.inference) { () -> Float in
-        let y_pred = model(batch)
+        let y_pred = model(batch.data)
         let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target2: batch.label)
         return loss.scalarized()
     }
@@ -288,7 +288,7 @@ time() {
         for eagerBatch in dataset.testBatches {
             let batch = LangMotionBatch2(copying: eagerBatch, to: device)
             let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.label.target.motion.shape[0]
+            let valBatchSize = batch.data.motionPart.motion.shape[0]
 
             devLossSum += loss
             devBatchCount += 1

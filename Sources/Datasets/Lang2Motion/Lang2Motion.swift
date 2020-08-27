@@ -127,39 +127,40 @@ extension Lang2Motion {
     }
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
-        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenIds.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.source.mask.squeezingShape(at: 0) })
-        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.source.tokenCount.squeezingShape(at: 0) })
+        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.source.sentence.tokenIds.squeezingShape(at: 0) })
+        let mask: Tensor<Float> = Tensor(batches.map{ $0.source.sentence.mask.squeezingShape(at: 0) })
+        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.source.sentence.tokenCount.squeezingShape(at: 0) })
+        let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.source.motionPart.motion.squeezingShape(at: 0) })
+        let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.source.motionPart.mask.squeezingShape(at: 0) })
 
         let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.target2.sampleID.squeezingShape(at: 0) })
-        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.target2.target.motion.squeezingShape(at: 0) })
-        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.target2.target.mask.squeezingShape(at: 0) })
         let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.target2.targetTruth.squeezingShape(at: 0) })
         let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.target2.targetTruthStop.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.target2.origMotionFramesCount.squeezingShape(at: 0) })
 
         let batch = LangMotionBatch(sampleID: sampleID, 
                 tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
-                targetMotion: targetMotion, targetMask: targetMask,
+                motionPartTensor: motionPartTensor, motionPartMask: motionPartMask,
                 targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         return batch
     }
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch2]) -> LangMotionBatch2 {
-        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.data.tokenIds.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.data.mask.squeezingShape(at: 0) })
-        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.data.tokenCount.squeezingShape(at: 0) })
+        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.data.sentence.tokenIds.squeezingShape(at: 0) })
+        let mask: Tensor<Float> = Tensor(batches.map{ $0.data.sentence.mask.squeezingShape(at: 0) })
+        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.data.sentence.tokenCount.squeezingShape(at: 0) })
+        let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.motion.squeezingShape(at: 0) })
+        let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.mask.squeezingShape(at: 0) })
 
         let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.label.sampleID.squeezingShape(at: 0) })
-        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.label.target.motion.squeezingShape(at: 0) })
-        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.label.target.mask.squeezingShape(at: 0) })
         let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.label.targetTruth.squeezingShape(at: 0) })
         let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.label.targetTruthStop.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.label.origMotionFramesCount.squeezingShape(at: 0) })
 
-        let data = LangMotionBatch.Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
-        let target = LangMotionBatch.Target(motion: targetMotion, mask: targetMask)
-        let label = LangMotionBatch.Target2(sampleID: sampleID, target: target, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+        let sentence = LangMotionBatch.Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+        let motionPart = LangMotionBatch.MotionPart(motion: motionPartTensor, mask: motionPartMask)
+        let data = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
+        let label = LangMotionBatch.Target2(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         let batch = LangMotionBatch2(data: data,label: label)
 
         return batch

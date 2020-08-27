@@ -90,10 +90,10 @@ public class MotionDecoder {
         return (motion: motion, log_probs: log_probs, done: Tensor(done))
     }
 
-    public static func greedyDecodeMotion(source: LangMotionBatch.Source, transformer: LangMotionTransformer, nbJoints: Int, nbMixtures: Int, maxMotionLength: Int) -> Tensor<Float> {
+    public static func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, transformer: LangMotionTransformer, nbJoints: Int, nbMixtures: Int, maxMotionLength: Int) -> Tensor<Float> {
         print("\nEncode:")
         print("======")
-        let memory = transformer.encode(input: source)
+        let memory = transformer.encode(input: sentence)
         print("  memory.count: \(memory.shape)")
 
         print("\nGenerate:")
@@ -102,11 +102,11 @@ public class MotionDecoder {
         var ys: Tensor<Float> = Tensor<Float>(repeating:0.0, shape: [1, 1, nbJoints])
         for _ in 0..<maxMotionLength {
             // prepare input
-            let targetMask = Tensor<Float>(subsequentMask3(size: ys.shape[1]))
-            let target = LangMotionBatch.Target(motion: ys, mask: targetMask)
+            let motionPartMask = Tensor<Float>(subsequentMask3(size: ys.shape[1]))
+            let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask)
 
             // decode motion
-            let out = transformer.decode(sourceMask: source.mask, target: target, memory: memory)
+            let out = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
             let singlePreds = transformer.mixtureModel(out[0...,-1].expandingShape(at: 0))
             
             // perform sampling

@@ -25,7 +25,7 @@ public struct TextProcessor {
         self.unkId = Int32(self.vocabulary.id(forToken: UNKNOWN_WORD)!)
     }
 
-    public func preprocess(sentence: String, maxTextSequenceLength: Int) -> LangMotionBatch.Source {
+    public func preprocess(sentence: String, maxTextSequenceLength: Int) -> LangMotionBatch.Sentence {
         var encodedSource = self.tokenizer.tokenize(sentence)
             .prefix(maxTextSequenceLength - 2)
             .map{ Int32(self.vocabulary.id(forToken: $0) ?? Int(self.unkId))}
@@ -46,7 +46,7 @@ public struct TextProcessor {
 
         let tokenCount: Tensor<Int32> = Tensor([Int32(origTokenCount)])
 
-        let singleSource = LangMotionBatch.Source(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
-        return singleSource
+        let singleSentence = LangMotionBatch.Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+        return singleSentence
     }
 }
