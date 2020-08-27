@@ -111,7 +111,7 @@ var dataset = try Lang2Motion(
 
 print("Dataset acquired.")
 
-// TODO: make possible to greedyDecodeMotion() during training again
+// TODO: make possible to call greedyDecodeMotion() during training again
 public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", saveMotion: Bool = true) {
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
@@ -156,16 +156,16 @@ let args = LossArgs(
 )
 
 @differentiable
-func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: LangMotionBatch.Target) -> Tensor<Float>  {
+func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: LangMotionBatch.Target) -> Tensor<Float> {
     let y_true = TargetTruth(motion: y_target.targetTruth, stops: y_target.targetTruthStop)
     let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
     let n_items: Float = Float(loss.shape[0] * loss.shape[1])
     let avg_loss = loss.sum() / n_items
-    // print("avg_loss: \(avg_loss)")
     return avg_loss
 }
 
 // Training loop
+print("\nTraining Transformer for the Lang2motion task!")
 let trainingProgress = TrainingProgress(metrics: [.loss])
 var trainingLoop = TrainingLoop(
   training: dataset.trainEpochs,
@@ -174,105 +174,23 @@ var trainingLoop = TrainingLoop(
   lossFunction: embeddedNormalMixtureSurrogateLoss,
   callbacks: [trainingProgress.update])
 
-try! trainingLoop.fit(&model, epochs: 10, on: device)
+try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 try! model.writeCheckpoint(to: checkpointURL, name: "model")
 
 print("\nFinished training.")
 
 // TODO: use tensorboard again
+// TODO: save model checkpoint after each epoch again
+// TODO: time 1 epoch training
+
 // let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
-// TODO: save model checkpoint after every epoch again
-// TODO: cleanups
-/// Training helpers
-// func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch) -> Float {
-//     let result = withLearningPhase(.training) { () -> Float in
-//         let (loss, grad) = valueWithGradient(at: model) {
-//             (model) -> Tensor<Float> in
-//             let y_pred = model(batch.data)
-//             let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target: batch.label)
-//             return loss
-//         }
-//         optimizer.update(&model, along: grad)
-//         LazyTensorBarrier()
-//         return loss.scalarized()
-//     }
-//     return result
-// }
-
-// func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch) -> Float {
-//     let result = withLearningPhase(.inference) { () -> Float in
-//         let y_pred = model(batch.data)
-//         let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target: batch.label)
-//         return loss.scalarized()
-//     }
-//     LazyTensorBarrier()
-//     return result
-// }
-
-// /// Training loop
-// print("\nTraining Transformer for the Lang2motion task!")
-// var trainingStepCount = 0
-// let print_every = 50
-// let limit_print_to_step = 5
-// let start_epoch = 0
-// var current_epoch = 0
 // time() {
-//     LazyTensorBarrier()
 //     for (epoch, epochBatches) in dataset.trainEpochs.prefix(nEpochs).enumerated() {
-//         current_epoch = start_epoch + epoch + 1
-//         print("[Epoch \(current_epoch)]")
-//         Context.local.learningPhase = .training
-//         var trainingLossSum: Float = 0
-//         var trainingBatchCount = 0
-//         if epoch == 0 {
-//             print("epochBatches.count: \(epochBatches.count)")
-//         }
-
 //         for eagerBatch in epochBatches {
-//             // if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
-//             //     print("==> step \(trainingStepCount)")
-//             // }
-//             let batch = LangMotionBatch(copying: eagerBatch, to: device)
-//             let loss: Float = update(model: &model, using: &optimizer, for: batch)
-//             if (trainingStepCount < limit_print_to_step || trainingStepCount % print_every == 0) {
-//                 print("current loss at step \(trainingStepCount): \(loss)")
-//             }
-//             trainingLossSum += loss
-//             trainingBatchCount += 1
 //             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-//             trainingStepCount += 1
 //         }
-//         print(
-//             """
-//             Training loss: \(trainingLossSum / Float(trainingBatchCount))
-//             """
-//         )
 //         summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: trainingLossSum / Float(trainingBatchCount))
-
-//         if epoch == 0 {
-//             print("dataset.testBatches.count: \(dataset.testBatches.count)")
-//         }
-//         Context.local.learningPhase = .inference
-//         var devLossSum: Float = 0
-//         var devBatchCount = 0
-//         var totalGuessCount = 0
-
-//         for eagerBatch in dataset.testBatches {
-//             let batch = LangMotionBatch(copying: eagerBatch, to: device)
-//             let loss: Float = validate(model: &model, for: batch)
-//             let valBatchSize = batch.data.motionPart.motion.shape[0]
-
-//             devLossSum += loss
-//             devBatchCount += 1
-//             totalGuessCount += valBatchSize
-//         }
-
-//         print(
-//             """
-//             Eval loss: \(devLossSum / Float(devBatchCount))
-//             """
-//         )
 //         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: current_epoch, value: devLossSum / Float(devBatchCount))
 //         try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(current_epoch)")
 //         if current_epoch >= 2 {
