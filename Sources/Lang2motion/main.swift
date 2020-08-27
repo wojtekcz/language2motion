@@ -15,7 +15,7 @@ let runName = "run_1"
 let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 40
+let nEpochs = 5
 let learningRate: Float = 5e-4
 let datasetSize: DatasetSize = .full
 
@@ -226,6 +226,7 @@ var trainingLoop = TrainingLoop(
   callbacks: [trainingProgress.update])
 
 try! trainingLoop.fit(&model, epochs: 10, on: device)
+try! model.writeCheckpoint(to: checkpointURL, name: "model")
 
 print("\nFinished training.")
 
