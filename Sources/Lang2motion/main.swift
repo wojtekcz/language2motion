@@ -111,57 +111,6 @@ var dataset = try Lang2Motion(
 
 print("Dataset acquired.")
 
-// TODO: cleanups
-/// one example to single batch
-// print("\nSingle batch")
-// print("============")
-// let example = dataset.trainExamples[0]
-// print("example.sentence: \"\(example.sentence)\"")
-
-// let singleBatch = textProcessor.preprocess(example: example)
-// LangMotionBatch.printBatch(singleBatch)
-
-/// Test model with one batch
-/// get a batch
-// print("\nOne batch:")
-// print("=========")
-// var epochIterator = dataset.trainEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch: LangMotionBatch = batches[0]
-// printBatch(batch)
-
-/// run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let deviceBatch = LangMotionBatch(copying: batch, to: device)
-// let batch_generated = model.generate(input: deviceBatch)
-// print("batch_generated.shape: \(batch_generated.shape)")
-
-/// decode single batch
-// print("\nDecode single batch:")
-// print("====================")
-// let singlePreds: MixtureModelPreds = model.generate(input: LangMotionBatch(copying: singleBatch, to: device))
-// singlePreds.printPreds()
-
-// let (motion, log_probs, done) = performNormalMixtureSampling(
-//     preds: single_generated, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
-
-// let descaled_motion = dataset.scaler.inverse_transform(motion)
-
-// print("motion.shape: \(motion.shape)")
-// print("log_probs.count: \(log_probs.count)")
-// print("done.shape: \(done.shape)")
-// print("done: \(done)")
-// print("log_probs: \(log_probs)")
-// print("descaled_motion: \(descaled_motion)")
-
-// motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8.png"), 
-//             motion: motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
-
-// motionToImg(url: dataURL.appendingPathComponent("motion_images/foo8_descaled.png"), 
-//             motion: descaled_motion, motionFlag: done, padTo: maxMotionLength, descr: "\(example.sentence)")
-
 // TODO: make possible to greedyDecodeMotion() during training again
 public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", saveMotion: Bool = true) {
     // TODO: incorporate done/stop signal
