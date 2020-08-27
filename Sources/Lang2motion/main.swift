@@ -13,11 +13,13 @@ import TrainingLoop
 let runName = "run_1"
 // let batchSize = 4
 let batchSize = 150
+// let batchSize = 50
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
+// let maxMotionLength =  50
 let nEpochs = 5
 let learningRate: Float = 5e-4
-let datasetSize: DatasetSize = .mini
+let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -35,8 +37,8 @@ let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory:
 try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print(device)
 
 // TODO: make sure X10 training works on Colab
