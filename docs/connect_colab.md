@@ -39,35 +39,23 @@ ssh colabp
 tmux -CC
 ```
 
-### d. (optional) load github credentials
-```
-git config --global user.name "Wojtek Czarnowski"
-git config --global user.email "wojtek.czarnowski@gmail.com"
-chmod 600 ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
-ssh-agent bash
-ssh-add /root/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
-```
-<!-- ## 3. setup project sources and data
-### b. clone language2motion repo
-```
-# cd /content
-git clone https://github.com/wojtekcz/language2motion.git language2motion.gt
-``` -->
-
-<!-- ### c. download data for Motion2label and Language2label scripts
-```
-cd /content/language2motion.gt/data/
-wget -nv --show-progress -N https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_dataset_v3.10Hz.tgz
-wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv
-wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/vocab.txt
-wget -nv -N https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.balanced.515.csv
-tar xzvf motion_dataset_v3.10Hz.tgz --skip-old-files
-``` -->
-
-### e. run Lang2motion script
+### d. run Lang2motion script
 ```
 cd /content/language2motion.gt
 swift run -c release Lang2motion
+```
+
+### e. (optional) set git user name & email
+```
+git config --global user.name "Wojtek Czarnowski"
+git config --global user.email "wojtek.czarnowski@gmail.com"
+```
+
+### f. (optional) load github credentials
+```
+chmod 600 ~/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
+ssh-agent bash
+ssh-add /root/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
 ```
 
 ## 3. vscode integration
@@ -80,8 +68,6 @@ swift run -c release Lang2motion
 ### b. install extensions (in container)
 - CodeLLDB
 - Maintained Swift Development Environment
-
-<!-- ### c. open folder ```/``` -->
 
 ### c. File/Open workspace...
 ```
