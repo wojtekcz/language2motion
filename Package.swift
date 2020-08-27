@@ -20,13 +20,13 @@ let package = Package(
         .library(name: "LangMotionModels", targets: ["LangMotionModels"]),
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
         .library(name: "TranslationModels", targets: ["TranslationModels"]),
+        .library(name: "TrainingLoop", targets: ["TrainingLoop"]),
         .executable(name: "PreprocessMotionDataset", targets: ["PreprocessMotionDataset"]),
         .executable(name: "Language2label", targets: ["Language2label"]),
         .executable(name: "Motion2label", targets: ["Motion2label"]),
         .executable(name: "Transformer-Translation", targets: ["Transformer-Translation"]),
         .executable(name: "Lang2lang", targets: ["Lang2lang"]),
         .executable(name: "Motion2lang", targets: ["Motion2lang"]),
-        .library(name: "TrainingLoop", targets: ["TrainingLoop"]),
         .executable(name: "Lang2motion", targets: ["Lang2motion"]),
     ],
     dependencies: [
@@ -57,6 +57,7 @@ let package = Package(
         .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "TranslationModels"], path: "Sources/Models/LangMotion"),
         .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
         .target(name: "TranslationModels", dependencies: ["TextModels", "Datasets"], path: "Sources/Models/Translation"),
+        .target(name: "TrainingLoop", dependencies: ["ModelSupport"], path: "Sources/TrainingLoop"),
         .target(
             name: "Transformer-Translation",
             dependencies: ["TranslationModels", "Datasets", "ModelSupport"],
@@ -69,10 +70,9 @@ let package = Package(
             name: "Motion2lang",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionLangModels"],
             path: "Sources/Motion2lang"),
-        .target(name: "TrainingLoop", dependencies: ["ModelSupport"], path: "Sources/TrainingLoop"),
         .target(
             name: "Lang2motion",
-            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels"],
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "TrainingLoop"],
             path: "Sources/Lang2motion"),
     ]
 )
