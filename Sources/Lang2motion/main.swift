@@ -202,17 +202,22 @@ let args = LossArgs(
 )
 
 /// Training helpers
+func embeddedNormalMixtureSurrogateLoss(y_target2: LangMotionBatch.Target2, y_pred: MixtureModelPreds) -> Tensor<Float>  {
+    let y_true = TargetTruth(motion: y_target2.targetTruth, stops: y_target2.targetTruthStop)
+    let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
+    let n_items: Float = Float(loss.shape[0] * loss.shape[1])
+    let avg_loss = loss.sum() / n_items
+    // print("avg_loss: \(avg_loss)")
+    return avg_loss
+}
+
 func update(model: inout LangMotionTransformer, using optimizer: inout Adam<LangMotionTransformer>, for batch: LangMotionBatch2) -> Float {
-    let y_true = TargetTruth(motion: batch.label.targetTruth, stops: batch.label.targetTruthStop)
     let result = withLearningPhase(.training) { () -> Float in
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
             let y_pred = model(batch)
-            let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
-            let n_items: Float = Float(loss.shape[0] * loss.shape[1])
-            let avg_loss = loss.sum() / n_items
-            // print("avg_loss: \(avg_loss)")
-            return avg_loss
+            let loss = embeddedNormalMixtureSurrogateLoss(y_target2: batch.label, y_pred: y_pred)
+            return loss
         }
         optimizer.update(&model, along: grad)
         LazyTensorBarrier()
@@ -222,13 +227,10 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
 }
 
 func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch2) -> Float {
-    let y_true = TargetTruth(motion: batch.label.targetTruth, stops: batch.label.targetTruthStop)
     let result = withLearningPhase(.inference) { () -> Float in
         let y_pred = model(batch)
-        let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
-        let n_items: Float = Float(loss.shape[0] * loss.shape[1])
-        let avg_loss = loss.sum() / n_items
-        return avg_loss.scalarized()
+        let loss = embeddedNormalMixtureSurrogateLoss(y_target2: batch.label, y_pred: y_pred)
+        return loss.scalarized()
     }
     LazyTensorBarrier()
     return result
