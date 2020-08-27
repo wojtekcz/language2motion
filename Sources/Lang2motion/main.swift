@@ -203,8 +203,8 @@ let args = LossArgs(
 
 /// Training helpers
 @differentiable
-func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target2: LangMotionBatch.Target2) -> Tensor<Float>  {
-    let y_true = TargetTruth(motion: y_target2.targetTruth, stops: y_target2.targetTruthStop)
+func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: LangMotionBatch.Target) -> Tensor<Float>  {
+    let y_true = TargetTruth(motion: y_target.targetTruth, stops: y_target.targetTruthStop)
     let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
     let n_items: Float = Float(loss.shape[0] * loss.shape[1])
     let avg_loss = loss.sum() / n_items
@@ -217,7 +217,7 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
         let (loss, grad) = valueWithGradient(at: model) {
             (model) -> Tensor<Float> in
             let y_pred = model(batch.data)
-            let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target2: batch.label)
+            let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target: batch.label)
             return loss
         }
         optimizer.update(&model, along: grad)
@@ -230,7 +230,7 @@ func update(model: inout LangMotionTransformer, using optimizer: inout Adam<Lang
 func validate(model: inout LangMotionTransformer, for batch: LangMotionBatch2) -> Float {
     let result = withLearningPhase(.inference) { () -> Float in
         let y_pred = model(batch.data)
-        let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target2: batch.label)
+        let loss = embeddedNormalMixtureSurrogateLoss(y_pred: y_pred, y_target: batch.label)
         return loss.scalarized()
     }
     LazyTensorBarrier()

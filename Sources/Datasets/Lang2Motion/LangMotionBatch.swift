@@ -80,9 +80,8 @@ public struct LangMotionBatch: KeyPathIterable {
     // (padded)
     public let source: Source
 
-    // TODO: rename Target2 to Target
-    // Target2
-    public struct Target2 {
+    // Target
+    public struct Target {
         public let sampleID: Tensor<Int32>        // bs
 
         // TODO: motion truth should be a STRUCT with motion and stop components
@@ -98,16 +97,16 @@ public struct LangMotionBatch: KeyPathIterable {
             self.origMotionFramesCount = origMotionFramesCount
         }
 
-        public init(copying target2: Target2, to device: Device) {
-            sampleID = Tensor<Int32>(copying: target2.sampleID, to: device)
+        public init(copying target: Target, to device: Device) {
+            sampleID = Tensor<Int32>(copying: target.sampleID, to: device)
 
-            targetTruth = Tensor<Float>(copying: target2.targetTruth, to: device)
-            targetTruthStop = Tensor<Float>(copying: target2.targetTruthStop, to: device)
-            origMotionFramesCount = Tensor<Int32>(copying: target2.origMotionFramesCount, to: device)
+            targetTruth = Tensor<Float>(copying: target.targetTruth, to: device)
+            targetTruthStop = Tensor<Float>(copying: target.targetTruthStop, to: device)
+            origMotionFramesCount = Tensor<Int32>(copying: target.origMotionFramesCount, to: device)
         }
 
         public func printTarget2() {
-            print("target2")
+            print("target")
             print("  sampleID.shape: \(self.sampleID.shape)")
 
             print("  targetTruth.shape: \(self.targetTruth.shape)")
@@ -116,9 +115,9 @@ public struct LangMotionBatch: KeyPathIterable {
         }
     }
 
-    // target2
+    // target
     // (padded)
-    public var target2: Target2
+    public var target: Target
 
     public init(sampleID: Tensor<Int32>, 
                 tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>, 
@@ -127,17 +126,10 @@ public struct LangMotionBatch: KeyPathIterable {
         let motionPart = MotionPart(motion: motionPartTensor, mask: motionPartMask)
         let sentence = Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
         self.source = Source(sentence: sentence, motionPart: motionPart)
-        self.target2 = Target2(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+        self.target = Target(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
     }
 
-    // TODO: unpack this
-    // public init(sampleID: Int, source: Source, targetMotion: Tensor<Float>, maxMotionLength: Int) {
-    //     let (target2, motionPart) = Self.preprocessTargetMotion(sampleID: Tensor([Int32(sampleID)]), motion: targetMotion, maxMotionLength: maxMotionLength)
-    //     self.source = source
-    //     self.target2 = target2
-    // }
-
-    public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (target2: Target2, motionPart: MotionPart)
+    public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (target: Target, motionPart: MotionPart)
     {
         var (motion, motionFlag) = Tensor<Float>(motion).paddedAndCropped(to: maxMotionLength)
         motion = motion.expandingShape(at: 0)
@@ -155,9 +147,9 @@ public struct LangMotionBatch: KeyPathIterable {
         let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
 
         let motionPart = MotionPart(motion: targetMotion, mask: targetMask)
-        let target2 = LangMotionBatch.Target2(sampleID: Tensor([Int32(sampleID)]), targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+        let target = LangMotionBatch.Target(sampleID: Tensor([Int32(sampleID)]), targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
 
-        return (target2: target2, motionPart: motionPart)
+        return (target: target, motionPart: motionPart)
     }
 
     public static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
@@ -178,7 +170,7 @@ public func subsequentMask3(size: Int) -> Tensor<Int32> {
 extension LangMotionBatch {
     public init(copying batch: LangMotionBatch, to device: Device) {
         self.source = Source(copying: batch.source, to: device)
-        self.target2 = Target2(copying: batch.target2, to: device)
+        self.target = Target(copying: batch.target, to: device)
     }
 }
 
@@ -193,18 +185,18 @@ extension LangMotionBatch {
         print("    motion.shape: \(self.source.motionPart.motion.shape)")
         print("    mask.shape: \(self.source.motionPart.mask.shape)")
 
-        print("target2")
-        print("  sampleID: shape \(self.target2.sampleID.shape), value \(self.target2.sampleID)")
-        print("  targetTruth.shape: \(self.target2.targetTruth.shape)")
-        print("  targetTruthStop.shape: \(self.target2.targetTruthStop.shape)")
-        print("  origMotionFramesCount: shape \(self.target2.origMotionFramesCount.shape), value \(self.target2.origMotionFramesCount)")
+        print("target")
+        print("  sampleID: shape \(self.target.sampleID.shape), value \(self.target.sampleID)")
+        print("  targetTruth.shape: \(self.target.targetTruth.shape)")
+        print("  targetTruthStop.shape: \(self.target.targetTruthStop.shape)")
+        print("  origMotionFramesCount: shape \(self.target.origMotionFramesCount.shape), value \(self.target.origMotionFramesCount)")
     }
 }
 
 extension LangMotionBatch2 {
     public init(copying batch: LangMotionBatch2, to device: Device) {
         let data = LangMotionBatch.Source(copying: batch.data, to: device)
-        let label = LangMotionBatch.Target2(copying: batch.label, to: device)
+        let label = LangMotionBatch.Target(copying: batch.label, to: device)
         self.init(data: data, label: label)
     }
 }

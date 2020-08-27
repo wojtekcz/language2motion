@@ -3,7 +3,7 @@ import ModelSupport
 import TensorFlow
 import PythonKit
 
-public typealias LangMotionBatch2 = LabeledData<LangMotionBatch.Source, LangMotionBatch.Target2>
+public typealias LangMotionBatch2 = LabeledData<LangMotionBatch.Source, LangMotionBatch.Target>
 
 public struct Lang2Motion {
 
@@ -133,10 +133,10 @@ extension Lang2Motion {
         let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.source.motionPart.motion.squeezingShape(at: 0) })
         let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.source.motionPart.mask.squeezingShape(at: 0) })
 
-        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.target2.sampleID.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.target2.targetTruth.squeezingShape(at: 0) })
-        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.target2.targetTruthStop.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.target2.origMotionFramesCount.squeezingShape(at: 0) })
+        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.target.sampleID.squeezingShape(at: 0) })
+        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.target.targetTruth.squeezingShape(at: 0) })
+        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.target.targetTruthStop.squeezingShape(at: 0) })
+        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.target.origMotionFramesCount.squeezingShape(at: 0) })
 
         let batch = LangMotionBatch(sampleID: sampleID, 
                 tokenIds: tokenIds, mask: mask, tokenCount: tokenCount, 
@@ -160,7 +160,7 @@ extension Lang2Motion {
         let sentence = LangMotionBatch.Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
         let motionPart = LangMotionBatch.MotionPart(motion: motionPartTensor, mask: motionPartMask)
         let data = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-        let label = LangMotionBatch.Target2(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+        let label = LangMotionBatch.Target(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
         let batch = LangMotionBatch2(data: data,label: label)
 
         return batch
