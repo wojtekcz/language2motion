@@ -180,6 +180,44 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
     }
 }
 
+class StatsRecorder {
+    let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
+    var trainingStepCount = 0
+    var trainingBatchCount = 0
+    var trainingLossSum: Float = 0.0
+
+    public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+        if event == .batchEnd {
+            guard let batchIndex = loop.batchIndex, let trainingLoss = loop.lastLoss else {
+                return
+            }
+            print("\nbatch stats: batchIndex: \(batchIndex), trainingStepCount: \(trainingStepCount), trainingLoss: \(trainingLoss)")
+            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value:trainingLoss.scalar!)
+            trainingStepCount += 1
+            trainingBatchCount += 1
+            trainingLossSum += Float(trainingLoss.scalar!)
+        }
+        if event == .epochStart {
+            trainingBatchCount = 0
+            trainingLossSum = 0.0
+        }
+        if event == .epochEnd {
+            guard let epochIndex = loop.epochIndex else {
+                return
+            }
+            let current_epoch = epochIndex + 1
+            let epochTrainingLoss = trainingLossSum / Float(trainingBatchCount)
+            print("\nepoch stats: current_epoch: \(current_epoch), epochTrainingLoss: \(epochTrainingLoss)")
+            summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: epochTrainingLoss)
+        }
+        if event == .fitEnd {
+            summaryWriter.flush()
+        }
+    }
+}
+
+let statsRecorder = StatsRecorder()
+
 // Training loop
 print("\nSetting up the training loop")
 let trainingProgress = TrainingProgress(metrics: [.loss])
@@ -188,7 +226,7 @@ var trainingLoop = TrainingLoop(
   validation: dataset.testBatches,
   optimizer: optimizer,
   lossFunction: embeddedNormalMixtureSurrogateLoss,
-  callbacks: [trainingProgress.update, saveCheckpoint])
+  callbacks: [trainingProgress.update, saveCheckpoint, statsRecorder.writeStats])
 
 print("\nTraining Transformer for the Lang2motion task!")
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
@@ -196,21 +234,12 @@ try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 
 print("\nFinished training.")
 
-// TODO: use tensorboard again
 // TODO: time 1 epoch training
-
-// let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 // time() {
 //     for (epoch, epochBatches) in dataset.trainEpochs.prefix(nEpochs).enumerated() {
-//         for eagerBatch in epochBatches {
-//             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-//         }
-//         summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: trainingLossSum / Float(trainingBatchCount))
-//         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: current_epoch, value: devLossSum / Float(devBatchCount))
 //         if current_epoch >= 2 {
 //             // greedyDecodeMotion(sentence: "human walks and then runs and later sits down", prefix: "epoch_\(current_epoch)", saveMotion: true)
 //         }
 //     }
-//     summaryWriter.flush()
 // }
