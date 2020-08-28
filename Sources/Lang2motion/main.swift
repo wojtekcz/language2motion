@@ -50,15 +50,17 @@ print(device)
 // print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-let _ = _ExecutionContext.global
+// let _ = _ExecutionContext.global
 
 /// instantiate text processor
+print("instantiate text processor")
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
 let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
 
 /// instantiate model
+print("instantiate model")
 let vocabSize = vocabulary.count
 let nbJoints = 47 // TODO: get value from dataset
 let nbMixtures = 20
@@ -186,10 +188,12 @@ class StatsRecorder {
 
     public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
         if event == .batchEnd {
-            guard let batchIndex = loop.batchIndex, let trainingLoss = loop.lastLoss else {
+            guard 
+            // let batchIndex = loop.batchIndex, 
+            let trainingLoss = loop.lastLoss else {
                 return
             }
-            print("\nbatch stats: batchIndex: \(batchIndex), trainingStepCount: \(trainingStepCount), trainingLoss: \(trainingLoss)")
+            // print("\nbatch stats: batchIndex: \(batchIndex), trainingStepCount: \(trainingStepCount), trainingLoss: \(trainingLoss)")
             summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value:trainingLoss.scalar!)
             trainingStepCount += 1
             trainingBatchCount += 1
@@ -205,7 +209,7 @@ class StatsRecorder {
             }
             let current_epoch = epochIndex + 1
             let epochTrainingLoss = trainingLossSum / Float(trainingBatchCount)
-            print("\nepoch stats: current_epoch: \(current_epoch), epochTrainingLoss: \(epochTrainingLoss)")
+            // print("\nepoch stats: current_epoch: \(current_epoch), epochTrainingLoss: \(epochTrainingLoss)")
             summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: epochTrainingLoss)
         }
         if event == .fitEnd {
