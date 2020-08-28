@@ -70,7 +70,6 @@ let feedForwardSize: Int = 1024
 let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
-// TODO: create model on device
 var model = LangMotionTransformer(
     vocabSize: vocabSize, 
     nbJoints: nbJoints,
@@ -163,6 +162,7 @@ let args = LossArgs(
 
 @differentiable
 func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: LangMotionBatch.Target) -> Tensor<Float> {
+    // TODO: create tensor on device
     let y_true = TargetTruth(copying: TargetTruth(motion: y_target.targetTruth, stops: y_target.targetTruthStop), to: device)
     let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
     let n_items: Float = Float(loss.shape[0] * loss.shape[1])
