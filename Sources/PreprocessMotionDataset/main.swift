@@ -16,7 +16,7 @@ let motionDataset = MotionDataset2Processor.loadDatasetFromFolder(datasetFolderU
 print(abs(date.timeIntervalSinceNow))
 
 let numberStr = "\(motionDataset.motionSamples.count)."
-let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset2.\(freqStr)\(sampledStr)\(numberStr)plist")
+let serializedDatasetURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset_v3.\(freqStr)\(sampledStr)\(numberStr)plist")
 
 date = Date()
 print("Encoding to property list..., writing to file '\(serializedDatasetURL.path)'")
