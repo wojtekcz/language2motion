@@ -69,6 +69,9 @@ public protocol TrainingLoopProtocol {
   /// The loss function.
   var lossFunction: LossFunction { get set }
 
+  /// The model, so it can be accessed from callbacks
+  var model: Model? { get set }
+
   // Callbacks
   /// The callbacks used to customize the training loop.
   var callbacks: [TrainingLoopCallback<Self>] { get set }
@@ -167,6 +170,9 @@ where
   public var optimizer: Opt
   /// The loss function
   public var lossFunction: LossFunction
+
+  /// The model, so it can be accessed from callbacks
+  public var model: Model? = nil
 
   // Callbacks
   /// The callbacks used to customize the training loop.
@@ -303,6 +309,7 @@ extension TrainingLoop {
 
     model.move(to: device)
     optimizer = Opt(copying: optimizer, to: device)
+    self.model = model
 
     do {
       try handleEvent(.fitStart)
