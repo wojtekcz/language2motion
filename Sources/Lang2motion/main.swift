@@ -170,6 +170,16 @@ func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: Lan
     return avg_loss
 }
 
+public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+    if event == .epochEnd {
+        guard let epochIndex = loop.epochIndex else {
+            return
+        }
+        let transformer: LangMotionTransformer = loop.model as! LangMotionTransformer
+        try! transformer.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+    }
+}
+
 // Training loop
 print("\nSetting up the training loop")
 let trainingProgress = TrainingProgress(metrics: [.loss])
@@ -178,16 +188,15 @@ var trainingLoop = TrainingLoop(
   validation: dataset.testBatches,
   optimizer: optimizer,
   lossFunction: embeddedNormalMixtureSurrogateLoss,
-  callbacks: [trainingProgress.update])
+  callbacks: [trainingProgress.update, saveCheckpoint])
 
 print("\nTraining Transformer for the Lang2motion task!")
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
-try! model.writeCheckpoint(to: checkpointURL, name: "model")
+try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 
 print("\nFinished training.")
 
 // TODO: use tensorboard again
-// TODO: save model checkpoint after each epoch again
 // TODO: time 1 epoch training
 
 // let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
@@ -199,7 +208,6 @@ print("\nFinished training.")
 //         }
 //         summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: trainingLossSum / Float(trainingBatchCount))
 //         summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: current_epoch, value: devLossSum / Float(devBatchCount))
-//         try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(current_epoch)")
 //         if current_epoch >= 2 {
 //             // greedyDecodeMotion(sentence: "human walks and then runs and later sits down", prefix: "epoch_\(current_epoch)", saveMotion: true)
 //         }
