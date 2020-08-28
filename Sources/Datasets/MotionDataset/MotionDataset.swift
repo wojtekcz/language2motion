@@ -4,6 +4,7 @@ public enum DatasetSize: String {
     case full = ""
     case midi = "midi."
     case mini = "mini."
+    case micro = "micro."
 }
 
 public class MotionDataset: Codable {
