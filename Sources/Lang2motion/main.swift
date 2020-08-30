@@ -10,7 +10,7 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_6"
+let runName = "run_7"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20
@@ -228,12 +228,17 @@ var trainingLoop = TrainingLoop(
   validation: dataset.testBatches,
   optimizer: optimizer,
   lossFunction: embeddedNormalMixtureSurrogateLoss,
-  callbacks: [trainingProgress.update, saveCheckpoint, statsRecorder.writeStats])
+  callbacks: [trainingProgress.update, statsRecorder.writeStats])
 
 print("\nTraining Transformer for the Lang2motion task!")
-try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
-try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
+// FIXME: epoch loop workaround for checkpoint saving
+for epochIndex in 0..<nEpochs {
+    print("epoch \(epochIndex+1)/\(nEpochs)")
+    try! trainingLoop.fit(&model, epochs: 1, on: device)
+    try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+}
 
+try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 print("\nFinished training.")
 
 // TODO: time 1 epoch training
