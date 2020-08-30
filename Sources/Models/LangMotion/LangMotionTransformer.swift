@@ -77,14 +77,14 @@ public struct LangMotionTransformer: Module {
         let (origBatchSize, numFrames) = (shape[0], shape[1])
 
         let tmpBatchSize = origBatchSize * numFrames
-        let tmpMotionFrames = motionPart.motion.reshaped(to: [tmpBatchSize, nbJoints])
+        let tmpMotionPart = motionPart.motion.reshaped(to: [tmpBatchSize, nbJoints])
 
         // FIXME: make targetEmbed() work
-        let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
-        var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
-        motionFeatures = positionalEncoding(motionFeatures)
+        let tmpMotionPartFeatures = motionDense(tmpMotionPart) // batch size here is origBatchSize*numFrames
+        var motionPartFeatures = tmpMotionPartFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
+        motionPartFeatures = positionalEncoding(motionPartFeatures)
 
-        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
+        let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
         return self.decoder(decoderInput)
     }
 }
