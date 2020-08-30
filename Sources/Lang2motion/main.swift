@@ -15,7 +15,7 @@ let runName = "run_7"
 let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 20
+let nEpochs = 30
 let learningRate: Float = 5e-4
 let datasetSize: DatasetSize = .full
 
