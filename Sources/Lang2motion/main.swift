@@ -10,7 +10,7 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_9"
+let runName = "run_10"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20
@@ -65,9 +65,9 @@ let vocabSize = vocabulary.count
 let nbJoints = 47 // TODO: get value from dataset
 let nbMixtures = 20
 let layerCount: Int = 6
-let modelSize: Int = 256
-let feedForwardSize: Int = 1024
-let headCount: Int = 8
+let modelSize: Int = 128
+let feedForwardSize: Int = 512
+let headCount: Int = 4
 let dropoutProbability: Double = 0.1
 
 var model = LangMotionTransformer(
