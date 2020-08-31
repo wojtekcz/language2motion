@@ -29,21 +29,21 @@ LocalForward 6006 localhost:6006
 ssh colabp
 ```
 
-### c. (optional) run tmux in iterm
+### c. run tmux in iterm
 ```
 tmux -CC
 ```
 
-### d. run Lang2motion script
-```
-cd /content/language2motion.gt
-swift run -c release Lang2motion
-```
-
-### e. (optional) set git user name & email
+### d. set git user name & email
 ```
 git config --global user.name "Wojtek Czarnowski"
 git config --global user.email "wojtek.czarnowski@gmail.com"
+```
+
+### e. run Lang2motion script
+```
+cd /content/language2motion.gt
+swift run -c release Lang2motion
 ```
 
 ### f. (optional) scp rsa key into colabp
