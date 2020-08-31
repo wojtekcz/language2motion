@@ -10,12 +10,12 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_7"
+let runName = "run_8"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 30
+let nEpochs = 5
 let learningRate: Float = 5e-4
 let datasetSize: DatasetSize = .full
 
@@ -78,7 +78,9 @@ var model = LangMotionTransformer(
     modelSize: modelSize,
     feedForwardSize: feedForwardSize,
     headCount: headCount,
-    dropoutProbability: dropoutProbability
+    dropoutProbability: dropoutProbability,
+    sentenceMaxPositionalLength: 100,
+    motionMaxPositionalLength: 500
 )
 
 // TODO: make sure resuming training works again
