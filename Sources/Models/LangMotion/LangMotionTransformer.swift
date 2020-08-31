@@ -38,7 +38,7 @@ public struct LangMotionTransformer: Module {
         self.encoder = Encoder(layer: .init(size: modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.motionDense = Dense<Float>(inputSize: nbJoints, outputSize: modelSize)
-        self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize, nbJoints: nbJoints, nbMixtures: nbMixtures)
+        self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize*layerCount, nbJoints: nbJoints, nbMixtures: nbMixtures)
         self.modelSize = modelSize
         self.nbJoints = nbJoints        
         self.nbMixtures = nbMixtures
@@ -65,7 +65,9 @@ public struct LangMotionTransformer: Module {
     public func callAsFunction(_ input: LangMotionBatch.Source) -> MixtureModelPreds {
         let encodedMemory = self.encode(input: input.sentence)
         let decoded = self.decode(sourceMask: input.sentence.mask, motionPart: input.motionPart, memory: encodedMemory)
-        return self.mixtureModel(decoded)
+        // reformat decoded.allOutputs[] into one tensor
+        let mixtureModelInput = Tensor<Float>(concatenating: decoded.allOutputs, alongAxis: 2)
+        return self.mixtureModel(mixtureModelInput)
     }
     
     @differentiable
@@ -76,7 +78,7 @@ public struct LangMotionTransformer: Module {
     }
     
     @differentiable
-    public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>) -> Tensor<Float> {
+    public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>) -> DecoderOutput<Float> {
         let shape = motionPart.motion.shape
         let (origBatchSize, numFrames) = (shape[0], shape[1])
 

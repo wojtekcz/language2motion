@@ -59,6 +59,17 @@ public struct TransformerDecoderLayer: Layer {
     }
 }
 
+public struct DecoderOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
+    public var lastLayerOutput: Tensor<Scalar>
+    public var allOutputs: [Tensor<Scalar>]
+
+    @differentiable
+    public init(lastLayerOutput: Tensor<Scalar>, allOutputs: [Tensor<Scalar>]) {
+        self.lastLayerOutput = lastLayerOutput
+        self.allOutputs = allOutputs
+    }
+}
+
 public struct Decoder: Layer {
     public var layers: [TransformerDecoderLayer]
     public var norm: LayerNorm<Float>
@@ -73,19 +84,22 @@ public struct Decoder: Layer {
     }
 
     @differentiable
-    public func callAsFunction(_ input: DecoderInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: DecoderInput<Float>) -> DecoderOutput<Float> {
+        var allOutputs: [Tensor<Float>] = []
         var transformerInput = input.sequence
         let memoryInput = input.memory
         
         for layerIndex in 0..<(withoutDerivative(at: layers) { $0.count }) {
-            transformerInput = layers[layerIndex](DecoderInput(
+            let layerOutput = layers[layerIndex](DecoderInput(
                 sequence: transformerInput,
                 sourceMask: input.sourceMask,
                 targetMask: input.targetMask,
                 memory: memoryInput
             ))
+            allOutputs.append(layerOutput)
+            transformerInput = layerOutput
         }
         
-        return transformerInput
+        return DecoderOutput<Float>(lastLayerOutput: transformerInput, allOutputs: allOutputs)
     }
 }

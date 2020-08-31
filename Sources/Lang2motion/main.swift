@@ -10,7 +10,7 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_8"
+let runName = "run_9"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20

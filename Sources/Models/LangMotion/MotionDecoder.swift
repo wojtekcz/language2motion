@@ -106,8 +106,9 @@ public class MotionDecoder {
             let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask)
 
             // decode motion
-            let out = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
-            let singlePreds = transformer.mixtureModel(out[0...,-1].expandingShape(at: 0))
+            let dedoderOutput = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
+            let mixtureModelInput = Tensor<Float>(concatenating: dedoderOutput.allOutputs, alongAxis: 2)
+            let singlePreds = transformer.mixtureModel(mixtureModelInput[0...,-1].expandingShape(at: 0))
             
             // perform sampling
             let (sampledMotion, _, _) = MotionDecoder.performNormalMixtureSampling(

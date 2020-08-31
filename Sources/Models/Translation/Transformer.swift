@@ -53,7 +53,7 @@ public struct TransformerModel: Module {
     public func decode(input: TranslationBatch, memory: Tensor<Float>) -> Tensor<Float> {
         let embedded = self.targetEmbed(input.targetTokenIds)
         let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
-        return self.decoder(decoderInput)
+        return self.decoder(decoderInput).lastLayerOutput
     }
     
     @differentiable
