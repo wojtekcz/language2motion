@@ -12,10 +12,10 @@ import TrainingLoop
 /// Set training params
 let runName = "run_10"
 // let batchSize = 4
-let batchSize = 150
+let batchSize = 250
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 5
+let nEpochs = 10
 let learningRate: Float = 5e-4
 let datasetSize: DatasetSize = .full
 
