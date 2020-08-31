@@ -8,6 +8,7 @@ public struct Lang2Motion {
     public struct LangRec {
         public let sampleID: Int
         public let text: String
+        public let motionSample: MotionSample
     }
 
     public let motionDataset: MotionDataset
@@ -84,7 +85,7 @@ extension Lang2Motion {
         motionSamples = _motionSamplesWithDistinctAnnotations
 
         // create LangRecs
-        langRecs = _motionSamplesWithDistinctAnnotations.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0]) }
+        langRecs = _motionSamplesWithDistinctAnnotations.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0], motionSample: $0) }
 
         // [sampleID:MotionSample] mapping
         var _motionSampleDict: [Int: MotionSample] = [:]
