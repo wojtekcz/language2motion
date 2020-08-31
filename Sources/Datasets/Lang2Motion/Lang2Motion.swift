@@ -59,6 +59,11 @@ extension Lang2Motion {
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
         print("keeping \(_motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
 
+        // filter out longest samples
+        let maxMotionLength = 100 // FIMXE: make it configurable
+        _motionSamples = _motionSamples.filter { $0.motion.shape[0] <= maxMotionLength }
+        print("keeping \(_motionSamples.count) shorter motions, with maximum \(maxMotionLength) frames")
+
         // scale motions
         print("Scaling motions...")
         let motions = _motionSamples.map { $0.motion }

@@ -10,14 +10,14 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_10"
+let runName = "run_11"
 // let batchSize = 4
 let batchSize = 250
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 10
 let learningRate: Float = 5e-4
-let datasetSize: DatasetSize = .full
+let datasetSize: DatasetSize = .midi
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
