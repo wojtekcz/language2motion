@@ -25,6 +25,7 @@
 		"sourcekit-lsp.serverPath": "/swift-tensorflow-toolchain/usr/bin/sourcekit-lsp",
 		"sourcekit-lsp.toolchainPath": "/swift-tensorflow-toolchain",
 		"swift.languageServerPath": "",
-		"swift.path.swift_driver_bin": "/swift-tensorflow-toolchain/usr/bin/swift"
+		"swift.path.swift_driver_bin": "/swift-tensorflow-toolchain/usr/bin/swift",
+		"python.dataScience.jupyterServerURI": "http://127.0.0.1:8888/?token=375a27ee4fe19df27b9fe81cdf67cab2f480f614009ee942"
 	}
 }
