@@ -180,11 +180,12 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
     }
 }
 
-class StatsRecorder {
+public class StatsRecorder {
     let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
-    var trainingStepCount = 0
-    var trainingBatchCount = 0
-    var trainingLossSum: Float = 0.0
+    public var trainingStepCount = 0
+    public var trainingBatchCount = 0
+    public var trainingLossSum: Float = 0.0
+    public var epochIndex = 0 // FIXME: Workaround
 
     public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
         if event == .batchEnd {
@@ -204,9 +205,9 @@ class StatsRecorder {
             trainingLossSum = 0.0
         }
         if event == .epochEnd {
-            guard let epochIndex = loop.epochIndex else {
-                return
-            }
+            // guard let epochIndex = loop.epochIndex else {
+            //     return
+            // }
             let current_epoch = epochIndex + 1
             let epochTrainingLoss = trainingLossSum / Float(trainingBatchCount)
             // print("\nepoch stats: current_epoch: \(current_epoch), epochTrainingLoss: \(epochTrainingLoss)")
@@ -234,6 +235,7 @@ print("\nTraining Transformer for the Lang2motion task!")
 // FIXME: epoch loop workaround for checkpoint saving
 for epochIndex in 0..<nEpochs {
     print("epoch \(epochIndex+1)/\(nEpochs)")
+    statsRecorder.epochIndex = epochIndex
     try! trainingLoop.fit(&model, epochs: 1, on: device)
     try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
 }
