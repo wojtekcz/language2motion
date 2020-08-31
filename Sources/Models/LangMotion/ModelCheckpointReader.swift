@@ -15,12 +15,14 @@ public struct LangMotionTransformerConfig { //: Codable {
     public let feedForwardSize: Int
     public let headCount: Int
     public let dropoutProbability: Double
+    public let sentenceMaxPositionalLength: Int
+    public let motionMaxPositionalLength: Int
 
 //     enum CodingKeys: String, CodingKey {
 //         case vocabSize = "vocabSize"
 //     }
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, modelSize: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double) {
+                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
@@ -29,6 +31,8 @@ public struct LangMotionTransformerConfig { //: Codable {
         self.feedForwardSize = feedForwardSize
         self.headCount = headCount
         self.dropoutProbability = dropoutProbability
+        self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
+        self.motionMaxPositionalLength = motionMaxPositionalLength
     }
 }
 
@@ -185,16 +189,18 @@ extension Decoder: InitializableFromPythonCheckpoint {
 
 
 // config
-let config = LangMotionTransformerConfig(
-    vocabSize: 100,
-    nbJoints: 47,
-    nbMixtures: 20,
-    layerCount: 6,
-    modelSize: 256,
-    feedForwardSize: 1024,
-    headCount: 8,
-    dropoutProbability: 0.1
-)
+// let config = LangMotionTransformerConfig(
+//     vocabSize: 100,
+//     nbJoints: 47,
+//     nbMixtures: 20,
+//     layerCount: 6,
+//     modelSize: 256,
+//     feedForwardSize: 1024,
+//     headCount: 8,
+//     dropoutProbability: 0.1,
+//     sentenceMaxPositionalLength: 5000, 
+//     motionMaxPositionalLength: 5000
+// )
 
 extension LangMotionTransformer {
     public init(checkpoint: URL, config: LangMotionTransformerConfig, name: String) throws {
@@ -219,12 +225,13 @@ extension LangMotionTransformer {
             let _decoder = Decoder(reader: reader, config: config, scope: scope + "/decoder")
             let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense")
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
-            let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability)
+            let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+            let _motionPositionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
             let _sourceEmbed = Sequential(_embedding, _positionalEncoding)
 
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
             
-            self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, 
+            self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, motionPositionalEncoding: _motionPositionalEncoding,
                       motionDense: _motionDense, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
                       modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
         } catch {

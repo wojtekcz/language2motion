@@ -11,6 +11,7 @@ public struct LangMotionTransformer: Module {
     public var decoder: Decoder
     public var embedding: Embedding<Float>
     public var positionalEncoding: PositionalEncoding
+    public var motionPositionalEncoding: PositionalEncoding
     public var motionDense: Dense<Float>
     public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
     public var mixtureModel: MotionGaussianMixtureModel
@@ -18,7 +19,8 @@ public struct LangMotionTransformer: Module {
     @noDerivative public var nbJoints: Int
     @noDerivative public var nbMixtures: Int
 
-    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, headCount: Int = 8, dropoutProbability: Double = 0.1) {
+    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, 
+                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
                                            targetSize: modelSize,
@@ -28,7 +30,8 @@ public struct LangMotionTransformer: Module {
         let feedForward = PositionwiseFeedForward(dimensionalityModel: modelSize,
                                                   innerLayerDimensionality: feedForwardSize)
         
-        self.positionalEncoding = PositionalEncoding(size: modelSize, dropoutProbability: dropoutProbability)
+        self.positionalEncoding = PositionalEncoding(size: modelSize, dropoutProbability: dropoutProbability, maxLength: sentenceMaxPositionalLength)
+        self.motionPositionalEncoding = PositionalEncoding(size: modelSize, dropoutProbability: dropoutProbability, maxLength: motionMaxPositionalLength)
         self.embedding = Embedding<Float>(vocabularySize: vocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform())
         self.sourceEmbed = Sequential(embedding, positionalEncoding)
         
@@ -41,7 +44,7 @@ public struct LangMotionTransformer: Module {
         self.nbMixtures = nbMixtures
     }
 
-    public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, 
+    public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
         motionDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
         mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int) 
     {
@@ -49,6 +52,7 @@ public struct LangMotionTransformer: Module {
         self.decoder = decoder
         self.embedding = embedding
         self.positionalEncoding = positionalEncoding
+        self.motionPositionalEncoding = motionPositionalEncoding
         self.motionDense = motionDense
         self.sourceEmbed = sourceEmbed
         self.mixtureModel = mixtureModel
@@ -82,7 +86,7 @@ public struct LangMotionTransformer: Module {
         // FIXME: make targetEmbed() work
         let tmpMotionPartFeatures = motionDense(tmpMotionPart) // batch size here is origBatchSize*numFrames
         var motionPartFeatures = tmpMotionPartFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
-        motionPartFeatures = positionalEncoding(motionPartFeatures)
+        motionPartFeatures = motionPositionalEncoding(motionPartFeatures)
 
         let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
         return self.decoder(decoderInput)

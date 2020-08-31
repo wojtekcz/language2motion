@@ -91,7 +91,9 @@ var model = LangMotionTransformer(
 //     modelSize: modelSize,
 //     feedForwardSize: feedForwardSize,
 //     headCount: headCount,
-//     dropoutProbability: dropoutProbability
+//     dropoutProbability: dropoutProbability,
+//     sentenceMaxPositionalLength: 5000, 
+//     motionMaxPositionalLength: 5000
 // )
 
 // print("checkpointURL: \(checkpointURL.path)")
