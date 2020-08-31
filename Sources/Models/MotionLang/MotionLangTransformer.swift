@@ -70,7 +70,7 @@ public struct MotionLangTransformer: Module {
     public func decode(input: MotionLangBatch, memory: Tensor<Float>) -> Tensor<Float> {
         let embedded = self.targetEmbed(input.targetTokenIds)
         let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
-        return self.decoder(decoderInput)
+        return self.decoder(decoderInput).lastLayerOutput
     }
     
     @differentiable
