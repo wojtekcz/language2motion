@@ -132,8 +132,9 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
 
     var imageURL: URL? = dataURL.appendingPathComponent("motion_images/\(prefix).png")
     if !saveMotion { imageURL = nil }
-    // TODO: use joint groupping
-    motionToImg(url: imageURL, motion: descaledMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)", cmapRange: 2.0)
+    // use joint groupping
+    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
+    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)", cmapRange: 2.0)
 
     if saveMotion {
         print("Saved image: \(imageURL!.path)")
