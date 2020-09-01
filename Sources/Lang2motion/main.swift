@@ -10,14 +10,15 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_12"
+let runName = "run_15"
 // let batchSize = 4
 let batchSize = 250
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 10
-let learningRate: Float = 1e-3 //5e-4
-let datasetSize: DatasetSize = .midi
+let nEpochs = 30
+// let learningRate: Float = 5e-4
+let learningRate: Float = 2e-5
+let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -70,23 +71,8 @@ let feedForwardSize: Int = 512
 let headCount: Int = 4
 let dropoutProbability: Double = 0.1
 
-var model = LangMotionTransformer(
-    vocabSize: vocabSize, 
-    nbJoints: nbJoints,
-    nbMixtures: nbMixtures,
-    layerCount: layerCount,
-    modelSize: modelSize,
-    feedForwardSize: feedForwardSize,
-    headCount: headCount,
-    dropoutProbability: dropoutProbability,
-    sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500
-)
-
-// TODO: make sure resuming training works again
-/// load model checkpoint
-// let config = LangMotionTransformerConfig(
-//     vocabSize: vocabSize,
+// var model = LangMotionTransformer(
+//     vocabSize: vocabSize, 
 //     nbJoints: nbJoints,
 //     nbMixtures: nbMixtures,
 //     layerCount: layerCount,
@@ -94,12 +80,28 @@ var model = LangMotionTransformer(
 //     feedForwardSize: feedForwardSize,
 //     headCount: headCount,
 //     dropoutProbability: dropoutProbability,
-//     sentenceMaxPositionalLength: 5000, 
-//     motionMaxPositionalLength: 5000
+//     sentenceMaxPositionalLength: 100,
+//     motionMaxPositionalLength: 500
 // )
 
-// print("checkpointURL: \(checkpointURL.path)")
-// var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e17")
+// TODO: make sure resuming training works again
+/// load model checkpoint
+let config = LangMotionTransformerConfig(
+    vocabSize: vocabSize,
+    nbJoints: nbJoints,
+    nbMixtures: nbMixtures,
+    layerCount: layerCount,
+    modelSize: modelSize,
+    feedForwardSize: feedForwardSize,
+    headCount: headCount,
+    dropoutProbability: dropoutProbability,
+    sentenceMaxPositionalLength: 100, // FIXME: extract this out
+    motionMaxPositionalLength: 500
+)
+
+print("checkpointURL: \(checkpointURL.path)")
+let start_epoch = 10
+var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
 print("\nLoading dataset...")
@@ -238,8 +240,8 @@ var trainingLoop = TrainingLoop(
 
 print("\nTraining Transformer for the Lang2motion task!")
 // FIXME: epoch loop workaround for checkpoint saving
-for epochIndex in 0..<nEpochs {
-    print("epoch \(epochIndex+1)/\(nEpochs)")
+for epochIndex in start_epoch..<start_epoch+nEpochs {
+    print("epoch \(epochIndex+1)/\(start_epoch + nEpochs)")
     statsRecorder.epochIndex = epochIndex
     try! trainingLoop.fit(&model, epochs: 1, on: device)
     try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
