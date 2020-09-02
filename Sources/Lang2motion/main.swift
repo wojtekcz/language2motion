@@ -10,7 +10,7 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_16"
+let runName = "run_17"
 // let batchSize = 4
 let batchSize = 150
 let maxTextSequenceLength =  20
@@ -92,6 +92,7 @@ var dataset = try Lang2Motion(
     minMotionLength: 10,
     maxMotionLength: 100,
     trainTestSplit: 1.0,
+    demultiplyMotions: true,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)

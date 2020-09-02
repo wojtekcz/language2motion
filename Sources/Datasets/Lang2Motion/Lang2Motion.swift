@@ -45,6 +45,7 @@ extension Lang2Motion {
         minMotionLength: Int = 10,
         maxMotionLength: Int = 100,
         trainTestSplit: Double = 0.8,
+        demultiplyMotions: Bool = false,
         device: Device,
         exampleMap: @escaping (MotionSample) -> LangMotionBatch
     ) throws {
@@ -62,7 +63,20 @@ extension Lang2Motion {
 
         // filter out longest samples
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] <= maxMotionLength }
-        print("keeping \(_motionSamples.count) shorter motions, with maximum \(maxMotionLength) frames")
+        print("Keeping \(_motionSamples.count) shorter motions, with maximum \(maxMotionLength) frames.")
+
+        // filter out multiplied motions
+        if demultiplyMotions {
+            var _uniqueMotionSampleDict: [Int: MotionSample] = [:]
+            for ms in motionDataset.motionSamples {
+                // only assign first (downsampled) sample
+                if _uniqueMotionSampleDict[ms.sampleID] == nil {
+                    _uniqueMotionSampleDict[ms.sampleID] = ms
+                }
+            }
+            _motionSamples = _uniqueMotionSampleDict.map { $0.value }
+            print("Demultiplaying motions back to \(_motionSamples.count).")
+        }
 
         // scale motions
         print("Scaling motions...")
