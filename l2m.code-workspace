@@ -14,7 +14,6 @@
 		"lldb.verboseLogging": true,
 		"lldb.library": "/swift-tensorflow-toolchain/usr/lib/liblldb.so.10.0.0git",
 		"lldb.libpython": "/usr/lib/x86_64-linux-gnu/libpython3.6m.so.1.0",
-		"python.pythonPath": "/usr/bin/python3",
 		"sde.languageServerMode": "sourcekit-lsp",
 		"sde.swiftBuildingParams": [
 			"build",
@@ -26,6 +25,6 @@
 		"sourcekit-lsp.toolchainPath": "/swift-tensorflow-toolchain",
 		"swift.languageServerPath": "",
 		"swift.path.swift_driver_bin": "/swift-tensorflow-toolchain/usr/bin/swift",
-		"python.dataScience.jupyterServerURI": "http://127.0.0.1:8888/?token=375a27ee4fe19df27b9fe81cdf67cab2f480f614009ee942"
+		"python.dataScience.jupyterServerURI": "http://127.0.0.1:8888/?token=454bc69558d1082d4c3eecfe70efb64df8095b93456d12af"
 	}
 }
