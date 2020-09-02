@@ -89,6 +89,8 @@ print("\nLoading dataset...")
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
+    minMotionLength: 10,
+    maxMotionLength: 100,
     trainTestSplit: 1.0,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
