@@ -55,11 +55,11 @@ extension Lang2Motion {
 
         // filter out samples without annotations
         var _motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
-        print("keeping \(_motionSamples.count) annotated motions")
+        print("Keeping \(_motionSamples.count) annotated motions.")
 
         // filter out shortest samples
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
-        print("keeping \(_motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
+        print("Keeping \(_motionSamples.count) longer motions, with minimum \(minMotionLength) frames.")
 
         // filter out longest samples
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] <= maxMotionLength }
@@ -99,7 +99,7 @@ extension Lang2Motion {
             }
             _motionSamplesWithDistinctAnnotations.append(contentsOf: samples)
         }
-        print("Having \(_motionSamplesWithDistinctAnnotations.count) annotations with motions")
+        print("Having \(_motionSamplesWithDistinctAnnotations.count) annotations with motions.")
 
         motionSamples = _motionSamplesWithDistinctAnnotations
 
