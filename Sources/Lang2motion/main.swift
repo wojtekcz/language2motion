@@ -16,8 +16,8 @@ let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 30
-let learningRate: Float = 5e-4
-// let learningRate: Float = 2e-5
+// let learningRate: Float = 5e-4
+let learningRate: Float = 2e-5
 let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
