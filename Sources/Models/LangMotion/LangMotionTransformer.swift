@@ -94,3 +94,20 @@ public struct LangMotionTransformer: Module {
         return self.decoder(decoderInput)
     }
 }
+
+extension LangMotionTransformer {
+    public init(config: LangMotionTransformerConfig) {
+        self.init(
+            vocabSize: config.vocabSize, 
+            nbJoints: config.nbJoints, 
+            nbMixtures: config.nbMixtures, 
+            layerCount: config.layerCount, 
+            modelSize: config.modelSize, 
+            feedForwardSize: config.feedForwardSize, 
+            headCount: config.headCount, 
+            dropoutProbability: config.dropoutProbability, 
+            sentenceMaxPositionalLength: config.sentenceMaxPositionalLength, 
+            motionMaxPositionalLength: config.motionMaxPositionalLength
+        )
+    }
+}

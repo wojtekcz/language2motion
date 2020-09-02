@@ -62,46 +62,26 @@ let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
 
 /// instantiate model
 print("instantiate model")
-let vocabSize = vocabulary.count
-let nbJoints = 47 // TODO: get value from dataset
-let nbMixtures = 20
-let layerCount: Int = 6
-let modelSize: Int = 256
-let feedForwardSize: Int = 1024
-let headCount: Int = 8
-let dropoutProbability: Double = 0.1
-
-// var model = LangMotionTransformer(
-//     vocabSize: vocabSize, 
-//     nbJoints: nbJoints,
-//     nbMixtures: nbMixtures,
-//     layerCount: layerCount,
-//     modelSize: modelSize,
-//     feedForwardSize: feedForwardSize,
-//     headCount: headCount,
-//     dropoutProbability: dropoutProbability,
-//     sentenceMaxPositionalLength: 100,
-//     motionMaxPositionalLength: 500
-// )
-
-// TODO: make sure resuming training works again
-/// load model checkpoint
 let config = LangMotionTransformerConfig(
-    vocabSize: vocabSize,
-    nbJoints: nbJoints,
-    nbMixtures: nbMixtures,
-    layerCount: layerCount,
-    modelSize: modelSize,
-    feedForwardSize: feedForwardSize,
-    headCount: headCount,
-    dropoutProbability: dropoutProbability,
-    sentenceMaxPositionalLength: 100, // FIXME: extract this out
+    vocabSize: vocabulary.count,
+    nbJoints: 47, // TODO: get value from dataset
+    nbMixtures: 20,
+    layerCount: 6,
+    modelSize: 256,
+    feedForwardSize: 1024,
+    headCount: 8,
+    dropoutProbability:  0.1,
+    sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500
 )
 
-print("checkpointURL: \(checkpointURL.path)")
-let start_epoch = 5
-var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
+/// create new model
+var model = LangMotionTransformer(config: config)
+
+/// load model checkpoint
+// print("checkpointURL: \(checkpointURL.path)")
+let start_epoch = 0
+// var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
 print("\nLoading dataset...")
@@ -130,7 +110,7 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
     let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
     processedSentence.printSentence()
 
-    let decodedMotion = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, transformer: model, nbJoints: nbJoints, nbMixtures: nbMixtures, maxMotionLength: maxMotionLength)
+    let decodedMotion = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, transformer: model, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, maxMotionLength: maxMotionLength)
     print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
     print("  descaledMotion.shape: \(descaledMotion.shape)")
@@ -160,8 +140,8 @@ var optimizer = Adam(for: model, learningRate: learningRate)
 
 // Loss function
 let args = LossArgs(
-        nb_joints: nbJoints,
-        nb_mixtures: nbMixtures,
+        nb_joints: config.nbJoints,
+        nb_mixtures: config.nbMixtures,
         mixture_regularizer_type: "None",  // ["cv", "l2", "None"]
         mixture_regularizer: 0.0,
         device: device
