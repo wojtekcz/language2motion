@@ -8,6 +8,7 @@ import Datasets
 import SummaryWriter
 import LangMotionModels
 import TrainingLoop
+import x10_optimizers_optimizer
 
 /// Set training params
 let runName = "run_17"
@@ -15,17 +16,24 @@ let runName = "run_17"
 let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
-let nEpochs = 30
-// let learningRate: Float = 5e-4
-let learningRate: Float = 2e-5
-let datasetSize: DatasetSize = .full
+let nEpochs = 10
+// let peakLearningRate: Float = 5e-4
+let peakLearningRate: Float = 2e-5
+
+let stepsPerEpoch = 202 // function of training set size and batching configuration
+
+let beta1: Float = 0.9
+let beta2: Float = 0.999
+let useBiasCorrection = false
+
+let datasetSize: DatasetSize = .midi
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
 print("maxTextSequenceLength: \(maxTextSequenceLength)")
 print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
-print("learningRate: \(learningRate)")
+print("peakLearningRate: \(peakLearningRate)")
 print("datasetSize: \(datasetSize)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
@@ -76,12 +84,12 @@ let config = LangMotionTransformerConfig(
 )
 
 /// create new model
-var model = LangMotionTransformer(config: config)
+// var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-// print("checkpointURL: \(checkpointURL.path)")
-let start_epoch = 0
-// var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
+print("checkpointURL: \(checkpointURL.path)")
+let start_epoch = 32
+var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
 print("\nLoading dataset...")
@@ -139,7 +147,39 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
 // exit(0)
 
 /// Optimizer
-var optimizer = Adam(for: model, learningRate: learningRate)
+// var optimizer = Adam(for: model, learningRate: learningRate)
+
+var optimizer = x10_optimizers_optimizer.GeneralOptimizer(
+    for: model,
+    TensorVisitorPlan(model.differentiableVectorView),
+    defaultOptimizer: makeWeightDecayedAdam(
+      learningRate: peakLearningRate,
+      beta1: beta1,
+      beta2: beta2
+    )
+)
+
+var scheduledLearningRate = LinearlyDecayedParameter(
+  baseParameter: LinearlyWarmedUpParameter(
+      baseParameter: FixedParameter<Float>(peakLearningRate),
+      warmUpStepCount: 20,
+      warmUpOffset: 0),
+  slope: -(peakLearningRate / Float(stepsPerEpoch * nEpochs)),  // The LR decays linearly to zero.
+  startStep: 10
+)
+
+public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+    if event == .updateStart {
+        let optimizer: GeneralOptimizer<LangMotionTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionTransformer>
+        let step = optimizer.step + 1 // for scheduled rates and bias correction, steps start at 1
+        optimizer.learningRate = scheduledLearningRate(forStep: UInt64(step))
+        if useBiasCorrection {
+          let f_step = Float(step)
+          optimizer.learningRate *= sqrtf(1 - powf(beta2, f_step)) / (1 - powf(beta1, f_step))
+        }
+        print("\noptimizer: step: \(optimizer.step), learningRate: \(optimizer.learningRate)")
+    }
+}
 
 // Loss function
 let args = LossArgs(
@@ -219,7 +259,7 @@ var trainingLoop = TrainingLoop(
   validation: dataset.testBatches,
   optimizer: optimizer,
   lossFunction: embeddedNormalMixtureSurrogateLoss,
-  callbacks: [trainingProgress.update, statsRecorder.writeStats])
+  callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater])
 
 print("\nTraining Transformer for the Lang2motion task!")
 // FIXME: epoch loop workaround for checkpoint saving
