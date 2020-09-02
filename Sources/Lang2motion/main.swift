@@ -10,14 +10,14 @@ import LangMotionModels
 import TrainingLoop
 
 /// Set training params
-let runName = "run_15"
+let runName = "run_16"
 // let batchSize = 4
-let batchSize = 250
+let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 30
-// let learningRate: Float = 5e-4
-let learningRate: Float = 2e-5
+let learningRate: Float = 5e-4
+// let learningRate: Float = 2e-5
 let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
@@ -66,9 +66,9 @@ let vocabSize = vocabulary.count
 let nbJoints = 47 // TODO: get value from dataset
 let nbMixtures = 20
 let layerCount: Int = 6
-let modelSize: Int = 128
-let feedForwardSize: Int = 512
-let headCount: Int = 4
+let modelSize: Int = 256
+let feedForwardSize: Int = 1024
+let headCount: Int = 8
 let dropoutProbability: Double = 0.1
 
 // var model = LangMotionTransformer(
@@ -100,7 +100,7 @@ let config = LangMotionTransformerConfig(
 )
 
 print("checkpointURL: \(checkpointURL.path)")
-let start_epoch = 10
+let start_epoch = 5
 var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
