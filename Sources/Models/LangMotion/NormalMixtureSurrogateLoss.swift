@@ -1,4 +1,5 @@
 import TensorFlow
+import Datasets
 
 public struct LossArgs {
     public let nb_joints: Int
@@ -16,24 +17,8 @@ public struct LossArgs {
      }
 }
 
-public struct TargetTruth {
-    public let motion: Tensor<Float> // bs x maxMotionLength-1 x nbJoints
-    public let stops: Tensor<Float>  // bs x maxMotionLength-1
-
-    public init(motion: Tensor<Float>, stops: Tensor<Float>) {
-        self.motion = motion
-        self.stops = stops
-     }
-
-    public init(copying targetTruth: TargetTruth, to device: Device) {
-        let motion = Tensor(copying: targetTruth.motion, to: device)
-        let stops = Tensor(copying: targetTruth.stops, to: device)
-        self.init(motion: motion, stops: stops)
-    }
-}
-
 @differentiable
-public func normalMixtureSurrogateLoss(y_true: TargetTruth, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
+public func normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
     let TINY: Float = 1e-8
     let pi: Float = 3.1415
     let nb_mixtures = args.nb_mixtures

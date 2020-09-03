@@ -104,9 +104,9 @@ var dataset = try Lang2Motion(
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    let (target2, motionPart) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
     let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-    let singleBatch = LangMotionBatch(data: source,label: target2)
+    let singleBatch = LangMotionBatch(data: source, label: target)
     return singleBatch
 }
 
@@ -191,9 +191,7 @@ let args = LossArgs(
 )
 
 @differentiable
-func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_target: LangMotionBatch.Target) -> Tensor<Float> {
-    // TODO: create tensor on device
-    let y_true = TargetTruth(copying: TargetTruth(motion: y_target.targetTruth, stops: y_target.targetTruthStop), to: device)
+func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMotionBatch.Target) -> Tensor<Float> {
     let loss = normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
     let n_items: Float = Float(loss.shape[0] * loss.shape[1])
     let avg_loss = loss.sum() / n_items

@@ -71,71 +71,47 @@ public struct LangMotion {
             print("  sentence")
             print("    tokenIds.shape: \(self.sentence.tokenIds.shape)")
             print("    mask.shape: \(self.sentence.mask.shape)")
-            print("    tokenCount: shape \(self.sentence.tokenCount.shape), value \(self.sentence.tokenCount)")
+            print("    tokenCount: (shape: \(self.sentence.tokenCount.shape), value: \(self.sentence.tokenCount))")
             print("  motionPart")
             print("    motion.shape: \(self.motionPart.motion.shape)")
             print("    mask.shape: \(self.motionPart.mask.shape)")
         }
     }
 
-    // source
-    // (padded)
-    public let source: Source
-
     // Target
     public struct Target {
         public let sampleID: Tensor<Int32>        // bs
 
-        // TODO: motion truth should be a STRUCT with motion and stop components
-        public var targetTruth: Tensor<Float>           // bs x maxMotionLength-1 x nbJoints
-        public var targetTruthStop: Tensor<Float>       // bs x maxMotionLength-1
+        public var motion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
+        public var stops: Tensor<Float>           // bs x maxMotionLength-1
+
         public let origMotionFramesCount: Tensor<Int32> // bs
 
-        public init(sampleID: Tensor<Int32>, targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
+        public init(sampleID: Tensor<Int32>, motion: Tensor<Float>, stops: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
             self.sampleID = sampleID
 
-            self.targetTruth = targetTruth
-            self.targetTruthStop = targetTruthStop
+            self.motion = motion
+            self.stops = stops
             self.origMotionFramesCount = origMotionFramesCount
         }
 
         public init(copying target: Target, to device: Device) {
             sampleID = Tensor<Int32>(copying: target.sampleID, to: device)
 
-            targetTruth = Tensor<Float>(copying: target.targetTruth, to: device)
-            targetTruthStop = Tensor<Float>(copying: target.targetTruthStop, to: device)
+            motion = Tensor<Float>(copying: target.motion, to: device)
+            stops = Tensor<Float>(copying: target.stops, to: device)
             origMotionFramesCount = Tensor<Int32>(copying: target.origMotionFramesCount, to: device)
         }
 
-        public func printTarget2() {
+        public func printTarget() {
             print("target")
-            print("  sampleID.shape: \(self.sampleID.shape)")
+            print("  sampleID: (shape: \(self.sampleID.shape), value: \(self.sampleID))")
 
-            print("  targetTruth.shape: \(self.targetTruth.shape)")
-            print("  targetTruthStop.shape: \(self.targetTruthStop.shape)")
-            print("  origMotionFramesCount.shape: \(self.origMotionFramesCount.shape)")
+            print("  motion.shape: \(self.motion.shape)")
+            print("  stops.shape: \(self.stops.shape)")
+            print("  origMotionFramesCount: (shape: \(self.origMotionFramesCount.shape), value: \(self.origMotionFramesCount))")
         }
     }
-
-    // target
-    // (padded)
-    public var target: Target
-
-    public init(sampleID: Tensor<Int32>, 
-                tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>, 
-                motionPartTensor: Tensor<Float>, motionPartMask: Tensor<Float>,
-                targetTruth: Tensor<Float>, targetTruthStop: Tensor<Float>, origMotionFramesCount: Tensor<Int32>) {
-        let motionPart = MotionPart(motion: motionPartTensor, mask: motionPartMask)
-        let sentence = Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
-        self.source = Source(sentence: sentence, motionPart: motionPart)
-        self.target = Target(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
-    }
-}
-
-public func subsequentMask3(size: Int) -> Tensor<Int32> {
-    let attentionShape = [1, size, size]
-    return Tensor<Int32>(ones: TensorShape(attentionShape))
-        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
 }
 
 extension LangMotionBatch {
@@ -158,47 +134,56 @@ extension LangMotionBatch {
         let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.mask.squeezingShape(at: 0) })
 
         let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.label.sampleID.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Float> = Tensor(batches.map{ $0.label.targetTruth.squeezingShape(at: 0) })
-        let targetTruthStop: Tensor<Float> = Tensor(batches.map{ $0.label.targetTruthStop.squeezingShape(at: 0) })
+        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.label.motion.squeezingShape(at: 0) })
+        let targetStops: Tensor<Float> = Tensor(batches.map{ $0.label.stops.squeezingShape(at: 0) })
         let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.label.origMotionFramesCount.squeezingShape(at: 0) })
 
         let sentence = Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
         let motionPart = MotionPart(motion: motionPartTensor, mask: motionPartMask)
         let data = Source(sentence: sentence, motionPart: motionPart)
-        let label = Target(sampleID: sampleID, targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+        let label = Target(sampleID: sampleID, motion: targetMotion, stops: targetStops, origMotionFramesCount: origMotionFramesCount)
         let batch = LangMotionBatch(data: data,label: label)
 
         return batch
     }
 
-    public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (target: Target, motionPart: MotionPart)
+    public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (motionPart: MotionPart, target: Target)
     {
-        var (motion, motionFlag) = Tensor<Float>(motion).paddedAndCropped(to: maxMotionLength)
-        motion = motion.expandingShape(at: 0)
-        motionFlag = motionFlag.expandingShape(at: 0)
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motion.shape[0])])
 
-        let rangeExceptLast = 0..<(motion.shape[1] - 1)
-        let targetMotion = motion[0..., rangeExceptLast, 0...]
+        var (paddedMotion, motionFlag) = motion.paddedAndCropped(to: maxMotionLength)
+        paddedMotion = paddedMotion.expandingShape(at: 0)
+        motionFlag = motionFlag.expandingShape(at: 0)
 
-        motionFlag = motionFlag[0..., rangeExceptLast]
-        let targetMask = makeStandardMask(target: motionFlag, pad: 0)
-        let targetTruth: Tensor<Float> = motion[0..., 1..., 0...]
+        // source (motionPart & motion flag)
+        let rangeExceptLast = 0..<(paddedMotion.shape[1] - 1)
+        let motionPartTensor = paddedMotion[0..., rangeExceptLast, 0...]
 
-        // FIXME: should targetTruthStop encompass current motion frame?
-        let targetTruthStop: Tensor<Float> = 1.0 - Tensor<Float>(motionFlag)
+        let motionPartFlag = motionFlag[0..., rangeExceptLast]
+        let motionPartMask = makeStandardMask(target: motionPartFlag, pad: 0) // FIXME: fix target mask
 
-        let motionPart = MotionPart(motion: targetMotion, mask: targetMask)
-        let target = Target(sampleID: Tensor([Int32(sampleID)]), targetTruth: targetTruth, targetTruthStop: targetTruthStop, origMotionFramesCount: origMotionFramesCount)
+        let motionPart = MotionPart(motion: motionPartTensor, mask: motionPartMask)
 
-        return (target: target, motionPart: motionPart)
+        // target (motion & stops)
+        let targetMotion: Tensor<Float> = paddedMotion[0..., 1..., 0...]
+        let targetMotionFlag = motionFlag[0..., 1...]
+        let targetStops: Tensor<Float> = 1.0 - Tensor<Float>(targetMotionFlag)
+
+        let target = Target(sampleID: Tensor([Int32(sampleID)]), motion: targetMotion, stops: targetStops, origMotionFramesCount: origMotionFramesCount)
+        return (motionPart: motionPart, target: target)
+    }
+
+    public static func subsequentMask(size: Int) -> Tensor<Int32> {
+        let attentionShape = [1, size, size]
+        return Tensor<Int32>(ones: TensorShape(attentionShape))
+            .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
     }
 
     public static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
         var targetMask = Tensor(zerosLike: target)
             .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
             .expandingShape(at: -2)
-        targetMask *= subsequentMask3(size: target.shape.last!)
+        targetMask *= subsequentMask(size: target.shape.last!)
         return Tensor<Float>(targetMask)
     }
 }
