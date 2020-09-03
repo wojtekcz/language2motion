@@ -4,7 +4,7 @@ import Foundation
 public struct MotionDataset2Processor {
     public static let maxSampleID = 3966
 
-    public static func loadDatasetFromFolder(datasetFolderURL: URL, sampled: Int? = nil, freq: Int? = 10, maxFrames: Int = 500) -> MotionDataset {
+    public static func loadDatasetFromFolder(datasetFolderURL: URL, sampled: Int? = nil, freq: Int? = 10, maxFrames: Int = 500, multiply: Bool = true) -> MotionDataset {
         var motionSamples: [MotionSample] = []
         let fm = FileManager()
         
@@ -26,13 +26,16 @@ public struct MotionDataset2Processor {
                     let motionSample = LegacyMMMReader.motionSampleFromMMM(sampleID: sampleID, mmmURL: mmmURL, annotationsURL: annotationsURL, maxFrames: maxFrames)
                     motionSamples.append(motionSample)
                 } else {
-                    let _motionSamples = LegacyMMMReader.downsampledMutlipliedMotionSamples(
+                    var _motionSamples = LegacyMMMReader.downsampledMutlipliedMotionSamples(
                         sampleID: sampleID, 
                         mmmURL: mmmURL, 
                         annotationsURL: annotationsURL, 
                         freq: freq!, 
                         maxFrames: maxFrames
                     )
+                    if !multiply {
+                        _motionSamples = Array(_motionSamples[0..<1])
+                    }
                     motionSamples.append(contentsOf: _motionSamples)
                 }
             } else {
