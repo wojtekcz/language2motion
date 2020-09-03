@@ -1,0 +1,3 @@
+export PATH="$PATH:/opt/bin:/swift/toolchain/usr/bin"
+export LD_LIBRARY_PATH="/usr/lib64-nvidia:$LD_LIBRARY_PATH"
+alias wnv='watch -n1 nvidia-smi'
