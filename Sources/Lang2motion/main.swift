@@ -88,7 +88,7 @@ let config = LangMotionTransformerConfig(
 
 /// load model checkpoint
 print("checkpointURL: \(checkpointURL.path)")
-let start_epoch = 32
+let start_epoch = 35
 var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
