@@ -11,14 +11,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_17"
-// let batchSize = 4
-let batchSize = 150
+let runName = "run_23"
+let batchSize = 4
+// let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 10
-// let peakLearningRate: Float = 5e-4
-let peakLearningRate: Float = 2e-5
+let peakLearningRate: Float = 5e-4
+// let peakLearningRate: Float = 2e-5
 
 let stepsPerEpoch = 202 // function of training set size and batching configuration
 
@@ -83,13 +83,15 @@ let config = LangMotionTransformerConfig(
     motionMaxPositionalLength: 500
 )
 
+var start_epoch = 0
+
 /// create new model
-// var model = LangMotionTransformer(config: config)
+var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-print("checkpointURL: \(checkpointURL.path)")
-let start_epoch = 35
-var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
+// print("checkpointURL: \(checkpointURL.path)")
+// start_epoch = 35
+// var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
 print("\nLoading dataset...")
@@ -177,7 +179,7 @@ public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event:
           let f_step = Float(step)
           optimizer.learningRate *= sqrtf(1 - powf(beta2, f_step)) / (1 - powf(beta1, f_step))
         }
-        print("\noptimizer: step: \(optimizer.step), learningRate: \(optimizer.learningRate)")
+        // print("\noptimizer: step: \(optimizer.step), learningRate: \(optimizer.learningRate)")
     }
 }
 
