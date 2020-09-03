@@ -44,23 +44,6 @@ public struct LangMotionTransformer: Module {
         self.nbMixtures = nbMixtures
     }
 
-    public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
-        motionDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
-        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int) 
-    {
-        self.encoder = encoder
-        self.decoder = decoder
-        self.embedding = embedding
-        self.positionalEncoding = positionalEncoding
-        self.motionPositionalEncoding = motionPositionalEncoding
-        self.motionDense = motionDense
-        self.sourceEmbed = sourceEmbed
-        self.mixtureModel = mixtureModel
-        self.modelSize = modelSize
-        self.nbJoints = nbJoints
-        self.nbMixtures = nbMixtures
-    }
-
     @differentiable
     public func callAsFunction(_ input: LangMotionBatch.Source) -> MixtureModelPreds {
         let encodedMemory = self.encode(input: input.sentence)
@@ -96,6 +79,24 @@ public struct LangMotionTransformer: Module {
 }
 
 extension LangMotionTransformer {
+
+    public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
+        motionDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
+        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int) 
+    {
+        self.encoder = encoder
+        self.decoder = decoder
+        self.embedding = embedding
+        self.positionalEncoding = positionalEncoding
+        self.motionPositionalEncoding = motionPositionalEncoding
+        self.motionDense = motionDense
+        self.sourceEmbed = sourceEmbed
+        self.mixtureModel = mixtureModel
+        self.modelSize = modelSize
+        self.nbJoints = nbJoints
+        self.nbMixtures = nbMixtures
+    }
+
     public init(config: LangMotionTransformerConfig) {
         self.init(
             vocabSize: config.vocabSize, 
