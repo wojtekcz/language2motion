@@ -25,7 +25,5 @@ privateKeyPath=/root/.ssh/private_key.pem
 wget $baseURL/private_key.pem -O $privateKeyPath
 chmod 600 $privateKeyPath
 
-sh("ls -l /root/.ssh")
-
 options="-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
 ssh $options -i $privateKeyPath -f -R 46190:localhost:22 wojtekcz.first@wojtekcz-46190.portmap.io -N -v &
