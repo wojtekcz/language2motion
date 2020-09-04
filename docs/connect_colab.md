@@ -79,5 +79,5 @@ ssh-add /root/.ssh/id_rsa_wcz\@MacBook-Wojtka.local
 ### a. start tensorboard
 ```
 cd /content/language2motion.gt/data
-tensorboard --bind_all --logdir runs/Lang2motion/run_16
+tensorboard --bind_all --logdir runs/Lang2motion/
 ```
