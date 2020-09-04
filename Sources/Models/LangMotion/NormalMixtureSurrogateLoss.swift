@@ -18,7 +18,7 @@ public struct LossArgs {
 }
 
 @differentiable
-public func normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
+func _normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
     let TINY: Float = 1e-8
     let pi: Float = 3.1415
     let nb_mixtures = args.nb_mixtures
@@ -64,4 +64,66 @@ public func normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: M
     let loss = -(log_mixture_pdf + log_bernoulli_pdf) +
         args.mixture_regularizer * mixture_reg
     return loss
+}
+
+extension LangMotionBatch.Target {
+
+    public func squeezed() -> Self {
+        let bs = self.motion.shape[0]
+        let nFrames = self.motion.shape[1]
+        let nJoints = self.motion.shape[2]
+        let motion = self.motion.reshaped(to: [1, bs*nFrames, nJoints])
+        let stops = self.stops.reshaped(to: [1, bs*nFrames])
+        let origMotionFramesCount = self.origMotionFramesCount.sum().expandingShape(at: 0)
+        return Self(sampleID: self.sampleID, motion: motion, stops: stops, origMotionFramesCount: origMotionFramesCount)
+    }
+
+    public func gathering(atIndices indices: Tensor<Int32>, alongAxis axis: Int) -> Self {
+        let motion = self.motion.gathering(atIndices: indices, alongAxis: axis)
+        let stops = self.stops.gathering(atIndices: indices, alongAxis: axis)
+        return Self(sampleID: self.sampleID, motion: motion, stops: stops, origMotionFramesCount: self.origMotionFramesCount)
+    }
+}
+
+extension MixtureModelPreds {
+    
+    @differentiable
+    public func squeezed() -> Self {
+        let bs = self.mixtureMeans.shape[0]
+        let nFrames = self.mixtureMeans.shape[1]
+        let nJointsMixtures = self.mixtureMeans.shape[2]
+        let nMixtures = self.mixtureWeights.shape[2]
+        
+        let mixtureMeans = self.mixtureMeans.reshaped(to: [1, bs*nFrames, nJointsMixtures])
+        let mixtureVars = self.mixtureVars.reshaped(to: [1, bs*nFrames, nJointsMixtures])
+        let mixtureWeights = self.mixtureWeights.reshaped(to: [1, bs*nFrames, nMixtures])
+        let stops = self.stops.reshaped(to: [1, bs*nFrames, 1])        
+        
+        return Self(mixtureMeans: mixtureMeans, mixtureVars: mixtureVars, mixtureWeights: mixtureWeights, stops: stops)
+    }
+    
+    @differentiable
+    public func gathering(atIndices indices: Tensor<Int32>, alongAxis axis: Int) -> Self {
+        let maskedMixtureMeans = self.mixtureMeans.gathering(atIndices: indices, alongAxis: axis)
+        let maskedMixtureVars = self.mixtureVars.gathering(atIndices: indices, alongAxis: axis)
+        let maskedMixtureWeights = self.mixtureWeights.gathering(atIndices: indices, alongAxis: axis)
+        let maskedStops = self.stops.gathering(atIndices: indices, alongAxis: axis)
+        return Self(mixtureMeans: maskedMixtureMeans, mixtureVars: maskedMixtureVars, mixtureWeights: maskedMixtureWeights, stops: maskedStops)
+    }
+}
+
+@differentiable(wrt: y_pred)
+public func normalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMotionBatch.Target, args: LossArgs) -> Tensor<Float> {
+    // masking
+    var y_pred = y_pred.squeezed()
+    var y_true = y_true.squeezed()
+    let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(y_true.stops.shape[1]), stride: 1)
+    let indices = ids.gathering(where: y_true.stops .!= Tensor(1))
+    y_pred = y_pred.gathering(atIndices: indices, alongAxis: 1)
+    y_true = y_true.gathering(atIndices: indices, alongAxis: 1)
+    
+    let loss = _normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)    
+    let n_items: Float = Float(loss.shape[0] * loss.shape[1])
+    let avg_loss = loss.sum() / n_items
+    return avg_loss
 }

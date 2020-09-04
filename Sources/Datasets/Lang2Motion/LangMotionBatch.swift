@@ -120,6 +120,13 @@ extension LangMotionBatch {
     public typealias MotionPart = LangMotion.MotionPart
     public typealias Target = LangMotion.Target
 
+    public var source: Source { get { return data } }
+    public var target: Target { get { return label } }
+
+    public init(source: Source, target: Target) {
+        self.init(data: source, label: target)
+    }
+
     public init(copying batch: LangMotionBatch, to device: Device) {
         let data = Source(copying: batch.data, to: device)
         let label = Target(copying: batch.label, to: device)
