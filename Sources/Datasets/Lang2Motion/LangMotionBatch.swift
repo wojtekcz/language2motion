@@ -154,11 +154,19 @@ extension LangMotionBatch {
         return batch
     }
 
+    public static func startMotionToken(nbJoints: Int) -> Tensor<Float> {
+        // one motion frame [1, nbJoints]
+        return Tensor<Float>(repeating:1.0, shape: [1, nbJoints])
+    }
+
     public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (motionPart: MotionPart, target: Target)
     {
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motion.shape[0])])
+        let nbJoints = motion.shape[1]
 
-        var (paddedMotion, motionFlag) = motion.paddedAndCropped(to: maxMotionLength)
+        let motion2 = Tensor(concatenating: [Self.startMotionToken(nbJoints: nbJoints), motion], alongAxis: 0)
+
+        var (paddedMotion, motionFlag) = motion2.paddedAndCropped(to: maxMotionLength+1)
         paddedMotion = paddedMotion.expandingShape(at: 0)
         motionFlag = motionFlag.expandingShape(at: 0)
 

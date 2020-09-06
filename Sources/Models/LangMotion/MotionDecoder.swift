@@ -99,7 +99,7 @@ public class MotionDecoder {
         print("\nGenerate:")
         print("=========")
         // start with tensor for neutral motion frame
-        var ys: Tensor<Float> = Tensor<Float>(repeating:0.0, shape: [1, 1, nbJoints])
+        var ys: Tensor<Float> = LangMotionBatch.startMotionToken(nbJoints: nbJoints).expandingShape(at: 0)
         for _ in 0..<maxMotionLength {
             // prepare input
             let motionPartMask = Tensor<Float>(LangMotionBatch.subsequentMask(size: ys.shape[1]))
@@ -115,7 +115,7 @@ public class MotionDecoder {
                 preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
             
             // concatenate motion
-            ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)        
+            ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)
         }
         return ys.squeezingShape(at:0)
     }
