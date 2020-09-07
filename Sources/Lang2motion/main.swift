@@ -11,14 +11,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_23"
-let batchSize = 4
+let runName = "run_28"
+let batchSize = 10
 // let batchSize = 150
 let maxTextSequenceLength =  20
 let maxMotionLength =  100
 let nEpochs = 10
-let peakLearningRate: Float = 5e-4
-// let peakLearningRate: Float = 2e-5
+// let peakLearningRate: Float = 5e-4
+let peakLearningRate: Float = 2e-5
 
 let stepsPerEpoch = 202 // function of training set size and batching configuration
 
@@ -26,7 +26,7 @@ let beta1: Float = 0.9
 let beta2: Float = 0.999
 let useBiasCorrection = false
 
-let datasetSize: DatasetSize = .midi
+let datasetSize: DatasetSize = .mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -90,7 +90,7 @@ var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
 // print("checkpointURL: \(checkpointURL.path)")
-// start_epoch = 35
+// start_epoch = 40
 // var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
@@ -102,7 +102,7 @@ var dataset = try Lang2Motion(
     minMotionLength: 10,
     maxMotionLength: 100,
     trainTestSplit: 1.0,
-    demultiplyMotions: true,
+    demultiplyMotions: false,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
