@@ -17,12 +17,13 @@ public struct LangMotionTransformerConfig { //: Codable {
     public let dropoutProbability: Double
     public let sentenceMaxPositionalLength: Int
     public let motionMaxPositionalLength: Int
+    public let doMotionDense: Bool
 
 //     enum CodingKeys: String, CodingKey {
 //         case vocabSize = "vocabSize"
 //     }
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, modelSize: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int) {
+                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, doMotionDense: Bool) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
@@ -33,6 +34,7 @@ public struct LangMotionTransformerConfig { //: Codable {
         self.dropoutProbability = dropoutProbability
         self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
         self.motionMaxPositionalLength = motionMaxPositionalLength
+        self.doMotionDense = doMotionDense
     }
 }
 
@@ -233,7 +235,7 @@ extension LangMotionTransformer {
             
             self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, motionPositionalEncoding: _motionPositionalEncoding,
                       motionDense: _motionDense, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
-                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
+                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, doMotionDense: config.doMotionDense)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
             print("Fail to load LangMotionTransformer from checkpoint. \(error)")

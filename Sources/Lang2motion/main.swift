@@ -44,8 +44,8 @@ let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory:
 try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print(device)
 
 // TODO: make sure X10 training works on Colab
@@ -80,7 +80,8 @@ let config = LangMotionTransformerConfig(
     headCount: 8,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500
+    motionMaxPositionalLength: 500,
+    doMotionDense: false
 )
 
 var start_epoch = 0
@@ -256,8 +257,8 @@ var trainingLoop = TrainingLoop(
     validation: dataset.testBatches,
     optimizer: optimizer,
     lossFunction: embeddedNormalMixtureSurrogateLoss,
-    // callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater]
-    callbacks: []
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater]
+    // callbacks: []
 )
 
 print("\nTraining Transformer for the Lang2motion task!")

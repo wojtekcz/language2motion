@@ -18,9 +18,10 @@ public struct LangMotionTransformer: Module {
     @noDerivative public var modelSize: Int
     @noDerivative public var nbJoints: Int
     @noDerivative public var nbMixtures: Int
+    @noDerivative public var doMotionDense: Bool
 
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, 
-                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000) {
+                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000, doMotionDense: Bool = true) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
                                            targetSize: modelSize,
@@ -42,6 +43,7 @@ public struct LangMotionTransformer: Module {
         self.modelSize = modelSize
         self.nbJoints = nbJoints        
         self.nbMixtures = nbMixtures
+        self.doMotionDense = doMotionDense
     }
 
     @differentiable
@@ -62,17 +64,24 @@ public struct LangMotionTransformer: Module {
     
     @differentiable
     public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>) -> DecoderOutput<Float> {
-        let shape = motionPart.motion.shape
-        let (origBatchSize, numFrames) = (shape[0], shape[1])
+        var motionPartFeatures: Tensor<Float>
+        if doMotionDense {
+            let shape = motionPart.motion.shape
+            let (origBatchSize, numFrames) = (shape[0], shape[1])
 
-        let tmpBatchSize = origBatchSize * numFrames
-        let tmpMotionPart = motionPart.motion.reshaped(to: [tmpBatchSize, nbJoints])
+            let tmpBatchSize = origBatchSize * numFrames
+            let tmpMotionPart = motionPart.motion.reshaped(to: [tmpBatchSize, nbJoints])
 
-        // FIXME: make targetEmbed() work
-        let tmpMotionPartFeatures = motionDense(tmpMotionPart) // batch size here is origBatchSize*numFrames
-        var motionPartFeatures = tmpMotionPartFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
-        motionPartFeatures = motionPositionalEncoding(motionPartFeatures)
-
+            // FIXME: make targetEmbed() work
+            let tmpMotionPartFeatures = motionDense(tmpMotionPart) // batch size here is origBatchSize*numFrames
+            motionPartFeatures = tmpMotionPartFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
+            motionPartFeatures = motionPositionalEncoding(motionPartFeatures)
+        } else {
+            // tile motion along joints dimension
+            let multiplyBy = modelSize/nbJoints+1
+            let tmpMotionPartFeatures = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<modelSize]
+            motionPartFeatures = motionPositionalEncoding(tmpMotionPartFeatures)
+        }
         let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
         return self.decoder(decoderInput)
     }
@@ -82,7 +91,7 @@ extension LangMotionTransformer {
 
     public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
         motionDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
-        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int) 
+        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, doMotionDense: Bool) 
     {
         self.encoder = encoder
         self.decoder = decoder
@@ -95,6 +104,7 @@ extension LangMotionTransformer {
         self.modelSize = modelSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
+        self.doMotionDense = doMotionDense
     }
 
     public init(config: LangMotionTransformerConfig) {
@@ -108,7 +118,8 @@ extension LangMotionTransformer {
             headCount: config.headCount, 
             dropoutProbability: config.dropoutProbability, 
             sentenceMaxPositionalLength: config.sentenceMaxPositionalLength, 
-            motionMaxPositionalLength: config.motionMaxPositionalLength
+            motionMaxPositionalLength: config.motionMaxPositionalLength,
+            doMotionDense: config.doMotionDense
         )
     }
 }
