@@ -11,7 +11,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_28"
+let runName = "run_33"
 let batchSize = 10
 // let batchSize = 150
 let maxTextSequenceLength =  20
@@ -26,7 +26,7 @@ let beta1: Float = 0.9
 let beta2: Float = 0.999
 let useBiasCorrection = false
 
-let datasetSize: DatasetSize = .mini
+let datasetSize: DatasetSize = .micro
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -44,8 +44,8 @@ let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory:
 try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 
 /// Select eager or X10 backend
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print(device)
 
 // TODO: make sure X10 training works on Colab
