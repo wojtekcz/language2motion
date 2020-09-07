@@ -15,7 +15,7 @@ let runName = "run_33"
 let batchSize = 10
 // let batchSize = 150
 let maxTextSequenceLength =  20
-let maxMotionLength =  100
+let maxMotionLength =  20
 let nEpochs = 10
 // let peakLearningRate: Float = 5e-4
 let peakLearningRate: Float = 2e-5
@@ -49,17 +49,17 @@ let device = Device.defaultXLA
 print(device)
 
 // TODO: make sure X10 training works on Colab
-// /// X10 warm-up
-// let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
-// let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
-// let eagerTensorSum = eagerTensor1 + eagerTensor2
-// print(eagerTensorSum)
-// print(eagerTensor1.device)
-// let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-// print(x10Tensor2.device)
+/// X10 warm-up
+let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+let eagerTensorSum = eagerTensor1 + eagerTensor2
+print(eagerTensorSum)
+print(eagerTensor1.device)
+let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-// let _ = _ExecutionContext.global
+let _ = _ExecutionContext.global
 
 /// instantiate text processor
 print("instantiate text processor")
@@ -252,11 +252,13 @@ let statsRecorder = StatsRecorder()
 print("\nSetting up the training loop")
 let trainingProgress = TrainingProgress(metrics: [.loss])
 var trainingLoop = TrainingLoop(
-  training: dataset.trainEpochs,
-  validation: dataset.testBatches,
-  optimizer: optimizer,
-  lossFunction: embeddedNormalMixtureSurrogateLoss,
-  callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater])
+    training: dataset.trainEpochs,
+    validation: dataset.testBatches,
+    optimizer: optimizer,
+    lossFunction: embeddedNormalMixtureSurrogateLoss,
+    // callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater]
+    callbacks: []
+)
 
 print("\nTraining Transformer for the Lang2motion task!")
 // FIXME: epoch loop workaround for checkpoint saving
