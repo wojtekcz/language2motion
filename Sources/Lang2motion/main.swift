@@ -11,22 +11,22 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_33"
-let batchSize = 10
-// let batchSize = 150
+let runName = "run_34"
+// let batchSize = 10
+let batchSize = 150
 let maxTextSequenceLength =  20
-let maxMotionLength =  20
-let nEpochs = 10
-// let peakLearningRate: Float = 5e-4
-let peakLearningRate: Float = 2e-5
+let maxMotionLength =  100
+let nEpochs = 20
+let peakLearningRate: Float = 2e-4
+// let peakLearningRate: Float = 2e-5
 
-let stepsPerEpoch = 202 // function of training set size and batching configuration
+let stepsPerEpoch = 383*2 // function of training set size and batching configuration
 
 let beta1: Float = 0.9
 let beta2: Float = 0.999
 let useBiasCorrection = false
 
-let datasetSize: DatasetSize = .micro
+let datasetSize: DatasetSize = .multi_full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -50,16 +50,16 @@ print(device)
 
 // TODO: make sure X10 training works on Colab
 /// X10 warm-up
-let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
-let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
-let eagerTensorSum = eagerTensor1 + eagerTensor2
-print(eagerTensorSum)
-print(eagerTensor1.device)
-let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-print(x10Tensor2.device)
+// let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+// let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+// let eagerTensorSum = eagerTensor1 + eagerTensor2
+// print(eagerTensorSum)
+// print(eagerTensor1.device)
+// let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+// print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-let _ = _ExecutionContext.global
+// let _ = _ExecutionContext.global
 
 /// instantiate text processor
 print("instantiate text processor")
