@@ -117,8 +117,8 @@ public func normalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMo
     // masking
     var y_pred = y_pred.squeezed()
     var y_true = y_true.squeezed()
-    let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(y_true.stops.shape[1]), stride: 1)
-    let indices = ids.gathering(where: y_true.stops .!= Tensor(1))
+    let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(y_true.stops.shape[1]), stride: 1, on: args.device)
+    let indices = ids.gathering(where: y_true.stops .!= Tensor(1, on: args.device))
     y_pred = y_pred.gathering(atIndices: indices, alongAxis: 1)
     y_true = y_true.gathering(atIndices: indices, alongAxis: 1)
     
