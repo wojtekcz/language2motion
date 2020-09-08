@@ -59,8 +59,6 @@ func _normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: Mixture
     } else {
         mixture_reg = 0.0
     }
-    // TODO: divide loss (component?) by maxMotionLength
-    // TODO: move loss averaging here
     let loss = -(log_mixture_pdf + log_bernoulli_pdf) +
         args.mixture_regularizer * mixture_reg
     return loss
@@ -123,7 +121,6 @@ public func normalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMo
     y_true = y_true.gathering(atIndices: indices, alongAxis: 1)
     
     let loss = _normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)    
-    let n_items: Float = Float(loss.shape[0] * loss.shape[1])
-    let avg_loss = loss.sum() / n_items
-    return avg_loss
+    let mean_loss = loss.mean()
+    return mean_loss
 }
