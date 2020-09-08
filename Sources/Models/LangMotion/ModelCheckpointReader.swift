@@ -226,6 +226,7 @@ extension LangMotionTransformer {
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
             let _decoder = Decoder(reader: reader, config: config, scope: scope + "/decoder")
             let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense")
+            let _contextDense = Dense<Float>(reader: reader, config: config, scope: scope + "/contextDense")
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
             let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
             let _motionPositionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
@@ -234,7 +235,7 @@ extension LangMotionTransformer {
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
             
             self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, motionPositionalEncoding: _motionPositionalEncoding,
-                      motionDense: _motionDense, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
+                      motionDense: _motionDense, contextDense: _contextDense, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
                       modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, doMotionDense: config.doMotionDense)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
