@@ -229,7 +229,8 @@ extension LangMotionTransformer {
             let _contextDense = Dense<Float>(reader: reader, config: config, scope: scope + "/contextDense")
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
             let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
-            let _motionPositionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
+            let motionPositionalEncodingSize = 32
+            let _motionPositionalEncoding = PositionalEncoding(size: motionPositionalEncodingSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
             let _sourceEmbed = Sequential(_embedding, _positionalEncoding)
 
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
