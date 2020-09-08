@@ -4,7 +4,7 @@ import TextModels
 import TranslationModels
 
 
-// Transformer with LangMotionBatch2
+// Transformer with LangMotionBatch
 
 public struct LangMotionTransformer: Module {
     public var encoder: Encoder
