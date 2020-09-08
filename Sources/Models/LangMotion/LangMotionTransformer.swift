@@ -6,7 +6,22 @@ import TranslationModels
 
 // Transformer with LangMotionBatch
 
+public struct LangMotionTransformerOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
+    public var preds: MixtureModelPreds
+    public var encoded: Tensor<Scalar>
+    public var decoded: DecoderOutput<Scalar>
+
+    @differentiable
+    public init(preds: MixtureModelPreds, encoded: Tensor<Scalar>, decoded: DecoderOutput<Scalar>) {
+        self.preds = preds
+        self.encoded = encoded
+        self.decoded = decoded
+    }
+}
+
+
 public struct LangMotionTransformer: Module {
+
     public var encoder: Encoder
     public var decoder: Decoder
     public var embedding: Embedding<Float>
@@ -47,12 +62,12 @@ public struct LangMotionTransformer: Module {
     }
 
     @differentiable
-    public func callAsFunction(_ input: LangMotionBatch.Source) -> MixtureModelPreds {
+    public func callAsFunction(_ input: LangMotionBatch.Source) -> LangMotionTransformerOutput<Float> {
         let encodedMemory = self.encode(input: input.sentence)
         let decoded = self.decode(sourceMask: input.sentence.mask, motionPart: input.motionPart, memory: encodedMemory)
         // reformat decoded.allOutputs[] into one tensor
         let mixtureModelInput = Tensor<Float>(concatenating: decoded.allOutputs, alongAxis: 2)
-        return self.mixtureModel(mixtureModelInput)
+        return LangMotionTransformerOutput(preds: self.mixtureModel(mixtureModelInput), encoded: encodedMemory, decoded: decoded)
     }
     
     @differentiable

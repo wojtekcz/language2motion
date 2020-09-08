@@ -194,8 +194,8 @@ let args = LossArgs(
 )
 
 @differentiable(wrt: y_pred)
-func embeddedNormalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMotionBatch.Target) -> Tensor<Float> {
-    return normalMixtureSurrogateLoss(y_pred: y_pred, y_true: y_true, args: args)
+func embeddedNormalMixtureSurrogateLoss(y_pred: LangMotionTransformerOutput<Float>, y_true: LangMotionBatch.Target) -> Tensor<Float> {
+    return normalMixtureSurrogateLoss(y_pred: y_pred.preds, y_true: y_true, args: args)
 }
 
 public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
