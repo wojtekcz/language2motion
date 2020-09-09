@@ -114,12 +114,14 @@ public struct LangMotionTransformer: Module {
             let currentMotion = motionPart.motion
 
             // compute contextVector
-            let numTokens = memory.shape[1]
-            let mask = sourceMask[0..., 0, 0...].expandingShape(at: 2).broadcasted(to: [batchSize, numTokens, modelSize])
-            let maskedMemory = memory * mask
-            let meanMemory = maskedMemory.mean(alongAxes: 1).squeezingShape(at: 1) // get mean across steps
+            // let numTokens = memory.shape[1]
+            // let mask = sourceMask[0..., 0, 0...].expandingShape(at: 2).broadcasted(to: [batchSize, numTokens, modelSize])
+            // let maskedMemory = memory * mask
+            // let meanMemory = maskedMemory.mean(alongAxes: 1).squeezingShape(at: 1) // get mean across steps
 
-            let contextVector = contextDense(meanMemory).expandingShape(at: 1).broadcasted(to: [batchSize, numFrames, contextSize])
+            // let contextVector = contextDense(meanMemory).expandingShape(at: 1).broadcasted(to: [batchSize, numFrames, contextSize])
+
+            let contextVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, contextSize])
 
             // previousMotion
             let previousMotion = motionPart.previousMotion
