@@ -83,7 +83,7 @@ public struct LangMotion {
 
         public init(sentence: Sentence, motionPart: MotionPart) {
             let sentenceMask = sentence.mask.squeezingShape(at: 1)
-            let motionFlag = Tensor<Float>(motionPart.motionFlag)
+            let motionFlag = Tensor<Float>(motionPart.motionFlag).squeezingShape(at: 2)
             let sourceAttentionMask = (sentenceMask * motionFlag.transposed()).expandingShape(at: 0)
             self.init(sentence: sentence, motionPart: motionPart, sourceAttentionMask: sourceAttentionMask)
         }
