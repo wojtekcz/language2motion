@@ -100,7 +100,7 @@ public struct LangMotionTransformer: Module {
             let tmpMotionPartFeatures = motionDense(tmpMotionPart) // batch size here is origBatchSize*numFrames
             motionPartFeatures = tmpMotionPartFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
             motionPartFeatures = motionPositionalEncoding(motionPartFeatures)
-        } else {
+        } else if (false) {
             // TODO: refactor this out
             // assuming modelSize = 256
             let shape = motionPart.motion.shape
@@ -132,14 +132,36 @@ public struct LangMotionTransformer: Module {
 
             let tensorStack = [motionPart.startFlag, motionPositionalEncodingVector, currentMotion, previousMotion, contextVector, motionFramePadding]
             let tmpMotionPartFeatures = Tensor<Float>(concatenating: tensorStack, alongAxis: 2)
+            motionPartFeatures = tmpMotionPartFeatures
+        } else {
+            // start flag, pos enc, current motion, padding with motion
+            let shape = motionPart.motion.shape
+            let (batchSize, numFrames) = (shape[0], shape[1])
 
-            // FIXME: preserve following?
-            // tile motion along joints dimension
-            // let multiplyBy = modelSize/nbJoints+1
-            // let tmpMotionPartFeatures = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<modelSize]
-            // motionPartFeatures = motionPositionalEncoding(tmpMotionPartFeatures)
+            // motion positional encoding
+            var motionPositionalEncodingVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, motionPositionalEncodingSize])
+            motionPositionalEncodingVector = motionPositionalEncoding(motionPositionalEncodingVector)
+            
+            // compute padding
+            let paddingSize = modelSize - (1 + motionPositionalEncodingSize + nbJoints)
+            // print("paddingSize: \(paddingSize)")
+            
+            let multiplyBy = paddingSize/nbJoints + 1
+            // print("multiplyBy: \(multiplyBy)")
+            let motionFramePadding = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<paddingSize]
+
+            // stack everything together
+            let tensorStack = [motionPart.startFlag, motionPositionalEncodingVector, motionPart.motion, motionFramePadding]
+            let tmpMotionPartFeatures = Tensor<Float>(concatenating: tensorStack, alongAxis: 2)
             motionPartFeatures = tmpMotionPartFeatures
         }
+
+        // FIXME: preserve following?
+        // tile motion along joints dimension
+        // let multiplyBy = modelSize/nbJoints+1
+        // let tmpMotionPartFeatures = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<modelSize]
+        // motionPartFeatures = motionPositionalEncoding(tmpMotionPartFeatures)            
+
         let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
         return self.decoder(decoderInput)
     }
