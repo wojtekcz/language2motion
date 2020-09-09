@@ -28,12 +28,12 @@ public typealias Activation<Scalar: TensorFlowFloatingPoint> =
 public typealias ActivationInput<Input: Differentiable,Scalar: TensorFlowFloatingPoint> =
     @differentiable (Input) -> Tensor<Scalar>
 
-struct DecoderContext: Differentiable {
-    var decoder: TransformerDecoderLayer,
+public struct DecoderContext: Differentiable {
+    public var decoder: TransformerDecoderLayer,
     input: DecoderInput<Float>
     
     @differentiable
-    init(decoder: TransformerDecoderLayer,
+    public init(decoder: TransformerDecoderLayer,
          input: DecoderInput<Float>) {
         self.decoder = decoder
         self.input = input
@@ -41,27 +41,27 @@ struct DecoderContext: Differentiable {
 }
 
 public struct SubLayerInput<Scalar: TensorFlowFloatingPoint >: Differentiable {
-    var sequence: Tensor<Scalar>
+    public var sequence: Tensor<Scalar>
     @noDerivative public let activation: SubLayerInput<Scalar>.Activation
     /// The element-wise activation function type.
     public typealias Activation = @differentiable (Tensor<Scalar>) -> Tensor<Scalar>
     
     @differentiable
-    init(sequence: Tensor<Scalar>, activation: @escaping SubLayerInput<Scalar>.Activation) {
+    public init(sequence: Tensor<Scalar>, activation: @escaping SubLayerInput<Scalar>.Activation) {
         self.sequence = sequence
         self.activation = activation
     }
 }
 
-struct DecoderSubLayerInput<Scalar: TensorFlowFloatingPoint >: Differentiable {
-    var sequence: Tensor<Scalar>
-    var decoderContext: DecoderInput<Scalar>
+public struct DecoderSubLayerInput<Scalar: TensorFlowFloatingPoint >: Differentiable {
+    public var sequence: Tensor<Scalar>
+    public var decoderContext: DecoderInput<Scalar>
     @noDerivative public let activation: DecoderSubLayerInput<Scalar>.Activation
     /// The element-wise activation function type.
     public typealias Activation = @differentiable (Tensor<Scalar>,DecoderInput<Scalar>) -> Tensor<Scalar>
     
     @differentiable
-    init(sequence: Tensor<Scalar>, decoderContext: DecoderInput<Scalar>, activation: @escaping DecoderSubLayerInput<Scalar>.Activation) {
+    public init(sequence: Tensor<Scalar>, decoderContext: DecoderInput<Scalar>, activation: @escaping DecoderSubLayerInput<Scalar>.Activation) {
         self.sequence = sequence
         self.activation = activation
         self.decoderContext = decoderContext
@@ -119,7 +119,7 @@ public struct SublayerConnection: Layer {
     }
     
     @differentiable
-    func decoderForward(_ input: DecoderSubLayerInput< Float>) -> Tensor<Float> {
+    public func decoderForward(_ input: DecoderSubLayerInput< Float>) -> Tensor<Float> {
         return input.sequence + self.dropout(input.activation(self.norm(input.sequence), input.decoderContext))
     }
 }
@@ -191,7 +191,7 @@ public struct DecoderInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     
     /// The batch size of this input. This is optional because it is only needed if the input
     /// sequences have been reshaped to matrices.
-    @noDerivative let batchSize: Int?
+    @noDerivative public let batchSize: Int?
     
     @differentiable
     public init(sequence: Tensor<Scalar>, sourceMask: Tensor<Scalar>,targetMask: Tensor<Scalar>, memory: Tensor<Scalar>, batchSize: Int? = nil) {
