@@ -18,7 +18,7 @@ public struct LossArgs {
 }
 
 @differentiable
-func _normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
+public func _normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
     let TINY: Float = 1e-8
     let pi: Float = 3.1415
     let nb_mixtures = args.nb_mixtures
