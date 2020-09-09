@@ -8,7 +8,7 @@ public struct LangMotion {
 
     public struct Sentence {
         public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
-        public var mask: Tensor<Float>       // bs x 1 x maxTextSequenceLength
+        public var mask: Tensor<Float>       // bs x maxMotionLength x maxTextSequenceLength
         public let tokenCount: Tensor<Int32> // bs
 
         public init(tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>) {

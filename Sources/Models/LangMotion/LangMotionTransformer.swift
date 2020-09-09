@@ -115,7 +115,7 @@ public struct LangMotionTransformer: Module {
 
             // compute contextVector
             let numTokens = memory.shape[1]
-            let mask = sourceMask.squeezingShape(at: 1).expandingShape(at: 2).broadcasted(to: [batchSize, numTokens, modelSize])
+            let mask = sourceMask[0..., 0, 0...].expandingShape(at: 2).broadcasted(to: [batchSize, numTokens, modelSize])
             let maskedMemory = memory * mask
             let meanMemory = maskedMemory.mean(alongAxes: 1).squeezingShape(at: 1) // get mean across steps
 
