@@ -124,7 +124,8 @@ public struct LangMotionTransformer: Module {
             let contextVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, contextSize])
 
             // previousMotion
-            let previousMotion = motionPart.previousMotion
+            // let previousMotion = motionPart.previousMotion
+            let previousMotion = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, nbJoints])
 
             // compute padding
             let motionFramePadding = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, modelSize - (1+motionPositionalEncodingSize+nbJoints*2+contextSize)])
