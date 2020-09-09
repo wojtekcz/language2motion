@@ -11,22 +11,23 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_34"
+let runName = "run_39"
 // let batchSize = 10
-let batchSize = 150
+let batchSize = 50
 let maxTextSequenceLength =  20
-let maxMotionLength =  100
+let maxMotionLength =  50
 let nEpochs = 20
-let peakLearningRate: Float = 2e-4
+let peakLearningRate: Float = 1e-3 // bs=50
+// let peakLearningRate: Float = 2e-4 // bs=10
 // let peakLearningRate: Float = 2e-5
 
-let stepsPerEpoch = 383*2 // function of training set size and batching configuration
+let stepsPerEpoch = 1967/batchSize*2 // function of training set size and batching configuration
 
 let beta1: Float = 0.9
 let beta2: Float = 0.999
 let useBiasCorrection = false
 
-let datasetSize: DatasetSize = .multi_full
+let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -35,6 +36,7 @@ print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
 print("peakLearningRate: \(peakLearningRate)")
 print("datasetSize: \(datasetSize)")
+print("stepsPerEpoch: \(stepsPerEpoch)")
 
 let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
@@ -75,9 +77,9 @@ let config = LangMotionTransformerConfig(
     nbJoints: 47, // TODO: get value from dataset
     nbMixtures: 20,
     layerCount: 6,
-    modelSize: 256,
-    feedForwardSize: 1024,
-    headCount: 8,
+    modelSize: 128,
+    feedForwardSize: 512,
+    headCount: 4,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
@@ -100,14 +102,15 @@ print("\nLoading dataset...")
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
-    minMotionLength: 10,
-    maxMotionLength: 100,
+    minMotionLength: 20,
+    maxMotionLength: 50,
     trainTestSplit: 1.0,
     demultiplyMotions: false,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
     let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+
     let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
     let singleBatch = LangMotionBatch(data: source, label: target)
     return singleBatch
