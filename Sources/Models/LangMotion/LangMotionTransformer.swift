@@ -72,7 +72,7 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func callAsFunction(_ input: LangMotionBatch.Source) -> LangMotionTransformerOutput<Float> {
         let encodedMemory = self.encode(input: input.sentence)
-        let decoded = self.decode(sourceMask: input.sentence.mask, motionPart: input.motionPart, memory: encodedMemory)
+        let decoded = self.decode(sourceMask: input.sourceAttentionMask, motionPart: input.motionPart, memory: encodedMemory)
         // reformat decoded.allOutputs[] into one tensor
         let mixtureModelInput = Tensor<Float>(concatenating: decoded.allOutputs, alongAxis: 2)
         return LangMotionTransformerOutput(preds: self.mixtureModel(mixtureModelInput), encoded: encodedMemory, decoded: decoded)
