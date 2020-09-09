@@ -116,7 +116,8 @@ var dataset = try Lang2Motion(
 print("Dataset acquired.")
 
 // TODO: make possible to call greedyDecodeMotion() during training again
-public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", saveMotion: Bool = true) {
+public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer, 
+                               sentence: String, prefix: String = "prefix", saveMotion: Bool = true, motionsURL: URL?) {
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
     print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
@@ -129,18 +130,20 @@ public func greedyDecodeMotion(sentence: String, prefix: String = "prefix", save
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
     print("  descaledMotion.shape: \(descaledMotion.shape)")
     print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
-
-    var imageURL: URL? = dataURL.appendingPathComponent("motion_images/\(prefix).png")
-    if !saveMotion { imageURL = nil }
+    var imageURL: URL? = nil
+    
+    if !saveMotion { imageURL = nil } else {
+        imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
+    }
     // use joint groupping
     let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(prefix), \(sentence)", cmapRange: 2.0)
+    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
 
     if saveMotion {
         print("Saved image: \(imageURL!.path)")
         let jointNames = dataset.motionSamples[0].jointNames
         let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
-        let mmmURL = dataURL.appendingPathComponent("motion_images/\(prefix).mmm.xml")
+        let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
         try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
         print("Saved motion: \(mmmURL.path)")
     }

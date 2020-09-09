@@ -101,10 +101,14 @@ public class MotionDecoder {
         // start with tensor for neutral motion frame
         let zeroMotionFrame = LangMotionBatch.zeroMotionFrame(nbJoints: nbJoints).expandingShape(at: 0)
         var ys: Tensor<Float> = zeroMotionFrame
-        for _ in 0..<maxMotionLength {
+        print("ys.shape: \(ys.shape)")
+        
+        let maxMotionLength2 = maxMotionLength-ys.shape[1] + 1        
+        for _ in 0..<maxMotionLength2 {
             // prepare input
-            let motionPartMask = Tensor<Float>(LangMotionBatch.subsequentMask(size: ys.shape[1]))
-            let previous_ys = Tensor<Float>(concatenating: [zeroMotionFrame, ys[0..., 0...ys.shape[1]-1, 0...]])
+            let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
+            let motionPartMask = LangMotionBatch.makeStandardMask(target: motionPartFlag, pad: 0)
+            let previous_ys = Tensor<Float>(concatenating: [zeroMotionFrame, ys], alongAxis: 1)[0..., 0...ys.shape[1]-1, 0...]
             var motionStartFlag = Tensor<Float>(zeros: [ys.shape[1], 1]).expandingShape(at: 0) // FIXME: refactor getting motionStartFlag
             motionStartFlag[0, 0, 0] = Tensor(1.0)
             let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask, previousMotion: previous_ys, startFlag: motionStartFlag)
@@ -113,7 +117,7 @@ public class MotionDecoder {
             let dedoderOutput = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
             let mixtureModelInput = Tensor<Float>(concatenating: dedoderOutput.allOutputs, alongAxis: 2)
             let singlePreds = transformer.mixtureModel(mixtureModelInput[0...,-1].expandingShape(at: 0))
-            
+
             // perform sampling
             let (sampledMotion, _, _) = MotionDecoder.performNormalMixtureSampling(
                 preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
@@ -121,7 +125,7 @@ public class MotionDecoder {
             // concatenate motion
             ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)
         }
-        return ys.squeezingShape(at:0)
+        return ys.squeezingShape(at:0)[1...]
     }
 
     public static func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {
