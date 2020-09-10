@@ -27,20 +27,16 @@ public struct LangMotionTransformer: Module {
     public var embedding: Embedding<Float>
     public var positionalEncoding: PositionalEncoding
     public var motionPositionalEncoding: PositionalEncoding
-    public var motionDense: Dense<Float>
-    public var contextDense: Dense<Float>
     public var motionNorm: LayerNorm<Float>
     public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
     public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var modelSize: Int
     @noDerivative public var nbJoints: Int
     @noDerivative public var nbMixtures: Int
-    @noDerivative public var doMotionDense: Bool
-    @noDerivative public var contextSize: Int
     @noDerivative public var motionPositionalEncodingSize: Int
 
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, 
-                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000, doMotionDense: Bool = true) {
+                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
                                            targetSize: modelSize,
@@ -58,16 +54,11 @@ public struct LangMotionTransformer: Module {
         
         self.encoder = Encoder(layer: .init(size: modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
-        self.motionDense = Dense<Float>(inputSize: nbJoints, outputSize: modelSize)
         self.motionNorm = LayerNorm(featureCount: modelSize, axis: 2)
-        let contextSize = 128
-        self.contextDense = Dense<Float>(inputSize: modelSize, outputSize: 128) // FIXME: parametrize contextSize = 128
         self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize*layerCount, nbJoints: nbJoints, nbMixtures: nbMixtures)
         self.modelSize = modelSize
         self.nbJoints = nbJoints        
         self.nbMixtures = nbMixtures
-        self.doMotionDense = doMotionDense
-        self.contextSize = contextSize
         self.motionPositionalEncodingSize = motionPositionalEncodingSize
     }
 
@@ -90,81 +81,27 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>) -> DecoderOutput<Float> {
         var motionPartFeatures: Tensor<Float>
-        if doMotionDense {
-            // TODO: kill motionDense layer eventually
-            let shape = motionPart.motion.shape
-            let (origBatchSize, numFrames) = (shape[0], shape[1])
 
-            let tmpBatchSize = origBatchSize * numFrames
-            let tmpMotionPart = motionPart.motion.reshaped(to: [tmpBatchSize, nbJoints])
+        // start flag, pos enc, current motion, padding with motion
+        let shape = motionPart.motion.shape
+        let (batchSize, numFrames) = (shape[0], shape[1])
 
-            // FIXME: make targetEmbed() work
-            let tmpMotionPartFeatures = motionDense(tmpMotionPart) // batch size here is origBatchSize*numFrames
-            motionPartFeatures = tmpMotionPartFeatures.reshaped(to: [origBatchSize, numFrames, self.modelSize])
-            motionPartFeatures = motionPositionalEncoding(motionPartFeatures)
-        } else if (false) {
-            // TODO: refactor this out
-            // assuming modelSize = 256
-            let shape = motionPart.motion.shape
-            let (batchSize, numFrames) = (shape[0], shape[1])
+        // motion positional encoding
+        var motionPositionalEncodingVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, motionPositionalEncodingSize])
+        motionPositionalEncodingVector = motionPositionalEncoding(motionPositionalEncodingVector)
+        
+        // compute padding
+        let paddingSize = modelSize - (1 + motionPositionalEncodingSize + nbJoints)
+        
+        let multiplyBy = paddingSize/nbJoints + 1
+        let motionFramePadding = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<paddingSize]
 
-            // motion positional encoding
-            var motionPositionalEncodingVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, motionPositionalEncodingSize])
-            motionPositionalEncodingVector = motionPositionalEncoding(motionPositionalEncodingVector)
-            
-            // current motion
-            let currentMotion = motionPart.motion
-
-            // compute contextVector
-            // let numTokens = memory.shape[1]
-            // let mask = sourceMask[0..., 0, 0...].expandingShape(at: 2).broadcasted(to: [batchSize, numTokens, modelSize])
-            // let maskedMemory = memory * mask
-            // let meanMemory = maskedMemory.mean(alongAxes: 1).squeezingShape(at: 1) // get mean across steps
-
-            // let contextVector = contextDense(meanMemory).expandingShape(at: 1).broadcasted(to: [batchSize, numFrames, contextSize])
-
-            let contextVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, contextSize])
-
-            // previousMotion
-            // let previousMotion = motionPart.previousMotion
-            let previousMotion = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, nbJoints])
-
-            // compute padding
-            let motionFramePadding = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, modelSize - (1+motionPositionalEncodingSize+nbJoints*2+contextSize)])
-
-            let tensorStack = [motionPart.startFlag, motionPositionalEncodingVector, currentMotion, previousMotion, contextVector, motionFramePadding]
-            let tmpMotionPartFeatures = Tensor<Float>(concatenating: tensorStack, alongAxis: 2)
-            motionPartFeatures = tmpMotionPartFeatures
-        } else {
-            // start flag, pos enc, current motion, padding with motion
-            let shape = motionPart.motion.shape
-            let (batchSize, numFrames) = (shape[0], shape[1])
-
-            // motion positional encoding
-            var motionPositionalEncodingVector = Tensor<Float>(repeating: 0.0, shape: [batchSize, numFrames, motionPositionalEncodingSize])
-            motionPositionalEncodingVector = motionPositionalEncoding(motionPositionalEncodingVector)
-            
-            // compute padding
-            let paddingSize = modelSize - (1 + motionPositionalEncodingSize + nbJoints)
-            // print("paddingSize: \(paddingSize)")
-            
-            let multiplyBy = paddingSize/nbJoints + 1
-            // print("multiplyBy: \(multiplyBy)")
-            let motionFramePadding = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<paddingSize]
-
-            // stack everything together
-            let tensorStack = [motionPart.startFlag, motionPositionalEncodingVector, motionPart.motion, motionFramePadding]
-            let tmpMotionPartFeatures = Tensor<Float>(concatenating: tensorStack, alongAxis: 2)
-            motionPartFeatures = tmpMotionPartFeatures
-        }
+        // stack everything together
+        let tensorStack = [motionPart.startFlag, motionPositionalEncodingVector, motionPart.motion, motionFramePadding]
+        let tmpMotionPartFeatures = Tensor<Float>(concatenating: tensorStack, alongAxis: 2)
+        motionPartFeatures = tmpMotionPartFeatures
 
         motionPartFeatures = self.motionNorm(motionPartFeatures)
-
-        // FIXME: preserve following?
-        // tile motion along joints dimension
-        // let multiplyBy = modelSize/nbJoints+1
-        // let tmpMotionPartFeatures = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<modelSize]
-        // motionPartFeatures = motionPositionalEncoding(tmpMotionPartFeatures)            
 
         let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
         return self.decoder(decoderInput)
@@ -174,23 +111,19 @@ public struct LangMotionTransformer: Module {
 extension LangMotionTransformer {
 
     public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
-        motionDense: Dense<Float>, contextDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
-        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, doMotionDense: Bool, motionNorm: LayerNorm<Float>) 
+        sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
+        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, motionNorm: LayerNorm<Float>) 
     {
         self.encoder = encoder
         self.decoder = decoder
         self.embedding = embedding
         self.positionalEncoding = positionalEncoding
         self.motionPositionalEncoding = motionPositionalEncoding
-        self.motionDense = motionDense
-        self.contextDense = contextDense
         self.sourceEmbed = sourceEmbed
         self.mixtureModel = mixtureModel
         self.modelSize = modelSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
-        self.doMotionDense = doMotionDense
-        self.contextSize = 128 // FIXME: parametrize contextSize
         self.motionPositionalEncodingSize = 32 // FIXME: parametrize motionPositionalEncodingSize
         self.motionNorm = motionNorm
     }
@@ -206,8 +139,7 @@ extension LangMotionTransformer {
             headCount: config.headCount, 
             dropoutProbability: config.dropoutProbability, 
             sentenceMaxPositionalLength: config.sentenceMaxPositionalLength, 
-            motionMaxPositionalLength: config.motionMaxPositionalLength,
-            doMotionDense: config.doMotionDense
+            motionMaxPositionalLength: config.motionMaxPositionalLength
         )
     }
 }

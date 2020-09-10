@@ -17,13 +17,12 @@ public struct LangMotionTransformerConfig { //: Codable {
     public let dropoutProbability: Double
     public let sentenceMaxPositionalLength: Int
     public let motionMaxPositionalLength: Int
-    public let doMotionDense: Bool
 
 //     enum CodingKeys: String, CodingKey {
 //         case vocabSize = "vocabSize"
 //     }
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, modelSize: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, doMotionDense: Bool) {
+                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
@@ -34,7 +33,6 @@ public struct LangMotionTransformerConfig { //: Codable {
         self.dropoutProbability = dropoutProbability
         self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
         self.motionMaxPositionalLength = motionMaxPositionalLength
-        self.doMotionDense = doMotionDense
     }
 }
 
@@ -225,8 +223,6 @@ extension LangMotionTransformer {
             let scope = "model"
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
             let _decoder = Decoder(reader: reader, config: config, scope: scope + "/decoder")
-            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense")
-            let _contextDense = Dense<Float>(reader: reader, config: config, scope: scope + "/contextDense")
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
             let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
             let motionPositionalEncodingSize = 32
@@ -238,8 +234,8 @@ extension LangMotionTransformer {
             let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
             
             self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, motionPositionalEncoding: _motionPositionalEncoding,
-                      motionDense: _motionDense, contextDense: _contextDense, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
-                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, doMotionDense: config.doMotionDense, motionNorm: _motionNorm)
+                      sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
+                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, motionNorm: _motionNorm)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
             print("Fail to load LangMotionTransformer from checkpoint. \(error)")

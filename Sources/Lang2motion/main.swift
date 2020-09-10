@@ -82,8 +82,7 @@ let config = LangMotionTransformerConfig(
     headCount: 4,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500,
-    doMotionDense: false
+    motionMaxPositionalLength: 500
 )
 
 var start_epoch = 0
