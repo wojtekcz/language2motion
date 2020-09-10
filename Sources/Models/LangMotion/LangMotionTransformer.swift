@@ -29,6 +29,7 @@ public struct LangMotionTransformer: Module {
     public var motionPositionalEncoding: PositionalEncoding
     public var motionDense: Dense<Float>
     public var contextDense: Dense<Float>
+    public var motionNorm: LayerNorm<Float>
     public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
     public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var modelSize: Int
@@ -58,6 +59,7 @@ public struct LangMotionTransformer: Module {
         self.encoder = Encoder(layer: .init(size: modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.motionDense = Dense<Float>(inputSize: nbJoints, outputSize: modelSize)
+        self.motionNorm = LayerNorm(featureCount: modelSize, axis: 2)
         let contextSize = 128
         self.contextDense = Dense<Float>(inputSize: modelSize, outputSize: 128) // FIXME: parametrize contextSize = 128
         self.mixtureModel = MotionGaussianMixtureModel(inputSize: modelSize*layerCount, nbJoints: nbJoints, nbMixtures: nbMixtures)
@@ -156,6 +158,8 @@ public struct LangMotionTransformer: Module {
             motionPartFeatures = tmpMotionPartFeatures
         }
 
+        motionPartFeatures = self.motionNorm(motionPartFeatures)
+
         // FIXME: preserve following?
         // tile motion along joints dimension
         // let multiplyBy = modelSize/nbJoints+1
@@ -171,7 +175,7 @@ extension LangMotionTransformer {
 
     public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
         motionDense: Dense<Float>, contextDense: Dense<Float>, sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
-        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, doMotionDense: Bool) 
+        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, doMotionDense: Bool, motionNorm: LayerNorm<Float>) 
     {
         self.encoder = encoder
         self.decoder = decoder
@@ -188,6 +192,7 @@ extension LangMotionTransformer {
         self.doMotionDense = doMotionDense
         self.contextSize = 128 // FIXME: parametrize contextSize
         self.motionPositionalEncodingSize = 32 // FIXME: parametrize motionPositionalEncodingSize
+        self.motionNorm = motionNorm
     }
 
     public init(config: LangMotionTransformerConfig) {

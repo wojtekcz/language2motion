@@ -234,10 +234,12 @@ extension LangMotionTransformer {
             let _sourceEmbed = Sequential(_embedding, _positionalEncoding)
 
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
+
+            let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
             
             self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, motionPositionalEncoding: _motionPositionalEncoding,
                       motionDense: _motionDense, contextDense: _contextDense, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
-                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, doMotionDense: config.doMotionDense)
+                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, doMotionDense: config.doMotionDense, motionNorm: _motionNorm)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
             print("Fail to load LangMotionTransformer from checkpoint. \(error)")

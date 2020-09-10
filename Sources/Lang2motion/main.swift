@@ -11,12 +11,12 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_39"
+let runName = "run_41"
 // let batchSize = 10
 let batchSize = 50
 let maxTextSequenceLength =  20
 let maxMotionLength =  50
-let nEpochs = 20
+let nEpochs = 30
 let peakLearningRate: Float = 1e-3 // bs=50
 // let peakLearningRate: Float = 2e-4 // bs=10
 // let peakLearningRate: Float = 2e-5
@@ -89,12 +89,12 @@ let config = LangMotionTransformerConfig(
 var start_epoch = 0
 
 /// create new model
-var model = LangMotionTransformer(config: config)
+// var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-// print("checkpointURL: \(checkpointURL.path)")
-// start_epoch = 40
-// var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
+print("checkpointURL: \(checkpointURL.path)")
+start_epoch = 2
+var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
 
 /// load dataset
 print("\nLoading dataset...")
