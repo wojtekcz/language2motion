@@ -46,7 +46,18 @@ public struct MotionGaussianMixtureModel: Module {
         // Processing gaussian mixture params:
         let mixtureMeans = linearMixtureMeans(x)
         let mixtureVars = softplus(linearMixtureVars(x))
-        let mixtureWeights = softmax(linearMixtureWeights(x), alongAxis: 1)
+        var mixtureWeights = softmax(linearMixtureWeights(x), alongAxis: 1)
+
+        if mixtureWeights.isNaN.any() {
+            // print("Fixing NaNs")
+            var divider = 1.0
+            let double_x = Tensor<Double>(linearMixtureWeights(x))
+            while mixtureWeights.isNaN.any() {
+                mixtureWeights = Tensor<Float>(softmax(double_x/divider, alongAxis: 1))
+                divider *= 10.0
+            }
+        }
+
         // stop
         let stop = sigmoid(linearStop(x))
         // merge

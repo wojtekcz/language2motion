@@ -59,6 +59,10 @@ public class MotionDecoder {
             // Decide which mixture to sample from
             let p = weights[width_idx].scalars.map { Double($0)}
             assert(p.count == nb_mixtures)
+            if weights[width_idx].isNaN.any() {
+                print("performNormalMixtureSampling: still NaNs?!")
+                print(p)
+            }
             let mixture_idx = randomNumber(probabilities: p) //np.random.choice(range(nb_mixtures), p=p)
 
             /// Sample from it.
