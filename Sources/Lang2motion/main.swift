@@ -104,7 +104,6 @@ var dataset = try Lang2Motion(
     minMotionLength: 20,
     maxMotionLength: 50,
     trainTestSplit: 1.0,
-    demultiplyMotions: false,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)

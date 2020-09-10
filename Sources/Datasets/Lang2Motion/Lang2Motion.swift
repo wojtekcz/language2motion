@@ -39,24 +39,12 @@ public struct Lang2Motion {
 
 extension Lang2Motion {
 
-    public static func demultiplyMotionSamples(_ motionSamples: [MotionSample]) -> [MotionSample] {
-        var _uniqueMotionSampleDict: [Int: MotionSample] = [:]
-        for ms in motionSamples {
-            // only assign first (downsampled) sample
-            if _uniqueMotionSampleDict[ms.sampleID] == nil {
-                _uniqueMotionSampleDict[ms.sampleID] = ms
-            }
-        }
-        return _uniqueMotionSampleDict.map { $0.value }
-    }
-
     public init(
         motionDatasetURL: URL,
         batchSize: Int,
         minMotionLength: Int = 10,
         maxMotionLength: Int = 100,
         trainTestSplit: Double = 0.8,
-        demultiplyMotions: Bool = false,
         device: Device,
         exampleMap: @escaping (MotionSample) -> LangMotionBatch
     ) throws {
@@ -75,12 +63,6 @@ extension Lang2Motion {
         // filter out longest samples
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] <= maxMotionLength }
         print("Keeping \(_motionSamples.count) shorter motions, with maximum \(maxMotionLength) frames.")
-
-        // filter out multiplied motions
-        if demultiplyMotions {
-            _motionSamples = Self.demultiplyMotionSamples(_motionSamples)
-            print("Demultiplaying motions back to \(_motionSamples.count).")
-        }
 
         // scale motions
         print("Scaling motions...")
