@@ -223,7 +223,11 @@ extension LangMotionBatch {
         let previousMotionPartTensor = Tensor(concatenating: [zeroMotionFrame, motionPartTensor[0, 0..<motionPartTensor.shape[1]-1, 0...]], alongAxis: 0).expandingShape(at: 0)
 
         let motionPartFlag = motionFlag[0..., rangeExceptLast]
-        let motionPartMask = makeStandardMask(target: motionPartFlag, pad: 0, shiftRight: shiftMaskRight) // FIXME: fix target mask
+        var motionPartMask = makeStandardMask(target: motionPartFlag, pad: 0, shiftRight: shiftMaskRight) // FIXME: fix target mask
+        let motionLen = Int(motionFlag.sum().scalar!)
+        motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
+        motionPartMask = abs(motionPartMask)
+
         var motionStartFlag = Tensor<Float>(zeros: [motionPartTensor.shape[1], 1]).expandingShape(at: 0)
         motionStartFlag[0, 0, 0] = Tensor(1.0)
 
