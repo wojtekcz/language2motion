@@ -107,7 +107,7 @@ var dataset = try Lang2Motion(
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in    
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, shiftMaskRight: true)
 
     let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
     let singleBatch = LangMotionBatch(data: source, label: target)
