@@ -97,7 +97,8 @@ public class MotionDecoder {
     public static func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, transformer: LangMotionTransformer, nbJoints: Int, nbMixtures: Int, maxMotionLength: Int) -> Tensor<Float> {
         print("\nEncode:")
         print("======")
-        let memory = transformer.encode(input: sentence)
+        let encoded = transformer.encode(input: sentence)
+        let memory = encoded.lastLayerOutput
         print("  memory.count: \(memory.shape)")
 
         print("\nGenerate:")
@@ -119,7 +120,7 @@ public class MotionDecoder {
 
             // decode motion
             let dedoderOutput = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
-            let mixtureModelInput = Tensor<Float>(concatenating: dedoderOutput.allOutputs, alongAxis: 2)
+            let mixtureModelInput = Tensor<Float>(concatenating: dedoderOutput.allResults, alongAxis: 2)
             let singlePreds = transformer.mixtureModel(mixtureModelInput[0...,-1].expandingShape(at: 0))
 
             // perform sampling

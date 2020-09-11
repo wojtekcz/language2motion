@@ -54,6 +54,24 @@ public struct AttentionInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     }
 }
 
+/// Output of an attention layer.
+public struct AttentionOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
+    public var result: Tensor<Scalar>
+    public var attentionProbs: Tensor<Scalar>
+    public var attentionScores: Tensor<Scalar>
+
+    @differentiable
+    public init(
+        result: Tensor<Scalar>,
+        attentionProbs: Tensor<Scalar>,
+        attentionScores: Tensor<Scalar>
+    ) {
+        self.result = result
+        self.attentionProbs = attentionProbs
+        self.attentionScores = attentionScores
+    }
+}
+
 /// Multi-head attention layer.
 ///
 /// This implementation is based on the
@@ -194,8 +212,59 @@ public struct MultiHeadAttention: Layer, Regularizable {
         self.attentionDropout = Dropout(probability: Double(attentionDropoutProbability))
     }
 
+    // @differentiable
+    // public func callAsFunction(_ input: AttentionInput<Scalar>) -> Tensor<Scalar> {
+    //     precondition(
+    //         input.source.rank == 3 || input.batchSize != nil,
+    //         "Whenever the input is provided in matrix form, the batch size must also be provided.")
+    //     // Scalar dimensions referenced here:
+    //     //   - B = batch size (number of sequences)
+    //     //   - F = `input.source` sequence length
+    //     //   - T = `input.target` sequence length
+    //     //   - N = number of attention heads
+    //     //   - H = size per attention head
+    //     let matrixInput = input.source.rank < 3
+    //     let B = matrixInput ? input.batchSize! : input.source.shape[0]
+    //     let F = matrixInput ? input.source.shape[0] / B : input.source.shape[1]
+    //     let T = matrixInput ? input.target.shape[0] / B : input.target.shape[1]
+    //     let N = headCount
+    //     let H = headSize
+
+    //     let source = input.source.reshapedToMatrix()
+    //     let target = input.target.reshapedToMatrix()
+
+    //     var q = queryActivation(matmul(source, queryWeight) + queryBias)  // [B * F, N * H]
+    //     var k = keyActivation(matmul(target, keyWeight) + keyBias)  // [B * T, N * H]
+    //     var v = valueActivation(matmul(target, valueWeight) + valueBias)  // [B * T, N * H]
+
+    //     q = q.reshaped(to: [B, F, N, H]).transposed(permutation: 0, 2, 1, 3)  // [B, N, F, H]
+    //     k = k.reshaped(to: [B, T, N, H]).transposed(permutation: 0, 2, 1, 3)  // [B, N, T, H]
+    //     v = v.reshaped(to: [B, T, N, H]).transposed(permutation: 0, 2, 1, 3)  // [B, N, T, H]
+
+    //     // Take the dot product between the query and the key to get the raw attention scores.
+    //     var attentionScores = matmul(q, transposed: false, k, transposed: true)  // [B, N, F, T]
+    //     attentionScores = attentionScores / sqrtf(Scalar(headSize))
+
+    //     // Since the attention mask is set to 1.0 for positions we want to attend to and 0.0 for
+    //     // masked positions, we create a tensor which is 0.0 for positions we want to attend to and 
+    //     // -10000.0 for masked positions. Since we are adding this tensor to the raw scores before 
+    //     // the softmax, this is effectively the same as removing the masked entries entirely.
+    //     let attentionMask = input.mask.expandingShape(at: 1)  // [B, 1, F, T]
+    //     attentionScores = attentionScores - 10000 * (1 - attentionMask)
+
+    //     // Normalize the attention scores to convert them to probabilities. We are also dropping
+    //     // out entire tokens to attend to, which might seem a bit unusual, but it is taken from the
+    //     // original Transformer paper.
+    //     let attentionProbabilities = attentionDropout(softmax(attentionScores))  // [B, N, F, T]
+
+    //     let result = matmul(attentionProbabilities, v)  // [B, N, F, H]
+    //         .transposed(permutation: 0, 2, 1, 3)  // [B, F, N, H]
+    //     return matrixResult
+    //         ? result.reshaped(to: [B * F, N * H]) : result.reshaped(to: [B, F, N * H])
+    // }
+
     @differentiable
-    public func callAsFunction(_ input: AttentionInput<Scalar>) -> Tensor<Scalar> {
+    public func callAsFunction(_ input: AttentionInput<Scalar>) -> AttentionOutput<Scalar> {
         precondition(
             input.source.rank == 3 || input.batchSize != nil,
             "Whenever the input is provided in matrix form, the batch size must also be provided.")
@@ -239,10 +308,17 @@ public struct MultiHeadAttention: Layer, Regularizable {
         // original Transformer paper.
         let attentionProbabilities = attentionDropout(softmax(attentionScores))  // [B, N, F, T]
 
+        // output attentionProbabilities
+
         let result = matmul(attentionProbabilities, v)  // [B, N, F, H]
             .transposed(permutation: 0, 2, 1, 3)  // [B, F, N, H]
-        return matrixResult
-            ? result.reshaped(to: [B * F, N * H]) : result.reshaped(to: [B, F, N * H])
+
+        let output = AttentionOutput(
+            result: matrixResult ? result.reshaped(to: [B * F, N * H]) : result.reshaped(to: [B, F, N * H]),
+            attentionProbs: attentionProbabilities,
+            attentionScores: attentionScores
+        )
+        return output
     }
 }
 
