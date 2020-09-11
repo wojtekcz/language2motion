@@ -88,7 +88,7 @@ var translationTask = try WMTTranslationTask(taskDirectoryURL: workspaceURL, max
 var model = TransformerModel(sourceVocabSize: translationTask.sourceVocabSize, targetVocabSize: translationTask.targetVocabSize)
 
 func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
-    let memory = model.encode(input: input).lastLayerOutput
+    let memory = model.encode(input: input)
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
     for _ in 0..<maxLength {
         let decoderInput = TranslationBatch(tokenIds: input.tokenIds,

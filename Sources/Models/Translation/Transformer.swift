@@ -38,12 +38,12 @@ public struct TransformerModel: Module {
     
     @differentiable
     public func callAsFunction(_ input: TranslationBatch) -> Tensor<Float> {
-        let encodedMemory = self.encode(input: input).lastLayerOutput
+        let encodedMemory = self.encode(input: input)
         return self.decode(input: input, memory: encodedMemory)
     }
     
     @differentiable
-    public func encode(input: TranslationBatch) -> EncoderOutput<Float> {
+    public func encode(input: TranslationBatch) -> Tensor<Float> {
         let embedded = self.sourceEmbed(input.tokenIds)
         let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask)
         return self.encoder(encoderInput)
