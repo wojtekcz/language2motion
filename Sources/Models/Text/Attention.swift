@@ -54,6 +54,31 @@ public struct AttentionInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     }
 }
 
+/// Output of an attention layer.
+public struct AttentionOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
+    public var result: Tensor<Scalar>
+    public var attentionProbs: Tensor<Scalar>
+    public var attentionScores: Tensor<Scalar>
+
+    @differentiable
+    public init(
+        result: Tensor<Scalar>,
+        attentionProbs: Tensor<Scalar>,
+        attentionScores: Tensor<Scalar>
+    ) {
+        self.result = result
+        self.attentionProbs = attentionProbs
+        self.attentionScores = attentionScores
+    }
+
+    public func printAttentionOutput() {
+        print("AttentionOutput")
+        print("  result.shape: \(result.shape)")
+        print("  attentionProbs.shape: \(attentionProbs.shape)")
+        print("  attentionScores.shape: \(attentionScores.shape)")
+    }
+}
+
 /// Multi-head attention layer.
 ///
 /// This implementation is based on the
@@ -195,7 +220,7 @@ public struct MultiHeadAttention: Layer, Regularizable {
     }
 
     @differentiable
-    public func callAsFunction(_ input: AttentionInput<Scalar>) -> Tensor<Scalar> {
+    public func callAsFunction(_ input: AttentionInput<Scalar>) -> AttentionOutput<Scalar> {
         precondition(
             input.source.rank == 3 || input.batchSize != nil,
             "Whenever the input is provided in matrix form, the batch size must also be provided.")
@@ -241,8 +266,13 @@ public struct MultiHeadAttention: Layer, Regularizable {
 
         let result = matmul(attentionProbabilities, v)  // [B, N, F, H]
             .transposed(permutation: 0, 2, 1, 3)  // [B, F, N, H]
-        return matrixResult
-            ? result.reshaped(to: [B * F, N * H]) : result.reshaped(to: [B, F, N * H])
+
+        let output = AttentionOutput(
+            result: matrixResult ? result.reshaped(to: [B * F, N * H]) : result.reshaped(to: [B, F, N * H]),
+            attentionProbs: attentionProbabilities,
+            attentionScores: attentionScores
+        )
+        return output
     }
 }
 

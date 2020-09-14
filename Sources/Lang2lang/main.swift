@@ -206,7 +206,7 @@ var source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingS
 
 
 func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
-    let memory = model.encode(input: input)
+    let memory = model.encode(input: input).lastLayerOutput
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
     // ys = Tensor(copying: ys, to: device)
     for _ in 0..<maxLength {

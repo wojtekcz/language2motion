@@ -9,7 +9,37 @@
 import TensorFlow
 import TextModels
 
-public struct TransformerEncoderLayer2:Layer {
+/// Output of an encoder layer.
+public struct EncoderLayerOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
+    public var result: Tensor<Scalar>
+    @noDerivative public var attentionOutput: AttentionOutput<Scalar>?
+
+    @differentiable
+    public init(
+        result: Tensor<Scalar>,
+        attentionOutput: AttentionOutput<Scalar>?
+    ) {
+        self.result = result
+        self.attentionOutput = attentionOutput
+    }
+}
+
+/// Output of an encoder.
+public struct EncoderOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
+    public var lastLayerOutput: Tensor<Scalar>
+    @noDerivative public var allLayerOutputs: [EncoderLayerOutput<Float>]
+
+    @differentiable
+    public init(
+        lastLayerOutput: Tensor<Scalar>,
+        allLayerOutputs: [EncoderLayerOutput<Float>]
+    ) {
+        self.lastLayerOutput = lastLayerOutput
+        self.allLayerOutputs = allLayerOutputs
+    }
+}
+
+public struct TransformerEncoderLayer2: Layer {
     public var selfAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
     sublayers: [SublayerConnection]
@@ -27,18 +57,22 @@ public struct TransformerEncoderLayer2:Layer {
     }
 
     @differentiable
-    public func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: TransformerInput<Float>) -> EncoderLayerOutput<Float> {
         // SR-11882
         let selfNoDerivative = withoutDerivative(at: self)
         let inputNoDerivative = withoutDerivative(at: input)
         let batchSizeNotDerivative = withoutDerivative(at: input.batchSize)
-        let output = self.sublayers[0](.init(sequence: input.sequence, activation: {
+        var _attentionOutput: AttentionOutput<Float>? = nil
+        var output = self.sublayers[0](.init(sequence: input.sequence, activation: {
             let attentionInput = AttentionInput(source: $0, target: $0, mask: inputNoDerivative.attentionMask, batchSize: batchSizeNotDerivative)
-            return selfNoDerivative.selfAttention.callAsFunction(attentionInput)
+            let attentionOutput = selfNoDerivative.selfAttention.callAsFunction(attentionInput)
+            _attentionOutput = attentionOutput
+            return attentionOutput.result
         }))
-        return self.sublayers[1](.init(sequence: output, activation: {
+        output = self.sublayers[1](.init(sequence: output, activation: {
             selfNoDerivative.feedForward.callAsFunction($0)
         }))
+        return EncoderLayerOutput(result: output, attentionOutput: _attentionOutput)
     }
 }
 
@@ -56,15 +90,20 @@ public struct Encoder: Layer {
     }
 
     @differentiable
-    public func callAsFunction(_ input: TransformerInput<Float>) -> Tensor<Float> {
+    public func callAsFunction(_ input: TransformerInput<Float>) -> EncoderOutput<Float> {
+        var allLayerOutputs: [EncoderLayerOutput<Float>] = []
         var transformerInput = input.sequence
         
         for layerIndex in 0..<(withoutDerivative(at: layers) { $0.count }) {
-            transformerInput = layers[layerIndex](TransformerInput(
+            let layerOutput = layers[layerIndex](TransformerInput(
                 sequence: transformerInput,
                 attentionMask: input.attentionMask))
+            
+            let layerOutputNoDerivative = withoutDerivative(at: layerOutput) { EncoderLayerOutput(result: $0.result, attentionOutput: $0.attentionOutput) }
+            allLayerOutputs.append(layerOutputNoDerivative)
+            transformerInput = layerOutput.result
         }
         
-        return transformerInput
+        return EncoderOutput<Float>(lastLayerOutput: transformerInput, allLayerOutputs: allLayerOutputs)
     }
 }

@@ -297,7 +297,7 @@ public struct TransformerEncoderLayer: Layer, Regularizable {
             target: input.sequence,
             mask: input.attentionMask,
             batchSize: input.batchSize)
-        var attentionOutput = multiHeadAttention(attentionInput)
+        var attentionOutput = multiHeadAttention(attentionInput).result
 
         // Run a linear projection of `hiddenSize` and then add a residual connection to the input.
         attentionOutput = matmul(attentionOutput, attentionWeight) + attentionBias
