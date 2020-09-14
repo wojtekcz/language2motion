@@ -113,10 +113,9 @@ public class MotionDecoder {
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeStandardMask(target: motionPartFlag, pad: 0)
-            let previous_ys = Tensor<Float>(concatenating: [zeroMotionFrame, ys], alongAxis: 1)[0..., 0...ys.shape[1]-1, 0...]
             var motionStartFlag = Tensor<Float>(zeros: [ys.shape[1], 1]).expandingShape(at: 0) // FIXME: refactor getting motionStartFlag
             motionStartFlag[0, 0, 0] = Tensor(1.0)
-            let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask, previousMotion: previous_ys, startFlag: motionStartFlag, motionFlag: motionPartFlag)
+            let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask, startFlag: motionStartFlag, motionFlag: motionPartFlag)
 
             // decode motion
             let dedoderOutput = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
