@@ -34,9 +34,15 @@ public struct LangMotionTransformer: Module {
     @noDerivative public var nbJoints: Int
     @noDerivative public var nbMixtures: Int
     @noDerivative public var motionPositionalEncodingSize: Int
+    @noDerivative public let encoderSelfAttentionTemp: Double
+    @noDerivative public let decoderSourceAttentionTemp: Double
+    @noDerivative public let decoderSelfAttentionTemp: Double
+    // TODO: keep config structure
 
+    // TODO: kill this initializer
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int = 6, modelSize: Int = 256, feedForwardSize: Int = 1024, 
-                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000) {
+                headCount: Int = 8, dropoutProbability: Double = 0.1, sentenceMaxPositionalLength: Int = 5000, motionMaxPositionalLength: Int = 5000,
+                encoderSelfAttentionTemp: Double = 1.0, decoderSourceAttentionTemp: Double = 1.0, decoderSelfAttentionTemp: Double = 1.0) {
         
         let attention = MultiHeadAttention(sourceSize: modelSize,
                                            targetSize: modelSize,
@@ -60,6 +66,9 @@ public struct LangMotionTransformer: Module {
         self.nbJoints = nbJoints        
         self.nbMixtures = nbMixtures
         self.motionPositionalEncodingSize = motionPositionalEncodingSize
+        self.encoderSelfAttentionTemp = encoderSelfAttentionTemp
+        self.decoderSourceAttentionTemp = decoderSourceAttentionTemp
+        self.decoderSelfAttentionTemp = decoderSelfAttentionTemp
     }
 
     @differentiable
@@ -75,7 +84,7 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func encode(input: LangMotionBatch.Sentence) -> EncoderOutput<Float> {
         let embedded = self.sourceEmbed(input.tokenIds)
-        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask)
+        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask, selfAttentionTemperature: Float(self.encoderSelfAttentionTemp))
         return self.encoder(encoderInput)
     }
     
@@ -104,7 +113,8 @@ public struct LangMotionTransformer: Module {
 
         motionPartFeatures = self.motionNorm(motionPartFeatures)
 
-        let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory)
+        let decoderInput = DecoderInput(sequence: motionPartFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory, 
+                                        sourceAttentionTemperature: Float(self.decoderSourceAttentionTemp), selfAttentionTemperature: Float(self.decoderSelfAttentionTemp))
         return self.decoder(decoderInput)
     }
 }
@@ -113,7 +123,8 @@ extension LangMotionTransformer {
 
     public init(encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding, 
         sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>, 
-        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, motionNorm: LayerNorm<Float>) 
+        mixtureModel: MotionGaussianMixtureModel, modelSize: Int, nbJoints: Int, nbMixtures: Int, motionNorm: LayerNorm<Float>,
+        encoderSelfAttentionTemp: Double, decoderSourceAttentionTemp: Double, decoderSelfAttentionTemp: Double) 
     {
         self.encoder = encoder
         self.decoder = decoder
@@ -127,6 +138,9 @@ extension LangMotionTransformer {
         self.nbMixtures = nbMixtures
         self.motionPositionalEncodingSize = 32 // FIXME: parametrize motionPositionalEncodingSize
         self.motionNorm = motionNorm
+        self.encoderSelfAttentionTemp = encoderSelfAttentionTemp
+        self.decoderSourceAttentionTemp = decoderSourceAttentionTemp
+        self.decoderSelfAttentionTemp = decoderSelfAttentionTemp
     }
 
     public init(config: LangMotionTransformerConfig) {
@@ -140,7 +154,10 @@ extension LangMotionTransformer {
             headCount: config.headCount, 
             dropoutProbability: config.dropoutProbability, 
             sentenceMaxPositionalLength: config.sentenceMaxPositionalLength, 
-            motionMaxPositionalLength: config.motionMaxPositionalLength
+            motionMaxPositionalLength: config.motionMaxPositionalLength,
+            encoderSelfAttentionTemp: config.encoderSelfAttentionTemp,
+            decoderSourceAttentionTemp: config.decoderSourceAttentionTemp, 
+            decoderSelfAttentionTemp: config.decoderSelfAttentionTemp
         )
     }
 }

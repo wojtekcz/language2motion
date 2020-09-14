@@ -192,14 +192,20 @@ public struct DecoderInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     /// The batch size of this input. This is optional because it is only needed if the input
     /// sequences have been reshaped to matrices.
     @noDerivative public let batchSize: Int?
-    
+
+    @noDerivative public let sourceAttentionTemperature: Float
+    @noDerivative public let selfAttentionTemperature: Float
+
     @differentiable
-    public init(sequence: Tensor<Scalar>, sourceMask: Tensor<Scalar>,targetMask: Tensor<Scalar>, memory: Tensor<Scalar>, batchSize: Int? = nil) {
+    public init(sequence: Tensor<Scalar>, sourceMask: Tensor<Scalar>,targetMask: Tensor<Scalar>, memory: Tensor<Scalar>,
+                batchSize: Int? = nil, sourceAttentionTemperature: Float, selfAttentionTemperature: Float) {
         self.sequence = sequence
         self.sourceMask = sourceMask
         self.targetMask = targetMask
         self.memory = memory
         self.batchSize = batchSize
+        self.sourceAttentionTemperature = sourceAttentionTemperature
+        self.selfAttentionTemperature = selfAttentionTemperature
     }
 }
 

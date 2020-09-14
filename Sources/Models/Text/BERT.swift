@@ -368,7 +368,8 @@ public struct BERT: Module, Regularizable {
                 transformerInput = encoderLayers[layerIndex](TransformerInput(
                 sequence: transformerInput,
                 attentionMask: attentionMask,
-                batchSize: batchSize))
+                batchSize: batchSize,
+                selfAttentionTemperature: 1.0))
         }
         case let .albert(_, hiddenGroupCount):
             let groupsPerLayer = Float(hiddenGroupCount) / Float(hiddenLayerCount)
@@ -377,7 +378,8 @@ public struct BERT: Module, Regularizable {
                 transformerInput = encoderLayers[groupIndex](TransformerInput(
                     sequence: transformerInput,
                     attentionMask: attentionMask,
-                    batchSize: batchSize))
+                    batchSize: batchSize, 
+                    selfAttentionTemperature: 1.0))
             }
         }
 

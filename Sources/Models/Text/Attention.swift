@@ -37,12 +37,15 @@ public struct AttentionInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     /// sequences have been reshaped to matrices.
     @noDerivative let batchSize: Int?
 
+    @noDerivative let temperature: Float
+
     @differentiable
     public init(
         source: Tensor<Scalar>,
         target: Tensor<Scalar>,
         mask: Tensor<Scalar>,
-        batchSize: Int? = nil
+        batchSize: Int? = nil,
+        temperature: Float = 1.0
     ) {
         precondition(
             source.rank == target.rank,
@@ -51,6 +54,7 @@ public struct AttentionInput<Scalar: TensorFlowFloatingPoint>: Differentiable {
         self.target = target
         self.mask = mask
         self.batchSize = batchSize
+        self.temperature = temperature
     }
 }
 
@@ -251,6 +255,8 @@ public struct MultiHeadAttention: Layer, Regularizable {
         // Take the dot product between the query and the key to get the raw attention scores.
         var attentionScores = matmul(q, transposed: false, k, transposed: true)  // [B, N, F, T]
         attentionScores = attentionScores / sqrtf(Scalar(headSize))
+
+        attentionScores = attentionScores * input.temperature
 
         // Since the attention mask is set to 1.0 for positions we want to attend to and 0.0 for
         // masked positions, we create a tensor which is 0.0 for positions we want to attend to and 

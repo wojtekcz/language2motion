@@ -66,6 +66,9 @@ public struct TransformerDecoderLayer: Layer {
         // targetMask, memory, and sourceMask
         let selfNoDerivative = withoutDerivative(at: self)
         let batchSize = withoutDerivative(at: input.batchSize)
+        let sourceAttentionTemperatureNotDerivative = withoutDerivative(at: input.sourceAttentionTemperature)
+        let selfAttentionTemperatureNotDerivative = withoutDerivative(at: input.selfAttentionTemperature)
+        
         
         var _targetAttentionOutput: AttentionOutput<Float>? = nil
         var _sourceAttentionOutput: AttentionOutput<Float>? = nil
@@ -75,7 +78,8 @@ public struct TransformerDecoderLayer: Layer {
             let attentionOutput = selfNoDerivative.selfAttention(.init(source: $0,
                                                  target: $0,
                                                  mask: $1.targetMask,
-                                                 batchSize: batchSize))
+                                                 batchSize: batchSize, 
+                                                 temperature: selfAttentionTemperatureNotDerivative))
             _targetAttentionOutput = attentionOutput
             return attentionOutput.result
         }))
@@ -83,7 +87,8 @@ public struct TransformerDecoderLayer: Layer {
             let attentionOutput = selfNoDerivative.sourceAttention(.init(source: $0,
                                                    target: $1.memory,
                                                    mask: $1.sourceMask,
-                                                   batchSize: batchSize))
+                                                   batchSize: batchSize,
+                                                   temperature: sourceAttentionTemperatureNotDerivative))
             _sourceAttentionOutput = attentionOutput
             return attentionOutput.result                                      
         }))
@@ -119,7 +124,9 @@ public struct Decoder: Layer {
                 sequence: transformerInput,
                 sourceMask: input.sourceMask,
                 targetMask: input.targetMask,
-                memory: memoryInput
+                memory: memoryInput,
+                sourceAttentionTemperature: input.sourceAttentionTemperature,
+                selfAttentionTemperature: input.selfAttentionTemperature
             ))
             let layerOutputNoDerivative = withoutDerivative(at: layerOutput) { 
                 DecoderLayerOutput<Float>(result: $0.result, targetAttentionOutput: $0.targetAttentionOutput, sourceAttentionOutput: $0.sourceAttentionOutput)

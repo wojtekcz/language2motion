@@ -72,17 +72,21 @@ let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
 
 /// instantiate model
 print("instantiate model")
+let modelSize = 128
 let config = LangMotionTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47, // TODO: get value from dataset
     nbMixtures: 20,
     layerCount: 6,
-    modelSize: 128,
+    modelSize: modelSize,
     feedForwardSize: 512,
     headCount: 4,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500
+    motionMaxPositionalLength: 500,
+    encoderSelfAttentionTemp: sqrt(Double(modelSize)),
+    decoderSourceAttentionTemp: sqrt(Double(modelSize)),
+    decoderSelfAttentionTemp: Double(modelSize)
 )
 
 var start_epoch = 0

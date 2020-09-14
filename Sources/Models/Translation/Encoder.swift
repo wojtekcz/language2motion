@@ -62,9 +62,10 @@ public struct TransformerEncoderLayer2: Layer {
         let selfNoDerivative = withoutDerivative(at: self)
         let inputNoDerivative = withoutDerivative(at: input)
         let batchSizeNotDerivative = withoutDerivative(at: input.batchSize)
+        let selfAttentionTemperatureNotDerivative = withoutDerivative(at: input.selfAttentionTemperature)
         var _attentionOutput: AttentionOutput<Float>? = nil
         var output = self.sublayers[0](.init(sequence: input.sequence, activation: {
-            let attentionInput = AttentionInput(source: $0, target: $0, mask: inputNoDerivative.attentionMask, batchSize: batchSizeNotDerivative)
+            let attentionInput = AttentionInput(source: $0, target: $0, mask: inputNoDerivative.attentionMask, batchSize: batchSizeNotDerivative, temperature: selfAttentionTemperatureNotDerivative)
             let attentionOutput = selfNoDerivative.selfAttention.callAsFunction(attentionInput)
             _attentionOutput = attentionOutput
             return attentionOutput.result
@@ -97,7 +98,8 @@ public struct Encoder: Layer {
         for layerIndex in 0..<(withoutDerivative(at: layers) { $0.count }) {
             let layerOutput = layers[layerIndex](TransformerInput(
                 sequence: transformerInput,
-                attentionMask: input.attentionMask))
+                attentionMask: input.attentionMask,
+                selfAttentionTemperature: input.selfAttentionTemperature))
             
             let layerOutputNoDerivative = withoutDerivative(at: layerOutput) { EncoderLayerOutput(result: $0.result, attentionOutput: $0.attentionOutput) }
             allLayerOutputs.append(layerOutputNoDerivative)

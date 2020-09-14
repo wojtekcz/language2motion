@@ -31,11 +31,14 @@ public struct TransformerInput<Scalar: TensorFlowFloatingPoint>: Differentiable 
     /// sequences have been reshaped to matrices.
     @noDerivative public let batchSize: Int?
 
+    @noDerivative public let selfAttentionTemperature: Float
+
     @differentiable
-    public init(sequence: Tensor<Scalar>, attentionMask: Tensor<Scalar>, batchSize: Int? = nil) {
+    public init(sequence: Tensor<Scalar>, attentionMask: Tensor<Scalar>, batchSize: Int? = nil, selfAttentionTemperature: Float) {
         self.sequence = sequence
         self.attentionMask = attentionMask
         self.batchSize = batchSize
+        self.selfAttentionTemperature = selfAttentionTemperature
     }
 }
 
@@ -153,7 +156,8 @@ public struct TransformerEncoder: Layer, Regularizable {
                 TransformerInput(
                     sequence: transformerInput,
                     attentionMask: input.attentionMask,
-                    batchSize: batchSize))
+                    batchSize: batchSize,
+                    selfAttentionTemperature: input.selfAttentionTemperature))
         }
 
         return transformerInput.reshapedFromMatrix(originalShape: input.sequence.shape)
