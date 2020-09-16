@@ -75,11 +75,11 @@ func decode(tensor: Tensor<Int32>, vocab: Vocabulary) -> String {
   let endId = Int32(vocab.id(forToken: EOS_WORD)!)
    var words = [String]()
    for scalar in tensor.scalars {
+       if let token = vocab.token(forId: Int(scalar)) {
+           words.append(token)
+       }
        if Int(scalar) == endId {
            break
-       } else
-        if let token = vocab.token(forId: Int(scalar)) {
-           words.append(token)
        }
    }
    return words.joined(separator: " ")
