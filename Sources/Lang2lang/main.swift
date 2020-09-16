@@ -248,10 +248,11 @@ print("decode(source.targetTokenIds): \(outputStr)")
 func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
    var words = [String]()
    for scalar in tensor.scalars {
+       if let token = vocab.token(forId: Int(scalar)) {
+           words.append(token)
+       }
        if Int(scalar) == textProcessor.eosId {
            break
-       } else if let token = vocab.token(forId: Int(scalar)) {
-           words.append(token)
        }
    }
    return words.joined(separator: " ")
