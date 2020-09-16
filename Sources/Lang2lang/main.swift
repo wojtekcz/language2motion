@@ -200,24 +200,9 @@ func validate(model: inout TransformerModel, for batch: TranslationBatch) -> Flo
 }
 
 // setup decoding
-var epochIterator2 = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch2 = epochIterator2.next()
-let batches2 = Array(epoch2!.1)
-let batch2 = batches2[0]
-
-let exampleIndex = 1
-var source = TranslationBatch(tokenIds: batch2.tokenIds[exampleIndex].expandingShape(at: 0),
-                      targetTokenIds: batch2.targetTokenIds[exampleIndex].expandingShape(at: 0),
-                      mask: batch2.mask[exampleIndex].expandingShape(at: 0),
-                      targetMask: batch2.targetMask[exampleIndex].expandingShape(at: 0),
-                      targetTruth: batch2.targetTruth[exampleIndex].expandingShape(at: 0),
-                      tokenCount: batch2.tokenCount)
-
-
 func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
     let memory = model.encode(input: input).lastLayerOutput
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
-    // ys = Tensor(copying: ys, to: device)
     for _ in 0..<maxLength {
 
         let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
@@ -226,43 +211,37 @@ func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: I
         motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
         motionPartMask = abs(motionPartMask)
 
-        // print("targetMask: \(motionPartMask)")
-
         let decoderInput = TranslationBatch(tokenIds: input.tokenIds,
                                      targetTokenIds: ys,
                                      mask: input.mask,
-                                    //  targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
                                      targetMask: motionPartMask,
                                      targetTruth: input.targetTruth,
                                      tokenCount: input.tokenCount)
-        // decoderInput = TranslationBatch(copying: decoderInput, to: device)
+
         let out = model.decode(input: decoderInput, memory: memory)
         let prob = model.generate(input: out[0...,-1])
         let nextWord = Int32(prob.argmax().scalarized())
         ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1) // , on: device
-        // ys = Tensor(copying: ys, to: device)
     }
     return ys
 }
 
-var outputStr = decode(tensor: source.tokenIds, vocab: textProcessor.vocabulary)
-print("decode(source.tokenIds): \(outputStr)")
-outputStr = decode(tensor: source.targetTokenIds, vocab: textProcessor.vocabulary)
-print("decode(source.targetTokenIds): \(outputStr)")
-
-
-func decode(tensor: Tensor<Float>, vocab: Vocabulary) -> String {
-   var words = [String]()
-   for scalar in tensor.scalars {
-       if let token = vocab.token(forId: Int(scalar)) {
-           words.append(token)
-       }
-       if Int(scalar) == textProcessor.eosId {
-           break
-       }
-   }
-   return words.joined(separator: " ")
+// encode/decode one example
+func greedyDecodeFromString(inputStr: String, maxLength: Int = 50, model: TransformerModel) -> String {
+    let example = Lang2Lang.Example(id: "-1", sourceSentence: inputStr, targetSentence: "")
+    let singleBatch = textProcessor.preprocess(example: example)
+    let decodedTensor = greedyDecode(model: model, input: singleBatch, maxLength: maxLength, startSymbol: textProcessor.bosId)
+    return decode(tensor: decodedTensor, vocab: textProcessor.vocabulary)
 }
+
+let textsToDecode = [
+    "A person runs forward.",
+    "A human is swimming.",
+    "A person runs.",
+    "A person plays the air guitar",
+    "A person performs a squat.",
+    "A human raises their left foot and touches it with the right hand."
+]
 
 print("\nTraining Transformer for the Lang2lang task!")
 var trainingStepCount = 0
@@ -326,26 +305,17 @@ time() {
             )
             summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
 
-            print("\nEncoding/decoding one example") // on eager device
+            print("\nDecoding few texts:") // on eager device
             Context.local.learningPhase = .inference
-            source = TranslationBatch(copying: source, to: Device.defaultTFEager)
             model.move(to: Device.defaultTFEager)
-            let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-            outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
-            print("greedyDecode(): \"\(outputStr)\"")
+            for text in textsToDecode {
+                let decodedText = greedyDecodeFromString(inputStr: text, maxLength: 15, model: model)
+                print("\"\(text)\" -> \"\(decodedText)\"")
+            }
             model.move(to: device)
         }
     }
     summaryWriter.flush()
 }
-
-// encode/decode one example
-// print("\nEncoding/decoding one example")
-// Context.local.learningPhase = .inference
-// source = TranslationBatch(copying: source, to: device)
-// model.move(to: Device.defaultTFEager)
-// let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-// outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
-// print("greedyDecode(), outputStr: \(outputStr)")
 
 print("\nFinito.")
