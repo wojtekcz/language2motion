@@ -4,3 +4,4 @@
 swift-install
 .DS_Store
 Package.resolved
+/.swiftpm
