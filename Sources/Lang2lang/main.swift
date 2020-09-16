@@ -13,9 +13,8 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_2"
-// let batchSize = 4000
-let batchSize = 200
+let runName = "run_1"
+let batchSize = 25
 let maxSequenceLength =  50
 let nEpochs = 40
 // let learningRate: Float = 2e-5
@@ -112,18 +111,18 @@ let singleBatch = textProcessor.preprocess(example: example)
 printBatch(singleBatch)
 
 // get a batch
-print("\nOne batch:")
-var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-let epoch = epochIterator.next()
-let batches = Array(epoch!.1)
-let batch: TranslationBatch = batches[0]
-printBatch(batch)
+//print("\nOne batch:")
+//var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+//let epoch = epochIterator.next()
+//let batches = Array(epoch!.1)
+//let batch: TranslationBatch = batches[0]
+//printBatch(batch)
 
 // run one batch
-print("\nRun one batch:")
-print("==============")
-let output = model(batch)
-print("output.shape: \(output.shape)")
+//print("\nRun one batch:")
+//print("==============")
+//let output = model(batch)
+//print("output.shape: \(output.shape)")
 
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)
