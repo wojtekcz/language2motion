@@ -103,14 +103,14 @@ func printBatch(_ batch: TranslationBatch) {
 }
 
 /// one example to single batch
-print("\nSingle batch")
-print("============")
-let example = dataset.trainExamples[0]
-print("example: \(example)")
-print("example.sourceSentence: \"\(example.sourceSentence)\"")
+//print("\nSingle batch")
+//print("============")
+//let example = dataset.trainExamples[0]
+//print("example: \(example)")
+//print("example.sourceSentence: \"\(example.sourceSentence)\"")
 
-let singleBatch = textProcessor.preprocess(example: example)
-printBatch(singleBatch)
+//let singleBatch = textProcessor.preprocess(example: example)
+//printBatch(singleBatch)
 
 // get a batch
 //print("\nOne batch:")
@@ -259,12 +259,6 @@ time() {
 
         time() {
             for eagerBatch in epochBatches {
-                // print("==> step \(trainingStepCount)")
-                // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
-                // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
-                // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
-                // print("eagerBatch.targetTruth.shape: \(eagerBatch.targetTruth.shape)")
-                // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
                 let batch = TranslationBatch(copying: eagerBatch, to: device)
                 let loss: Float = update(model: &model, using: &optimizer, for: batch)
                 // print("current loss at step \(trainingStepCount): \(loss)")
