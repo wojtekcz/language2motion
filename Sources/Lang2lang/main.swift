@@ -13,8 +13,9 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_3"
+let runName = "run_4"
 let batchSize = 150
+// let batchSize = 25
 let maxSequenceLength =  50
 let nEpochs = 100
 // let learningRate: Float = 2e-5
