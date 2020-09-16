@@ -213,10 +213,20 @@ func greedyDecode(model: TransformerModel, input: TranslationBatch, maxLength: I
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
     // ys = Tensor(copying: ys, to: device)
     for _ in 0..<maxLength {
+
+        let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
+        var motionPartMask = TranslationBatch.makeStandardMask(target: motionPartFlag, pad: 0, shiftRight: true)
+        let motionLen = Int(motionPartFlag.sum().scalar!)
+        motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
+        motionPartMask = abs(motionPartMask)
+
+        // print("targetMask: \(motionPartMask)")
+
         let decoderInput = TranslationBatch(tokenIds: input.tokenIds,
                                      targetTokenIds: ys,
                                      mask: input.mask,
-                                     targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
+                                    //  targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
+                                     targetMask: motionPartMask,
                                      targetTruth: input.targetTruth,
                                      tokenCount: input.tokenCount)
         // decoderInput = TranslationBatch(copying: decoderInput, to: device)
