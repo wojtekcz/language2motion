@@ -38,10 +38,10 @@ let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
 let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
 let eagerTensorSum = eagerTensor1 + eagerTensor2
-print(eagerTensorSum)
-print(eagerTensor1.device)
+// print(eagerTensorSum)
+// print(eagerTensor1.device)
 let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-print(x10Tensor2.device)
+// print(x10Tensor2.device)
 
 // instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -69,7 +69,7 @@ var model = TransformerModel(
 
 let device = Device.defaultXLA
 // let device = Device.defaultTFEager
-print(device)
+print("backend: \(device)")
 model.move(to: device)
 
 // load dataset
@@ -84,6 +84,7 @@ var dataset = try Lang2Lang(
     return singleBatch
 }
 
+print("records: \(dataset.trainExamples.count)/\(dataset.valExamples.count)")
 print("Dataset acquired.")
 
 func printBatch(_ batch: TranslationBatch) {
@@ -117,6 +118,10 @@ printBatch(singleBatch)
 //let batches = Array(epoch!.1)
 //let batch: TranslationBatch = batches[0]
 //printBatch(batch)
+
+// print("targetTokenIds: \(batch.targetTokenIds)")
+// print("targetTruth: \(batch.targetTruth)")
+// print("targetMask: \(batch.targetMask)")
 
 // run one batch
 //print("\nRun one batch:")
@@ -315,7 +320,6 @@ time() {
 
             print(
                 """
-                totalGuessCount: \(totalGuessCount) \
                 Eval loss: \(devLossSum / Float(devBatchCount))
                 """
             )
