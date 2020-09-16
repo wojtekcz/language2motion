@@ -14,10 +14,10 @@ import SummaryWriter
 
 
 let runName = "run_5"
-let batchSize = 150
+let batchSize = 50
 // let batchSize = 25
 let maxSequenceLength =  50
-let nEpochs = 100
+let nEpochs = 150
 // let learningRate: Float = 2e-5
 let learningRate: Float = 5e-4
 
