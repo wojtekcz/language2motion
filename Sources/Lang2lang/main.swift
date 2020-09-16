@@ -27,7 +27,11 @@ print("maxSequenceLength: \(maxSequenceLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
-let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#if os(macOS)
+    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+#else
+    let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#endif
 // let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
 
