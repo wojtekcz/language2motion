@@ -62,14 +62,14 @@ public struct MotionLangTransformer: Module {
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, length, hiddenSize])
         motionFeatures = positionalEncoding(motionFeatures)
 
-        let encoderInput: TransformerInput = TransformerInput(sequence: motionFeatures, attentionMask: input.mask)
-        return self.encoder(encoderInput)
+        let encoderInput: TransformerInput = TransformerInput(sequence: motionFeatures, attentionMask: input.mask, selfAttentionTemperature: 1.0)
+        return self.encoder(encoderInput).lastLayerOutput
     }
     
     @differentiable
     public func decode(input: MotionLangBatch, memory: Tensor<Float>) -> Tensor<Float> {
         let embedded = self.targetEmbed(input.targetTokenIds)
-        let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory)
+        let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory, sourceAttentionTemperature: 1.0, selfAttentionTemperature: 1.0)
         return self.decoder(decoderInput).lastLayerOutput
     }
     
