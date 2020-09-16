@@ -18,7 +18,8 @@ public func time(repeating: Int = 1, _ f: () -> ()) {
         let milliseconds = nanoseconds / 1e6
         times.append(milliseconds)
     }
-    print("average: \(times.reduce(0.0, +)/Double(times.count)) ms,   " +
-          "min: \(times.reduce(times[0], min)) ms,   " +
-          "max: \(times.reduce(times[0], max)) ms")
+    // print("average: \(times.reduce(0.0, +)/Double(times.count)) ms,   " +
+    //       "min: \(times.reduce(times[0], min)) ms,   " +
+    //       "max: \(times.reduce(times[0], max)) ms")
+    print("average: \(times.reduce(0.0, +)/Double(times.count)/1000) sec")
 }
