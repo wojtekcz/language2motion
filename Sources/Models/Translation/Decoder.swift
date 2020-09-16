@@ -132,7 +132,11 @@ public struct Decoder: Layer {
                 DecoderLayerOutput<Float>(result: $0.result, targetAttentionOutput: $0.targetAttentionOutput, sourceAttentionOutput: $0.sourceAttentionOutput)
             }
             allLayerOutputs.append(layerOutputNoDerivative)
-            allResults.append(layerOutput.result)
+
+            // FIXME: "derivative result" needed for LangMotionTransformer?
+            // allResults.append(layerOutput.result)
+            // "non derivative result" needed for Transformer
+            allResults.append(layerOutputNoDerivative.result)            
             transformerInput = layerOutput.result
         }
         return DecoderOutput<Float>(lastLayerOutput: transformerInput, allLayerOutputs: allLayerOutputs, allResults: allResults)
