@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_51"
+let runName = "run_52"
 // let batchSize = 10
 let batchSize = 50
 let maxTextSequenceLength =  20
@@ -40,12 +40,20 @@ print("peakLearningRate: \(peakLearningRate)")
 print("datasetSize: \(datasetSize)")
 print("stepsPerEpoch: \(stepsPerEpoch)")
 
-let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#if os(macOS)
+    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+#else
+    let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
 let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
 let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory: true)
-try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
+
+// FIXME: how to make macOS builds use filesystem in read/write mode?
+#if os(Linux)
+    try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
+#endif
 
 /// Select eager or X10 backend
 // let device = Device.defaultXLA
