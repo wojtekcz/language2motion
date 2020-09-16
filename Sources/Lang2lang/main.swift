@@ -13,7 +13,7 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_4"
+let runName = "run_5"
 let batchSize = 150
 // let batchSize = 25
 let maxSequenceLength =  50
