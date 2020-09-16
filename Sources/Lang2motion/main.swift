@@ -2,7 +2,9 @@ import TensorFlow
 import TextModels
 import TranslationModels
 import Foundation
-import FoundationXML
+#if os(Linux)
+  import FoundationXML
+#endif
 import ModelSupport
 import Datasets
 import SummaryWriter

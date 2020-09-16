@@ -1,4 +1,7 @@
-import FoundationXML
+import Foundation
+#if os(Linux)
+  import FoundationXML
+#endif
 import TensorFlow
 
 
