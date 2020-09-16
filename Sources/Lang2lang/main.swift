@@ -13,10 +13,10 @@ import Datasets
 import SummaryWriter
 
 
-let runName = "run_1"
-let batchSize = 25
+let runName = "run_3"
+let batchSize = 150
 let maxSequenceLength =  50
-let nEpochs = 40
+let nEpochs = 100
 // let learningRate: Float = 2e-5
 let learningRate: Float = 5e-4
 
@@ -31,8 +31,8 @@ print("learningRate: \(learningRate)")
 #else
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 #endif
-// let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
-let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
+let dsURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
+// let dsURL = dataURL.appendingPathComponent("labels_ds_v2.balanced.515.csv")
 
 // X10 warmup
 let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
@@ -53,9 +53,9 @@ let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer, 
 let sourceVocabSize = vocabulary.count
 let targetVocabSize = vocabulary.count
 let layerCount: Int = 6
-let modelSize: Int = 256
-let feedForwardSize: Int = 1024
-let headCount: Int = 8
+let modelSize: Int = 128
+let feedForwardSize: Int = 512
+let headCount: Int = 4
 let dropoutProbability: Double = 0.1
 var model = TransformerModel(
     sourceVocabSize: sourceVocabSize, 
@@ -67,8 +67,8 @@ var model = TransformerModel(
     dropoutProbability: dropoutProbability
 )
 
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print(device)
 model.move(to: device)
 
@@ -127,7 +127,7 @@ printBatch(singleBatch)
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)
 
-let logdirURL = dataURL.appendingPathComponent("tboard/Lang2lang/\(runName)", isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("runs/Lang2lang/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 @differentiable(wrt: logits)
@@ -261,62 +261,64 @@ time() {
             print("epochBatches.count: \(epochBatches.count)")
         }
 
-        for eagerBatch in epochBatches {
-            // print("==> step \(trainingStepCount)")
-            // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
-            // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
-            // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
-            // print("eagerBatch.targetTruth.shape: \(eagerBatch.targetTruth.shape)")
-            // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
-            let batch = TranslationBatch(copying: eagerBatch, to: device)
-            let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            // print("current loss at step \(trainingStepCount): \(loss)")
-            trainingLossSum += loss
-            trainingBatchCount += 1
-            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-            trainingStepCount += 1
+        time() {
+            for eagerBatch in epochBatches {
+                // print("==> step \(trainingStepCount)")
+                // print("eagerBatch.tokenIds.shape: \(eagerBatch.tokenIds.shape)")
+                // print("eagerBatch.targetTokenIds.shape: \(eagerBatch.targetTokenIds.shape)")
+                // print("eagerBatch.mask.shape: \(eagerBatch.mask.shape)")
+                // print("eagerBatch.targetTruth.shape: \(eagerBatch.targetTruth.shape)")
+                // print("eagerBatch.tokenCount: \(eagerBatch.tokenCount)")
+                let batch = TranslationBatch(copying: eagerBatch, to: device)
+                let loss: Float = update(model: &model, using: &optimizer, for: batch)
+                // print("current loss at step \(trainingStepCount): \(loss)")
+                trainingLossSum += loss
+                trainingBatchCount += 1
+                summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+                trainingStepCount += 1
+            }
+            print(
+                """
+                Training loss: \(trainingLossSum / Float(trainingBatchCount))
+                """
+            )
+            summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
+
+            if epoch == 0 {
+                print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
+            }
+            Context.local.learningPhase = .inference
+            var devLossSum: Float = 0
+            var devBatchCount = 0
+            var totalGuessCount = 0
+
+            for eagerBatch in dataset.validationBatches {
+                let batch = TranslationBatch(copying: eagerBatch, to: device)
+                let loss: Float = validate(model: &model, for: batch)
+                let valBatchSize = batch.tokenIds.shape[0]
+
+                devLossSum += loss
+                devBatchCount += 1
+                totalGuessCount += valBatchSize
+            }
+
+            print(
+                """
+                totalGuessCount: \(totalGuessCount) \
+                Eval loss: \(devLossSum / Float(devBatchCount))
+                """
+            )
+            summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
+
+            print("\nEncoding/decoding one example") // on eager device
+            Context.local.learningPhase = .inference
+            source = TranslationBatch(copying: source, to: Device.defaultTFEager)
+            model.move(to: Device.defaultTFEager)
+            let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
+            outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
+            print("greedyDecode(): \"\(outputStr)\"")
+            model.move(to: device)
         }
-        print(
-            """
-            Training loss: \(trainingLossSum / Float(trainingBatchCount))
-            """
-        )
-        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
-
-        if epoch == 0 {
-            print("dataset.validationBatches.count: \(dataset.validationBatches.count)")
-        }
-        Context.local.learningPhase = .inference
-        var devLossSum: Float = 0
-        var devBatchCount = 0
-        var totalGuessCount = 0
-
-        for eagerBatch in dataset.validationBatches {
-            let batch = TranslationBatch(copying: eagerBatch, to: device)
-            let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.tokenIds.shape[0]
-
-            devLossSum += loss
-            devBatchCount += 1
-            totalGuessCount += valBatchSize
-        }
-
-        print(
-            """
-            totalGuessCount: \(totalGuessCount) \
-            Eval loss: \(devLossSum / Float(devBatchCount))
-            """
-        )
-        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-
-        print("\nEncoding/decoding one example") // on eager device
-        Context.local.learningPhase = .inference
-        source = TranslationBatch(copying: source, to: Device.defaultTFEager)
-        model.move(to: Device.defaultTFEager)
-        let out = greedyDecode(model: model, input: source, maxLength: 50, startSymbol: textProcessor.bosId)
-        outputStr = decode(tensor: out, vocab: textProcessor.vocabulary)
-        print("greedyDecode(): \"\(outputStr)\"")
-        model.move(to: device)
     }
     summaryWriter.flush()
 }
