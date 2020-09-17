@@ -55,9 +55,9 @@ let sourceVocabSize = vocabulary.count
 let inputSize = 48 // TODO: get value from dataset
 let targetVocabSize = vocabulary.count
 let layerCount: Int = 6
-let modelSize: Int = 256
-let feedForwardSize: Int = 1024
-let headCount: Int = 8
+let modelSize: Int = 128
+let feedForwardSize: Int = 512
+let headCount: Int = 4
 let dropoutProbability: Double = 0.1
 
 var model = MotionLangTransformer(
