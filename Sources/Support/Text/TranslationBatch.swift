@@ -63,13 +63,13 @@ public struct TranslationBatch: KeyPathIterable {
         self.tokenCount = tokenCount
     }
     
-    static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
-        var targetMask = Tensor(zerosLike: target)
-            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
-            .expandingShape(at: -2)
-        targetMask *= subsequentMask(size: target.shape.last!)
-        return Tensor<Float>(targetMask)
-    }
+//    static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
+//        var targetMask = Tensor(zerosLike: target)
+//            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
+//            .expandingShape(at: -2)
+//        targetMask *= subsequentMask(size: target.shape.last!)
+//        return Tensor<Float>(targetMask)
+//    }
 
     public static func subsequentMask(size: Int, shiftRight: Bool = false) -> Tensor<Int32> {
         let attentionShape = [1, size, size]
@@ -94,11 +94,11 @@ public struct TranslationBatch: KeyPathIterable {
     }
 }
 
-public func subsequentMask(size: Int) -> Tensor<Int32> {
-    let attentionShape = [1, size, size]
-    return Tensor<Int32>(ones: TensorShape(attentionShape))
-        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
-}
+//public func subsequentMask(size: Int) -> Tensor<Int32> {
+//    let attentionShape = [1, size, size]
+//    return Tensor<Int32>(ones: TensorShape(attentionShape))
+//        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
+//}
 
 extension TranslationBatch {
   public init(copying batch: TranslationBatch, to device: Device) {
