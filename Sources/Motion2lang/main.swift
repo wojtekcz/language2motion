@@ -20,7 +20,11 @@ print("maxSequenceLength: \(maxSequenceLength)")
 print("nEpochs: \(nEpochs)")
 print("learningRate: \(learningRate)")
 
-let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#if os(macOS)
+    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+#else
+    let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
