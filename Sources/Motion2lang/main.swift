@@ -9,9 +9,10 @@ import MotionLangModels
 
 /// Set training params
 let runName = "run_1"
-let batchSize = 100
+//let batchSize = 10
+let batchSize = 50
 let maxSequenceLength = 50
-let nEpochs = 10
+let nEpochs = 150
 let learningRate: Float = 5e-4
 
 print("runName: \(runName)")
@@ -25,24 +26,24 @@ print("learningRate: \(learningRate)")
 #else
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 #endif
-let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.plist")
+let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.norm.10Hz.mini.plist")
 let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
 
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+//let device = Device.defaultTFEager
 print("backend: \(device)")
 
 
 /// X10 warm-up
-// let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
-// let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
-// let eagerTensorSum = eagerTensor1 + eagerTensor2
-// print(eagerTensorSum)
-// print(eagerTensor1.device)
-// let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-// print(x10Tensor2.device)
+let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+let eagerTensorSum = eagerTensor1 + eagerTensor2
+//print(eagerTensorSum)
+//print(eagerTensor1.device)
+let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+//print(x10Tensor2.device)
 
 // instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -90,33 +91,33 @@ print("Dataset acquired.")
 
 /// Test model with one batch
 // get a batch
-// print("\nOne batch (MotionLangBatch):")
-// var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
-// let epoch = epochIterator.next()
-// let batches = Array(epoch!.1)
-// let batch: MotionLangBatch = batches[0]
-// print("type: \(type(of:batch))")
-// print("motionFrames.shape: \(batch.motionFrames.shape)")
-// // print("motionFlag.shape: \(batch.motionFlag.shape)")
-// print("mask.shape: \(batch.mask.shape)")
-// print("origMotionFramesCount.shape: \(batch.origMotionFramesCount.shape)")
-// print("origMotionFramesCount: \(batch.origMotionFramesCount)")
-// print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
-// print("targetMask.shape: \(batch.targetMask.shape)")
-// print("targetTruth.shape: \(batch.targetTruth.shape)")
+print("\nOne batch (MotionLangBatch):")
+//var epochIterator = dataset.trainingEpochs.enumerated().makeIterator()
+//let epoch = epochIterator.next()
+//let batches = Array(epoch!.1)
+//let batch: MotionLangBatch = batches[0]
+//print("type: \(type(of:batch))")
+//print("motionFrames.shape: \(batch.motionFrames.shape)")
+////print("motionFlag.shape: \(batch.motionFlag.shape)")
+//print("mask.shape: \(batch.mask.shape)")
+//print("origMotionFramesCount.shape: \(batch.origMotionFramesCount.shape)")
+//print("origMotionFramesCount: \(batch.origMotionFramesCount)")
+//print("targetTokenIds.shape: \(batch.targetTokenIds.shape)")
+//print("targetMask.shape: \(batch.targetMask.shape)")
+//print("targetTruth.shape: \(batch.targetTruth.shape)")
 
 // run one batch
-// print("\nRun one batch:")
-// print("==============")
-// let deviceBatch = MotionLangBatch(copying: batch, to: device)
-// let output = model(deviceBatch)
-// print("output.shape: \(output.shape)")
+//print("\nRun one batch:")
+//print("==============")
+//let deviceBatch = MotionLangBatch(copying: batch, to: device)
+//let output = model(deviceBatch)
+//print("output.shape: \(output.shape)")
 
 /// Optimizer
 var optimizer = Adam(for: model, learningRate: learningRate)
 optimizer = Adam(copying: optimizer, to: device)
 
-let logdirURL = dataURL.appendingPathComponent("tboard/Motion2lang/\(runName)", isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("runs/Motion2lang/\(runName)", isDirectory: true)
 let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
 
 /// Training helpers
@@ -153,7 +154,6 @@ func validate(model: inout MotionLangTransformer, for batch: MotionLangBatch) ->
 func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLength: Int, startSymbol: Int32) -> Tensor<Int32> {
     let memory = model.encode(input: input)
     var ys = Tensor(repeating: startSymbol, shape: [1,1])
-    // ys = Tensor(copying: ys, to: device)
     for _ in 0..<maxLength {
         // print("loop \(i)")
         // print("  ys: \(ys)")
@@ -170,14 +170,10 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
                                      targetTokenIds: ys,
                                      targetMask: motionPartMask,
                                      targetTruth: input.targetTruth)
-        // decoderInput = MotionLangBatch(copying: decoderInput, to: device)
         let out = model.decode(input: decoderInput, memory: memory)
-        // print("out.shape: \(out.shape)")
-        // print("out[0...,-1].shape: \(out[0...,-1].shape)")
         let prob = model.generate(input: out[0...,-1])
         let nextWord = Int32(prob.argmax().scalarized())
         ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1) // , on: device
-        // ys = Tensor(copying: ys, to: device)
     }
     return ys
 }
