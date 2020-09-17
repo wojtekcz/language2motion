@@ -10,7 +10,7 @@ import MotionLangModels
 /// Set training params
 let runName = "run_1"
 //let batchSize = 10
-let batchSize = 50
+let batchSize = 100
 let maxSequenceLength = 50
 let nEpochs = 150
 let learningRate: Float = 5e-4
@@ -31,8 +31,8 @@ let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 /// Select eager or X10 backend
 
-let device = Device.defaultXLA
-//let device = Device.defaultTFEager
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print("backend: \(device)")
 
 
