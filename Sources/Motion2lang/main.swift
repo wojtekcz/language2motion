@@ -53,7 +53,6 @@ let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: 
 let textProcessor = LegacyTextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
 
 // instantiate model
-let sourceVocabSize = vocabulary.count
 let inputSize = 47 // TODO: get value from dataset
 let targetVocabSize = vocabulary.count
 let layerCount: Int = 6
@@ -63,7 +62,6 @@ let headCount: Int = 4
 let dropoutProbability: Double = 0.1
 
 var model = MotionLangTransformer(
-    sourceVocabSize: sourceVocabSize, 
     inputSize: inputSize,
     targetVocabSize: targetVocabSize,
     layerCount: layerCount, 
