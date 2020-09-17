@@ -9,124 +9,102 @@ public struct Motion2Lang {
     public struct LangRec {
         public let sampleID: Int
         public let text: String
-        public let label: String
+        public let motionSample: MotionSample
     }
 
-    /// Motion2Lang example.
-    public struct Example {
-        public let id: String
-        public let motionSample: LegacyMotionSample
-        public let targetSentence: String
+    public let motionDataset: MotionDataset
+    public let scaler: Scaler
 
-        public init(id: String, motionSample: LegacyMotionSample, targetSentence: String) {
-            self.id = id
-            self.motionSample = motionSample
-            self.targetSentence = targetSentence
-        }
-    }
-
-    public let motionDataset: LegacyMotionDataset
-
+    public let motionSamples: [MotionSample]
     public let langRecs: [LangRec]
     public let langRecsDict: [Int: LangRec]
 
-    public let motionSampleDict: [Int: LegacyMotionSample]
+    public let motionSampleDict: [Int: MotionSample]
 
-    public let trainExamples: [Example]
-    public let valExamples: [Example]
+    public let trainMotionSamples: [MotionSample]
+    public let testMotionSamples: [MotionSample]
+    
+    public typealias LazySamples = LazyMapSequence<[MotionSample], MotionLangBatch>
 
-    public typealias Samples = LazyMapSequence<[Example], MotionLangBatch>
-
-    /// The training texts.
-    public let trainingSamples: Samples
-    /// The validation texts.
-    public let validationSamples: Samples
-    // public let validationSamples: [(text: String, label: String)]
-
-    /// The sequence length to which every sentence will be padded.
-    public let maxSequenceLength: Int
     public let batchSize: Int
 
     /// The type of the collection of batches.
-    public typealias Batches = Slices<Sampling<Samples, ArraySlice<Int>>>
+    public typealias Batches = Slices<Sampling<LazySamples, ArraySlice<Int>>>
     /// The type of the training sequence of epochs.
-    public typealias TrainEpochs = LazyMapSequence<TrainingEpochs<Samples, SystemRandomNumberGenerator>, 
+    public typealias TrainEpochs = LazyMapSequence<TrainingEpochs<LazySamples, SystemRandomNumberGenerator>,
         LazyMapSequence<Batches, MotionLangBatch>>
-    /// The sequence of training data (epochs of batches).
-    public var trainingEpochs: TrainEpochs
-    /// The validation batches.
-    public var validationBatches: LazyMapSequence<Slices<Samples>, MotionLangBatch>    
-}
 
-//===-----------------------------------------------------------------------------------------===//
-// Data
-//===-----------------------------------------------------------------------------------------===//
-
-extension Motion2Lang {
-    static func transformDF(df: PythonObject) -> [LangRec] {
-        return Python.list(df.iterrows()).map {
-            (rowObj: PythonObject) -> LangRec in 
-            let row = rowObj.tuple2.1
-            let sample_id: Int = Int(row.sample_id)!
-            let text: String = String(row.text)!
-            let label: String = String(row.label)!
-            return LangRec(sampleID: sample_id, text: text, label: label)
-        }
-    }
-
-    public static func getExample(motionSample: LegacyMotionSample, langRec: LangRec) -> Example {
-        let sample_id: String = "\(langRec.sampleID)" // Int to String
-        return Example(id: sample_id, motionSample: motionSample, targetSentence: langRec.text)
-    }
+    public var trainEpochs: TrainEpochs
+    public var testBatches: LazyMapSequence<Slices<LazySamples>, MotionLangBatch>
 }
 
 extension Motion2Lang {
-    /// Creates an instance of `motionDatasetURL` motion dataset with `langDatasetURL` labels,
-    /// with batches of size `batchSize` by `maximumSequenceLength`.
+    /// Creates an instance of `motionDatasetURL` motion dataset,
+    /// with batches of size `batchSize`.
     ///
     /// - Parameters:
-    ///   - exampleMap: a transform that processes `Example` in `MotionLangBatch`.
+    ///   - exampleMap: a transform that processes `MotionSample` in `MotionLangBatch`.
     public init(
         motionDatasetURL: URL,
-        langDatasetURL: URL,
-        maxSequenceLength: Int, // TODO: separate motion length from text sequence length?
         batchSize: Int,
         minMotionLength: Int = 10,
+        maxMotionLength: Int = 100,
         trainTestSplit: Double = 0.8,
-        exampleMap: @escaping (Example) -> MotionLangBatch
+        exampleMap: @escaping (MotionSample) -> MotionLangBatch
     ) throws {
-        // Load the data files.
-        motionDataset = LegacyMotionDataset(from: motionDatasetURL)
+        // Load the data file.
+        motionDataset = MotionDataset(from: motionDatasetURL)
         print(motionDataset.description)
-        let df = pd.read_csv(langDatasetURL.path)
 
         // filter out samples without annotations
-        var motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
-        print("keeping \(motionSamples.count) annotatated motions")
+        var _motionSamples = motionDataset.motionSamples.filter { $0.annotations.count > 0 }
+        print("Keeping \(_motionSamples.count) annotated motions.")
 
         // filter out shortest samples
-        motionSamples = motionSamples.filter { $0.motionFramesArray.shape[0] >= minMotionLength }
-        print("keeping \(motionSamples.count) longer motions, with minimum \(minMotionLength) frames")
+        _motionSamples = _motionSamples.filter { $0.motion.shape[0] >= minMotionLength }
+        print("Keeping \(_motionSamples.count) longer motions, with minimum \(minMotionLength) frames.")
 
-        // split into train/test sets
-        var trainMotionSamples: [LegacyMotionSample] = []
-        var testMotionSamples: [LegacyMotionSample] = []
-        (trainMotionSamples, testMotionSamples) = motionSamples.trainTestSplitMotionSamples(split: trainTestSplit)
+        // filter out longest samples
+        _motionSamples = _motionSamples.filter { $0.motion.shape[0] <= maxMotionLength }
+        print("Keeping \(_motionSamples.count) shorter motions, with maximum \(maxMotionLength) frames.")
+
+        // scale motions
+        print("Scaling motions...")
+        let motions = _motionSamples.map { $0.motion }
+        let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
+        let scaledMotions = motions.map { _scaler.transform($0) }
+
+        for idx in 0..<_motionSamples.count {
+            _motionSamples[idx].motion = scaledMotions[idx]
+        }
+        scaler = _scaler
+        print("Motions scaled.")
+
+        // pair all motions with all annotations
+        var _motionSamplesWithDistinctAnnotations: [MotionSample] = []
+
+        for ms in _motionSamples {
+            let samples = ms.annotations.map { (ann: String) -> MotionSample in
+                MotionSample(sampleID: ms.sampleID, annotations: [ann], jointNames: ms.jointNames, timesteps: ms.timesteps, motion: ms.motion)
+            }
+            _motionSamplesWithDistinctAnnotations.append(contentsOf: samples)
+        }
+        print("Having \(_motionSamplesWithDistinctAnnotations.count) annotations with motions.")
+
+        motionSamples = _motionSamplesWithDistinctAnnotations
 
         // create LangRecs
-        let _langRecs = Motion2Lang.transformDF(df: df)
+        langRecs = _motionSamplesWithDistinctAnnotations.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0], motionSample: $0) }
 
         // [sampleID:LangRec] mapping
         var _langRecsDict: [Int: LangRec] = [:]
-        for langRec in _langRecs {
+        for langRec in langRecs {
             _langRecsDict[langRec.sampleID] = langRec
         }
-
-        langRecs = _langRecs
         langRecsDict = _langRecsDict
-
-        // [sampleID:LegacyMotionSample] mapping
-        var _motionSampleDict: [Int: LegacyMotionSample] = [:]
+        
+        // [sampleID:MotionSample] mapping
+        var _motionSampleDict: [Int: MotionSample] = [:]
         for ms in motionDataset.motionSamples {
             // only assign first (downsampled) sample
             if _motionSampleDict[ms.sampleID] == nil {
@@ -135,57 +113,31 @@ extension Motion2Lang {
         }
         motionSampleDict = _motionSampleDict
 
-        // create Examples
-        trainExamples = trainMotionSamples.map {
-            Motion2Lang.getExample(motionSample: $0, langRec: _langRecsDict[$0.sampleID]!)
-        }
-        valExamples = testMotionSamples.map {
-            Motion2Lang.getExample(motionSample: $0, langRec: _langRecsDict[$0.sampleID]!)
-        }
+        // split into train/test sets
+        let _trainMotionSamples: [MotionSample]
+        let _testMotionSamples: [MotionSample]
+        (_trainMotionSamples, _testMotionSamples) = _motionSamplesWithDistinctAnnotations.trainTestSplitMotionSamples(split: trainTestSplit)
+        trainMotionSamples = _trainMotionSamples
+        testMotionSamples = _testMotionSamples
 
-        trainingSamples = trainExamples.lazy.map(exampleMap)
-        validationSamples = valExamples.lazy.map(exampleMap)
-      
-        self.maxSequenceLength = maxSequenceLength
+        let trainSamples: LazySamples = _trainMotionSamples.lazy.map(exampleMap)
+        let testSamples: LazySamples = _testMotionSamples.lazy.map(exampleMap)
+
         self.batchSize = batchSize
 
         // Create the training sequence of epochs.
         let entropy = SystemRandomNumberGenerator()
-        trainingEpochs = TrainingEpochs(
-        samples: trainingSamples, batchSize: batchSize, entropy: entropy
+        trainEpochs = TrainingEpochs(
+            samples: trainSamples, batchSize: batchSize, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, MotionLangBatch> in
             batches.lazy.map{ 
-                Motion2Lang.reduceDataBatches(Array($0))
+                MotionLangBatch.reduceDataBatches(Array($0))
             }
         }
         
-        // Create the validation collection of batches.
-        validationBatches = validationSamples.inBatches(of: batchSize).lazy.map{ 
-            Motion2Lang.reduceDataBatches(Array($0))
+        // Create the test collection of batches.
+        testBatches = testSamples.inBatches(of: batchSize).lazy.map{
+            MotionLangBatch.reduceDataBatches(Array($0))
         }
-    }
-
-    public static func reduceDataBatches(_ batches: [MotionLangBatch]) -> MotionLangBatch {
-        var maxLength: Int? = 50 // FIXME: move this out
-        maxLength = maxLength ?? batches.map { $0.motionFrames.shape[1] }.max()!
-
-        let motionFrames: Tensor<Float> = Tensor(batches.map{$0.motionFrames.paddedOrCropped(to: maxLength!)})
-
-        // let mask: Tensor<Float> = Tensor(batches.map{$0.mask.paddedOrCropped(to: maxLength!)})        
-        // getting mask from motionFrames, so it's
-        let mask: Tensor<Float> = motionFrames[0...,0...,LegacyMotionFrame.cjpMotionFlagIdx].expandingShape(at: 1)
-
-        // let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{$0.origMotionFramesCount})
-
-        let targetTokenIds: Tensor<Int32> = Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) })
-        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Int32> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
-        return MotionLangBatch(motionFrames: motionFrames, 
-                        mask: mask,
-                        origMotionFramesCount: origMotionFramesCount,
-                        targetTokenIds: targetTokenIds,
-                        targetMask: targetMask,
-                        targetTruth: targetTruth)
     }
 }

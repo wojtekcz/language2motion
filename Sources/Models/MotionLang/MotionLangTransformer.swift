@@ -49,13 +49,13 @@ public struct MotionLangTransformer: Module {
     
     @differentiable
     public func encode(input: MotionLangBatch) -> Tensor<Float> {
-        let origBatchSize = input.motionFrames.shape[0]
-        let length = input.motionFrames.shape[1]
-        let numFrames = input.motionFrames.shape[2]
+        let origBatchSize = input.motion.shape[0]
+        let length = input.motion.shape[1]
+        let numFrames = input.motion.shape[2]
         let hiddenSize = self.modelSize
 
         let tmpBatchSize = origBatchSize * length
-        let tmpMotionFrames = input.motionFrames.reshaped(to: [tmpBatchSize, numFrames])
+        let tmpMotionFrames = input.motion.reshaped(to: [tmpBatchSize, numFrames])
 
         //FIXME: make sourceEmbed() work
         let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames

@@ -117,7 +117,7 @@ extension Lang2Motion {
         // Create the training sequence of epochs.
         let entropy = SystemRandomNumberGenerator()
         trainEpochs = TrainingEpochs(
-        samples: trainSamples, batchSize: batchSize, entropy: entropy
+            samples: trainSamples, batchSize: batchSize, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, LangMotionBatch> in
             batches.lazy.map{ 
                 // TODO: reduceDataBatches to device directly
