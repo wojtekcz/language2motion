@@ -259,7 +259,6 @@ time() {
 
         print(
             """
-            totalGuessCount: \(totalGuessCount) \
             Eval loss: \(devLossSum / Float(devBatchCount))
             """
         )
