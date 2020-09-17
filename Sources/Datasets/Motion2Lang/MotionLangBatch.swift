@@ -38,7 +38,13 @@ public struct MotionLangBatch: KeyPathIterable {
         let rangeExceptLast = 0..<(target.shape[1] - 1)
         self.targetTokenIds = target[0...,rangeExceptLast]
         self.targetTruth = target[0..., 1...]
-        self.targetMask = MotionLangBatch.makeStandardMask(target: self.targetTokenIds, pad: targetPadId)
+//        self.targetMask = MotionLangBatch.makeStandardMask(target: self.targetTokenIds, pad: targetPadId)
+        
+        var motionPartMask = Self.makeStandardMask(target: self.targetTokenIds, pad: targetPadId, shiftRight: true)
+        let motionLen = Int(self.targetTokenIds.sum().scalar!)
+        motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
+        motionPartMask = abs(motionPartMask)
+        self.targetMask = motionPartMask
     }
 
     public init(motionFrames: Tensor<Float>, mask: Tensor<Float>,  origMotionFramesCount: Tensor<Int32>, targetTokenIds: Tensor<Int32>, targetMask: Tensor<Float>, targetTruth: Tensor<Int32>) {
@@ -50,20 +56,42 @@ public struct MotionLangBatch: KeyPathIterable {
         self.targetTruth = targetTruth
     }
 
-    static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
+    public static func subsequentMask(size: Int, shiftRight: Bool = false) -> Tensor<Int32> {
+        let attentionShape = [1, size, size]
+        let ones = Tensor<Int32>(ones: TensorShape(attentionShape))
+        var mask: Tensor<Int32>
+        
+        if !shiftRight {
+            mask = ones.bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
+        } else {
+            // https://www.tensorflow.org/tutorials/text/transformer#masking
+            mask = 1 - ones.bandPart(subdiagonalCount: -1, superdiagonalCount: 0)
+        }
+        return mask
+    }
+
+    public static func makeStandardMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = false) -> Tensor<Float> {
         var targetMask = Tensor(zerosLike: target)
             .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
             .expandingShape(at: -2)
-        targetMask *= subsequentMask2(size: target.shape.last!)
+        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight)
         return Tensor<Float>(targetMask)
     }
+
+//    static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
+//        var targetMask = Tensor(zerosLike: target)
+//            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
+//            .expandingShape(at: -2)
+//        targetMask *= subsequentMask2(size: target.shape.last!)
+//        return Tensor<Float>(targetMask)
+//    }
 }
 
-public func subsequentMask2(size: Int) -> Tensor<Int32> {
-    let attentionShape = [1, size, size]
-    return Tensor<Int32>(ones: TensorShape(attentionShape))
-        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
-}
+//public func subsequentMask2(size: Int) -> Tensor<Int32> {
+//    let attentionShape = [1, size, size]
+//    return Tensor<Int32>(ones: TensorShape(attentionShape))
+//        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
+//}
 
 extension MotionLangBatch {
     public init(copying batch: MotionLangBatch, to device: Device) {

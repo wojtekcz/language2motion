@@ -157,11 +157,18 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch, maxLengt
     for _ in 0..<maxLength {
         // print("loop \(i)")
         // print("  ys: \(ys)")
+        
+        let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
+        var motionPartMask = MotionLangBatch.makeStandardMask(target: motionPartFlag, pad: 0, shiftRight: true)
+        let motionLen = Int(motionPartFlag.sum().scalar!)
+        motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
+        motionPartMask = abs(motionPartMask)
+        
         let decoderInput = MotionLangBatch(motionFrames: input.motionFrames,
                                      mask: input.mask,
                                      origMotionFramesCount: input.origMotionFramesCount,
                                      targetTokenIds: ys,
-                                     targetMask: Tensor<Float>(subsequentMask(size: ys.shape[1])),
+                                     targetMask: motionPartMask,
                                      targetTruth: input.targetTruth)
         // decoderInput = MotionLangBatch(copying: decoderInput, to: device)
         let out = model.decode(input: decoderInput, memory: memory)
