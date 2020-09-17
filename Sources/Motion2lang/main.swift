@@ -208,59 +208,60 @@ time() {
         if epoch == 0 {
             print("epochBatches.count: \(epochBatches.count)")
         }
-
-        for eagerBatch in epochBatches {
-            if (trainingStepCount < 5) {
-                print("==> step \(trainingStepCount)")
+        time() {
+            for eagerBatch in epochBatches {
+                if (trainingStepCount < 5) {
+                    print("==> step \(trainingStepCount)")
+                }
+                let batch = MotionLangBatch(copying: eagerBatch, to: device)
+                let loss: Float = update(model: &model, using: &optimizer, for: batch)
+                if (trainingStepCount < 5) {
+                    print("current loss at step \(trainingStepCount): \(loss)")
+                }
+                trainingLossSum += loss
+                trainingBatchCount += 1
+                summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
+                trainingStepCount += 1
             }
-            let batch = MotionLangBatch(copying: eagerBatch, to: device)
-            let loss: Float = update(model: &model, using: &optimizer, for: batch)
-            if (trainingStepCount < 5) {
-                print("current loss at step \(trainingStepCount): \(loss)")
+            print(
+                """
+                Training loss: \(trainingLossSum / Float(trainingBatchCount))
+                """
+            )
+            summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
+
+            if epoch == 0 {
+                print("dataset.testBatches.count: \(dataset.testBatches.count)")
             }
-            trainingLossSum += loss
-            trainingBatchCount += 1
-            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: trainingLossSum / Float(trainingBatchCount))
-            trainingStepCount += 1
+            Context.local.learningPhase = .inference
+            var devLossSum: Float = 0
+            var devBatchCount = 0
+            var totalGuessCount = 0
+
+            for eagerBatch in dataset.testBatches {
+                let batch = MotionLangBatch(copying: eagerBatch, to: device)
+                let loss: Float = validate(model: &model, for: batch)
+                let valBatchSize = batch.motion.shape[0]
+
+                devLossSum += loss
+                devBatchCount += 1
+                totalGuessCount += valBatchSize
+            }
+
+            print(
+                """
+                Eval loss: \(devLossSum / Float(devBatchCount))
+                """
+            )
+            summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
+
+            Context.local.learningPhase = .inference
+            model.move(to: Device.defaultTFEager)
+            for sample in samplesToDecode {
+                greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 15)
+            }
+            model.move(to: device)
         }
-        print(
-            """
-            Training loss: \(trainingLossSum / Float(trainingBatchCount))
-            """
-        )
-        summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: epoch+1, value: trainingLossSum / Float(trainingBatchCount))
-
-        if epoch == 0 {
-            print("dataset.testBatches.count: \(dataset.testBatches.count)")
-        }
-        Context.local.learningPhase = .inference
-        var devLossSum: Float = 0
-        var devBatchCount = 0
-        var totalGuessCount = 0
-
-        for eagerBatch in dataset.testBatches {
-            let batch = MotionLangBatch(copying: eagerBatch, to: device)
-            let loss: Float = validate(model: &model, for: batch)
-            let valBatchSize = batch.motion.shape[0]
-
-            devLossSum += loss
-            devBatchCount += 1
-            totalGuessCount += valBatchSize
-        }
-
-        print(
-            """
-            Eval loss: \(devLossSum / Float(devBatchCount))
-            """
-        )
-        summaryWriter.writeScalarSummary(tag: "EpochTestLoss", step: epoch+1, value: devLossSum / Float(devBatchCount))
-
-        Context.local.learningPhase = .inference
-        model.move(to: Device.defaultTFEager)
-        for sample in samplesToDecode {
-            greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 15)
-        }
-        model.move(to: device)
     }
     summaryWriter.flush()
 }
