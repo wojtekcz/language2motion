@@ -194,7 +194,7 @@ func greedyDecodeSample(_ sample_id: Int) {
     Context.local.learningPhase = .inference
     source = MotionLangBatch(copying: source, to: Device.defaultTFEager)
     model.move(to: Device.defaultTFEager)
-    let out = greedyDecode(model: model, input: source, maxLength: maxSequenceLength, startSymbol: textProcessor.bosId)
+    let out = greedyDecode(model: model, input: source, maxLength: 15, startSymbol: textProcessor.bosId)
     let outputStr = textProcessor.decode(tensor: out)
     print("greedyDecode(): \"\(outputStr)\"")
     model.move(to: device)
