@@ -10,6 +10,7 @@ public struct MotionLangTransformer: Module {
     public var encoder: Encoder
     public var decoder: Decoder
     public var positionalEncoding: PositionalEncoding
+    public var motionNorm: LayerNorm<Float>
     public var motionDense: Dense<Float>
     public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding>
     public var generator: Generator
@@ -29,6 +30,7 @@ public struct MotionLangTransformer: Module {
         
         self.encoder = Encoder(layer: .init(size: modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
         self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
+        self.motionNorm = LayerNorm(featureCount: modelSize, axis: 2)
         self.motionDense = Dense<Float>(inputSize: inputSize, outputSize: modelSize)
         self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)
         self.generator = Generator(dimModel: modelSize, vocabSize: targetVocabSize)
@@ -53,6 +55,8 @@ public struct MotionLangTransformer: Module {
 
         let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, length, hiddenSize])
+        motionFeatures = self.motionNorm(motionFeatures)
+
         motionFeatures = positionalEncoding(motionFeatures)
 
         let encoderInput: TransformerInput = TransformerInput(sequence: motionFeatures, attentionMask: input.mask, selfAttentionTemperature: 1.0)
