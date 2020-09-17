@@ -84,11 +84,11 @@ public struct LegacyTextProcessor {
         let endId = Int32(vocabulary.id(forToken: EOS_WORD)!)
         var words = [String]()
         for scalar in tensor.scalars {
+            if let token = vocabulary.token(forId: Int(scalar)) {
+                words.append(token)
+            }
             if Int(scalar) == endId {
                 break
-            } else
-                if let token = vocabulary.token(forId: Int(scalar)) {
-                words.append(token)
             }
         }
         return words.joined(separator: " ")
