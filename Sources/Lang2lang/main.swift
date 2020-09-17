@@ -237,7 +237,7 @@ func greedyDecodeFromString(inputStr: String, maxLength: Int = 50, model: Transf
 let textsToDecode = [
     "A person runs forward.",
     "A human is swimming.",
-    "A person runs.",
+    "A person walks.",
     "A person plays the air guitar",
     "A person performs a squat.",
     "A human raises their left foot and touches it with the right hand."
