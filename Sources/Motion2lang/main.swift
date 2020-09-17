@@ -8,11 +8,11 @@ import SummaryWriter
 import MotionLangModels
 
 /// Set training params
-let runName = "run_2"
-//let batchSize = 10
-let batchSize = 100
+let runName = "run_5"
+let batchSize = 10
+//let batchSize = 300
 let maxMotionLength = 50
-let maxTextSequenceLength = 20
+let maxTextSequenceLength = 40
 let nEpochs = 150
 let learningRate: Float = 5e-4
 
@@ -258,7 +258,7 @@ time() {
             Context.local.learningPhase = .inference
             model.move(to: Device.defaultTFEager)
             for sample in samplesToDecode {
-                greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 15)
+                greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20)
             }
             model.move(to: device)
         }
