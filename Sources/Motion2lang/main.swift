@@ -32,7 +32,7 @@ let langDatasetURL = dataURL.appendingPathComponent("labels_ds_v2.csv")
 
 // let device = Device.defaultXLA
 let device = Device.defaultTFEager
-print(device)
+print("backend: \(device)")
 
 
 /// X10 warm-up
