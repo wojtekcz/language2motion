@@ -58,7 +58,7 @@ let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory:
 /// Select eager or X10 backend
 // let device = Device.defaultXLA
 let device = Device.defaultTFEager
-print(device)
+print("backend: \(device)")
 
 // TODO: make sure X10 training works on Colab
 /// X10 warm-up

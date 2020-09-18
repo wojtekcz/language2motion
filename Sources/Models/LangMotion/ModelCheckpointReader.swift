@@ -193,22 +193,6 @@ extension Decoder: InitializableFromPythonCheckpoint {
     }
 }
 
-
-
-// config
-// let config = LangMotionTransformerConfig(
-//     vocabSize: 100,
-//     nbJoints: 47,
-//     nbMixtures: 20,
-//     layerCount: 6,
-//     modelSize: 256,
-//     feedForwardSize: 1024,
-//     headCount: 8,
-//     dropoutProbability: 0.1,
-//     sentenceMaxPositionalLength: 5000, 
-//     motionMaxPositionalLength: 5000
-// )
-
 extension LangMotionTransformer {
     public init(checkpoint: URL, config: LangMotionTransformerConfig, name: String) throws {
         print("Loading model \"\(name)\" from \"\(checkpoint.path)\"...")

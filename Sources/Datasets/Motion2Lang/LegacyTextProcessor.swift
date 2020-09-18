@@ -3,6 +3,7 @@ import TensorFlow
 import ModelSupport
 
 
+// TODO: rename to MotionLangBatchProcessor
 public struct LegacyTextProcessor {
 
     let BOS_WORD = "[CLS]"
@@ -46,7 +47,10 @@ public struct LegacyTextProcessor {
         assert(encodedTarget.count == maxTextSequenceLength, "encodedTarget.count \(encodedTarget.count) does not equal maxTextSequenceLength \(maxTextSequenceLength)")
         
         let targetTensor = Tensor<Int32>.init( encodedTarget).expandingShape(at: 0)
-        let singleBatch = MotionLangBatch(motion: paddedMotion, motionFlag: motionFlag,  origMotionFramesCount: origMotionFramesCount, target: targetTensor, targetPadId: padId)
+        
+        let sampleID = Tensor<Int32>(Int32(motionSample.sampleID)).expandingShape(at: 0)
+
+        let singleBatch = MotionLangBatch(sampleID: sampleID, motion: paddedMotion, motionFlag: motionFlag,  origMotionFramesCount: origMotionFramesCount, target: targetTensor, targetPadId: padId)
         return singleBatch
     }
 
