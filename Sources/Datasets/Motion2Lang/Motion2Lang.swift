@@ -50,6 +50,7 @@ extension Motion2Lang {
         minMotionLength: Int = 10,
         maxMotionLength: Int = 100,
         trainTestSplit: Double = 0.8,
+        device: Device,
         exampleMap: @escaping (MotionSample) -> MotionLangBatch
     ) throws {
         // Load the data file.
@@ -131,13 +132,13 @@ extension Motion2Lang {
             samples: trainSamples, batchSize: batchSize, entropy: entropy
         ).lazy.map { (batches: Batches) -> LazyMapSequence<Batches, MotionLangBatch> in
             batches.lazy.map{ 
-                MotionLangBatch.reduceDataBatches(Array($0))
+                MotionLangBatch.reduceDataBatches(Array($0)).copy(to: device)
             }
         }
         
         // Create the test collection of batches.
         testBatches = testSamples.inBatches(of: batchSize).lazy.map{
-            MotionLangBatch.reduceDataBatches(Array($0))
+            MotionLangBatch.reduceDataBatches(Array($0)).copy(to: device)
         }
     }
 }

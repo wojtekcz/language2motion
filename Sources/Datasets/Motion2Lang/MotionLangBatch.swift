@@ -1,59 +1,147 @@
 import Foundation
 import TensorFlow
+import ModelSupport
 
-// TODO: add targetTokenCount and sampleID
-public struct MotionLangBatch: KeyPathIterable {
-    public var motion: Tensor<Float>
-    public let origMotionFramesCount: Tensor<Int32>
-    /// IDs that correspond to the vocabulary used while tokenizing.
-    /// The shape of this tensor is `[batchSize, maxSequenceLength]`.
-    // aka src
-    
-    public var targetTokenIds: Tensor<Int32>
-    // aka tgt
-    
-    /// IDs of the token types (e.g., sentence A and sentence B in BERT).
-    /// The shape of this tensor is `[batchSize, maxSequenceLength]`.
-    // public var tokenTypeIds: Tensor<Int32> // TODO: !!! Mutable in order to allow for batching.
-    
-    /// Mask over the sequence of tokens specifying which ones are "real" as opposed to "padding".
-    /// The shape of this tensor is `[batchSize, maxSequenceLength]`.
-    public var mask: Tensor<Float> // TODO: !!! Mutable in order to allow for batching.
-    
-    public var targetMask: Tensor<Float> // TODO: !!! Mutable in order to allow for batching.
-    
-    public var targetTruth: Tensor<Int32>
-    
-    // public var tokenCount: Int32
-    
-    public init(motion: Tensor<Float>, motionFlag: Tensor<Int32>,  origMotionFramesCount: Tensor<Int32>, target: Tensor<Int32>, targetPadId: Int32) {
-        self.motion = motion
-        self.origMotionFramesCount = origMotionFramesCount
+public typealias MotionLangBatch = LabeledData<MotionLang.Source, MotionLang.Target>
 
+public struct MotionLang {
+    public struct Source {
+        // sampleID
+        public let sampleID: Tensor<Int32>
+
+        // motion
+        public var motion: Tensor<Float>
+        // motionFlag
+        // ...
+        
+        // mask // encoder self-attention mask
+        public var mask: Tensor<Float>
+
+        // origMotionLength
+        public let origMotionFramesCount: Tensor<Int32>
+        
+        // targetTokenIds, sentenceTokenIds
+        public var targetTokenIds: Tensor<Int32>
+        // targetMask // decoder self-attention mask?
+        public var targetMask: Tensor<Float>
+        // sourceAttentionMask // decoder source attention mask?
+        // origSentenceLength
+
+        public init(
+            sampleID: Tensor<Int32>,
+            motion: Tensor<Float>,
+            mask: Tensor<Float>,
+            origMotionFramesCount: Tensor<Int32>,
+            
+            targetTokenIds: Tensor<Int32>,
+            targetMask: Tensor<Float>
+        ) {
+            self.sampleID = sampleID
+            self.motion = motion
+            self.mask = mask
+            self.origMotionFramesCount = origMotionFramesCount
+
+            self.targetTokenIds = targetTokenIds
+            self.targetMask = targetMask
+        }
+        
+        public init(copying source: Source, to device: Device) {
+            sampleID = Tensor(copying: source.sampleID, to: device)
+            motion = Tensor(copying: source.motion, to: device)
+            mask = Tensor(copying: source.mask, to: device)
+            origMotionFramesCount = Tensor(copying: source.origMotionFramesCount, to: device)
+
+            targetTokenIds = Tensor(copying: source.targetTokenIds, to: device)
+            targetMask = Tensor(copying: source.targetMask, to: device)
+        }
+        
+        public static func reduceDataBatches(_ batches: [Source]) -> Source {
+            let sampleID = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
+
+            let motion = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
+            let mask = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
+            let origMotionFramesCount = Tensor(batches.map{$0.origMotionFramesCount})
+
+            let targetTokenIds = Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) })
+            let targetMask = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
+            return Source(
+                sampleID: sampleID,
+                motion: motion,
+                mask: mask,
+                origMotionFramesCount: origMotionFramesCount,
+
+                targetTokenIds: targetTokenIds,
+                targetMask: targetMask
+            )
+        }
+    }
+    public struct Target {
+        // sampleID
+        // targetTruthTokenIds
+        public var targetTruth: Tensor<Int32>
+
+        public init(targetTruth: Tensor<Int32>) {
+            self.targetTruth = targetTruth
+        }
+        
+        public init(copying target: Target, to device: Device) {
+            targetTruth = Tensor(copying: target.targetTruth, to: device)
+        }
+        
+        public static func reduceDataBatches(_ batches: [Target]) -> Target {
+            let targetTruth = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
+            return Target(targetTruth: targetTruth)
+        }
+    }
+}
+
+extension MotionLangBatch {
+    public typealias MLSource = MotionLang.Source
+    public typealias MLTarget = MotionLang.Target
+
+    public var source: MLSource { get { return data } }
+    public var target: MLTarget { get { return label } }
+
+    public init(source: MLSource, target: MLTarget) {
+        self.init(data: source, label: target)
+    }
+
+    public init(copying batch: MotionLangBatch, to device: Device) {
+        let data = MLSource(copying: batch.data, to: device)
+        let label = MLTarget(copying: batch.label, to: device)
+        self.init(data: data, label: label)
+    }
+    
+    public static func reduceDataBatches(_ batches: [MotionLangBatch]) -> MotionLangBatch {
+        let source = MLSource.reduceDataBatches(batches.map{ $0.source })
+        let target = MLTarget.reduceDataBatches(batches.map{ $0.target })
+        return MotionLangBatch(source: source, target: target)
+    }
+    
+    public func copy(to device: Device) -> Self {
+        return Self(copying: self, to: device)
+    }
+
+    public init(sampleID: Tensor<Int32>, motion: Tensor<Float>, motionFlag: Tensor<Int32>,  origMotionFramesCount: Tensor<Int32>, target: Tensor<Int32>, targetPadId: Int32) {
+        
         let mask = Tensor<Float>(Tensor(zerosLike: motionFlag)
             .replacing(with: Tensor(onesLike: motionFlag), where: motionFlag .!= Tensor.init(0))
             .expandingShape(at: 1))
-        self.mask = mask
 
         let rangeExceptLast = 0..<(target.shape[1] - 1)
-        self.targetTokenIds = target[0...,rangeExceptLast]
-        self.targetTruth = target[0..., 1...]
+        let targetTokenIds = target[0...,rangeExceptLast]
+        let targetTruth = target[0..., 1...]
 //        self.targetMask = MotionLangBatch.makeStandardMask(target: self.targetTokenIds, pad: targetPadId)
-        
-        var motionPartMask = Self.makeStandardMask(target: self.targetTokenIds, pad: targetPadId, shiftRight: true)
-        let motionLen = Int(self.targetTokenIds.sum().scalar!)
+
+        var motionPartMask = Self.makeStandardMask(target: targetTokenIds, pad: targetPadId, shiftRight: true)
+        let motionLen = Int(targetTokenIds.sum().scalar!)
         motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
         motionPartMask = abs(motionPartMask)
-        self.targetMask = motionPartMask
-    }
+        
+        let source = MLSource(sampleID: sampleID, motion: motion, mask: mask, origMotionFramesCount: origMotionFramesCount, targetTokenIds: targetTokenIds, targetMask: motionPartMask)
 
-    public init(motion: Tensor<Float>, mask: Tensor<Float>,  origMotionFramesCount: Tensor<Int32>, targetTokenIds: Tensor<Int32>, targetMask: Tensor<Float>, targetTruth: Tensor<Int32>) {
-        self.motion = motion
-        self.mask = mask
-        self.origMotionFramesCount = origMotionFramesCount
-        self.targetTokenIds = targetTokenIds
-        self.targetMask = targetMask
-        self.targetTruth = targetTruth
+        let target = MLTarget(targetTruth: targetTruth)
+        self.init(source: source, target: target)
     }
 
     public static func subsequentMask(size: Int, shiftRight: Bool = false) -> Tensor<Int32> {
@@ -77,44 +165,6 @@ public struct MotionLangBatch: KeyPathIterable {
         targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight)
         return Tensor<Float>(targetMask)
     }
-
-//    static func makeStandardMask(target: Tensor<Int32>, pad: Int32) -> Tensor<Float> {
-//        var targetMask = Tensor(zerosLike: target)
-//            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
-//            .expandingShape(at: -2)
-//        targetMask *= subsequentMask2(size: target.shape.last!)
-//        return Tensor<Float>(targetMask)
-//    }
 }
 
-//public func subsequentMask2(size: Int) -> Tensor<Int32> {
-//    let attentionShape = [1, size, size]
-//    return Tensor<Int32>(ones: TensorShape(attentionShape))
-//        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
-//}
-
-extension MotionLangBatch {
-    public init(copying batch: MotionLangBatch, to device: Device) {
-        self.motion = Tensor<Float>(copying: batch.motion, to: device)
-        self.mask = Tensor<Float>(copying: batch.mask, to: device)
-        self.origMotionFramesCount = Tensor<Int32>(copying: batch.origMotionFramesCount, to: device)
-        self.targetTokenIds = Tensor<Int32>(copying: batch.targetTokenIds, to: device)
-        self.targetMask = Tensor<Float>(copying: batch.targetMask, to: device)
-        self.targetTruth = Tensor<Int32>(copying: batch.targetTruth, to: device)
-    }
-    
-    public static func reduceDataBatches(_ batches: [MotionLangBatch]) -> MotionLangBatch {
-        let motion: Tensor<Float> = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{$0.origMotionFramesCount})
-        let targetTokenIds: Tensor<Int32> = Tensor(batches.map{ $0.targetTokenIds.squeezingShape(at: 0) })
-        let targetMask: Tensor<Float> = Tensor(batches.map{ $0.targetMask.squeezingShape(at: 0) })
-        let targetTruth: Tensor<Int32> = Tensor(batches.map{ $0.targetTruth.squeezingShape(at: 0) })
-        return MotionLangBatch(motion: motion,
-                        mask: mask,
-                        origMotionFramesCount: origMotionFramesCount,
-                        targetTokenIds: targetTokenIds,
-                        targetMask: targetMask,
-                        targetTruth: targetTruth)
-    }
-}
+// TODO: add targetTokenCount and sampleID
