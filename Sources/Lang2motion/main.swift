@@ -94,6 +94,7 @@ let config = LangMotionTransformerConfig(
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
+    motionPositionalEncodingSize: 32,
     encoderSelfAttentionTemp: sqrt(Double(modelSize)),
     decoderSourceAttentionTemp: sqrt(Double(modelSize)),
     decoderSelfAttentionTemp: Double(modelSize)

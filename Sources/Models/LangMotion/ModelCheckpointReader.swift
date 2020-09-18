@@ -6,43 +6,6 @@ import TextModels
 import ModelSupport
 
 
-public struct LangMotionTransformerConfig { //: Codable {
-    public let vocabSize: Int
-    public let nbJoints: Int
-    public let nbMixtures: Int
-    public let layerCount: Int
-    public let modelSize: Int
-    public let feedForwardSize: Int
-    public let headCount: Int
-    public let dropoutProbability: Double
-    public let sentenceMaxPositionalLength: Int
-    public let motionMaxPositionalLength: Int
-    public let encoderSelfAttentionTemp: Double
-    public let decoderSourceAttentionTemp: Double
-    public let decoderSelfAttentionTemp: Double
-
-//     enum CodingKeys: String, CodingKey {
-//         case vocabSize = "vocabSize"
-//     }
-    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, modelSize: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int,
-                encoderSelfAttentionTemp: Double, decoderSourceAttentionTemp: Double, decoderSelfAttentionTemp: Double) {
-        self.vocabSize = vocabSize
-        self.nbJoints = nbJoints
-        self.nbMixtures = nbMixtures
-        self.layerCount = layerCount
-        self.modelSize = modelSize
-        self.feedForwardSize = feedForwardSize
-        self.headCount = headCount
-        self.dropoutProbability = dropoutProbability
-        self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
-        self.motionMaxPositionalLength = motionMaxPositionalLength
-        self.encoderSelfAttentionTemp = encoderSelfAttentionTemp
-        self.decoderSourceAttentionTemp = decoderSourceAttentionTemp
-        self.decoderSelfAttentionTemp = decoderSelfAttentionTemp
-    }
-}
-
 protocol InitializableFromPythonCheckpoint {
     init(reader: CheckpointReader, config: LangMotionTransformerConfig, scope: String)
 }
@@ -224,10 +187,8 @@ extension LangMotionTransformer {
 
             let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
             
-            self.init(encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding, motionPositionalEncoding: _motionPositionalEncoding,
-                      sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, 
-                      modelSize: config.modelSize, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, motionNorm: _motionNorm,
-                      encoderSelfAttentionTemp: config.encoderSelfAttentionTemp, decoderSourceAttentionTemp: config.decoderSourceAttentionTemp, decoderSelfAttentionTemp: config.decoderSelfAttentionTemp)
+            self.init(config: config, encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding,
+                      motionPositionalEncoding: _motionPositionalEncoding, sourceEmbed: _sourceEmbed, mixtureModel: _mixtureModel, motionNorm: _motionNorm)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
             print("Fail to load LangMotionTransformer from checkpoint. \(error)")
