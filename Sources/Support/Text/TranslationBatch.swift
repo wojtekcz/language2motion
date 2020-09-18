@@ -94,11 +94,11 @@ public struct TranslationBatch: KeyPathIterable {
     }
 }
 
-//public func subsequentMask(size: Int) -> Tensor<Int32> {
-//    let attentionShape = [1, size, size]
-//    return Tensor<Int32>(ones: TensorShape(attentionShape))
-//        .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
-//}
+public func subsequentMask(size: Int) -> Tensor<Int32> {
+   let attentionShape = [1, size, size]
+   return Tensor<Int32>(ones: TensorShape(attentionShape))
+       .bandPart(subdiagonalCount: 0, superdiagonalCount: -1)
+}
 
 extension TranslationBatch {
   public init(copying batch: TranslationBatch, to device: Device) {
