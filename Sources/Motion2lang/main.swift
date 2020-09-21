@@ -44,7 +44,7 @@ print("stepsPerEpoch: \(stepsPerEpoch)")
 #endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
-let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("runs/Motion2lang/\(runName)", isDirectory: true)
 let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory: true)
 
 // FIXME: how to make macOS builds use filesystem in read/write mode?
