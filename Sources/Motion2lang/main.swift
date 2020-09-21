@@ -86,13 +86,23 @@ let config = MotionLangTransformerConfig(
     modelSize: modelSize,
     feedForwardSize: 512,
     headCount: 4,
-    dropoutProbability:  0.1
+    dropoutProbability: 0.1,
+    sentenceMaxPositionalLength: 100,
+    motionMaxPositionalLength: 500
 )
 
 var start_epoch = 0
 
+/// create new model
 var model = MotionLangTransformer(config: config)
 
+try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
+
+/// load model checkpoint
+print("checkpointURL: \(checkpointURL.path)")
+//start_epoch = 2
+//var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
+model = try! MotionLangTransformer(checkpoint: checkpointURL, config: config, name: "model.final")
 /// load dataset
 print("\nLoading dataset...")
 

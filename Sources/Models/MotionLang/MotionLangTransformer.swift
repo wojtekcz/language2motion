@@ -6,7 +6,7 @@ import TextModels
 
 // Transformer with MotionLangBatch
 
-public struct MotionLangTransformerConfig {
+public struct MotionLangTransformerConfig: ModelConfig {
     public let vocabSize: Int
     public let nbJoints: Int
     public let layerCount: Int
@@ -14,9 +14,12 @@ public struct MotionLangTransformerConfig {
     public let feedForwardSize: Int
     public let headCount: Int
     public let dropoutProbability: Double
+    public let sentenceMaxPositionalLength: Int
+    public let motionMaxPositionalLength: Int
 
     public init(vocabSize: Int, nbJoints: Int, layerCount: Int, modelSize: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double) {
+                feedForwardSize: Int, headCount: Int, dropoutProbability: Double,
+                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
         self.layerCount = layerCount
@@ -24,13 +27,17 @@ public struct MotionLangTransformerConfig {
         self.feedForwardSize = feedForwardSize
         self.headCount = headCount
         self.dropoutProbability = dropoutProbability
+        self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
+        self.motionMaxPositionalLength = motionMaxPositionalLength
     }
 }
 
 public struct MotionLangTransformer: Module {
     public var encoder: Encoder
     public var decoder: Decoder
+    public var embedding: Embedding<Float>
     public var positionalEncoding: PositionalEncoding
+    public var motionPositionalEncoding: PositionalEncoding
     public var motionNorm: LayerNorm<Float>
     public var motionDense: Dense<Float>
     public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding>
@@ -46,14 +53,15 @@ public struct MotionLangTransformer: Module {
         let feedForward = PositionwiseFeedForward(dimensionalityModel: config.modelSize,
                                                   innerLayerDimensionality: config.feedForwardSize)
         
-        positionalEncoding = PositionalEncoding(size: config.modelSize,
-                                                dropoutProbability: config.dropoutProbability)
+        self.embedding = Embedding(vocabularySize: config.vocabSize, embeddingSize: config.modelSize, embeddingsInitializer: glorotUniform())
+        self.positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+        self.motionPositionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
         
         self.encoder = Encoder(layer: .init(size: config.modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
         self.decoder = Decoder(layer: .init(size: config.modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
         self.motionNorm = LayerNorm(featureCount: config.modelSize, axis: 2)
         self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.modelSize)
-        self.targetEmbed = Sequential(Embedding(vocabularySize: config.vocabSize, embeddingSize: config.modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
+        self.targetEmbed = Sequential(embedding, positionalEncoding)
         self.generator = Generator(dimModel: config.modelSize, vocabSize: config.vocabSize)
         self.config = config
     }
@@ -80,7 +88,7 @@ public struct MotionLangTransformer: Module {
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, length, hiddenSize])
         motionFeatures = self.motionNorm(motionFeatures)
 
-        motionFeatures = positionalEncoding(motionFeatures)
+        motionFeatures = motionPositionalEncoding(motionFeatures)
 
         let encoderInput: TransformerInput = TransformerInput(sequence: motionFeatures, attentionMask: input.mask, selfAttentionTemperature: 1.0)
         return self.encoder(encoderInput)
@@ -96,5 +104,23 @@ public struct MotionLangTransformer: Module {
     @differentiable
     public func generate(input: Tensor<Float>) -> Tensor<Float> {
         self.generator(input)
+    }
+}
+
+extension MotionLangTransformer {
+
+    public init(config: MotionLangTransformerConfig, encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>,
+                positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding,
+                motionNorm: LayerNorm<Float>, motionDense: Dense<Float>, generator: Generator) {
+        self.config = config
+        self.encoder = encoder
+        self.decoder = decoder
+        self.embedding = embedding
+        self.positionalEncoding = positionalEncoding
+        self.motionPositionalEncoding = motionPositionalEncoding
+        self.motionNorm = motionNorm
+        self.motionDense = motionDense
+        self.targetEmbed = Sequential(embedding, positionalEncoding)
+        self.generator = generator
     }
 }
