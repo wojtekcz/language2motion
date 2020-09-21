@@ -92,6 +92,10 @@ public struct Generator: Layer {
         self.dense = Dense(inputSize: dimModel, outputSize: vocabSize, weightInitializer: glorotUniform())
     }
     
+    public init(dense: Dense<Float>) {
+        self.dense = dense
+    }
+
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
         return logSoftmax(dense(input))
