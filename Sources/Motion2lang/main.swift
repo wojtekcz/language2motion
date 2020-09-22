@@ -293,7 +293,7 @@ for epochIndex in start_epoch..<start_epoch+nEpochs {
     print("epoch \(epochIndex+1)/\(start_epoch + nEpochs)")
     statsRecorder.epochIndex = epochIndex
     try! trainingLoop.fit(&model, epochs: 1, on: device)
-//    try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+    try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
 
     Context.local.learningPhase = .inference
     model.move(to: Device.defaultTFEager)
@@ -303,7 +303,7 @@ for epochIndex in start_epoch..<start_epoch+nEpochs {
     model.move(to: device)
 }
 
-//try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
+try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 print("\nFinished training.")
 
 /// Generate motion description
