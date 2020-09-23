@@ -10,7 +10,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_12"
+let runName = "run_16"
 let batchSize = 100
 //let batchSize = 300
 let maxMotionLength = 50
@@ -125,9 +125,9 @@ var start_epoch = 0
 //let modeName = "model.e\(start_epoch)"
 //let modeName = "model.final"
 //var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: modeName)
-var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: "model.re-saved.final")
+var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_15/checkpoints"), config: config, name: "model.e21")
 
-try! model.writeCheckpoint(to: checkpointURL, name: "model.re-saved2.final")
+//try! model.writeCheckpoint(to: checkpointURL, name: "model.re-saved2.final")
 
 /// Optimizer
 //var optimizer = Adam(for: model, learningRate: learningRate)
@@ -148,7 +148,7 @@ func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.
 }
 
 /// Set up decoding
-func greedyDecodeSample(_ sample_id: Int, maxLength: Int = 15) {
+func greedyDecodeSample(_ sample_id: Int, maxLength: Int = 15, model: MotionLangTransformer) {
     let motionSample = dataset.motionSampleDict[sample_id]!
     print("\nsample: \(motionSample.sampleID), \"\(motionSample.annotations[0])\", motion: \(motionSample.timesteps[-1]) sec (\(motionSample.motion.shape[0]) frames)")
 
@@ -171,8 +171,11 @@ let samplesToDecode = [
 ]
 
 Context.local.learningPhase = .inference
-for sample in samplesToDecode {
-    greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20)
+//for sample in samplesToDecode {
+for _ in 0..<10 {
+    let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
+    let sampleID = dataset.motionSamples[randomIdx].sampleID
+    greedyDecodeSample(sampleID, maxLength: 20, model: model)
 }
 
 exit(0)
@@ -199,7 +202,7 @@ for epochIndex in start_epoch..<start_epoch+nEpochs {
     Context.local.learningPhase = .inference
     model.move(to: Device.defaultTFEager)
     for sample in samplesToDecode {
-        greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20)
+        greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20, model: model)
     }
     model.move(to: device)
 }
@@ -209,6 +212,6 @@ print("\nFinished training.")
 
 /// Generate motion description
 let sample_id = 733
-greedyDecodeSample(sample_id, maxLength: 20)
+greedyDecodeSample(sample_id, maxLength: 20, model: model)
 
 print("\nFinito.")
