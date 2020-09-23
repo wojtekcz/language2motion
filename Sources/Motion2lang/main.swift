@@ -17,11 +17,13 @@ let maxMotionLength = 50
 let maxTextSequenceLength = 40
 let nEpochs = 10
 
-let optimizerOpts = OptimizerOpts(
+var optimizerOpts = OptimizerOpts(
     peakLearningRate: 2e-5,
     beta1: 0.9,
     beta2: 0.999,
-    useBiasCorrection: false
+    useBiasCorrection: false,
+    lrSlopeMultiplier: 2,
+    nEpochs: nEpochs
 )
 
 //let datasetSize: DatasetSize = .multi_full
@@ -35,7 +37,7 @@ print("maxTextSequenceLength: \(maxTextSequenceLength)")
 print("nEpochs: \(nEpochs)")
 print("peakLearningRate: \(optimizerOpts.peakLearningRate)")
 print("datasetSize: \(datasetSize)")
-print("stepsPerEpoch: \(stepsPerEpoch)")
+print("stepsPerEpoch: \(optimizerOpts.stepsPerEpoch)")
 
 #if os(macOS)
 //    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
@@ -72,6 +74,13 @@ let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
 // let _ = _ExecutionContext.global
 
+/// instantiate text processor
+let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
+let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
+let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
+let textProcessor = LegacyTextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
+
+
 /// load dataset
 print("\nLoading dataset...")
 
@@ -91,14 +100,7 @@ print("Dataset acquired.")
 
 print(dataset.motionSamples.count)
 
-let stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
-let lrSlopeMultiplier = 2
-
-/// instantiate text processor
-let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
-let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
-let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-let textProcessor = LegacyTextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
+optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
 
 /// instantiate model
 print("instantiate model")

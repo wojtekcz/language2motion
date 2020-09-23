@@ -1,7 +1,6 @@
 import Foundation
 import x10_optimizers_optimizer
 import TrainingLoop
-import MotionLangModels
 import TextModels
 
 
@@ -10,12 +9,18 @@ public struct OptimizerOpts {
     public let beta1: Float
     public let beta2: Float
     public let useBiasCorrection: Bool
+    public let lrSlopeMultiplier: Int
+    public let nEpochs: Int
+    public var stepsPerEpoch: Int
     
-    public init(peakLearningRate: Float = 5e-4, beta1: Float = 0.9, beta2: Float = 0.999, useBiasCorrection: Bool = false) {
+    public init(peakLearningRate: Float = 5e-4, beta1: Float = 0.9, beta2: Float = 0.999, useBiasCorrection: Bool = false, lrSlopeMultiplier: Int = 1, nEpochs: Int = 10, stepsPerEpoch: Int = 1) {
         self.peakLearningRate = peakLearningRate
         self.beta1 = beta1
         self.beta2 = beta2
         self.useBiasCorrection = useBiasCorrection
+        self.lrSlopeMultiplier = lrSlopeMultiplier
+        self.nEpochs = nEpochs
+        self.stepsPerEpoch = stepsPerEpoch
     }
 }
 
@@ -42,7 +47,7 @@ public class OptimizerWrapper {
             baseParameter: FixedParameter<Float>(opts.peakLearningRate),
               warmUpStepCount: 20,
               warmUpOffset: 0),
-            slope: -(opts.peakLearningRate / Float(stepsPerEpoch * nEpochs * lrSlopeMultiplier)),  // The LR decays linearly to zero.
+            slope: -(opts.peakLearningRate / Float(opts.stepsPerEpoch * opts.nEpochs * opts.lrSlopeMultiplier)),  // The LR decays linearly to zero.
           startStep: 10
         )
     }
