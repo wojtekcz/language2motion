@@ -40,7 +40,6 @@ public struct MotionLangTransformer: Module {
     public var motionPositionalEncoding: PositionalEncoding
     public var motionNorm: LayerNorm<Float>
     public var motionDense: Dense<Float>
-    public var targetEmbed: Sequential<Embedding<Float>, PositionalEncoding>
     public var generator: Generator
     @noDerivative public var config: MotionLangTransformerConfig
     
@@ -61,7 +60,6 @@ public struct MotionLangTransformer: Module {
         self.decoder = Decoder(layer: .init(size: config.modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
         self.motionNorm = LayerNorm(featureCount: config.modelSize, axis: 2)
         self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.modelSize)
-        self.targetEmbed = Sequential(embedding, positionalEncoding)
         self.generator = Generator(dimModel: config.modelSize, vocabSize: config.vocabSize)
         self.config = config
     }
@@ -96,7 +94,7 @@ public struct MotionLangTransformer: Module {
     
     @differentiable
     public func decode(input: MotionLangBatch.MLSource, memory: Tensor<Float>) -> DecoderOutput<Float> {
-        let embedded = self.targetEmbed(input.targetTokenIds)
+        let embedded = self.positionalEncoding(self.embedding(input.targetTokenIds))
         let decoderInput = DecoderInput(sequence: embedded, sourceMask: input.mask, targetMask: input.targetMask, memory: memory, sourceAttentionTemperature: 1.0, selfAttentionTemperature: 1.0)
         return self.decoder(decoderInput)
     }
@@ -120,7 +118,6 @@ extension MotionLangTransformer {
         self.motionPositionalEncoding = motionPositionalEncoding
         self.motionNorm = motionNorm
         self.motionDense = motionDense
-        self.targetEmbed = Sequential(embedding, positionalEncoding)
         self.generator = generator
     }
 }
