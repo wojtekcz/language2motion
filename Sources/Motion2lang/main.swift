@@ -10,7 +10,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_11"
+let runName = "run_12"
 let batchSize = 100
 //let batchSize = 300
 let maxMotionLength = 50
@@ -121,11 +121,13 @@ var start_epoch = 0
 
 /// load model checkpoint
 //print("logdirURL: \(logdirURL.path)")
-start_epoch = 17
-let modeName = "model.e\(start_epoch)"
+//start_epoch = 50
+//let modeName = "model.e\(start_epoch)"
 //let modeName = "model.final"
-var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_9/checkpoints"), config: config, name: modeName)
+//var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: modeName)
+var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: "model.re-saved.final")
 
+try! model.writeCheckpoint(to: checkpointURL, name: "model.re-saved2.final")
 
 /// Optimizer
 //var optimizer = Adam(for: model, learningRate: learningRate)
@@ -167,6 +169,13 @@ let samplesToDecode = [
 //    ["sampleID": 1292, "text": "A person performs a squat."],
 //    ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
 ]
+
+Context.local.learningPhase = .inference
+for sample in samplesToDecode {
+    greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20)
+}
+
+exit(0)
 
 // Training loop
 print("\nSetting up the training loop")
