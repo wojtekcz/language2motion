@@ -10,22 +10,20 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let batchSize = 10
 let runName = "run_9"
+let batchSize = 100
 //let batchSize = 300
 let maxMotionLength = 50
 let maxTextSequenceLength = 40
-let nEpochs = 150
+let nEpochs = 10
 let peakLearningRate: Float = 5e-4
-
-let stepsPerEpoch = 1967/batchSize*2 // function of training set size and batching configuration
 
 let beta1: Float = 0.9
 let beta2: Float = 0.999
 let useBiasCorrection = false
 
 //let datasetSize: DatasetSize = .multi_full
-let datasetSize: DatasetSize = .micro
+let datasetSize: DatasetSize = .multi_midi
 
 
 print("runName: \(runName)")
@@ -38,7 +36,8 @@ print("datasetSize: \(datasetSize)")
 print("stepsPerEpoch: \(stepsPerEpoch)")
 
 #if os(macOS)
-    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+//    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+    let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
 #else
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 #endif
@@ -290,7 +289,7 @@ func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch.MLSource,
         let out = model.decode(input: decoderInput, memory: memory).lastLayerOutput
         let prob = model.generate(input: out[0...,-1])
         let nextWord = Int32(prob.argmax().scalarized())
-        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1) // , on: device
+        ys = Tensor(concatenating: [ys, Tensor(repeating: nextWord, shape: [1,1])], alongAxis: 1)
     }
     return ys
 }
@@ -306,13 +305,15 @@ func greedyDecodeSample(_ sample_id: Int, maxLength: Int = 15) {
 }
 
 let samplesToDecode = [
+    ["sampleID": dataset.motionSamples[0].sampleID, "text": dataset.motionSamples[0].annotations[0]], // for small dataset
 //    ["sampleID": 733, "text": "Ala ma kota."], // for .micro dataset
-    ["sampleID": 449, "text": "A person runs forward."],
-    ["sampleID": 3921, "text": "A human is swimming."],
-    ["sampleID": 843, "text": "A person walks."],
-    ["sampleID": 1426, "text": "A person plays the air guitar."],
-    ["sampleID": 1292, "text": "A person performs a squat."],
-    ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
+//    ["sampleID": 1242, "text": "Ala ma kota."], // for .multi_mini dataset
+//    ["sampleID": 449, "text": "A person runs forward."],
+//    ["sampleID": 3921, "text": "A human is swimming."],
+//    ["sampleID": 843, "text": "A person walks."],
+//    ["sampleID": 1426, "text": "A person plays the air guitar."],
+//    ["sampleID": 1292, "text": "A person performs a squat."],
+//    ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
 ]
 
 // Training loop
