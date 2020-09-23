@@ -10,7 +10,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_10"
+let runName = "run_11"
 let batchSize = 100
 //let batchSize = 300
 let maxMotionLength = 50
@@ -97,10 +97,7 @@ var dataset = try Motion2Lang(
 }
 
 print("Dataset acquired.")
-
 print(dataset.motionSamples.count)
-
-optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
 
 /// instantiate model
 print("instantiate model")
@@ -133,6 +130,7 @@ var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathCompon
 /// Optimizer
 //var optimizer = Adam(for: model, learningRate: learningRate)
 
+optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
 let optimizerWrapper = OptimizerWrapper(opts: optimizerOpts, model: model)
 
 /// stats recorder
