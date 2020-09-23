@@ -10,8 +10,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_5"
 let batchSize = 10
+let runName = "run_9"
 //let batchSize = 300
 let maxMotionLength = 50
 let maxTextSequenceLength = 40
@@ -44,8 +44,9 @@ print("stepsPerEpoch: \(stepsPerEpoch)")
 #endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
-let logdirURL = dataURL.appendingPathComponent("runs/Motion2lang/\(runName)", isDirectory: true)
-let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("runs/Motion2lang/", isDirectory: true)
+let rundirURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
+let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory: true)
 
 // FIXME: how to make macOS builds use filesystem in read/write mode?
 #if os(Linux)
@@ -69,6 +70,28 @@ let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
 // let _ = _ExecutionContext.global
+
+/// load dataset
+print("\nLoading dataset...")
+
+var dataset = try Motion2Lang(
+    motionDatasetURL: motionDatasetURL,
+    batchSize: batchSize,
+    minMotionLength: 20,
+    maxMotionLength: 100,
+    trainTestSplit: 0.9,
+    device: device
+) { (motionSample: MotionSample) -> MotionLangBatch in
+    let singleBatch = textProcessor.preprocess(motionSample: motionSample, maxMotionLength: maxMotionLength, maxTextSequenceLength: maxTextSequenceLength)
+    return singleBatch
+}
+
+print("Dataset acquired.")
+
+print(dataset.motionSamples.count)
+
+let stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
+let lrSlopeMultiplier = 2
 
 /// instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -96,29 +119,13 @@ var start_epoch = 0
 /// create new model
 var model = MotionLangTransformer(config: config)
 
-try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
-
 /// load model checkpoint
-print("checkpointURL: \(checkpointURL.path)")
-//start_epoch = 2
-//var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
-model = try! MotionLangTransformer(checkpoint: checkpointURL, config: config, name: "model.final")
-/// load dataset
-print("\nLoading dataset...")
+//print("logdirURL: \(logdirURL.path)")
+//start_epoch = 10
+//let modeName = "model.e\(start_epoch)"
+//let modeName = "model.final"
+//var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_8/checkpoints"), config: config, name: modeName)
 
-var dataset = try Motion2Lang(
-    motionDatasetURL: motionDatasetURL,
-    batchSize: batchSize,
-    minMotionLength: 20,
-    maxMotionLength: 100,
-    trainTestSplit: 0.9,
-    device: device
-) { (motionSample: MotionSample) -> MotionLangBatch in
-    let singleBatch = textProcessor.preprocess(motionSample: motionSample, maxMotionLength: maxMotionLength, maxTextSequenceLength: maxTextSequenceLength)
-    return singleBatch
-}
-
-print("Dataset acquired.")
 
 /// Test model with one batch
 // get a batch
@@ -162,7 +169,7 @@ var scheduledLearningRate = LinearlyDecayedParameter(
       baseParameter: FixedParameter<Float>(peakLearningRate),
       warmUpStepCount: 20,
       warmUpOffset: 0),
-  slope: -(peakLearningRate / Float(stepsPerEpoch * nEpochs)),  // The LR decays linearly to zero.
+  slope: -(peakLearningRate / Float(stepsPerEpoch * nEpochs * lrSlopeMultiplier)),  // The LR decays linearly to zero.
   startStep: 10
 )
 
@@ -181,30 +188,63 @@ public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event:
 
 /// stats recorder
 public class StatsRecorder {
-    let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
+    let summaryWriter = SummaryWriter(logdir: rundirURL, flushMillis: 30*1000)
     public var trainingStepCount = 0
     public var trainingBatchCount = 0
     public var trainingLossSum: Float = 0.0
+
+    public var validationStepCount = 0
+    public var validationBatchCount = 0
+    public var validationLossSum: Float = 0.0
+
     public var epochIndex = 0 // FIXME: Workaround
+    public var inValidationPhase = false
 
     public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+        
+        // TODO: write learning rate
+        
+        if event == .validationStart {
+            inValidationPhase = true
+            validationBatchCount = 0
+            validationLossSum = 0.0
+        }
+
+        if event == .validationEnd {
+            inValidationPhase = false
+            let current_epoch = epochIndex + 1
+            let epochValidationLoss = validationLossSum / Float(validationBatchCount)
+            summaryWriter.writeScalarSummary(tag: "EpochValidationLoss", step: current_epoch, value: epochValidationLoss)
+        }
+
         if event == .batchEnd {
             guard
             // let batchIndex = loop.batchIndex,
-            let trainingLoss = loop.lastLoss else {
+            let lastLoss = loop.lastLoss else {
                 return
             }
-            // print("\nbatch stats: batchIndex: \(batchIndex), trainingStepCount: \(trainingStepCount), trainingLoss: \(trainingLoss)")
-            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value:trainingLoss.scalar!)
-            trainingStepCount += 1
-            trainingBatchCount += 1
-            trainingLossSum += Float(trainingLoss.scalar!)
+            if !inValidationPhase {
+                // print("\nbatch stats: batchIndex: \(batchIndex), trainingStepCount: \(trainingStepCount), trainingLoss: \(lastLoss)")
+                summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: lastLoss.scalar!)
+                
+                let optimizer: GeneralOptimizer<MotionLangTransformer> = loop.optimizer as! GeneralOptimizer<MotionLangTransformer>
+                summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.learningRate)
+
+                trainingStepCount += 1
+                trainingBatchCount += 1
+                trainingLossSum += Float(lastLoss.scalar!)
+            } else {
+                validationStepCount += 1
+                validationBatchCount += 1
+                validationLossSum += Float(lastLoss.scalar!)
+                summaryWriter.writeScalarSummary(tag: "ValidationLoss", step: validationStepCount, value: lastLoss.scalar!)
+            }
         }
-        if event == .epochStart {
+        if event == .trainingStart {
             trainingBatchCount = 0
             trainingLossSum = 0.0
         }
-        if event == .epochEnd {
+        if event == .trainingEnd {
             // guard let epochIndex = loop.epochIndex else {
             //     return
             // }
@@ -284,7 +324,6 @@ var trainingLoop: TrainingLoop = TrainingLoop(
     optimizer: optimizer,
     lossFunction:  embeddedSoftmaxCrossEntropy,
     callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater]
-//    callbacks: []
 )
 
 print("\nTraining Transformer for the Motion2lang task!")
