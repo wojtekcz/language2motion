@@ -10,10 +10,10 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_16"
-let batchSize = 100
+let runName = "run_18"
+let batchSize = 200
 //let batchSize = 300
-let maxMotionLength = 50
+let maxMotionLength = 100
 let maxTextSequenceLength = 40
 let nEpochs = 10
 
@@ -26,8 +26,8 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-//let datasetSize: DatasetSize = .multi_full
-let datasetSize: DatasetSize = .multi_midi
+let datasetSize: DatasetSize = .multi_full
+//let datasetSize: DatasetSize = .multi_midi
 
 
 print("runName: \(runName)")
@@ -122,10 +122,10 @@ var start_epoch = 0
 /// load model checkpoint
 //print("logdirURL: \(logdirURL.path)")
 //start_epoch = 50
-//let modeName = "model.e\(start_epoch)"
-//let modeName = "model.final"
-//var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: modeName)
-var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_15/checkpoints"), config: config, name: "model.e21")
+//let modelName = "model.e\(start_epoch)"
+//let modelName = "model.final"
+//var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: modelName)
+var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_17/checkpoints"), config: config, name: "model.e19")
 
 //try! model.writeCheckpoint(to: checkpointURL, name: "model.re-saved2.final")
 
@@ -170,15 +170,15 @@ let samplesToDecode = [
 //    ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
 ]
 
-Context.local.learningPhase = .inference
-//for sample in samplesToDecode {
-for _ in 0..<10 {
-    let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
-    let sampleID = dataset.motionSamples[randomIdx].sampleID
-    greedyDecodeSample(sampleID, maxLength: 20, model: model)
-}
-
-exit(0)
+//Context.local.learningPhase = .inference
+////for sample in samplesToDecode {
+//for _ in 0..<10 {
+//    let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
+//    let sampleID = dataset.motionSamples[randomIdx].sampleID
+//    greedyDecodeSample(sampleID, maxLength: 40, model: model)
+//}
+//
+//exit(0)
 
 // Training loop
 print("\nSetting up the training loop")
