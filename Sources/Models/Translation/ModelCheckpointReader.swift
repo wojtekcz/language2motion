@@ -10,7 +10,7 @@ public protocol ModelConfig {
     var dropoutProbability: Double { get }
 }
 
-protocol InitializableFromPythonCheckpoint {
+public protocol InitializableFromPythonCheckpoint {
     init(reader: CheckpointReader, config: ModelConfig, scope: String)
 }
 

@@ -13,14 +13,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_52"
+let runName = "run_53"
 // let batchSize = 10
-let batchSize = 50
-let maxTextSequenceLength =  20
+let batchSize = 10
+let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 30
-let peakLearningRate: Float = 1e-3 // bs=50
-// let peakLearningRate: Float = 2e-4 // bs=10
+let nEpochs = 10
+//let peakLearningRate: Float = 1e-3 // bs=50
+ let peakLearningRate: Float = 2e-4 // bs=10
 // let peakLearningRate: Float = 2e-5
 
 let stepsPerEpoch = 1967/batchSize*2 // function of training set size and batching configuration
@@ -29,7 +29,7 @@ let beta1: Float = 0.9
 let beta2: Float = 0.999
 let useBiasCorrection = false
 
-let datasetSize: DatasetSize = .full
+let datasetSize: DatasetSize = .multi_mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -41,14 +41,16 @@ print("datasetSize: \(datasetSize)")
 print("stepsPerEpoch: \(stepsPerEpoch)")
 
 #if os(macOS)
-    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+//    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+    let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
 #else
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 #endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
-let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
-let checkpointURL = logdirURL.appendingPathComponent("checkpoints", isDirectory: true)
+let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+let rundirURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
+let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory: true)
 
 // FIXME: how to make macOS builds use filesystem in read/write mode?
 #if os(Linux)
@@ -103,12 +105,12 @@ let config = LangMotionTransformerConfig(
 var start_epoch = 0
 
 /// create new model
-var model = LangMotionTransformer(config: config)
+//var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-// print("checkpointURL: \(checkpointURL.path)")
-// start_epoch = 2
-// var model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(start_epoch)")
+ start_epoch = 10
+ var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_52/checkpoints"), config: config, name: "model.e\(start_epoch)")
+
 
 /// load dataset
 print("\nLoading dataset...")
@@ -223,12 +225,13 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
             return
         }
         let transformer: LangMotionTransformer = loop.model as! LangMotionTransformer
-        try! transformer.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+//        try! transformer.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
     }
 }
 
 public class StatsRecorder {
-    let summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
+    let summaryWriter = SummaryWriter(logdir: rundirURL, flushMillis: 30*1000)
     public var trainingStepCount = 0
     public var trainingBatchCount = 0
     public var trainingLossSum: Float = 0.0
@@ -277,7 +280,6 @@ var trainingLoop = TrainingLoop(
     optimizer: optimizer,
     lossFunction: embeddedNormalMixtureSurrogateLoss,
     callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater]
-    // callbacks: []
 )
 
 print("\nTraining Transformer for the Lang2motion task!")

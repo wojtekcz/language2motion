@@ -6,7 +6,7 @@ import TranslationModels
 
 // Transformer with LangMotionBatch
 
-public struct LangMotionTransformerConfig {
+public struct LangMotionTransformerConfig: ModelConfig {
     public let vocabSize: Int
     public let nbJoints: Int
     public let nbMixtures: Int
@@ -64,11 +64,9 @@ public struct LangMotionTransformer: Module {
     public var positionalEncoding: PositionalEncoding
     public var motionPositionalEncoding: PositionalEncoding
     public var motionNorm: LayerNorm<Float>
-    public var sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding> 
     public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var config: LangMotionTransformerConfig
 
-    // TODO: kill this initializer
     public init(config: LangMotionTransformerConfig) {
         let attention = MultiHeadAttention(sourceSize: config.modelSize,
                                            targetSize: config.modelSize,
@@ -79,10 +77,8 @@ public struct LangMotionTransformer: Module {
                                                   innerLayerDimensionality: config.feedForwardSize)
         
         self.positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
-        let motionPositionalEncodingSize = 32
-        self.motionPositionalEncoding = PositionalEncoding(size: motionPositionalEncodingSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
+        self.motionPositionalEncoding = PositionalEncoding(size: config.motionPositionalEncodingSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
         self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.modelSize, embeddingsInitializer: glorotUniform())
-        self.sourceEmbed = Sequential(embedding, positionalEncoding)
         
         self.encoder = Encoder(layer: .init(size: config.modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
         self.decoder = Decoder(layer: .init(size: config.modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
@@ -103,7 +99,7 @@ public struct LangMotionTransformer: Module {
     
     @differentiable
     public func encode(input: LangMotionBatch.Sentence) -> EncoderOutput<Float> {
-        let embedded = self.sourceEmbed(input.tokenIds)
+        let embedded = self.positionalEncoding(self.embedding(input.tokenIds))
         let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask, selfAttentionTemperature: Float(config.encoderSelfAttentionTemp))
         return self.encoder(encoderInput)
     }
@@ -143,7 +139,6 @@ extension LangMotionTransformer {
 
     public init(config: LangMotionTransformerConfig, encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>,
                 positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding,
-                sourceEmbed: Sequential<Embedding<Float>, PositionalEncoding>,
                 mixtureModel: MotionGaussianMixtureModel, motionNorm: LayerNorm<Float>) {
         self.config = config
         self.encoder = encoder
@@ -151,7 +146,6 @@ extension LangMotionTransformer {
         self.embedding = embedding
         self.positionalEncoding = positionalEncoding
         self.motionPositionalEncoding = motionPositionalEncoding
-        self.sourceEmbed = sourceEmbed
         self.mixtureModel = mixtureModel
         self.motionNorm = motionNorm
     }

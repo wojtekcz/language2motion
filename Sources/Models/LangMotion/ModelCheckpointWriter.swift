@@ -11,8 +11,8 @@ extension LangMotionTransformer: ExportableLayer {
             "encoder": "encoder",
             "decoder": "decoder",
             "embedding": "embedding",
-            "mixtureModel": "mixtureModel",
-            "motionNorm": "motionNorm"
+            "motionNorm": "motionNorm",
+            "mixtureModel": "mixtureModel"
         ]
     }
 }
