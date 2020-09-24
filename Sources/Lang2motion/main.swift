@@ -13,21 +13,20 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_53"
-// let batchSize = 10
+let runName = "run_56"
 let batchSize = 10
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 10
-//let peakLearningRate: Float = 1e-3 // bs=50
- let peakLearningRate: Float = 2e-4 // bs=10
-// let peakLearningRate: Float = 2e-5
 
-let stepsPerEpoch = 1967/batchSize*2 // function of training set size and batching configuration
-
-let beta1: Float = 0.9
-let beta2: Float = 0.999
-let useBiasCorrection = false
+var optimizerOpts = OptimizerOpts(
+    peakLearningRate: 2e-5,
+    beta1: 0.9,
+    beta2: 0.999,
+    useBiasCorrection: false,
+    lrSlopeMultiplier: 2,
+    nEpochs: nEpochs
+)
 
 let datasetSize: DatasetSize = .multi_mini
 
@@ -36,9 +35,9 @@ print("batchSize: \(batchSize)")
 print("maxTextSequenceLength: \(maxTextSequenceLength)")
 print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
-print("peakLearningRate: \(peakLearningRate)")
+print("peakLearningRate: \(optimizerOpts.peakLearningRate)")
 print("datasetSize: \(datasetSize)")
-print("stepsPerEpoch: \(stepsPerEpoch)")
+print("stepsPerEpoch: \(optimizerOpts.stepsPerEpoch)")
 
 #if os(macOS)
 //    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
@@ -82,6 +81,27 @@ let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
 let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
 
+/// load dataset
+print("\nLoading dataset...")
+
+var dataset = try Lang2Motion(
+    motionDatasetURL: motionDatasetURL,
+    batchSize: batchSize,
+    minMotionLength: 20,
+    maxMotionLength: 50,
+    trainTestSplit: 0.9,
+    device: device
+) { (motionSample: MotionSample) -> LangMotionBatch in
+    let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
+    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, shiftMaskRight: true)
+
+    let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
+    let singleBatch = LangMotionBatch(data: source, label: target)
+    return singleBatch
+}
+
+print("Dataset acquired.")
+
 /// instantiate model
 print("instantiate model")
 let modelSize = 128
@@ -108,30 +128,8 @@ var start_epoch = 0
 //var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
- start_epoch = 10
- var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_52/checkpoints"), config: config, name: "model.e\(start_epoch)")
-
-
-/// load dataset
-print("\nLoading dataset...")
-
-var dataset = try Lang2Motion(
-    motionDatasetURL: motionDatasetURL,
-    batchSize: batchSize,
-    minMotionLength: 20,
-    maxMotionLength: 50,
-    trainTestSplit: 1.0,
-    device: device
-) { (motionSample: MotionSample) -> LangMotionBatch in    
-    let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, shiftMaskRight: true)
-
-    let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-    let singleBatch = LangMotionBatch(data: source, label: target)
-    return singleBatch
-}
-
-print("Dataset acquired.")
+ start_epoch = 15
+ var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_55/checkpoints"), config: config, name: "model.e\(start_epoch)")
 
 // TODO: make possible to call greedyDecodeMotion() during training again
 public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer, 
@@ -173,37 +171,12 @@ public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransforme
 /// Optimizer
 // var optimizer = Adam(for: model, learningRate: learningRate)
 
-var optimizer = x10_optimizers_optimizer.GeneralOptimizer(
-    for: model,
-    TensorVisitorPlan(model.differentiableVectorView),
-    defaultOptimizer: makeWeightDecayedAdam(
-      learningRate: peakLearningRate,
-      beta1: beta1,
-      beta2: beta2
-    )
-)
+optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
+let optimizerWrapper = OptimizerWrapper(opts: optimizerOpts, model: model)
 
-var scheduledLearningRate = LinearlyDecayedParameter(
-  baseParameter: LinearlyWarmedUpParameter(
-      baseParameter: FixedParameter<Float>(peakLearningRate),
-      warmUpStepCount: 20,
-      warmUpOffset: 0),
-  slope: -(peakLearningRate / Float(stepsPerEpoch * nEpochs)),  // The LR decays linearly to zero.
-  startStep: 10
-)
+/// stats recorder
+let statsRecorder = StatsRecorder(logdirURL: rundirURL)
 
-public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
-    if event == .updateStart {
-        let optimizer: GeneralOptimizer<LangMotionTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionTransformer>
-        let step = optimizer.step + 1 // for scheduled rates and bias correction, steps start at 1
-        optimizer.learningRate = scheduledLearningRate(forStep: UInt64(step))
-        if useBiasCorrection {
-          let f_step = Float(step)
-          optimizer.learningRate *= sqrtf(1 - powf(beta2, f_step)) / (1 - powf(beta1, f_step))
-        }
-        // print("\noptimizer: step: \(optimizer.step), learningRate: \(optimizer.learningRate)")
-    }
-}
 
 // Loss function
 let args = LossArgs(
@@ -224,52 +197,11 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
         guard let epochIndex = loop.epochIndex else {
             return
         }
-        let transformer: LangMotionTransformer = loop.model as! LangMotionTransformer
+//        let transformer: LangMotionTransformer = loop.model as! LangMotionTransformer
 //        try! transformer.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
         try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
     }
 }
-
-public class StatsRecorder {
-    let summaryWriter = SummaryWriter(logdir: rundirURL, flushMillis: 30*1000)
-    public var trainingStepCount = 0
-    public var trainingBatchCount = 0
-    public var trainingLossSum: Float = 0.0
-    public var epochIndex = 0 // FIXME: Workaround
-
-    public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
-        if event == .batchEnd {
-            guard 
-            // let batchIndex = loop.batchIndex, 
-            let trainingLoss = loop.lastLoss else {
-                return
-            }
-            // print("\nbatch stats: batchIndex: \(batchIndex), trainingStepCount: \(trainingStepCount), trainingLoss: \(trainingLoss)")
-            summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value:trainingLoss.scalar!)
-            trainingStepCount += 1
-            trainingBatchCount += 1
-            trainingLossSum += Float(trainingLoss.scalar!)
-        }
-        if event == .epochStart {
-            trainingBatchCount = 0
-            trainingLossSum = 0.0
-        }
-        if event == .epochEnd {
-            // guard let epochIndex = loop.epochIndex else {
-            //     return
-            // }
-            let current_epoch = epochIndex + 1
-            let epochTrainingLoss = trainingLossSum / Float(trainingBatchCount)
-            // print("\nepoch stats: current_epoch: \(current_epoch), epochTrainingLoss: \(epochTrainingLoss)")
-            summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: epochTrainingLoss)
-        }
-        if event == .fitEnd {
-            summaryWriter.flush()
-        }
-    }
-}
-
-let statsRecorder = StatsRecorder()
 
 // Training loop
 print("\nSetting up the training loop")
@@ -277,9 +209,9 @@ let trainingProgress = TrainingProgress(metrics: [.loss])
 var trainingLoop = TrainingLoop(
     training: dataset.trainEpochs,
     validation: dataset.testBatches,
-    optimizer: optimizer,
+    optimizer: optimizerWrapper.optimizer,
     lossFunction: embeddedNormalMixtureSurrogateLoss,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, learningRateUpdater]
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater]
 )
 
 print("\nTraining Transformer for the Lang2motion task!")
