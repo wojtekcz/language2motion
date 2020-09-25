@@ -69,9 +69,6 @@ public protocol TrainingLoopProtocol {
   /// The loss function.
   var lossFunction: LossFunction { get set }
 
-  /// The model, so it can be accessed from callbacks
-  var model: Model? { get set }
-
   // Callbacks
   /// The callbacks used to customize the training loop.
   var callbacks: [TrainingLoopCallback<Self>] { get set }
@@ -130,7 +127,7 @@ public enum TrainingLoopEvent {
 
 /// Callbacks that can inject custom behavior in a training loop.
 public typealias TrainingLoopCallback<L: TrainingLoopProtocol> = (
-  _ loop: inout L, _ event: TrainingLoopEvent
+  _ loop: inout L, _ event: TrainingLoopEvent, _ model: L.Model
 ) throws -> Void
 
 /// A generic training loop.
@@ -170,9 +167,6 @@ where
   public var optimizer: Opt
   /// The loss function
   public var lossFunction: LossFunction
-
-  /// The model, so it can be accessed from callbacks
-  public var model: Model? = nil
 
   // Callbacks
   /// The callbacks used to customize the training loop.
@@ -231,7 +225,7 @@ extension TrainingLoop {
     guard let data = lastInput else { return }
     lastOutput = model(data)
     guard let target = lastTarget else { return }
-    try handleEvent(.inferencePredictionEnd)
+    try handleEvent(.inferencePredictionEnd, model)
     lastLoss = lossFunction.f(lastOutput!, target)
   }
 
@@ -240,7 +234,7 @@ extension TrainingLoop {
     model: inout Model, differentiableStep: (Model, inout Self) throws -> Void
   ) throws {
     try differentiableStep(model, &self)
-    try handleEvent(.updateStart)
+    try handleEvent(.updateStart, model)
     optimizer.update(&model, along: lastGradient!)
   }
 }
@@ -263,16 +257,16 @@ public enum TrainingLoopAction: Error {
 
 extension TrainingLoop {
   /// Call `event` on all callbacks.
-  mutating private func handleEvent(_ event: TrainingLoopEvent) throws {
+  mutating private func handleEvent(_ event: TrainingLoopEvent, _ model: Model) throws {
     for callback in callbacks {
-      try callback(&self, event)
+      try callback(&self, event, model)
     }
   }
 }
 
 extension TrainingLoop {
   /// Performs `step` on each of `batches`.
-  mutating private func multipleSteps<Batches: Collection>(
+  mutating private func multipleSteps<Batches: Collection>(model: Model,
     on batches: Batches, step: (inout Self) throws -> Void
   ) throws where Batches.Element == Batch {
     batchCount = batches.count
@@ -280,10 +274,10 @@ extension TrainingLoop {
       batchIndex = i
       (lastInput, lastTarget) = (batch.data, batch.label)
       do {
-        try handleEvent(.batchStart)
+        try handleEvent(.batchStart, model)
         try step(&self)
       } catch TrainingLoopAction.cancelBatch {}
-      try handleEvent(.batchEnd)
+      try handleEvent(.batchEnd, model)
       LazyTensorBarrier()
     }
   }
@@ -309,41 +303,41 @@ extension TrainingLoop {
 
     model.move(to: device)
     optimizer = Opt(copying: optimizer, to: device)
-    self.model = model
 
     do {
-      try handleEvent(.fitStart)
+      try handleEvent(.fitStart, model)
       LazyTensorBarrier()
 
       for (i, batches) in training.prefix(epochs).enumerated() {
         epochIndex = i
         do {
-          try handleEvent(.epochStart)
+          try handleEvent(.epochStart, model)
 
           // Training phase
           do {
             Context.local.learningPhase = .training
-            try handleEvent(.trainingStart)
+            try handleEvent(.trainingStart, model)
             try multipleSteps(
+              model: model,
               on: batches,
               step: {
                 try $0.trainingStep(model: &model, differentiableStep: differentiableStep)
               })
           } catch TrainingLoopAction.cancelTraining {}
-          try handleEvent(.trainingEnd)
+          try handleEvent(.trainingEnd, model)
 
           // Validation phase
           do {
             Context.local.learningPhase = .inference
-            try handleEvent(.validationStart)
-            try multipleSteps(on: validation, step: { try $0.inferenceStep(model: model) })
+            try handleEvent(.validationStart, model)
+            try multipleSteps(model: model, on: validation, step: { try $0.inferenceStep(model: model) })
           } catch TrainingLoopAction.cancelValidation {}
-          try handleEvent(.validationEnd)
+          try handleEvent(.validationEnd, model)
         } catch TrainingLoopAction.cancelEpoch {}
 
-        try handleEvent(.epochEnd)
+        try handleEvent(.epochEnd, model)
       }
     } catch TrainingLoopAction.cancelFit {}
-    try handleEvent(.fitEnd)
+    try handleEvent(.fitEnd, model)
   }
 }

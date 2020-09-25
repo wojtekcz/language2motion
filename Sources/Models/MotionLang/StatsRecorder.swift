@@ -20,7 +20,7 @@ public class StatsRecorder {
         summaryWriter = SummaryWriter(logdir: logdirURL, flushMillis: 30*1000)
     }
     
-    public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+    public func writeStats<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
         
         // TODO: write learning rate
         

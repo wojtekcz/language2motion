@@ -180,6 +180,16 @@ let samplesToDecode = [
 //
 //exit(0)
 
+// TODO: fix epoch numbering
+public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
+    if event == .epochEnd {
+        guard let epochIndex = loop.epochIndex else {
+            return
+        }
+        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1).in_fit")
+    }
+}
+
 // Training loop
 print("\nSetting up the training loop")
 let trainingProgress = TrainingProgress(metrics: [.loss])
@@ -188,7 +198,7 @@ var trainingLoop: TrainingLoop = TrainingLoop(
     validation: dataset.testBatches,
     optimizer: optimizerWrapper.optimizer,
     lossFunction:  embeddedSoftmaxCrossEntropy,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater]
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
 )
 
 print("\nTraining Transformer for the Motion2lang task!")

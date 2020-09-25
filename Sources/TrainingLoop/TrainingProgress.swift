@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import Foundation
+import TensorFlow
 
 let progressBarLength = 30
 
@@ -74,7 +75,7 @@ public class TrainingProgress {
   ///   - loop: The TrainingLoop where an event has occurred. This can be accessed to obtain
   ///     the last measure loss and other values.
   ///   - event: The training or validation event that this callback is responding to.
-  public func update<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+  public func update<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: Any) throws {
     try statistics?.record(&loop, event: event)
 
     switch event {
