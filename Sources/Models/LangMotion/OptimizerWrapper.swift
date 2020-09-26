@@ -52,7 +52,7 @@ public class OptimizerWrapper {
         )
     }
     
-    public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent) throws {
+    public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: Any) throws {
         if event == .updateStart {
             let optimizer: GeneralOptimizer<LangMotionTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionTransformer>
             let step = optimizer.step + 1 // for scheduled rates and bias correction, steps start at 1

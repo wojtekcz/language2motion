@@ -11,14 +11,13 @@ import x10_optimizers_optimizer
 
 /// Set training params
 let runName = "run_18"
-let batchSize = 200
-//let batchSize = 300
+let batchSize = 10
 let maxMotionLength = 100
 let maxTextSequenceLength = 40
-let nEpochs = 10
+let nEpochs = 2
 
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 2e-5,
+    peakLearningRate: 1e-3,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
@@ -26,8 +25,8 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_full
-//let datasetSize: DatasetSize = .multi_midi
+//let datasetSize: DatasetSize = .multi_full
+let datasetSize: DatasetSize = .micro
 
 
 print("runName: \(runName)")
@@ -180,13 +179,22 @@ let samplesToDecode = [
 //
 //exit(0)
 
-// TODO: fix epoch numbering
 public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
     if event == .epochEnd {
         guard let epochIndex = loop.epochIndex else {
             return
         }
-        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1).in_fit")
+        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+    }
+}
+
+public func decodeSamplesAfterEpoch<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
+    if event == .epochEnd {
+        Context.local.learningPhase = .inference
+        for sample in samplesToDecode {
+            // TODO: make greedyDecodeSample work on device
+            greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20, model: model)
+        }
     }
 }
 
@@ -198,24 +206,12 @@ var trainingLoop: TrainingLoop = TrainingLoop(
     validation: dataset.testBatches,
     optimizer: optimizerWrapper.optimizer,
     lossFunction:  embeddedSoftmaxCrossEntropy,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint, decodeSamplesAfterEpoch]
 )
 
 print("\nTraining Transformer for the Motion2lang task!")
-// FIXME: epoch loop workaround for checkpoint saving
-for epochIndex in start_epoch..<start_epoch+nEpochs {
-    print("epoch \(epochIndex+1)/\(start_epoch + nEpochs)")
-    statsRecorder.epochIndex = epochIndex
-    try! trainingLoop.fit(&model, epochs: 1, on: device)
-    try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
 
-    Context.local.learningPhase = .inference
-    model.move(to: Device.defaultTFEager)
-    for sample in samplesToDecode {
-        greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20, model: model)
-    }
-    model.move(to: device)
-}
+try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 
 try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 print("\nFinished training.")
