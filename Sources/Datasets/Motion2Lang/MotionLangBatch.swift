@@ -133,7 +133,7 @@ extension MotionLangBatch {
         let targetTruth = target[0..., 1...]
 //        self.targetMask = MotionLangBatch.makeStandardMask(target: self.targetTokenIds, pad: targetPadId)
 
-        var motionPartMask = Self.makeStandardMask(target: targetTokenIds, pad: targetPadId, shiftRight: true)
+        var motionPartMask = Self.makeStandardMask(target: targetTokenIds, pad: targetPadId, shiftRight: true, on: Device.defaultTFEager)
         let motionLen = Int(targetTokenIds.sum().scalar!)
         motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
         motionPartMask = abs(motionPartMask)
@@ -144,9 +144,9 @@ extension MotionLangBatch {
         self.init(source: source, target: target)
     }
 
-    public static func subsequentMask(size: Int, shiftRight: Bool = false) -> Tensor<Int32> {
+    public static func subsequentMask(size: Int, shiftRight: Bool = false, on device: Device) -> Tensor<Int32> {
         let attentionShape = [1, size, size]
-        let ones = Tensor<Int32>(ones: TensorShape(attentionShape))
+        let ones = Tensor<Int32>(ones: TensorShape(attentionShape), on: device)
         var mask: Tensor<Int32>
         
         if !shiftRight {
@@ -158,11 +158,11 @@ extension MotionLangBatch {
         return mask
     }
 
-    public static func makeStandardMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = false) -> Tensor<Float> {
-        var targetMask = Tensor(zerosLike: target)
-            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
+    public static func makeStandardMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = false, on device: Device) -> Tensor<Float> {
+        var targetMask = Tensor(zerosLike: target).copy(to: device)
+            .replacing(with: Tensor(onesLike: target, on: device), where: target .!= Tensor.init(pad))
             .expandingShape(at: -2)
-        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight)
+        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight, on: device)
         return Tensor<Float>(targetMask)
     }
 }

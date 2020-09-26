@@ -26,7 +26,7 @@ var optimizerOpts = OptimizerOpts(
 )
 
 //let datasetSize: DatasetSize = .multi_full
-let datasetSize: DatasetSize = .micro
+let datasetSize: DatasetSize = .mini
 
 
 print("runName: \(runName)")
@@ -57,8 +57,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 
 /// Select eager or X10 backend
 
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// X10 warm-up
@@ -71,7 +71,7 @@ let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
 //print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-// let _ = _ExecutionContext.global
+let _ = _ExecutionContext.global
 
 /// instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -116,7 +116,7 @@ let config = MotionLangTransformerConfig(
 var start_epoch = 0
 
 /// create new model
-//var model = MotionLangTransformer(config: config)
+var model = MotionLangTransformer(config: config)
 
 /// load model checkpoint
 //print("logdirURL: \(logdirURL.path)")
@@ -124,7 +124,7 @@ var start_epoch = 0
 //let modelName = "model.e\(start_epoch)"
 //let modelName = "model.final"
 //var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: modelName)
-var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_17/checkpoints"), config: config, name: "model.e19")
+// var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_17/checkpoints"), config: config, name: "model.e19")
 
 //try! model.writeCheckpoint(to: checkpointURL, name: "model.re-saved2.final")
 
@@ -147,13 +147,14 @@ func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.
 }
 
 /// Set up decoding
-func greedyDecodeSample(_ sample_id: Int, maxLength: Int = 15, model: MotionLangTransformer) {
+func greedyDecodeSample(_ sample_id: Int, maxLength: Int = 15, model: MotionLangTransformer, device: Device) {
     let motionSample = dataset.motionSampleDict[sample_id]!
     print("\nsample: \(motionSample.sampleID), \"\(motionSample.annotations[0])\", motion: \(motionSample.timesteps[-1]) sec (\(motionSample.motion.shape[0]) frames)")
 
-    let singleBatch = textProcessor.preprocess(motionSample: motionSample, maxMotionLength: maxMotionLength, maxTextSequenceLength: maxTextSequenceLength)
-    let out = MotionLangDecoder.greedyDecode(model: model, input: singleBatch.source, maxLength: maxLength, startSymbol: textProcessor.bosId)
-    let outputStr = textProcessor.decode(tensor: out)
+    var singleBatch = textProcessor.preprocess(motionSample: motionSample, maxMotionLength: maxMotionLength, maxTextSequenceLength: maxTextSequenceLength)
+    singleBatch = singleBatch.copy(to: device)
+    let decoded = MotionLangDecoder.greedyDecode(model: model, input: singleBatch.source, maxLength: maxLength, startSymbol: textProcessor.bosId, device: device)
+    let outputStr = textProcessor.decode(tensor: decoded)
     print("decoded: \"\(outputStr)\"")
 }
 
@@ -169,55 +170,54 @@ let samplesToDecode = [
 //    ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
 ]
 
-//Context.local.learningPhase = .inference
-////for sample in samplesToDecode {
-//for _ in 0..<10 {
-//    let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
-//    let sampleID = dataset.motionSamples[randomIdx].sampleID
-//    greedyDecodeSample(sampleID, maxLength: 40, model: model)
-//}
-//
-//exit(0)
-
-public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
-    if event == .epochEnd {
-        guard let epochIndex = loop.epochIndex else {
-            return
-        }
-        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
-    }
+model.move(to: device)
+Context.local.learningPhase = .inference
+// for sample in samplesToDecode {
+for _ in 0..<1 {
+   let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
+   let sampleID = dataset.motionSamples[randomIdx].sampleID
+   greedyDecodeSample(sampleID, maxLength: 40, model: model, device: device)
 }
 
-public func decodeSamplesAfterEpoch<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
-    if event == .epochEnd {
-        Context.local.learningPhase = .inference
-        for sample in samplesToDecode {
-            // TODO: make greedyDecodeSample work on device
-            greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20, model: model)
-        }
-    }
-}
+// public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
+//     if event == .epochEnd {
+//         guard let epochIndex = loop.epochIndex else {
+//             return
+//         }
+//         try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+//     }
+// }
 
-// Training loop
-print("\nSetting up the training loop")
-let trainingProgress = TrainingProgress(metrics: [.loss])
-var trainingLoop: TrainingLoop = TrainingLoop(
-    training: dataset.trainEpochs,
-    validation: dataset.testBatches,
-    optimizer: optimizerWrapper.optimizer,
-    lossFunction:  embeddedSoftmaxCrossEntropy,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint, decodeSamplesAfterEpoch]
-)
+// public func decodeSamplesAfterEpoch<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
+//     if event == .epochEnd {
+//         Context.local.learningPhase = .inference
+//         for sample in samplesToDecode {
+//             // TODO: make greedyDecodeSample work on device
+//             greedyDecodeSample(sample["sampleID"] as! Int, maxLength: 20, model: model, device: device)
+//         }
+//     }
+// }
 
-print("\nTraining Transformer for the Motion2lang task!")
+// // Training loop
+// print("\nSetting up the training loop")
+// let trainingProgress = TrainingProgress(metrics: [.loss])
+// var trainingLoop: TrainingLoop = TrainingLoop(
+//     training: dataset.trainEpochs,
+//     validation: dataset.testBatches,
+//     optimizer: optimizerWrapper.optimizer,
+//     lossFunction:  embeddedSoftmaxCrossEntropy,
+//     callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint, decodeSamplesAfterEpoch]
+// )
 
-try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
+// print("\nTraining Transformer for the Motion2lang task!")
 
-try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
-print("\nFinished training.")
+// try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 
-/// Generate motion description
-let sample_id = 733
-greedyDecodeSample(sample_id, maxLength: 20, model: model)
+// try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
+// print("\nFinished training.")
 
-print("\nFinito.")
+// /// Generate motion description
+// let sample_id = 733
+// greedyDecodeSample(sample_id, maxLength: 20, model: model, device: device)
+
+// print("\nFinito.")
