@@ -2,6 +2,12 @@ import Foundation
 import TensorFlow
 import ModelSupport
 
+extension Tensor {
+    public func copy(to device: Device) -> Tensor<Scalar> {
+        return Tensor<Scalar>(copying: self, to: device)
+    }
+}
+
 public typealias MotionLangBatch = LabeledData<MotionLang.Source, MotionLang.Target>
 
 public struct MotionLang {
@@ -160,7 +166,7 @@ extension MotionLangBatch {
 
     public static func makeStandardMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = false, on device: Device) -> Tensor<Float> {
         var targetMask = Tensor(zerosLike: target).copy(to: device)
-            .replacing(with: Tensor(onesLike: target, on: device), where: target .!= Tensor.init(pad))
+            .replacing(with: Tensor(onesLike: target).copy(to: device), where: target .!= Tensor.init(pad).copy(to: device))
             .expandingShape(at: -2)
         targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight, on: device)
         return Tensor<Float>(targetMask)
