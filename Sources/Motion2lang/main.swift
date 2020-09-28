@@ -10,11 +10,11 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_20"
-let batchSize = 50
+let runName = "run_21"
+let batchSize = 150
 let maxMotionLength = 100
 let maxTextSequenceLength = 50
-let nEpochs = 2
+let nEpochs = 10
 
 var optimizerOpts = OptimizerOpts(
     peakLearningRate: 1e-3,
@@ -26,7 +26,7 @@ var optimizerOpts = OptimizerOpts(
 )
 
 //let datasetSize: DatasetSize = .multi_full
-let datasetSize: DatasetSize = .mini
+let datasetSize: DatasetSize = .multi_midi
 
 
 print("runName: \(runName)")
@@ -95,7 +95,6 @@ var dataset = try Motion2Lang(
 }
 
 print("Dataset acquired.")
-print(dataset.motionSamples.count)
 
 /// instantiate model
 print("instantiate model")
