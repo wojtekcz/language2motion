@@ -11,9 +11,9 @@ import x10_optimizers_optimizer
 
 /// Set training params
 let runName = "run_20"
-let batchSize = 10
-let maxMotionLength = 50
-let maxTextSequenceLength = 20
+let batchSize = 50
+let maxMotionLength = 100
+let maxTextSequenceLength = 50
 let nEpochs = 2
 
 var optimizerOpts = OptimizerOpts(
@@ -26,7 +26,7 @@ var optimizerOpts = OptimizerOpts(
 )
 
 //let datasetSize: DatasetSize = .multi_full
-let datasetSize: DatasetSize = .micro
+let datasetSize: DatasetSize = .mini
 
 
 print("runName: \(runName)")
@@ -143,8 +143,14 @@ func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.
     let resultSize = y_true.targetTruth.shape.last! * y_true.targetTruth.shape.first!
     let logits = y_pred.reshaped(to: [resultSize, -1])
     let labels = y_true.targetTruth.reshaped(to: [-1])
-    // TODO: ignore padded entries
-    return softmaxCrossEntropy(logits: logits, labels: labels)
+
+    // masking padded entries
+    @differentiable
+    func _none(t: Tensor<Float>) -> Tensor<Float> { t }
+    let sceLosses = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _none)
+    let lossesMask = Tensor<Float>(labels.replacing(with: Tensor<Int32>(repeating: 1, shape: labels.shape), where: labels .!= Tensor<Int32>(0)))
+    let nonPaddedCount = Float(labels.replacing(with: Tensor<Int32>(repeating: 1, shape: labels.shape), where: labels .!= Tensor(0)).sum().scalar!)
+    return (sceLosses * lossesMask).sum()/nonPaddedCount
 }
 
 /// Set up decoding
