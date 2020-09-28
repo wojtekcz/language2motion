@@ -10,10 +10,10 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_18"
-let batchSize = 50
-let maxMotionLength = 100
-let maxTextSequenceLength = 40
+let runName = "run_19"
+let batchSize = 10
+let maxMotionLength = 50
+let maxTextSequenceLength = 20
 let nEpochs = 2
 
 var optimizerOpts = OptimizerOpts(
@@ -57,8 +57,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 
 /// Select eager or X10 backend
 
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// X10 warm-up
@@ -71,7 +71,7 @@ let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
 //print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-let _ = _ExecutionContext.global
+// let _ = _ExecutionContext.global
 
 /// instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
