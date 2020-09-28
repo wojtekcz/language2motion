@@ -11,7 +11,7 @@ extension Tensor {
 public class MotionLangDecoder {
     public static func greedyDecode(model: MotionLangTransformer, input: MotionLangBatch.MLSource, maxLength: Int, startSymbol: Int32, device: Device) -> Tensor<Int32> {
         let memory = model.encode(input: input).lastLayerOutput
-        // TODO: make loop work on tensors of same size
+        // TODO: make loop work on tensors of same size, so it can be compiled with X10 backend
         var ys = Tensor(repeating: startSymbol, shape: [1,1], on: device)
         for _ in 0..<maxLength {
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]], on: device)
