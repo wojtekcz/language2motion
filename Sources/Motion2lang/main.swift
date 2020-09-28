@@ -55,23 +55,22 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
     try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 #endif
 
-/// Select eager or X10 backend
-
-//let device = Device.defaultXLA
- let device = Device.defaultTFEager
-print("backend: \(device)")
-
 /// X10 warm-up
-let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
-let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
-let eagerTensorSum = eagerTensor1 + eagerTensor2
-//print(eagerTensorSum)
-//print(eagerTensor1.device)
-let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-//print(x10Tensor2.device)
+// let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
+// let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
+// let eagerTensorSum = eagerTensor1 + eagerTensor2
+// print(eagerTensorSum)
+// print(eagerTensor1.device)
+// let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
+// print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-// let _ = _ExecutionContext.global
+let _ = _ExecutionContext.global
+
+/// Select eager or X10 backend
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
+print("backend: \(device)")
 
 /// instantiate text processor
 let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
@@ -148,8 +147,9 @@ func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.
     @differentiable
     func _none(t: Tensor<Float>) -> Tensor<Float> { t }
     let sceLosses = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _none)
-    let lossesMask = Tensor<Float>(labels.replacing(with: Tensor<Int32>(repeating: 1, shape: labels.shape), where: labels .!= Tensor<Int32>(0)))
-    let nonPaddedCount = Float(labels.replacing(with: Tensor<Int32>(repeating: 1, shape: labels.shape), where: labels .!= Tensor(0)).sum().scalar!)
+    let lossesMaskInt32 = labels.replacing(with: Tensor<Int32>(repeating: 1, shape: labels.shape, on: device), where: labels .!= Tensor<Int32>(0, on: device))
+    let lossesMask = Tensor<Float>(lossesMaskInt32)
+    let nonPaddedCount = Float(lossesMask.sum().scalar!)
     return (sceLosses * lossesMask).sum()/nonPaddedCount
 }
 
@@ -213,7 +213,7 @@ var trainingLoop: TrainingLoop = TrainingLoop(
     validation: dataset.testBatches,
     optimizer: optimizerWrapper.optimizer,
     lossFunction:  embeddedSoftmaxCrossEntropy,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint, decodeSamplesAfterEpoch]
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, decodeSamplesAfterEpoch, saveCheckpoint]
 )
 
 print("\nTraining Transformer for the Motion2lang task!")
