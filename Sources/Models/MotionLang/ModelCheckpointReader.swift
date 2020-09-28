@@ -26,9 +26,9 @@ extension MotionLangTransformer {
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
             let _decoder = Decoder(reader: reader, config: config, scope: scope + "/decoder")
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
-            let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+            let _positionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
 
-            let _motionPositionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
+            let _motionPositionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
 
             let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
             let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense")

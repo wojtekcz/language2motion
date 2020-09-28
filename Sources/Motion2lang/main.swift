@@ -87,12 +87,12 @@ print("Dataset acquired.")
 
 /// instantiate model
 print("instantiate model")
-let modelSize = 128
 let config = MotionLangTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
     layerCount: 6,
-    modelSize: modelSize,
+    encoderDepth: 256,
+    decoderDepth: 64,
     feedForwardSize: 512,
     headCount: 4,
     dropoutProbability: 0.1,

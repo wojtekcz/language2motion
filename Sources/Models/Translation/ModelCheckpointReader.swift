@@ -4,10 +4,27 @@ import Checkpoints
 import TextModels
 
 public protocol ModelConfig {
-    var modelSize: Int { get }
+    var encoderDepth: Int { get }
+    var decoderDepth: Int { get }
     var headCount: Int { get }
     var layerCount: Int { get }
     var dropoutProbability: Double { get }
+}
+
+public struct AttentionConfig {
+    public let sourceSize: Int
+    public let targetSize: Int
+    public let headCount: Int
+    public let headSize: Int
+    public let dropoutProbability: Double
+    
+    public init (sourceSize: Int, targetSize: Int, headCount: Int, headSize: Int, dropoutProbability: Double) {
+        self.sourceSize = sourceSize
+        self.targetSize = targetSize
+        self.headCount = headCount
+        self.headSize = headSize
+        self.dropoutProbability = dropoutProbability
+    }
 }
 
 public protocol InitializableFromPythonCheckpoint {
@@ -51,17 +68,18 @@ extension LayerNorm: InitializableFromPythonCheckpoint {
     }
 }
 
-extension MultiHeadAttention: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension MultiHeadAttention {
+    public init(reader: CheckpointReader, config: AttentionConfig, scope: String) {
         self.init(
-            sourceSize: config.modelSize,
-            targetSize: config.modelSize,
+            sourceSize: config.sourceSize,
+            targetSize: config.targetSize,
             headCount: config.headCount,
-            headSize: config.modelSize/config.headCount,
+            headSize: config.sourceSize/config.headCount,
             queryActivation: identity,
             keyActivation: identity,
             valueActivation: identity,
-            attentionDropoutProbability: 0,
+            attentionDropoutProbability: Float(config.dropoutProbability),
+//            attentionDropoutProbability: 0,
             matrixResult: false,
             queryWeight: reader.readTensor(name: scope + "/queryWeight"),
             queryBias: reader.readTensor(name: scope + "/queryBias"),
@@ -102,7 +120,17 @@ extension SublayerConnection: InitializableFromPythonCheckpoint {
 
 extension TransformerEncoderLayer2: InitializableFromPythonCheckpoint {
     public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
-        let _selfAttention = MultiHeadAttention(reader: reader, config: config, scope: scope + "/selfAttention")
+
+        let selfAttConfig = AttentionConfig(
+            sourceSize: config.encoderDepth,
+            targetSize: config.encoderDepth,
+            headCount: config.headCount,
+            headSize: config.encoderDepth/config.headCount,
+            dropoutProbability: config.dropoutProbability
+//            dropoutProbability: 0
+        )
+        
+        let _selfAttention = MultiHeadAttention(reader: reader, config: selfAttConfig, scope: scope + "/selfAttention")
         let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward")
         let _sublayers = (0..<2).map { i in
             SublayerConnection(reader: reader, config: config, scope: scope + "/sublayers/SublayerConnection_h\(i)")
@@ -127,8 +155,26 @@ extension Encoder: InitializableFromPythonCheckpoint {
 
 extension TransformerDecoderLayer: InitializableFromPythonCheckpoint {
     public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
-        let _selfAttention = MultiHeadAttention(reader: reader, config: config, scope: scope + "/selfAttention")
-        let _sourceAttention = MultiHeadAttention(reader: reader, config: config, scope: scope + "/sourceAttention")
+        let selfAttConfig = AttentionConfig(
+            sourceSize: config.decoderDepth,
+            targetSize: config.decoderDepth,
+            headCount: config.headCount,
+            headSize: config.decoderDepth/config.headCount,
+//            dropoutProbability: 0
+            dropoutProbability: config.dropoutProbability
+        )
+
+        let sourceAttConfig = AttentionConfig(
+            sourceSize: config.decoderDepth,
+            targetSize: config.encoderDepth,
+            headCount: config.headCount,
+            headSize: config.decoderDepth/config.headCount,
+//            dropoutProbability: 0
+            dropoutProbability: config.dropoutProbability
+        )
+
+        let _selfAttention = MultiHeadAttention(reader: reader, config: selfAttConfig, scope: scope + "/selfAttention")
+        let _sourceAttention = MultiHeadAttention(reader: reader, config: sourceAttConfig, scope: scope + "/sourceAttention")
         let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward")
         let _sublayers = (0..<3).map { i in
             SublayerConnection(reader: reader, config: config, scope: scope + "/sublayers/SublayerConnection_h\(i)")
