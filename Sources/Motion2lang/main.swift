@@ -10,14 +10,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_21"
+let runName = "run_23"
 let batchSize = 150
 let maxMotionLength = 100
 let maxTextSequenceLength = 50
-let nEpochs = 10
+let nEpochs = 20
 
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 1e-3,
+    peakLearningRate: 5e-4,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
@@ -36,10 +36,8 @@ print("maxTextSequenceLength: \(maxTextSequenceLength)")
 print("nEpochs: \(nEpochs)")
 print("peakLearningRate: \(optimizerOpts.peakLearningRate)")
 print("datasetSize: \(datasetSize)")
-// print("stepsPerEpoch: \(optimizerOpts.stepsPerEpoch)")
 
 #if os(macOS)
-//    let dataURL = URL(fileURLWithPath: "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
 #else
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
@@ -54,15 +52,6 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 #if os(Linux)
     try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 #endif
-
-/// X10 warm-up
-// let eagerTensor1 = Tensor([0.0, 1.0, 2.0])
-// let eagerTensor2 = Tensor([1.5, 2.5, 3.5])
-// let eagerTensorSum = eagerTensor1 + eagerTensor2
-// print(eagerTensorSum)
-// print(eagerTensor1.device)
-// let x10Tensor2 = Tensor([1.5, 2.5, 3.5], on: Device.defaultXLA)
-// print(x10Tensor2.device)
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
 let _ = _ExecutionContext.global
@@ -111,30 +100,11 @@ let config = MotionLangTransformerConfig(
     motionMaxPositionalLength: 500
 )
 
-var start_epoch = 0
-
 /// create new model
 var model = MotionLangTransformer(config: config)
 
 /// load model checkpoint
-//print("logdirURL: \(logdirURL.path)")
-//start_epoch = 50
-//let modelName = "model.e\(start_epoch)"
-//let modelName = "model.final"
-//var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_11/checkpoints"), config: config, name: modelName)
 // var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_17/checkpoints"), config: config, name: "model.e19")
-
-//try! model.writeCheckpoint(to: checkpointURL, name: "model.re-saved2.final")
-
-/// Optimizer
-//var optimizer = Adam(for: model, learningRate: learningRate)
-
-optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize // function of training set size and batching configuration
-print("stepsPerEpoch: \(optimizerOpts.stepsPerEpoch)")
-let optimizerWrapper = OptimizerWrapper(opts: optimizerOpts, model: model)
-
-/// stats recorder
-let statsRecorder = StatsRecorder(logdirURL: rundirURL)
 
 @differentiable(wrt: y_pred)
 func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.MLTarget) -> Tensor<Float> {
@@ -205,8 +175,13 @@ public func decodeSamplesAfterEpoch<L: TrainingLoopProtocol>(_ loop: inout L, ev
 }
 
 // Training loop
-print("\nSetting up the training loop")
+optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize
+print("stepsPerEpoch: \(optimizerOpts.stepsPerEpoch)")
+
+print("\nTraining Transformer for the Motion2lang task!")
+let statsRecorder = StatsRecorder(logdirURL: rundirURL)
 let trainingProgress = TrainingProgress(metrics: [.loss])
+let optimizerWrapper = OptimizerWrapper(opts: optimizerOpts, model: model)
 var trainingLoop: TrainingLoop = TrainingLoop(
     training: dataset.trainEpochs,
     validation: dataset.testBatches,
@@ -214,8 +189,6 @@ var trainingLoop: TrainingLoop = TrainingLoop(
     lossFunction:  embeddedSoftmaxCrossEntropy,
     callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, decodeSamplesAfterEpoch, saveCheckpoint]
 )
-
-print("\nTraining Transformer for the Motion2lang task!")
 
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 
