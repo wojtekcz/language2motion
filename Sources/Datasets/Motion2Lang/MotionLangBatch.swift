@@ -158,16 +158,14 @@ extension MotionLangBatch {
         return mask
     }
 
-    public static func makeSelfAttentionDecoderMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = true, on device: Device = Device.defaultTFEager) -> Tensor<Float> {
+    public static func makeSelfAttentionDecoderMask(target: Tensor<Int32>, pad: Int32, on device: Device = Device.defaultTFEager) -> Tensor<Float> {
         var targetMask = Tensor(zerosLike: target).copy(to: device)
             .replacing(with: Tensor(onesLike: target).copy(to: device), where: target .!= Tensor.init(pad).copy(to: device))
             .expandingShape(at: -2)
-        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight, on: device)
+        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: false, on: device)
         
         // reverse mask
-        let seqLen = Int(target.sum().scalar!)
-        targetMask[0, 0..<seqLen-1, 0..<seqLen] -= 1
-        targetMask = abs(targetMask)
+        targetMask = targetMask.transposed(permutation: [0, 2, 1])
 
         return Tensor<Float>(targetMask)
     }
