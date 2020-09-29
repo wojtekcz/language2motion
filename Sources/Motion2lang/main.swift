@@ -10,8 +10,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_31"
-let batchSize = 150
+let runName = "run_33"
+let batchSize = 120
 let maxMotionLength = 150
 let maxTextSequenceLength = 50
 let nEpochs = 50
@@ -25,8 +25,8 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-//let datasetSize: DatasetSize = .multi_full
-let datasetSize: DatasetSize = .multi_midi
+let datasetSize: DatasetSize = .multi_full
+// let datasetSize: DatasetSize = .multi_midi
 
 
 print("runName: \(runName)")
@@ -101,10 +101,10 @@ let config = MotionLangTransformerConfig(
 )
 
 /// create new model
-var model = MotionLangTransformer(config: config)
+// var model = MotionLangTransformer(config: config)
 
 /// load model checkpoint
-// var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_24/checkpoints"), config: config, name: "model.e5")
+var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_31/checkpoints"), config: config, name: "model.e39")
 
 @differentiable(wrt: y_pred)
 func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.MLTarget) -> Tensor<Float> {
@@ -134,24 +134,24 @@ func greedyDecodeSample(_ sample_id: Int, maxLength: Int = 15, model: MotionLang
     print("decoded: \"\(outputStr)\"")
 }
 
-//let samplesToDecode: [[String:Any]] = [
+let samplesToDecode: [[String:Any]] = [
 //    ["sampleID": dataset.motionSamples[0].sampleID, "text": dataset.motionSamples[0].annotations[0]], // for small dataset
 //    ["sampleID": 733, "text": "Ala ma kota."], // for .micro dataset
 //    ["sampleID": 1242, "text": "Ala ma kota."], // for .multi_mini dataset
-//    ["sampleID": 449, "text": "A person runs forward."],
-//    ["sampleID": 3921, "text": "A human is swimming."],
-//    ["sampleID": 843, "text": "A person walks."],
-//    ["sampleID": 1426, "text": "A person plays the air guitar."],
-//    ["sampleID": 1292, "text": "A person performs a squat."],
-//    ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
-//]
+   ["sampleID": 449, "text": "A person runs forward."],
+   ["sampleID": 3921, "text": "A human is swimming."],
+   ["sampleID": 843, "text": "A person walks."],
+   ["sampleID": 1426, "text": "A person plays the air guitar."],
+   ["sampleID": 1292, "text": "A person performs a squat."],
+   ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
+]
 
-let nSamples = 5
-let samplesToDecode: [[String: Any]] = (0..<nSamples).map { (i) -> [String: Any] in
-    let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
-    let ms = dataset.motionSamples[randomIdx]
-    return ["sampleID": ms.sampleID, "text": ms.annotations[0]]
-}
+// let nSamples = 5
+// let samplesToDecode: [[String: Any]] = (0..<nSamples).map { (i) -> [String: Any] in
+//     let randomIdx = Int.random(in: 0..<dataset.motionSamples.count)
+//     let ms = dataset.motionSamples[randomIdx]
+//     return ["sampleID": ms.sampleID, "text": ms.annotations[0]]
+// }
 
 public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: MotionLangTransformer) throws {
     if event == .epochEnd {
