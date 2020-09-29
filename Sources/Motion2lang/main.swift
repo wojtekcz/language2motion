@@ -10,11 +10,11 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_23"
+let runName = "run_27"
 let batchSize = 150
 let maxMotionLength = 100
 let maxTextSequenceLength = 50
-let nEpochs = 20
+let nEpochs = 50
 
 var optimizerOpts = OptimizerOpts(
     peakLearningRate: 5e-4,
@@ -104,7 +104,7 @@ let config = MotionLangTransformerConfig(
 var model = MotionLangTransformer(config: config)
 
 /// load model checkpoint
-// var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_17/checkpoints"), config: config, name: "model.e19")
+// var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_24/checkpoints"), config: config, name: "model.e5")
 
 @differentiable(wrt: y_pred)
 func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.MLTarget) -> Tensor<Float> {
