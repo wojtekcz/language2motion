@@ -137,15 +137,9 @@ extension MotionLangBatch {
         let rangeExceptLast = 0..<(target.shape[1] - 1)
         let targetTokenIds = target[0...,rangeExceptLast]
         let targetTruth = target[0..., 1...]
-//        self.targetMask = MotionLangBatch.makeStandardMask(target: self.targetTokenIds, pad: targetPadId)
+        let targetMask = Self.makeSelfAttentionDecoderMask(target: targetTokenIds, pad: targetPadId)
 
-        var motionPartMask = Self.makeStandardMask(target: targetTokenIds, pad: targetPadId, shiftRight: true, on: Device.defaultTFEager)
-        let motionLen = Int(targetTokenIds.sum().scalar!)
-        motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
-        motionPartMask = abs(motionPartMask)
-        
-        let source = MLSource(sampleID: sampleID, motion: motion, mask: mask, origMotionFramesCount: origMotionFramesCount, targetTokenIds: targetTokenIds, targetMask: motionPartMask)
-
+        let source = MLSource(sampleID: sampleID, motion: motion, mask: mask, origMotionFramesCount: origMotionFramesCount, targetTokenIds: targetTokenIds, targetMask: targetMask)
         let target = MLTarget(targetTruth: targetTruth)
         self.init(source: source, target: target)
     }
@@ -164,11 +158,17 @@ extension MotionLangBatch {
         return mask
     }
 
-    public static func makeStandardMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = false, on device: Device) -> Tensor<Float> {
+    public static func makeSelfAttentionDecoderMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = true, on device: Device = Device.defaultTFEager) -> Tensor<Float> {
         var targetMask = Tensor(zerosLike: target).copy(to: device)
             .replacing(with: Tensor(onesLike: target).copy(to: device), where: target .!= Tensor.init(pad).copy(to: device))
             .expandingShape(at: -2)
         targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight, on: device)
+        
+        // reverse mask
+        let seqLen = Int(target.sum().scalar!)
+        targetMask[0, 0..<seqLen-1, 0..<seqLen] -= 1
+        targetMask = abs(targetMask)
+
         return Tensor<Float>(targetMask)
     }
 }

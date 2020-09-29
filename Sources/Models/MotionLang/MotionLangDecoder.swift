@@ -14,17 +14,14 @@ public class MotionLangDecoder {
         // TODO: make loop work on tensors of same size, so it can be compiled with X10 backend
         var ys = Tensor(repeating: startSymbol, shape: [1,1], on: device)
         for _ in 0..<maxLength {
-            let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]], on: device)
-            var motionPartMask = MotionLangBatch.makeStandardMask(target: motionPartFlag, pad: 0, shiftRight: true, on: device)
-            let motionLen = Int(motionPartFlag.sum().scalar!)
-            motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
-            motionPartMask = abs(motionPartMask)
+            let targetFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]], on: device)
+            let targetMask = MotionLangBatch.makeSelfAttentionDecoderMask(target: targetFlag, pad: 0, on: device)
 
             let decoderInput = MotionLangBatch.MLSource(sampleID: input.sampleID, motion: input.motion,
                                          mask: input.mask,
                                          origMotionFramesCount: input.origMotionFramesCount,
                                          targetTokenIds: ys,
-                                         targetMask: motionPartMask
+                                         targetMask: targetMask
                                          )
             let decoded = model.decode(input: decoderInput, memory: memory).lastLayerOutput
             let prob = model.generate(input: decoded[0...,-1])
