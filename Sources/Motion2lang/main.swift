@@ -10,9 +10,9 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_27"
+let runName = "run_30"
 let batchSize = 150
-let maxMotionLength = 100
+let maxMotionLength = 150
 let maxTextSequenceLength = 50
 let nEpochs = 50
 
@@ -75,7 +75,7 @@ var dataset = try Motion2Lang(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     minMotionLength: 20,
-    maxMotionLength: 100,
+    maxMotionLength: 150,
     trainTestSplit: 0.9,
     device: device
 ) { (motionSample: MotionSample) -> MotionLangBatch in
@@ -92,9 +92,9 @@ let config = MotionLangTransformerConfig(
     nbJoints: 47,
     layerCount: 6,
     encoderDepth: 256,
-    decoderDepth: 64,
-    feedForwardSize: 512,
-    headCount: 4,
+    decoderDepth: 128,
+    feedForwardSize: 1024,
+    headCount: 8,
     dropoutProbability: 0.1,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500
