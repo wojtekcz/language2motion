@@ -10,7 +10,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_30"
+let runName = "run_31"
 let batchSize = 150
 let maxMotionLength = 150
 let maxTextSequenceLength = 50
@@ -92,9 +92,9 @@ let config = MotionLangTransformerConfig(
     nbJoints: 47,
     layerCount: 6,
     encoderDepth: 256,
-    decoderDepth: 128,
-    feedForwardSize: 1024,
-    headCount: 8,
+    decoderDepth: 256,
+    feedForwardSize: 2048,
+    headCount: 16,
     dropoutProbability: 0.1,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500
