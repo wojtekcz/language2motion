@@ -13,14 +13,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_56"
-let batchSize = 10
+let runName = "run_61"
+let batchSize = 20
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 10
 
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 2e-5,
+    peakLearningRate: 1e-3,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
@@ -104,32 +104,32 @@ print("Dataset acquired.")
 
 /// instantiate model
 print("instantiate model")
-let modelSize = 128
 let config = LangMotionTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47, // TODO: get value from dataset
     nbMixtures: 20,
     layerCount: 6,
-    modelSize: modelSize,
+    encoderDepth: 64,
+    decoderDepth: 128,
     feedForwardSize: 512,
     headCount: 4,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
     motionPositionalEncodingSize: 32,
-    encoderSelfAttentionTemp: sqrt(Double(modelSize)),
-    decoderSourceAttentionTemp: sqrt(Double(modelSize)),
-    decoderSelfAttentionTemp: Double(modelSize)
+    encoderSelfAttentionTemp: 1,
+    decoderSourceAttentionTemp: 1,
+    decoderSelfAttentionTemp: 1
 )
 
 var start_epoch = 0
 
 /// create new model
-//var model = LangMotionTransformer(config: config)
+var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
- start_epoch = 15
- var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_55/checkpoints"), config: config, name: "model.e\(start_epoch)")
+// start_epoch = 15
+// var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_55/checkpoints"), config: config, name: "model.e\(start_epoch)")
 
 // TODO: make possible to call greedyDecodeMotion() during training again
 public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer, 

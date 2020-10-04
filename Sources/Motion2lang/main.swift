@@ -101,10 +101,10 @@ let config = MotionLangTransformerConfig(
 )
 
 /// create new model
-// var model = MotionLangTransformer(config: config)
+ var model = MotionLangTransformer(config: config)
 
 /// load model checkpoint
-var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_31/checkpoints"), config: config, name: "model.e39")
+//var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_31/checkpoints"), config: config, name: "model.e39")
 
 @differentiable(wrt: y_pred)
 func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.MLTarget) -> Tensor<Float> {

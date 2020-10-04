@@ -9,7 +9,7 @@ import ModelSupport
 extension MotionGaussianMixtureModel {
     public init(reader: CheckpointReader, config: LangMotionTransformerConfig, scope: String) {
         self.init(
-            inputSize: config.modelSize,
+            inputSize: config.decoderDepth,
             nbJoints: config.nbJoints,
             nbMixtures: config.nbMixtures,
             linearMixtureMeans: Dense<Float>(reader: reader, config: config, scope: scope + "/linearMixtureMeans"),
@@ -42,7 +42,7 @@ extension LangMotionTransformer {
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
             let _decoder = Decoder(reader: reader, config: config, scope: scope + "/decoder")
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
-            let _positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+            let _positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
             let motionPositionalEncodingSize = 32
             let _motionPositionalEncoding = PositionalEncoding(size: motionPositionalEncodingSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
 

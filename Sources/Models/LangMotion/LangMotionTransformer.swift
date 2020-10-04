@@ -11,7 +11,8 @@ public struct LangMotionTransformerConfig: ModelConfig {
     public let nbJoints: Int
     public let nbMixtures: Int
     public let layerCount: Int
-    public let modelSize: Int
+    public let encoderDepth: Int
+    public let decoderDepth: Int
     public let feedForwardSize: Int
     public let headCount: Int
     public let dropoutProbability: Double
@@ -22,14 +23,15 @@ public struct LangMotionTransformerConfig: ModelConfig {
     public let decoderSourceAttentionTemp: Double
     public let decoderSelfAttentionTemp: Double
 
-    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, modelSize: Int,
+    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
                 feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, motionPositionalEncodingSize: Int,
                 encoderSelfAttentionTemp: Double, decoderSourceAttentionTemp: Double, decoderSelfAttentionTemp: Double) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
         self.layerCount = layerCount
-        self.modelSize = modelSize
+        self.encoderDepth = encoderDepth
+        self.decoderDepth = decoderDepth
         self.feedForwardSize = feedForwardSize
         self.headCount = headCount
         self.dropoutProbability = dropoutProbability
@@ -68,22 +70,42 @@ public struct LangMotionTransformer: Module {
     @noDerivative public var config: LangMotionTransformerConfig
 
     public init(config: LangMotionTransformerConfig) {
-        let attention = MultiHeadAttention(sourceSize: config.modelSize,
-                                           targetSize: config.modelSize,
+
+        let encAttention = MultiHeadAttention(sourceSize: config.encoderDepth,
+                                           targetSize: config.encoderDepth,
                                            headCount: config.headCount,
-                                           headSize: config.modelSize/config.headCount,
+                                           headSize: config.encoderDepth/config.headCount,
+                                           attentionDropoutProbability: Float(config.dropoutProbability),
                                            matrixResult: false)
-        let feedForward = PositionwiseFeedForward(dimensionalityModel: config.modelSize,
+        
+        let decSelfAttention = MultiHeadAttention(sourceSize: config.decoderDepth,
+                                           targetSize: config.decoderDepth,
+                                           headCount: config.headCount,
+                                           headSize: config.decoderDepth/config.headCount,
+                                           attentionDropoutProbability: Float(config.dropoutProbability),
+                                           matrixResult: false)
+
+        let decSourceAttention = MultiHeadAttention(sourceSize: config.decoderDepth,
+                                           targetSize: config.encoderDepth,
+                                           headCount: config.headCount,
+                                           headSize: config.decoderDepth/config.headCount,
+                                           attentionDropoutProbability: Float(config.dropoutProbability),
+                                           matrixResult: false)
+        
+        let encFeedForward = PositionwiseFeedForward(dimensionalityModel: config.encoderDepth,
                                                   innerLayerDimensionality: config.feedForwardSize)
-        
-        self.positionalEncoding = PositionalEncoding(size: config.modelSize, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+
+        let decFeedForward = PositionwiseFeedForward(dimensionalityModel: config.decoderDepth,
+                                                  innerLayerDimensionality: config.feedForwardSize)
+
+        self.positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
         self.motionPositionalEncoding = PositionalEncoding(size: config.motionPositionalEncodingSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
-        self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.modelSize, embeddingsInitializer: glorotUniform())
+        self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
         
-        self.encoder = Encoder(layer: .init(size: config.modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
-        self.decoder = Decoder(layer: .init(size: config.modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
-        self.motionNorm = LayerNorm(featureCount: config.modelSize, axis: 2)
-        self.mixtureModel = MotionGaussianMixtureModel(inputSize: config.modelSize*config.layerCount, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
+        self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
+        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
+        self.motionNorm = LayerNorm(featureCount: config.decoderDepth, axis: 2)
+        self.mixtureModel = MotionGaussianMixtureModel(inputSize: config.decoderDepth*config.layerCount, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
         self.config = config
     }
 
@@ -117,7 +139,7 @@ public struct LangMotionTransformer: Module {
         motionPositionalEncodingVector = motionPositionalEncoding(motionPositionalEncodingVector)
         
         // compute padding
-        let paddingSize = config.modelSize - (1 + config.motionPositionalEncodingSize + config.nbJoints)
+        let paddingSize = config.decoderDepth - (1 + config.motionPositionalEncodingSize + config.nbJoints)
         
         let multiplyBy = paddingSize/config.nbJoints + 1
         let motionFramePadding = motionPart.motion.tiled(multiples: [1, 1, multiplyBy])[0..., 0..., 0..<paddingSize]
