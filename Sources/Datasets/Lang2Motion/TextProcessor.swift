@@ -40,13 +40,13 @@ public struct TextProcessor {
         assert(encodedSource.count == maxTextSequenceLength, "encodedSource.count \(encodedSource.count) does not equal maxTextSequenceLength \(maxTextSequenceLength)")
 
         let tokenIds: Tensor<Int32> = Tensor<Int32>.init(encodedSource).expandingShape(at: 0)
-        let mask: Tensor<Float> = Tensor<Float>(Tensor(zerosLike: tokenIds)
+        let selfAttentionMask: Tensor<Float> = Tensor<Float>(Tensor(zerosLike: tokenIds)
             .replacing(with: Tensor(onesLike: tokenIds), where: tokenIds .!= Tensor.init(padId))
             .expandingShape(at: 1))
 
         let tokenCount: Tensor<Int32> = Tensor([Int32(origTokenCount)])
 
-        let singleSentence = LangMotionBatch.Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+        let singleSentence = LangMotionBatch.Sentence(tokenIds: tokenIds, selfAttentionMask: selfAttentionMask, tokenCount: tokenCount)
         return singleSentence
     }
 }

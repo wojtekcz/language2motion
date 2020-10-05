@@ -8,32 +8,32 @@ public struct LangMotion {
 
     public struct Sentence {
         public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
-        public var mask: Tensor<Float>       // bs x maxMotionLength x maxTextSequenceLength
         public let tokenCount: Tensor<Int32> // bs
+        public var selfAttentionMask: Tensor<Float> // bs x maxMotionLength x maxTextSequenceLength // or x 1?
 
-        public init(tokenIds: Tensor<Int32>, mask: Tensor<Float>, tokenCount: Tensor<Int32>) {
+        public init(tokenIds: Tensor<Int32>, selfAttentionMask: Tensor<Float>, tokenCount: Tensor<Int32>) {
             self.tokenIds = tokenIds
-            self.mask = mask
+            self.selfAttentionMask = selfAttentionMask
             self.tokenCount = tokenCount
         }
 
         public init(copying sentence: Sentence, to device: Device) {
             tokenIds = Tensor<Int32>(copying: sentence.tokenIds, to: device)
-            mask = Tensor<Float>(copying: sentence.mask, to: device)
+            selfAttentionMask = Tensor<Float>(copying: sentence.selfAttentionMask, to: device)
             tokenCount = Tensor<Int32>(copying: sentence.tokenCount, to: device)
         }
 
         public static func reduceDataBatches(_ batches: [Sentence]) -> Sentence {
             let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) })
-            let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
+            let selfAttentionMask: Tensor<Float> = Tensor(batches.map{ $0.selfAttentionMask.squeezingShape(at: 0) })
             let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.tokenCount.squeezingShape(at: 0) })
-            return Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+            return Sentence(tokenIds: tokenIds, selfAttentionMask: selfAttentionMask, tokenCount: tokenCount)
         }
 
         public func printSentence() {
             print("sentence")
             print("  tokenIds.shape: \(self.tokenIds.shape)")
-            print("  mask.shape: \(self.mask.shape)")
+            print("  selfAttentionMask.shape: \(self.selfAttentionMask.shape)")
             print("  tokenCount: shape \(self.tokenCount.shape), value \(self.tokenCount)")
         }
     }
@@ -93,7 +93,7 @@ public struct LangMotion {
         }
 
         public init(sentence: Sentence, motionPart: MotionPart) {
-            let sentenceMask = sentence.mask.squeezingShape(at: 1)
+            let sentenceMask = sentence.selfAttentionMask.squeezingShape(at: 1)
             let motionFlag = Tensor<Float>(motionPart.motionFlag).squeezingShape(at: 2)
             let sourceAttentionMask = (sentenceMask * motionFlag.transposed()).expandingShape(at: 0)
             self.init(sentence: sentence, motionPart: motionPart, sourceAttentionMask: sourceAttentionMask)
@@ -116,7 +116,7 @@ public struct LangMotion {
             print("source")
             print("  sentence")
             print("    tokenIds.shape: \(self.sentence.tokenIds.shape)")
-            print("    mask.shape: \(self.sentence.mask.shape)")
+            print("    selfAttentionMask.shape: \(self.sentence.selfAttentionMask.shape)")
             print("    tokenCount: (shape: \(self.sentence.tokenCount.shape), value: \(self.sentence.tokenCount))")
             print("  motionPart")
             print("    motion.shape: \(self.motionPart.motion.shape)")

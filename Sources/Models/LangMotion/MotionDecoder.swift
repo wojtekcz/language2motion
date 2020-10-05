@@ -119,7 +119,7 @@ public class MotionDecoder {
             let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask, startFlag: motionStartFlag, motionFlag: motionPartFlag)
 
             // decode motion
-            let dedoderOutput = transformer.decode(sourceMask: sentence.mask, motionPart: motionPart, memory: memory)
+            let dedoderOutput = transformer.decode(sourceMask: sentence.selfAttentionMask, motionPart: motionPart, memory: memory)
             let mixtureModelInput = Tensor<Float>(concatenating: dedoderOutput.allResults, alongAxis: 2)
             let singlePreds = transformer.mixtureModel(mixtureModelInput[0...,-1].expandingShape(at: 0))
 

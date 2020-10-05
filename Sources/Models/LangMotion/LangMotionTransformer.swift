@@ -128,7 +128,7 @@ public struct LangMotionTransformer: Module {
     @differentiable
     public func encode(input: LangMotionBatch.Sentence) -> EncoderOutput<Float> {
         let embedded = self.positionalEncoding(self.embedding(input.tokenIds))
-        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.mask, selfAttentionTemperature: Float(config.encoderSelfAttentionTemp))
+        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.selfAttentionMask, selfAttentionTemperature: Float(config.encoderSelfAttentionTemp))
         return self.encoder(encoderInput)
     }
     
