@@ -23,6 +23,13 @@ public struct LangMotion {
             tokenCount = Tensor<Int32>(copying: sentence.tokenCount, to: device)
         }
 
+        public static func reduceDataBatches(_ batches: [Sentence]) -> Sentence {
+            let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.tokenIds.squeezingShape(at: 0) })
+            let mask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
+            let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.tokenCount.squeezingShape(at: 0) })
+            return Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
+        }
+
         public func printSentence() {
             print("sentence")
             print("  tokenIds.shape: \(self.tokenIds.shape)")
@@ -55,6 +62,14 @@ public struct LangMotion {
             mask = Tensor<Float>(copying: motionPart.mask, to: device)
             startFlag = Tensor<Float>(copying: motionPart.startFlag, to: device)
             motionFlag = Tensor<Int32>(copying: motionPart.motionFlag, to: device)
+        }
+
+        public static func reduceDataBatches(_ batches: [MotionPart]) -> MotionPart {
+            let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
+            let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
+            let motionPartStartFlag: Tensor<Float> = Tensor(batches.map{ $0.startFlag.squeezingShape(at: 0) })
+            let motionPartFlag: Tensor<Int32> = Tensor(batches.map{ $0.motionFlag.squeezingShape(at: 0) })
+            return MotionPart(motion: motionPartTensor, mask: motionPartMask, startFlag: motionPartStartFlag, motionFlag: motionPartFlag)
         }
 
         public func printMotionPart() {
@@ -90,6 +105,13 @@ public struct LangMotion {
             sourceAttentionMask = Tensor(copying: source.sourceAttentionMask, to: device)
         }
 
+        public static func reduceDataBatches(_ batches: [Source]) -> Source {
+            let sentence = Sentence.reduceDataBatches(batches.map{ $0.sentence })
+            let motionPart = MotionPart.reduceDataBatches(batches.map{ $0.motionPart })
+            let sourceAttentionMask: Tensor<Float> = Tensor(batches.map{ $0.sourceAttentionMask.squeezingShape(at: 0) })
+            return Source(sentence: sentence, motionPart: motionPart, sourceAttentionMask: sourceAttentionMask)
+        }
+        
         public func printSource() {
             print("source")
             print("  sentence")
@@ -130,6 +152,14 @@ public struct LangMotion {
             origMotionFramesCount = Tensor<Int32>(copying: target.origMotionFramesCount, to: device)
         }
 
+        public static func reduceDataBatches(_ batches: [Target]) -> Target {
+            let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
+            let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
+            let targetStops: Tensor<Float> = Tensor(batches.map{ $0.stops.squeezingShape(at: 0) })
+            let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })
+            return Target(sampleID: sampleID, motion: targetMotion, stops: targetStops, origMotionFramesCount: origMotionFramesCount)
+        }
+
         public func printTarget() {
             print("target")
             print("  sampleID: (shape: \(self.sampleID.shape), value: \(self.sampleID))")
@@ -155,34 +185,15 @@ extension LangMotionBatch {
     }
 
     public init(copying batch: LangMotionBatch, to device: Device) {
-        let data = Source(copying: batch.data, to: device)
-        let label = Target(copying: batch.label, to: device)
-        self.init(data: data, label: label)
+        let source = Source(copying: batch.source, to: device)
+        let target = Target(copying: batch.target, to: device)
+        self.init(source: source, target: target)
     }
 
     public static func reduceDataBatches(_ batches: [LangMotionBatch]) -> LangMotionBatch {
-        // TODO: refactor: move code into sub-structures
-        let tokenIds: Tensor<Int32> = Tensor(batches.map{ $0.data.sentence.tokenIds.squeezingShape(at: 0) })
-        let mask: Tensor<Float> = Tensor(batches.map{ $0.data.sentence.mask.squeezingShape(at: 0) })
-        let tokenCount: Tensor<Int32> = Tensor(batches.map{ $0.data.sentence.tokenCount.squeezingShape(at: 0) })
-        let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.motion.squeezingShape(at: 0) })
-        let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.mask.squeezingShape(at: 0) })
-        let motionPartStartFlag: Tensor<Float> = Tensor(batches.map{ $0.data.motionPart.startFlag.squeezingShape(at: 0) })
-        let motionPartFlag: Tensor<Int32> = Tensor(batches.map{ $0.data.motionPart.motionFlag.squeezingShape(at: 0) })
-        let sourceAttentionMask: Tensor<Float> = Tensor(batches.map{ $0.data.sourceAttentionMask.squeezingShape(at: 0) })
-
-        let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.label.sampleID.squeezingShape(at: 0) })
-        let targetMotion: Tensor<Float> = Tensor(batches.map{ $0.label.motion.squeezingShape(at: 0) })
-        let targetStops: Tensor<Float> = Tensor(batches.map{ $0.label.stops.squeezingShape(at: 0) })
-        let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.label.origMotionFramesCount.squeezingShape(at: 0) })
-
-        let sentence = Sentence(tokenIds: tokenIds, mask: mask, tokenCount: tokenCount)
-        let motionPart = MotionPart(motion: motionPartTensor, mask: motionPartMask, startFlag: motionPartStartFlag, motionFlag: motionPartFlag)
-        let data = Source(sentence: sentence, motionPart: motionPart, sourceAttentionMask: sourceAttentionMask)
-        let label = Target(sampleID: sampleID, motion: targetMotion, stops: targetStops, origMotionFramesCount: origMotionFramesCount)
-        let batch = LangMotionBatch(data: data,label: label)
-
-        return batch
+        let source = Source.reduceDataBatches(batches.map{ $0.source })
+        let target = Target.reduceDataBatches(batches.map{ $0.target })
+        return LangMotionBatch(source: source, target: target)
     }
 
     // TODO: kill startMotionToken?
