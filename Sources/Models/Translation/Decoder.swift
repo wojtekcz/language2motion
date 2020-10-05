@@ -102,14 +102,18 @@ public struct TransformerDecoderLayer: Layer {
 public struct Decoder: Layer {
     public var layers: [TransformerDecoderLayer]
     public var norm: LayerNorm<Float>
-    public init(layer: TransformerDecoderLayer, layerCount: Int) {
+    @noDerivative public let derivativeAllLayers: Bool
+
+    public init(layer: TransformerDecoderLayer, layerCount: Int, derivativeAllLayers: Bool) {
         self.layers = [TransformerDecoderLayer](repeating: layer, count: layerCount)
         self.norm = LayerNorm(featureCount: layerCount, axis: 2)
+        self.derivativeAllLayers = derivativeAllLayers
     }
     
-    public init(layers: [TransformerDecoderLayer], norm: LayerNorm<Float>) {
+    public init(layers: [TransformerDecoderLayer], norm: LayerNorm<Float>, derivativeAllLayers: Bool) {
         self.layers = layers
         self.norm = norm
+        self.derivativeAllLayers = derivativeAllLayers
     }
 
     @differentiable
@@ -133,10 +137,13 @@ public struct Decoder: Layer {
             }
             allLayerOutputs.append(layerOutputNoDerivative)
 
-            // FIXME: "derivative result" needed for LangMotionTransformer?
-//             allResults.append(layerOutput.result)
-            // "non derivative result" needed for Transformer and MotionLangTransformer
-            allResults.append(layerOutputNoDerivative.result)
+            if derivativeAllLayers {
+                // LangMotionTransformer needs all layers output to be derivative for MotionGaussianMixtureModel head
+                allResults.append(layerOutput.result)
+            } else {
+                // "non derivative result" for Transformer and MotionLangTransformer
+                allResults.append(layerOutputNoDerivative.result)
+            }
             transformerInput = layerOutput.result
         }
         return DecoderOutput<Float>(lastLayerOutput: transformerInput, allLayerOutputs: allLayerOutputs, allResults: allResults)

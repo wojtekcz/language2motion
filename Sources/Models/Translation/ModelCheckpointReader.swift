@@ -188,12 +188,12 @@ extension TransformerDecoderLayer: InitializableFromPythonCheckpoint {
     }
 }
 
-extension Decoder: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension Decoder {
+    public init(reader: CheckpointReader, config: ModelConfig, derivativeAllLayers: Bool, scope: String) {
         let _layers = (0..<config.layerCount).map { i in
             TransformerDecoderLayer(reader: reader, config: config, scope: scope + "/layers/TransformerDecoderLayer_h\(i)")
         }
         let _norm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/norm", axis: 2, epsilon: 0.001)
-        self.init(layers: _layers, norm: _norm)
+        self.init(layers: _layers, norm: _norm, derivativeAllLayers: derivativeAllLayers)
     }
 }

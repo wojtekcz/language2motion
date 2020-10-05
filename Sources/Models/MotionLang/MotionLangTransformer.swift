@@ -78,7 +78,7 @@ public struct MotionLangTransformer: Module {
         self.motionPositionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
         
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
-        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
+        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount, derivativeAllLayers: false)
         self.motionNorm = LayerNorm(featureCount: config.encoderDepth, axis: 2)
         self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.encoderDepth)
         self.generator = Generator(dimModel: config.decoderDepth, vocabSize: config.vocabSize)
