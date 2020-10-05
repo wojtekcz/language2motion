@@ -48,7 +48,6 @@ let logdirURL = dataURL.appendingPathComponent("runs/Motion2lang/", isDirectory:
 let rundirURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
 let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory: true)
 
-// FIXME: how to make macOS builds use filesystem in read/write mode?
 #if os(Linux)
     try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
 #endif
@@ -106,6 +105,7 @@ let config = MotionLangTransformerConfig(
 /// load model checkpoint
 //var model = try! MotionLangTransformer(checkpoint: logdirURL.appendingPathComponent("run_31/checkpoints"), config: config, name: "model.e39")
 
+// Loss function
 @differentiable(wrt: y_pred)
 func embeddedSoftmaxCrossEntropy(y_pred: Tensor<Float>, y_true: MotionLangBatch.MLTarget) -> Tensor<Float> {
     let resultSize = y_true.targetTruth.shape.last! * y_true.targetTruth.shape.first!
