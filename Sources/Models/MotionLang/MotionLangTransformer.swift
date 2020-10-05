@@ -95,16 +95,15 @@ public struct MotionLangTransformer: Module {
     
     @differentiable
     public func encode(input: MotionLangBatch.MLSource) -> EncoderOutput<Float> {
-        let origBatchSize = input.motion.shape[0]
-        let length = input.motion.shape[1]
-        let numFrames = input.motion.shape[2]
+        let shape = input.motion.shape
+        let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
         let encoderDepth = self.config.encoderDepth
 
-        let tmpBatchSize = origBatchSize * length
-        let tmpMotionFrames = input.motion.reshaped(to: [tmpBatchSize, numFrames])
+        let tmpBatchSize = origBatchSize * numFrames
+        let tmpMotionFrames = input.motion.reshaped(to: [tmpBatchSize, nbJoints])
 
         let tmpMotionFeatures = motionDense(tmpMotionFrames) // batch size here is origBatchSize*numFrames
-        var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, length, encoderDepth])
+        var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, encoderDepth])
         motionFeatures = self.motionNorm(motionFeatures)
 
         motionFeatures = motionPositionalEncoding(motionFeatures)
