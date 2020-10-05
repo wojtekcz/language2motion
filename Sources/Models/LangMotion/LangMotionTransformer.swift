@@ -24,7 +24,8 @@ public struct LangMotionTransformerConfig: ModelConfig {
     public let decoderSelfAttentionTemp: Double
 
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double, sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, motionPositionalEncodingSize: Int,
+                feedForwardSize: Int, headCount: Int, dropoutProbability: Double,
+                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, motionPositionalEncodingSize: Int,
                 encoderSelfAttentionTemp: Double, decoderSourceAttentionTemp: Double, decoderSelfAttentionTemp: Double) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
@@ -60,55 +61,58 @@ public struct LangMotionTransformerOutput<Scalar: TensorFlowFloatingPoint>: Diff
 
 public struct LangMotionTransformer: Module {
 
-    public var encoder: Encoder
-    public var decoder: Decoder
-    public var embedding: Embedding<Float>
-    public var positionalEncoding: PositionalEncoding
-    public var motionPositionalEncoding: PositionalEncoding
-    public var motionNorm: LayerNorm<Float>
-    public var motionDense: Dense<Float>
-    public var mixtureModel: MotionGaussianMixtureModel
     @noDerivative public var config: LangMotionTransformerConfig
 
+    // encoding sentence
+    public var embedding: Embedding<Float>
+    public var positionalEncoding: PositionalEncoding
+    public var encoder: Encoder
+
+    // decoding motion
+    public var motionDense: Dense<Float>
+    public var motionPositionalEncoding: PositionalEncoding
+    public var motionNorm: LayerNorm<Float>
+    public var decoder: Decoder
+
+    // generating motion
+    public var mixtureModel: MotionGaussianMixtureModel
+
     public init(config: LangMotionTransformerConfig) {
+        self.config = config
 
-        let encAttention = MultiHeadAttention(sourceSize: config.encoderDepth,
-                                           targetSize: config.encoderDepth,
-                                           headCount: config.headCount,
-                                           headSize: config.encoderDepth/config.headCount,
-                                           attentionDropoutProbability: Float(config.dropoutProbability),
-                                           matrixResult: false)
-        
-        let decSelfAttention = MultiHeadAttention(sourceSize: config.decoderDepth,
-                                           targetSize: config.decoderDepth,
-                                           headCount: config.headCount,
-                                           headSize: config.decoderDepth/config.headCount,
-                                           attentionDropoutProbability: Float(config.dropoutProbability),
-                                           matrixResult: false)
+        // encoding sentence
+        self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
+        self.positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
 
-        let decSourceAttention = MultiHeadAttention(sourceSize: config.decoderDepth,
-                                           targetSize: config.encoderDepth,
-                                           headCount: config.headCount,
-                                           headSize: config.decoderDepth/config.headCount,
-                                           attentionDropoutProbability: Float(config.dropoutProbability),
-                                           matrixResult: false)
+        let encAttention = MultiHeadAttention(sourceSize: config.encoderDepth, targetSize: config.encoderDepth,
+                                              headCount: config.headCount, headSize: config.encoderDepth/config.headCount,
+                                              attentionDropoutProbability: Float(config.dropoutProbability), matrixResult: false)
         
         let encFeedForward = PositionwiseFeedForward(dimensionalityModel: config.encoderDepth,
-                                                  innerLayerDimensionality: config.feedForwardSize)
+                                                     innerLayerDimensionality: config.feedForwardSize)
 
-        let decFeedForward = PositionwiseFeedForward(dimensionalityModel: config.decoderDepth,
-                                                  innerLayerDimensionality: config.feedForwardSize)
-
-        self.positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
-        self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
-        self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
-        
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
-        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount, derivativeAllLayers: true)
+
+        // decoding motion
         self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth)
+        self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
         self.motionNorm = LayerNorm(featureCount: config.decoderDepth, axis: 2)
+
+        let decSelfAttention = MultiHeadAttention(sourceSize: config.decoderDepth, targetSize: config.decoderDepth,
+                                                  headCount: config.headCount, headSize: config.decoderDepth/config.headCount,
+                                                  attentionDropoutProbability: Float(config.dropoutProbability), matrixResult: false)
+        
+        let decSourceAttention = MultiHeadAttention(sourceSize: config.decoderDepth, targetSize: config.encoderDepth,
+                                                    headCount: config.headCount, headSize: config.decoderDepth/config.headCount,
+                                                    attentionDropoutProbability: Float(config.dropoutProbability), matrixResult: false)
+        
+        let decFeedForward = PositionwiseFeedForward(dimensionalityModel: config.decoderDepth,
+                                                     innerLayerDimensionality: config.feedForwardSize)
+
+        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount, derivativeAllLayers: true)
+
+        // generating motion
         self.mixtureModel = MotionGaussianMixtureModel(inputSize: config.decoderDepth*config.layerCount, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
-        self.config = config
     }
 
     @differentiable
