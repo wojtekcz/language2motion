@@ -207,6 +207,16 @@ extension LangMotionBatch {
         return Tensor<Float>(zeros: [1, nbJoints])
     }
 
+    public static func neutralMotionFrame() -> Tensor<Float> {
+        // one motion frame [1, 47]
+        // sampleID: 1, frame: 0, scaled
+        return Tensor<Float>([[ -0.612953,  0.0476239,   0.212333,   0.161793,  0.0028466,  0.0190509, -0.0479624, -0.0228922,
+                                -0.0694337,   0.387513, -0.0018089,   0.135106,   0.158669,  -0.324085,  -0.165832,    0.35672,
+                                -0.0738947,   0.103075,  0.0545089,   0.135437,  -0.221003,  -0.154341,   0.179823,  -0.279305,
+                                 0.0844597,  -0.254741,  -0.122429,   0.224831,  0.0616969,   0.324959,  -0.483339,   0.308075,
+                                  0.857774, 0.00596291,  0.0430199,   0.373412,  -0.021832,   -0.11818,  -0.083582,  -0.152354,
+                                  0.120838,   0.373251, -0.0313812,  -0.261799, -0.0735726, -0.0238353,    1.64312]])
+    }
     public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (motionPart: MotionPart, target: Target)
     {
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motion.shape[0])])
