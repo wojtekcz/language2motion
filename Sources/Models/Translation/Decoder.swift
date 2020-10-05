@@ -124,7 +124,7 @@ public struct Decoder: Layer {
         let memoryInput = input.memory
         
         for layerIndex in 0..<(withoutDerivative(at: layers) { $0.count }) {
-            let layerOutput = layers[layerIndex](DecoderInput(
+            let layerOutput: DecoderLayerOutput<Float> = layers[layerIndex](DecoderInput(
                 sequence: transformerInput,
                 sourceMask: input.sourceMask,
                 targetMask: input.targetMask,
