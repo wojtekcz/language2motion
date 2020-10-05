@@ -39,20 +39,29 @@ extension LangMotionTransformer {
             
             // load objects            
             let scope = "model"
-            let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
-            let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: true, scope: scope + "/decoder")
+
+            // encoding
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
             let _positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
-            let motionPositionalEncodingSize = 32
+            let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
+
+            // decoding
+            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense")
+            
+            let motionPositionalEncodingSize = 32 // FIXME: update motionPositionalEncoding
             let _motionPositionalEncoding = PositionalEncoding(size: motionPositionalEncodingSize, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
 
+            let _motionSegmentEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/segmentEmbedding")
+            let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
+            let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: true, scope: scope + "/decoder")
+            
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
 
-            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense")
-            let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
-            
-            self.init(config: config, encoder: _encoder, decoder: _decoder, embedding: _embedding, positionalEncoding: _positionalEncoding,
-                      motionPositionalEncoding: _motionPositionalEncoding, mixtureModel: _mixtureModel, motionDense: _motionDense, motionNorm: _motionNorm)
+            self.init(config: config,
+                      embedding: _embedding, positionalEncoding: _positionalEncoding, encoder: _encoder,
+                      motionDense: _motionDense, motionPositionalEncoding: _motionPositionalEncoding,
+                      motionSegmentEmbedding: _motionSegmentEmbedding, motionNorm: _motionNorm, decoder: _decoder,
+                      mixtureModel: _mixtureModel)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
             print("Fail to load LangMotionTransformer from checkpoint. \(error)")

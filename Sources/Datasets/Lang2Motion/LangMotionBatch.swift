@@ -7,9 +7,9 @@ public typealias LangMotionBatch = LabeledData<LangMotion.Source, LangMotion.Tar
 public struct LangMotion {
 
     public struct Sentence {
-        public var tokenIds: Tensor<Int32>   // bs x maxTextSequenceLength
-        public let tokenCount: Tensor<Int32> // bs
+        public var tokenIds: Tensor<Int32>          // bs x maxTextSequenceLength
         public var selfAttentionMask: Tensor<Float> // bs x maxMotionLength x maxTextSequenceLength // or x 1?
+        public let tokenCount: Tensor<Int32>        // bs
 
         public init(tokenIds: Tensor<Int32>, selfAttentionMask: Tensor<Float>, tokenCount: Tensor<Int32>) {
             self.tokenIds = tokenIds
@@ -38,53 +38,51 @@ public struct LangMotion {
         }
     }
 
-    // FIXME: -1 is obsolete?
     public struct MotionPart {
-        public var motion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
+        public var motion: Tensor<Float>               // bs x maxMotionLength x nbJoints
 
-        // self-attention mask
-        public var mask: Tensor<Float>            // bs x maxMotionLength-1 x maxMotionLength-1 // FIXME: should be bs x maxMotionLength x maxTextSequenceLength?
-        public var startFlag: Tensor<Float>       // bs x maxMotionLength-1 x 1
-        public var motionFlag: Tensor<Int32>      // bs x maxMotionLength-1 x 1
+        public var decSelfAttentionMask: Tensor<Float> // bs x maxMotionLength x maxMotionLength
+        public var motionFlag: Tensor<Int32>           // bs x maxMotionLength x 1
+        public var segmentIDs: Tensor<Int32>           // bs x maxMotionLength x 1
 
-        public init(motion: Tensor<Float>, mask: Tensor<Float>, startFlag: Tensor<Float>, motionFlag: Tensor<Int32>) {
+        public init(motion: Tensor<Float>, decSelfAttentionMask: Tensor<Float>, motionFlag: Tensor<Int32>, segmentIDs: Tensor<Int32>) {
             self.motion = motion
-            self.mask = mask
-            self.startFlag = startFlag
+            self.decSelfAttentionMask = decSelfAttentionMask
             self.motionFlag = motionFlag
+            self.segmentIDs = segmentIDs
 
-            assert(startFlag.shape.count == 3 && startFlag.shape[2]==1)
             assert(motionFlag.shape.count == 3 && motionFlag.shape[2]==1)
+            assert(segmentIDs.shape.count == 3 && segmentIDs.shape[2]==1)
         }
 
         public init(copying motionPart: MotionPart, to device: Device) {
             motion = Tensor<Float>(copying: motionPart.motion, to: device)
-            mask = Tensor<Float>(copying: motionPart.mask, to: device)
-            startFlag = Tensor<Float>(copying: motionPart.startFlag, to: device)
+            decSelfAttentionMask = Tensor<Float>(copying: motionPart.decSelfAttentionMask, to: device)
             motionFlag = Tensor<Int32>(copying: motionPart.motionFlag, to: device)
+            segmentIDs = Tensor<Int32>(copying: motionPart.segmentIDs, to: device)
         }
 
         public static func reduceDataBatches(_ batches: [MotionPart]) -> MotionPart {
             let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
-            let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.mask.squeezingShape(at: 0) })
-            let motionPartStartFlag: Tensor<Float> = Tensor(batches.map{ $0.startFlag.squeezingShape(at: 0) })
+            let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.decSelfAttentionMask.squeezingShape(at: 0) })
             let motionPartFlag: Tensor<Int32> = Tensor(batches.map{ $0.motionFlag.squeezingShape(at: 0) })
-            return MotionPart(motion: motionPartTensor, mask: motionPartMask, startFlag: motionPartStartFlag, motionFlag: motionPartFlag)
+            let segmentIDs: Tensor<Int32> = Tensor(batches.map{ $0.segmentIDs.squeezingShape(at: 0) })
+            return MotionPart(motion: motionPartTensor, decSelfAttentionMask: motionPartMask, motionFlag: motionPartFlag, segmentIDs: segmentIDs)
         }
 
         public func printMotionPart() {
             print("motionPart")
             print("  motion.shape: \(self.motion.shape)")
-            print("  mask.shape: \(self.mask.shape)")
-            print("  startFlag.shape: \(self.startFlag.shape)")
+            print("  decSelfAttentionMask.shape: \(self.decSelfAttentionMask.shape)")
             print("  motionFlag.shape: \(self.motionFlag.shape)")
+            print("  segmentIDs.shape: \(self.segmentIDs.shape)")
         }
     }
 
     public struct Source {
         public var sentence: Sentence
         public var motionPart: MotionPart
-        public var sourceAttentionMask: Tensor<Float>       // bs x maxMotionLength x maxTextSequenceLength
+        public var sourceAttentionMask: Tensor<Float> // bs x maxMotionLength x maxTextSequenceLength
 
         public init(sentence: Sentence, motionPart: MotionPart, sourceAttentionMask: Tensor<Float>) {
             self.sentence = sentence
@@ -120,9 +118,9 @@ public struct LangMotion {
             print("    tokenCount: (shape: \(self.sentence.tokenCount.shape), value: \(self.sentence.tokenCount))")
             print("  motionPart")
             print("    motion.shape: \(self.motionPart.motion.shape)")
-            print("    mask.shape: \(self.motionPart.mask.shape)")
-            print("    startFlag.shape: \(self.motionPart.startFlag.shape)")
+            print("    decSelfAttentionMask.shape: \(self.motionPart.decSelfAttentionMask.shape)")
             print("    motionFlag.shape: \(self.motionPart.motionFlag.shape)")
+            print("    segmentIDs.shape: \(self.motionPart.segmentIDs.shape)")
             print("  sourceAttentionMask.shape: \(self.sourceAttentionMask.shape)")
         }
     }
@@ -130,9 +128,8 @@ public struct LangMotion {
     public struct Target {
         public let sampleID: Tensor<Int32>        // bs
 
-        // FIXME: -1 is obsolete?
-        public var motion: Tensor<Float>          // bs x maxMotionLength-1 x nbJoints
-        public var stops: Tensor<Float>           // bs x maxMotionLength-1
+        public var motion: Tensor<Float>          // bs x maxMotionLength x nbJoints
+        public var stops: Tensor<Float>           // bs x maxMotionLength
 
         public let origMotionFramesCount: Tensor<Int32> // bs
 
@@ -217,37 +214,64 @@ extension LangMotionBatch {
                                   0.857774, 0.00596291,  0.0430199,   0.373412,  -0.021832,   -0.11818,  -0.083582,  -0.152354,
                                   0.120838,   0.373251, -0.0313812,  -0.261799, -0.0735726, -0.0238353,    1.64312]])
     }
+
+    public enum MotionSegment: Int32, CaseIterable {
+        case padding = 0
+        case motion = 1
+        case start = 2
+        case stop = 3
+    }
+
+    public static func padAndSegmentMotion(_ inputMotion: Tensor<Float>, to width: Int) -> (motion: Tensor<Float>, motionFlag: Tensor<Int32>, segmentIDs: Tensor<Int32>) {
+        // pads two-dimensional tensor
+        assert(inputMotion.shape.count == 2)
+        let currentWidth = inputMotion.shape[0]
+        let paddingSize = Swift.max(width - currentWidth, 0)
+        let sizes: [(before: Int, after: Int)] = [(before: 0, after: paddingSize), (before: 0, after: 0)]
+        
+        let motion = inputMotion[0..<width].padded(forSizes: sizes)
+        
+        var motionFlag = Tensor<Int32>(repeating: 1, shape: [currentWidth])
+        motionFlag = motionFlag[0..<width].padded(forSizes: [(before: 0, after: paddingSize)], with: 0)
+        
+        // form segment ids
+        var segmentIDs = Tensor(repeating: MotionSegment.motion.rawValue, shape: [currentWidth]) // MOTION
+        segmentIDs[0] = Tensor(MotionSegment.start.rawValue) // START
+        segmentIDs = segmentIDs[0..<width].padded(forSizes: [(before: 0, after: paddingSize)], with: MotionSegment.padding.rawValue) // PADDING
+        segmentIDs[currentWidth-1] = Tensor(MotionSegment.stop.rawValue) // STOP
+
+        return (motion: motion, motionFlag: motionFlag, segmentIDs: segmentIDs) // all 1-dim tensors
+    }
+
     public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (motionPart: MotionPart, target: Target)
     {
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motion.shape[0])])
-        let nbJoints = motion.shape[1]
         
-        let zeroMotionFrame = Self.zeroMotionFrame(nbJoints: nbJoints)
+        let neutralMotionFrame = Self.neutralMotionFrame()
         
-        let motion2 = Tensor(concatenating: [zeroMotionFrame, motion], alongAxis: 0)
+        // add start and stop "neutral" frames
+        let motion2 = Tensor(concatenating: [neutralMotionFrame, motion[0..<maxMotionLength-1], neutralMotionFrame], alongAxis: 0)
 
-        var (paddedMotion, motionFlag) = motion2.paddedAndCropped(to: maxMotionLength+1)
-        paddedMotion = paddedMotion.expandingShape(at: 0) // FIXME: move adding batch dimension further down
-        motionFlag = motionFlag.expandingShape(at: 0) // FIXME: move adding batch dimension further down
-
+        let (paddedMotion, motionFlag, segmentIDs) = padAndSegmentMotion(motion2, to: maxMotionLength+1)
+        
         // source (motionPart & motion flag)
-        let rangeExceptLast = 0..<(paddedMotion.shape[1] - 1)
-        let motionPartTensor = paddedMotion[0..., rangeExceptLast, 0...]
+        let rangeExceptLast = 0..<(paddedMotion.shape[0] - 1)
+        let motionPartTensor = paddedMotion[rangeExceptLast, 0...]
 
-        let motionPartFlag = motionFlag[0..., rangeExceptLast]
+        let motionPartFlag = motionFlag[rangeExceptLast]
+        let motionPartSegmentIDs = segmentIDs[rangeExceptLast]
         let motionPartMask = Self.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
 
-        var motionStartFlag = Tensor<Float>(zeros: [motionPartTensor.shape[1], 1]).expandingShape(at: 0)
-        motionStartFlag[0, 0, 0] = Tensor(1.0)
-
-        let motionPart = MotionPart(motion: motionPartTensor, mask: motionPartMask, startFlag: motionStartFlag, motionFlag: motionPartFlag.expandingShape(at: 2))
+        let motionPart = MotionPart(motion: motionPartTensor.expandingShape(at: 0), decSelfAttentionMask: motionPartMask,
+                                    motionFlag: motionPartFlag.expandingShape(at: [0, 2]), segmentIDs: motionPartSegmentIDs.expandingShape(at: [0, 2]))
 
         // target (motion & stops)
-        let targetMotion: Tensor<Float> = paddedMotion[0..., 1..., 0...]
-        let targetMotionFlag = motionFlag[0..., 1...]
+        let targetMotion: Tensor<Float> = paddedMotion[1..., 0...]
+        let targetMotionFlag = motionFlag[1...].expandingShape(at: 0)
         let targetStops: Tensor<Float> = 1.0 - Tensor<Float>(targetMotionFlag)
+        // TODO: add target segmentIDs
 
-        let target = Target(sampleID: Tensor([Int32(sampleID)]), motion: targetMotion, stops: targetStops, origMotionFramesCount: origMotionFramesCount)
+        let target = Target(sampleID: Tensor([Int32(sampleID)]), motion: targetMotion.expandingShape(at: 0), stops: targetStops, origMotionFramesCount: origMotionFramesCount)
         return (motionPart: motionPart, target: target)
     }
 

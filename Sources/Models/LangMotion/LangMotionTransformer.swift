@@ -71,6 +71,7 @@ public struct LangMotionTransformer: Module {
     // decoding motion
     public var motionDense: Dense<Float>
     public var motionPositionalEncoding: PositionalEncoding
+    public var motionSegmentEmbedding: Embedding<Float>
     public var motionNorm: LayerNorm<Float>
     public var decoder: Decoder
 
@@ -84,6 +85,15 @@ public struct LangMotionTransformer: Module {
         self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
         self.positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
 
+        // The token type vocabulary will always be small and so we use the one-hot approach here
+        // as it is always faster for small vocabularies.
+        let segmentVocabularySize = LangMotionBatch.MotionSegment.allCases.count
+        let initializerStandardDeviation: Float = 0.02
+        self.motionSegmentEmbedding = Embedding<Float>(
+            vocabularySize: segmentVocabularySize,
+            embeddingSize: config.decoderDepth,
+            embeddingsInitializer: truncatedNormalInitializer(standardDeviation: Tensor<Float>(initializerStandardDeviation)))
+        
         let encAttention = MultiHeadAttention(sourceSize: config.encoderDepth, targetSize: config.encoderDepth,
                                               headCount: config.headCount, headSize: config.encoderDepth/config.headCount,
                                               attentionDropoutProbability: Float(config.dropoutProbability), matrixResult: false)
@@ -145,10 +155,11 @@ public struct LangMotionTransformer: Module {
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, config.decoderDepth])
 
         motionFeatures = motionPositionalEncoding(motionFeatures)
-        // TODO: add segment encoding
+        let segmentEmbeddings = motionSegmentEmbedding(motionPart.segmentIDs[0..., 0..., 0])
+        motionFeatures = motionFeatures + segmentEmbeddings
         motionFeatures = motionNorm(motionFeatures)
 
-        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: motionPart.mask, memory: memory,
+        let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: motionPart.decSelfAttentionMask, memory: memory,
                                         sourceAttentionTemperature: Float(config.decoderSourceAttentionTemp), selfAttentionTemperature: Float(config.decoderSelfAttentionTemp))
         return self.decoder(decoderInput)
     }
@@ -156,17 +167,24 @@ public struct LangMotionTransformer: Module {
 
 extension LangMotionTransformer {
 
-    public init(config: LangMotionTransformerConfig, encoder: Encoder, decoder: Decoder, embedding: Embedding<Float>,
-                positionalEncoding: PositionalEncoding, motionPositionalEncoding: PositionalEncoding,
-                mixtureModel: MotionGaussianMixtureModel, motionDense: Dense<Float>, motionNorm: LayerNorm<Float>) {
+    public init(config: LangMotionTransformerConfig,
+                embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, encoder: Encoder,
+                motionDense: Dense<Float>, motionPositionalEncoding: PositionalEncoding, motionSegmentEmbedding: Embedding<Float>,
+                motionNorm: LayerNorm<Float>, decoder: Decoder,
+                mixtureModel: MotionGaussianMixtureModel
+    ) {
         self.config = config
-        self.encoder = encoder
-        self.decoder = decoder
+
         self.embedding = embedding
         self.positionalEncoding = positionalEncoding
-        self.motionPositionalEncoding = motionPositionalEncoding
-        self.mixtureModel = mixtureModel
+        self.encoder = encoder
+
         self.motionDense = motionDense
+        self.motionPositionalEncoding = motionPositionalEncoding
+        self.motionSegmentEmbedding = motionSegmentEmbedding
         self.motionNorm = motionNorm
+        self.decoder = decoder
+
+        self.mixtureModel = mixtureModel
     }
 }
