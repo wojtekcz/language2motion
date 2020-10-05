@@ -94,6 +94,7 @@ public class MotionDecoder {
         return (motion: motion, log_probs: log_probs, done: Tensor(done))
     }
 
+    // FIXME: get up-to-date code from motion generation notebook
     public static func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, transformer: LangMotionTransformer, nbJoints: Int, nbMixtures: Int, maxMotionLength: Int) -> Tensor<Float> {
         print("\nEncode:")
         print("======")
@@ -112,7 +113,7 @@ public class MotionDecoder {
         for _ in 0..<maxMotionLength2 {
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
-            let motionPartMask = LangMotionBatch.makeStandardMask(target: motionPartFlag, pad: 0)
+            let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
             var motionStartFlag = Tensor<Float>(zeros: [ys.shape[1], 1]).expandingShape(at: 0) // FIXME: refactor getting motionStartFlag
             motionStartFlag[0, 0, 0] = Tensor(1.0)
             let motionPart = LangMotionBatch.MotionPart(motion: ys, mask: motionPartMask, startFlag: motionStartFlag, motionFlag: motionPartFlag)

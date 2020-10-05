@@ -214,10 +214,7 @@ extension LangMotionBatch {
         let motionPartTensor = paddedMotion[0..., rangeExceptLast, 0...]
 
         let motionPartFlag = motionFlag[0..., rangeExceptLast]
-        var motionPartMask = makeStandardMask(target: motionPartFlag, pad: 0, shiftRight: shiftMaskRight) // FIXME: fix target mask
-        let motionLen = Int(motionFlag.sum().scalar!)
-        motionPartMask[0, 0..<motionLen-1, 0..<motionLen] -= 1
-        motionPartMask = abs(motionPartMask)
+        let motionPartMask = Self.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
 
         var motionStartFlag = Tensor<Float>(zeros: [motionPartTensor.shape[1], 1]).expandingShape(at: 0)
         motionStartFlag[0, 0, 0] = Tensor(1.0)
@@ -233,9 +230,9 @@ extension LangMotionBatch {
         return (motionPart: motionPart, target: target)
     }
 
-    public static func subsequentMask(size: Int, shiftRight: Bool = false) -> Tensor<Int32> {
+    public static func subsequentMask(size: Int, shiftRight: Bool = false, on device: Device) -> Tensor<Int32> {
         let attentionShape = [1, size, size]
-        let ones = Tensor<Int32>(ones: TensorShape(attentionShape))
+        let ones = Tensor<Int32>(ones: TensorShape(attentionShape), on: device)
         var mask: Tensor<Int32>
         
         if !shiftRight {
@@ -247,11 +244,15 @@ extension LangMotionBatch {
         return mask
     }
 
-    public static func makeStandardMask(target: Tensor<Int32>, pad: Int32, shiftRight: Bool = false) -> Tensor<Float> {
-        var targetMask = Tensor(zerosLike: target)
-            .replacing(with: Tensor(onesLike: target), where: target .!= Tensor.init(pad))
+    public static func makeSelfAttentionDecoderMask(target: Tensor<Int32>, pad: Int32, on device: Device = Device.defaultTFEager) -> Tensor<Float> {
+        var targetMask = Tensor(zerosLike: target).copy(to: device)
+            .replacing(with: Tensor(onesLike: target).copy(to: device), where: target .!= Tensor.init(pad).copy(to: device))
             .expandingShape(at: -2)
-        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: shiftRight)
+        targetMask *= subsequentMask(size: target.shape.last!, shiftRight: false, on: device)
+        
+        // reverse mask
+        targetMask = targetMask.transposed(permutation: [0, 2, 1])
+
         return Tensor<Float>(targetMask)
     }
 }
