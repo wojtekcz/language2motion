@@ -196,7 +196,7 @@ extension LangMotionBatch {
         return Tensor<Float>(zeros: [1, nbJoints])
     }
 
-    public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int, shiftMaskRight: Bool = false) -> (motionPart: MotionPart, target: Target)
+    public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (motionPart: MotionPart, target: Target)
     {
         let origMotionFramesCount: Tensor<Int32> = Tensor<Int32>([Int32(motion.shape[0])])
         let nbJoints = motion.shape[1]
