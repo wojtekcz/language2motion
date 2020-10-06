@@ -13,11 +13,11 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_66"
-let batchSize = 20
+let runName = "run_67"
+let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
-let nEpochs = 4
+let nEpochs = 10
 
 var optimizerOpts = OptimizerOpts(
     peakLearningRate: 1e-3,
@@ -28,7 +28,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_mini
+let datasetSize: DatasetSize = .multi_midi
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -54,7 +54,7 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 #endif
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-let _ = _ExecutionContext.global
+// let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
 // let device = Device.defaultXLA
@@ -97,10 +97,10 @@ let config = LangMotionTransformerConfig(
     nbJoints: 47,
     nbMixtures: 20,
     layerCount: 6,
-    encoderDepth: 64,
-    decoderDepth: 128,
-    feedForwardSize: 512,
-    headCount: 4,
+    encoderDepth: 256,
+    decoderDepth: 256,
+    feedForwardSize: 2048,
+    headCount: 16,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
