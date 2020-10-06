@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_63"
+let runName = "run_66"
 let batchSize = 20
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
