@@ -82,15 +82,6 @@ public struct LangMotionTransformer: Module {
         // encoding sentence
         self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
         self.positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
-
-        // The token type vocabulary will always be small and so we use the one-hot approach here
-        // as it is always faster for small vocabularies.
-        let segmentVocabularySize = LangMotionBatch.MotionSegment.allCases.count
-        let initializerStandardDeviation: Float = 0.02
-        self.motionSegmentEmbedding = Embedding<Float>(
-            vocabularySize: segmentVocabularySize,
-            embeddingSize: config.decoderDepth,
-            embeddingsInitializer: truncatedNormalInitializer(standardDeviation: Tensor<Float>(initializerStandardDeviation)))
         
         let encAttention = MultiHeadAttention(sourceSize: config.encoderDepth, targetSize: config.encoderDepth,
                                               headCount: config.headCount, headSize: config.encoderDepth/config.headCount,
@@ -104,6 +95,15 @@ public struct LangMotionTransformer: Module {
         // decoding motion
         self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth)
         self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
+
+        // The token type vocabulary will always be small and so we use the one-hot approach here
+        // as it is always faster for small vocabularies.
+        let initializerStandardDeviation: Float = 0.02
+        self.motionSegmentEmbedding = Embedding<Float>(
+            vocabularySize: LangMotionBatch.MotionSegment.allCases.count,
+            embeddingSize: config.decoderDepth,
+            embeddingsInitializer: truncatedNormalInitializer(standardDeviation: Tensor<Float>(initializerStandardDeviation)))
+
         self.motionNorm = LayerNorm(featureCount: config.decoderDepth, axis: 2)
 
         let decSelfAttention = MultiHeadAttention(sourceSize: config.decoderDepth, targetSize: config.decoderDepth,

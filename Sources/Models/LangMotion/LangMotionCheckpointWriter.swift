@@ -8,11 +8,12 @@ import ModelSupport
 extension LangMotionTransformer: ExportableLayer {
     public var nameMappings: [String: String] {        
         [
-            "encoder": "encoder",
-            "decoder": "decoder",
             "embedding": "embedding",
-            "motionNorm": "motionNorm",
+            "encoder": "encoder",
             "motionDense": "motionDense",
+            "motionSegmentEmbedding": "motionSegmentEmbedding",
+            "motionNorm": "motionNorm",
+            "decoder": "decoder",
             "mixtureModel": "mixtureModel"
         ]
     }
