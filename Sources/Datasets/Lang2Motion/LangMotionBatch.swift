@@ -238,7 +238,8 @@ extension LangMotionBatch {
         
         var motionFlag = Tensor<Int32>(repeating: 1, shape: [currentWidth])
         motionFlag = motionFlag[0..<width].padded(forSizes: [(before: 0, after: paddingSize)], with: 0)
-        
+        motionFlag[currentWidth-1] = Tensor(0) // STOP frame
+
         // form segment ids
         var segmentIDs = Tensor(repeating: MotionSegment.motion.rawValue, shape: [currentWidth]) // MOTION
         segmentIDs[0] = Tensor(MotionSegment.start.rawValue) // START
