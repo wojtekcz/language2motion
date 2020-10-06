@@ -36,7 +36,7 @@ extension MotionGaussianMixtureModel: ExportableLayer {
 
 extension LangMotionTransformer {
     public func writeCheckpoint(to location: URL, name: String) throws {
-        print("saving model \(location.path)")
+        print("saving model \(name) in \(location.path)")
         try TranslationModels.writeCheckpoint(self, to: location, name: name)
     }
 }
