@@ -140,10 +140,10 @@ public struct Decoder: Layer {
 
 //            if derivativeAllLayers { // FIXME: switch doesn't work
 //                // LangMotionTransformer needs all layers output to be derivative for MotionGaussianMixtureModel head
-                allResults.append(layerOutput.result)
+//                allResults.append(layerOutput.result)
 //            } else {
 //                // "non derivative result" for Transformer and MotionLangTransformer
-//                allResults.append(layerOutputNoDerivative.result)
+                allResults.append(layerOutputNoDerivative.result)
 //            }
 //            allResults.append(layerOutputNoDerivative.result)
             transformerInput = layerOutput.result

@@ -120,7 +120,8 @@ public struct LangMotionTransformer: Module {
         self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount, derivativeAllLayers: true)
 
         // generating motion
-        self.mixtureModel = MotionGaussianMixtureModel(inputSize: config.decoderDepth*config.layerCount, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
+        //config.decoderDepth*config.layerCount
+        self.mixtureModel = MotionGaussianMixtureModel(inputSize: config.decoderDepth, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
     }
 
     @differentiable
@@ -128,7 +129,8 @@ public struct LangMotionTransformer: Module {
         let encoded = self.encode(input: input.sentence)
         let decoded = self.decode(sourceMask: input.sourceAttentionMask, motionPart: input.motionPart, memory: encoded.lastLayerOutput)
         // reformat decoded.allOutputs[] into one tensor
-        let mixtureModelInput = Tensor<Float>(concatenating: decoded.allResults, alongAxis: 2)
+        //let mixtureModelInput = Tensor<Float>(concatenating: decoded.allResults, alongAxis: 2)
+        let mixtureModelInput = decoded.lastLayerOutput
         let rslt = LangMotionTransformerOutput(preds: self.mixtureModel(mixtureModelInput), encoded: encoded, decoded: decoded)
         return rslt
     }
