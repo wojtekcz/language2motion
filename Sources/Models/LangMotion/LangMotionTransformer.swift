@@ -18,14 +18,13 @@ public struct LangMotionTransformerConfig: ModelConfig {
     public let dropoutProbability: Double
     public let sentenceMaxPositionalLength: Int
     public let motionMaxPositionalLength: Int
-    public let motionPositionalEncodingSize: Int // TODO: kill motionPositionalEncodingSize
     public let encoderSelfAttentionTemp: Double
     public let decoderSourceAttentionTemp: Double
     public let decoderSelfAttentionTemp: Double
 
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
                 feedForwardSize: Int, headCount: Int, dropoutProbability: Double,
-                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, motionPositionalEncodingSize: Int,
+                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int,
                 encoderSelfAttentionTemp: Double, decoderSourceAttentionTemp: Double, decoderSelfAttentionTemp: Double) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
@@ -38,7 +37,6 @@ public struct LangMotionTransformerConfig: ModelConfig {
         self.dropoutProbability = dropoutProbability
         self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
         self.motionMaxPositionalLength = motionMaxPositionalLength
-        self.motionPositionalEncodingSize = motionPositionalEncodingSize
         self.encoderSelfAttentionTemp = encoderSelfAttentionTemp
         self.decoderSourceAttentionTemp = decoderSourceAttentionTemp
         self.decoderSelfAttentionTemp = decoderSelfAttentionTemp
