@@ -236,17 +236,17 @@ extension LangMotionBatch {
         
         let motion = inputMotion[0..<width].padded(forSizes: sizes)
         
-        var motionFlag = Tensor<Int32>(repeating: 1, shape: [currentWidth])
+        var motionFlag = Tensor<Float>(repeating: 1, shape: [currentWidth])
         motionFlag = motionFlag[0..<width].padded(forSizes: [(before: 0, after: paddingSize)], with: 0)
         motionFlag[currentWidth-1] = Tensor(0) // STOP frame
 
         // form segment ids
-        var segmentIDs = Tensor(repeating: MotionSegment.motion.rawValue, shape: [currentWidth]) // MOTION
-        segmentIDs[0] = Tensor(MotionSegment.start.rawValue) // START
-        segmentIDs = segmentIDs[0..<width].padded(forSizes: [(before: 0, after: paddingSize)], with: MotionSegment.padding.rawValue) // PADDING
-        segmentIDs[currentWidth-1] = Tensor(MotionSegment.stop.rawValue) // STOP
+        var segmentIDs = Tensor<Float>(repeating: Float(MotionSegment.motion.rawValue), shape: [currentWidth]) // MOTION
+        segmentIDs[0] = Tensor(Float(MotionSegment.start.rawValue)) // START
+        segmentIDs = segmentIDs[0..<width].padded(forSizes: [(before: 0, after: paddingSize)], with: Float(MotionSegment.padding.rawValue)) // PADDING
+        segmentIDs[currentWidth-1] = Tensor(Float(MotionSegment.stop.rawValue)) // STOP
 
-        return (motion: motion, motionFlag: motionFlag, segmentIDs: segmentIDs) // all 1-dim tensors
+        return (motion: motion, motionFlag: Tensor<Int32>(motionFlag), segmentIDs: Tensor<Int32>(segmentIDs)) // all 1-dim tensors
     }
 
     public static func preprocessTargetMotion(sampleID: Int, motion: Tensor<Float>, maxMotionLength: Int) -> (motionPart: MotionPart, target: Target)
