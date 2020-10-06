@@ -8,7 +8,7 @@ import ModelSupport
 extension LangMotionTransformer: ExportableLayer {
     public var nameMappings: [String: String] {        
         [
-            "embedding": "embedding",
+            "langEmbedding": "langEmbedding",
             "encoder": "encoder",
             "motionDense": "motionDense",
             "motionSegmentEmbedding": "motionSegmentEmbedding",

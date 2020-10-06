@@ -41,8 +41,8 @@ extension LangMotionTransformer {
             let scope = "model"
 
             // encoding
-            let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
-            let _positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+            let _langEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/langEmbedding")
+            let _langPositionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
 
             // decoding
@@ -56,7 +56,7 @@ extension LangMotionTransformer {
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
 
             self.init(config: config,
-                      embedding: _embedding, positionalEncoding: _positionalEncoding, encoder: _encoder,
+                      langEmbedding: _langEmbedding, langPositionalEncoding: _langPositionalEncoding, encoder: _encoder,
                       motionDense: _motionDense, motionPositionalEncoding: _motionPositionalEncoding,
                       motionSegmentEmbedding: _motionSegmentEmbedding, motionNorm: _motionNorm, decoder: _decoder,
                       mixtureModel: _mixtureModel)

@@ -62,8 +62,8 @@ public struct LangMotionTransformer: Module {
     @noDerivative public var config: LangMotionTransformerConfig
 
     // encoding sentence
-    public var embedding: Embedding<Float>
-    public var positionalEncoding: PositionalEncoding
+    public var langEmbedding: Embedding<Float>
+    public var langPositionalEncoding: PositionalEncoding
     public var encoder: Encoder
 
     // decoding motion
@@ -80,8 +80,8 @@ public struct LangMotionTransformer: Module {
         self.config = config
 
         // encoding sentence
-        self.embedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
-        self.positionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
+        self.langEmbedding = Embedding<Float>(vocabularySize: config.vocabSize, embeddingSize: config.encoderDepth, embeddingsInitializer: glorotUniform())
+        self.langPositionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
         
         let encAttention = MultiHeadAttention(sourceSize: config.encoderDepth, targetSize: config.encoderDepth,
                                               headCount: config.headCount, headSize: config.encoderDepth/config.headCount,
@@ -135,7 +135,7 @@ public struct LangMotionTransformer: Module {
     
     @differentiable
     public func encode(input: LangMotionBatch.Sentence) -> EncoderOutput<Float> {
-        let embedded = self.positionalEncoding(self.embedding(input.tokenIds))
+        let embedded = self.langPositionalEncoding(self.langEmbedding(input.tokenIds))
         let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.selfAttentionMask, selfAttentionTemperature: Float(config.encoderSelfAttentionTemp))
         return self.encoder(encoderInput)
     }
@@ -166,15 +166,15 @@ public struct LangMotionTransformer: Module {
 extension LangMotionTransformer {
 
     public init(config: LangMotionTransformerConfig,
-                embedding: Embedding<Float>, positionalEncoding: PositionalEncoding, encoder: Encoder,
+                langEmbedding: Embedding<Float>, langPositionalEncoding: PositionalEncoding, encoder: Encoder,
                 motionDense: Dense<Float>, motionPositionalEncoding: PositionalEncoding, motionSegmentEmbedding: Embedding<Float>,
                 motionNorm: LayerNorm<Float>, decoder: Decoder,
                 mixtureModel: MotionGaussianMixtureModel
     ) {
         self.config = config
 
-        self.embedding = embedding
-        self.positionalEncoding = positionalEncoding
+        self.langEmbedding = langEmbedding
+        self.langPositionalEncoding = langPositionalEncoding
         self.encoder = encoder
 
         self.motionDense = motionDense
