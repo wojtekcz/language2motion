@@ -30,6 +30,7 @@ public struct DecoderOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     public var lastLayerOutput: Tensor<Scalar>
     @noDerivative public var allLayerOutputs: [DecoderLayerOutput<Float>]
     public var allResults: [Tensor<Float>]
+//    @noDerivative public var allResults: [Tensor<Float>]
 
     @differentiable
     public init(lastLayerOutput: Tensor<Scalar>, allLayerOutputs: [DecoderLayerOutput<Float>], allResults: [Tensor<Float>]) {
@@ -119,7 +120,7 @@ public struct Decoder: Layer {
     @differentiable
     public func callAsFunction(_ input: DecoderInput<Float>) -> DecoderOutput<Float> {
         var allLayerOutputs: [DecoderLayerOutput<Float>] = []
-        var allResults: [Tensor<Float>] = []
+        @noDerivative var allResults: [Tensor<Float>] = []
         var transformerInput = input.sequence
         let memoryInput = input.memory
         
@@ -137,13 +138,14 @@ public struct Decoder: Layer {
             }
             allLayerOutputs.append(layerOutputNoDerivative)
 
-            if derivativeAllLayers {
-                // LangMotionTransformer needs all layers output to be derivative for MotionGaussianMixtureModel head
+//            if derivativeAllLayers { // FIXME: switch doesn't work
+//                // LangMotionTransformer needs all layers output to be derivative for MotionGaussianMixtureModel head
                 allResults.append(layerOutput.result)
-            } else {
-                // "non derivative result" for Transformer and MotionLangTransformer
-                allResults.append(layerOutputNoDerivative.result)
-            }
+//            } else {
+//                // "non derivative result" for Transformer and MotionLangTransformer
+//                allResults.append(layerOutputNoDerivative.result)
+//            }
+//            allResults.append(layerOutputNoDerivative.result)
             transformerInput = layerOutput.result
         }
         return DecoderOutput<Float>(lastLayerOutput: transformerInput, allLayerOutputs: allLayerOutputs, allResults: allResults)
