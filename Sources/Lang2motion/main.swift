@@ -13,11 +13,11 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_69"
+let runName = "run_70"
 let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
-let nEpochs = 10
+let nEpochs = 30
 
 var optimizerOpts = OptimizerOpts(
     peakLearningRate: 1e-3,
@@ -110,10 +110,10 @@ let config = LangMotionTransformerConfig(
 )
 
 /// create new model
-var model = LangMotionTransformer(config: config)
+//var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-//var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_61/checkpoints"), config: config, name: "model.e2")
+var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_69/checkpoints"), config: config, name: "model.e10")
 
 // Loss function
 let args = LossArgs(
