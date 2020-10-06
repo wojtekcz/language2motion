@@ -17,7 +17,7 @@ public struct LossArgs {
      }
 }
 
-@differentiable
+@differentiable(wrt: y_pred)
 public func _normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MixtureModelPreds, args: LossArgs) -> Tensor<Float> {
     let TINY: Float = 1e-8
     let pi: Float = 3.1415
@@ -43,6 +43,10 @@ public func _normalMixtureSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: 
             log(pdf + TINY).sum(alongAxes:2).squeezingShape(at: 2)
         log_mixture_pdf = log_mixture_pdf + weighted_pdf
     }
+    
+    // mask mixture loss with stops
+    let zeroTensor = Tensor<Float>(repeating: 0.0, shape: log_mixture_pdf.shape, on: args.device)
+    log_mixture_pdf = log_mixture_pdf.replacing(with: zeroTensor, where: y_true.stops .== Tensor<Float>(1.0, on: args.device))
 
     let b_pdf1 = Float(1.0) - y_true.stops
     let b_pdf2 = Float(1.0) - stops
@@ -72,14 +76,16 @@ extension LangMotionBatch.Target {
         let nJoints = self.motion.shape[2]
         let motion = self.motion.reshaped(to: [1, bs*nFrames, nJoints])
         let stops = self.stops.reshaped(to: [1, bs*nFrames])
+        let segmentIDs = self.segmentIDs.reshaped(to: [1, bs*nFrames])
         let origMotionFramesCount = self.origMotionFramesCount.sum().expandingShape(at: 0)
-        return Self(sampleID: self.sampleID, motion: motion, stops: stops, origMotionFramesCount: origMotionFramesCount)
+        return Self(sampleID: self.sampleID, motion: motion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: origMotionFramesCount)
     }
 
     public func gathering(atIndices indices: Tensor<Int32>, alongAxis axis: Int) -> Self {
         let motion = self.motion.gathering(atIndices: indices, alongAxis: axis)
         let stops = self.stops.gathering(atIndices: indices, alongAxis: axis)
-        return Self(sampleID: self.sampleID, motion: motion, stops: stops, origMotionFramesCount: self.origMotionFramesCount)
+        let segmentIDs = self.segmentIDs.gathering(atIndices: indices, alongAxis: axis)
+        return Self(sampleID: self.sampleID, motion: motion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: self.origMotionFramesCount)
     }
 }
 
@@ -116,7 +122,7 @@ public func normalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMo
     var y_pred = y_pred.squeezed()
     var y_true = y_true.squeezed()
     let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(y_true.stops.shape[1]), stride: 1, on: args.device)
-    let indices = ids.gathering(where: y_true.stops .!= Tensor(1, on: args.device))
+    let indices = ids.gathering(where: y_true.segmentIDs .!= Tensor(0, on: args.device))
     y_pred = y_pred.gathering(atIndices: indices, alongAxis: 1)
     y_true = y_true.gathering(atIndices: indices, alongAxis: 1)
     
