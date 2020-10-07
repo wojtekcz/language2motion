@@ -13,14 +13,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_70"
+let runName = "run_71"
 let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
 let nEpochs = 30
 
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 1e-3,
+    peakLearningRate: 5e-4,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
