@@ -13,14 +13,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_71"
-let batchSize = 50
+let runName = "run_72"
+let batchSize = 10
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
 let nEpochs = 30
 
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 5e-4,
+    peakLearningRate: 1e-3,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
@@ -28,7 +28,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_midi
+let datasetSize: DatasetSize = .mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -54,7 +54,7 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 #endif
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
-// let _ = _ExecutionContext.global
+let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
 // let device = Device.defaultXLA
@@ -110,10 +110,10 @@ let config = LangMotionTransformerConfig(
 )
 
 /// create new model
-//var model = LangMotionTransformer(config: config)
+var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_69/checkpoints"), config: config, name: "model.e10")
+// var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_69/checkpoints"), config: config, name: "model.e10")
 
 // Loss function
 let args = LossArgs(
