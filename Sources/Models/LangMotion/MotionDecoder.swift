@@ -38,6 +38,7 @@ public func bernoulli_pdf(sample: Int, p: Float) -> Float {
 }
 
 public class MotionDecoder {
+    /// done means motionFlag: 1-motion, 0-stop
     public static func performNormalMixtureSampling(preds: MixtureModelPreds, nb_joints: Int, nb_mixtures: Int, maxMotionLength: Int) -> (motion: Tensor<Float>, log_probs: [Float], done: Tensor<Int32>) {
         let TINY: Float = 1e-8
         let motionLength = preds.mixtureMeans.shape[1]
