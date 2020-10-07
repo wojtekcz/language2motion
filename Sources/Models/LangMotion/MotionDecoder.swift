@@ -95,45 +95,62 @@ public class MotionDecoder {
         return (motion: motion, log_probs: log_probs, done: Tensor(done))
     }
 
-    // FIXME: get up-to-date code from motion generation notebook
-    public static func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, transformer: LangMotionTransformer, nbJoints: Int, nbMixtures: Int, maxMotionLength: Int) -> Tensor<Float> {
+    public static func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, startMotion: Tensor<Float>?, transformer: LangMotionTransformer,
+        maxMotionLength: Int, memoryMultiplier: Float = 1.0) -> (motion: Tensor<Float>, done: Tensor<Int32>)
+    {
         print("\nEncode:")
         print("======")
         let encoded = transformer.encode(input: sentence)
-        let memory = encoded.lastLayerOutput
+        let memory = encoded.lastLayerOutput * memoryMultiplier
         print("  memory.count: \(memory.shape)")
 
         print("\nGenerate:")
         print("=========")
+
         // start with tensor for neutral motion frame
-        let zeroMotionFrame = LangMotionBatch.zeroMotionFrame(nbJoints: nbJoints).expandingShape(at: 0)
-        var ys: Tensor<Float> = zeroMotionFrame
+        let neutralMotionFrame = LangMotionBatch.neutralMotionFrame().expandingShape(at: 0)
+        var ys: Tensor<Float> = neutralMotionFrame
+        // or with supplied motion
+        if startMotion != nil {
+            ys = Tensor<Float>(concatenating: [neutralMotionFrame, startMotion!.expandingShape(at:0)], alongAxis: 1)
+        }
         print("ys.shape: \(ys.shape)")
         
-        let maxMotionLength2 = maxMotionLength-ys.shape[1] + 1        
+        var dones: [Tensor<Int32>] = []
+
+        let maxMotionLength2 = maxMotionLength-ys.shape[1]+1
+
         for _ in 0..<maxMotionLength2 {
+            print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
-            
-            let segmentIDs = Tensor<Int32>([[0, 1, 2, 3]]) // FIXME: code this
-            
+            let segmentIDs = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]]).expandingShape(at: 2)
             let motionPart = LangMotionBatch.MotionPart(motion: ys, decSelfAttentionMask: motionPartMask,
-                                                        motionFlag: motionPartFlag, segmentIDs: segmentIDs)
+                                                        motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: segmentIDs)
 
+            let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             // decode motion
-            let dedoderOutput = transformer.decode(sourceMask: sentence.selfAttentionMask, motionPart: motionPart, memory: memory)
-            let mixtureModelInput = Tensor<Float>(concatenating: dedoderOutput.allResults, alongAxis: 2)
-            let singlePreds = transformer.mixtureModel(mixtureModelInput[0...,-1].expandingShape(at: 0))
-
+            let decoded = transformer.decode(sourceMask: source.sourceAttentionMask, motionPart: motionPart, memory: memory)
+                        
+            // let mixtureModelInput = Tensor<Float>(concatenating: decoded.allResults, alongAxis: 2)
+            let mixtureModelInput = decoded.lastLayerOutput
+            let mixtureModelInput2 = mixtureModelInput[0...,-1].expandingShape(at: 0)
+            let singlePreds = transformer.mixtureModel(mixtureModelInput2)
+            
             // perform sampling
-            let (sampledMotion, _, _) = MotionDecoder.performNormalMixtureSampling(
-                preds: singlePreds, nb_joints: nbJoints, nb_mixtures: nbMixtures, maxMotionLength: maxMotionLength)
+            let (sampledMotion, _, done) = MotionDecoder.performNormalMixtureSampling(
+                preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: maxMotionLength)
             
             // concatenate motion
             ys = Tensor(concatenating: [ys, sampledMotion.expandingShape(at: 0)], alongAxis: 1)
+            
+            // get done signal out
+            dones.append(done)
         }
-        return ys.squeezingShape(at:0)[1...]
+        print()
+        let dones2 = Tensor<Int32>(concatenating: dones, alongAxis: 0)
+        return (motion: ys.squeezingShape(at:0)[1...], done: dones2)
     }
 
     public static func decode(context: Any, nb_joints: Int, language: Any, references: Any, args: Any, init: Any? = nil) {

@@ -140,7 +140,7 @@ public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransforme
     let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
     processedSentence.printSentence()
 
-    let decodedMotion = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, transformer: model, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures, maxMotionLength: maxMotionLength)
+    let (decodedMotion, decodedMotionFlag) = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, startMotion: nil, transformer: model, maxMotionLength: maxMotionLength)
     print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
     print("  descaledMotion.shape: \(descaledMotion.shape)")
@@ -152,7 +152,7 @@ public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransforme
     }
     // use joint groupping
     let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: nil, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
+    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
 
     if saveMotion {
         print("Saved image: \(imageURL!.path)")
