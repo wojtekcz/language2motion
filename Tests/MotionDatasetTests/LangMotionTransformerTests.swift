@@ -123,7 +123,8 @@ class LangMotionTransformerTests: XCTestCase {
                 print(3)
                 Context.local.learningPhase = .inference
                 let mixtureModelInput = decoded.lastLayerOutput
-                let predsO = model.mixtureModel.callAsFunction_old(mixtureModelInput)
+//                let predsO = model.mixtureModel.callAsFunction_old(mixtureModelInput)
+                let predsO = model.mixtureModel(mixtureModelInput)
                 let predsN = model.mixtureModel(mixtureModelInput)
                 LazyTensorBarrier()
 
