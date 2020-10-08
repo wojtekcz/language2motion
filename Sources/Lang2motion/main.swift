@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_72"
+let runName = "run_73"
 let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
@@ -28,7 +28,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_full
+let datasetSize: DatasetSize = .multi_mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
