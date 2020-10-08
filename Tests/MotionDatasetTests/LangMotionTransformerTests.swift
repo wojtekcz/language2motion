@@ -86,25 +86,49 @@ class LangMotionTransformerTests: XCTestCase {
     }
     
     func testForwardPass() throws {
+        print("\n===> setup test")
         let _ = _ExecutionContext.global
 
         /// Select eager or X10 backend
-        // let device = Device.defaultXLA
-        let device = Device.defaultTFEager
+        let device = Device.defaultXLA
+        // let device = Device.defaultTFEager
         print("backend: \(device)")
 
         textProcessor = getTextProcessor()
-        dataset = try! loadDataset(datasetSize: .mini, device: device)
-        let model = getModel(vocabSize: textProcessor!.vocabulary.count)
+        dataset = try! loadDataset(datasetSize: .micro, device: device)
+        var model = getModel(vocabSize: textProcessor!.vocabulary.count)
         
         let motionSample = dataset!.motionSamples[0]
         let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
         let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
 
-        let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
+        var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 
-        let _ = model(source)
-        LazyTensorBarrier()
+        source = LangMotionBatch.Source(copying: source, to: device)
+
+        print("\n===> start test")
+        model.move(to: device)
+        // let _ = model(source)
+        let input = source
+        time {
+            print(1)
+            let encoded = model.encode(input: input.sentence)
+            LazyTensorBarrier()
+
+            print(2)
+            let decoded = model.decode(sourceMask: input.sourceAttentionMask, motionPart: input.motionPart, memory: encoded.lastLayerOutput)
+            LazyTensorBarrier()
+
+            time {
+                print(3)
+                let mixtureModelInput = decoded.lastLayerOutput
+                let preds = model.mixtureModel(mixtureModelInput)
+                LazyTensorBarrier()
+            }
+            print(4)
+            // let rslt = LangMotionTransformerOutput(preds: preds, encoded: encoded, decoded: decoded)
+        }
+        print("===> end test\n")
     }
 
     func testX10Performance() throws {
