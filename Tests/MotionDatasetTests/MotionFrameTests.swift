@@ -9,11 +9,7 @@ final class MotionDatasetTests: XCTestCase {
         return URL(fileURLWithPath: "/notebooks/language2motion.gt/data/motion_dataset.grouppedJoints.normalized.\(maxSamples).plist")
     }
 
-    public override var description: String {
-        return "MotionDataset(motionSamples: \(maxSamples))"
-    }
-
-    func serializeMotionSample() throws {
+    func testSerializeMotionSample() throws {
 //        let mmmURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/00186_mmm.xml")
 //        let annotationsURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/00186_annotations.json")
 //        let m186 = MotionSample(sampleID: 186, mmmURL: mmmURL, annotationsURL: annotationsURL)
@@ -27,12 +23,13 @@ final class MotionDatasetTests: XCTestCase {
 //        print(String(data: msJSON, encoding: .utf8)!)
 //
 //        // decode from JSON
-//        let decoder = JSONDecoder()
+        let decoder = JSONDecoder()
+        print(decoder)
 //        let ms2 = try decoder.decode(MotionSample.self, from: msJSON)
 //        print(ms2)
     }
 
-    func serializeMotionDataJSON() throws {
+    func testSerializeMotionDataJSON() throws {
 //        let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
 //
 //        var date = Date()
@@ -61,7 +58,7 @@ final class MotionDatasetTests: XCTestCase {
 //        print(abs(date.timeIntervalSinceNow))
     }
 
-    func serializeMotionDataBinary() throws {
+    func testSerializeMotionDataBinary() throws {
 //        let datasetFolderURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/2017-06-22/")
 //
 //        var date = Date()
@@ -74,7 +71,7 @@ final class MotionDatasetTests: XCTestCase {
 //        print("Done in \(abs(date.timeIntervalSinceNow)) sec.")
     }
 
-    func readBinaryMotionData() throws {
+    func testReadBinaryMotionData() throws {
 //        print("Reading..., decoding...")
 //        let date = Date() 
 //        let motionData = MotionData(from: serializedDatasetURL)
@@ -82,10 +79,10 @@ final class MotionDatasetTests: XCTestCase {
 //        print(motionData.description)
     }
 
-    static var allTests = [
-        ("serializeMotionSample", serializeMotionSample),
-        ("serializeMotionDataJSON", serializeMotionDataJSON),
-        ("serializeMotionDataBinary", serializeMotionDataBinary),
-        ("readBinaryMotionData", readBinaryMotionData),
-    ]
+   static var allTests = [
+       ("testSerializeMotionSample", testSerializeMotionSample),
+       ("testSerializeMotionDataJSON", testSerializeMotionDataJSON),
+       ("testSerializeMotionDataBinary", testSerializeMotionDataBinary),
+       ("testReadBinaryMotionData", testReadBinaryMotionData)
+   ]
 }

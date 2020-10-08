@@ -6,11 +6,12 @@ extension MotionDatasetTests {
     //   `swift test --generate-linuxmain`
     // to regenerate.
     static let __allTests__MotionDatasetTests = [
-        // ("serializeMotionFrame", serializeMotionFrame),
-        // ("serializeMotionSample", serializeMotionSample),
-        // ("serializeMotionDataJSON", serializeMotionDataJSON),
-        ("serializeMotionDataBinary", serializeMotionDataBinary),
-        ("readBinaryMotionData", readBinaryMotionData),
+       ("testSerializeMotionSample", testSerializeMotionSample),
+       ("testSerializeMotionDataJSON", testSerializeMotionDataJSON),
+       ("testSerializeMotionDataBinary", testSerializeMotionDataBinary),
+       ("testReadBinaryMotionData", testReadBinaryMotionData),
+    ]
+}
     ]
 }
 
