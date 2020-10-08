@@ -121,23 +121,28 @@ class LangMotionTransformerTests: XCTestCase {
 
             time {
                 print(3)
+                Context.local.learningPhase = .inference
                 let mixtureModelInput = decoded.lastLayerOutput
                 let predsO = model.mixtureModel.callAsFunction(mixtureModelInput)
                 let predsN = model.mixtureModel.callAsFunction2(mixtureModelInput)
                 LazyTensorBarrier()
 
+                func roundT(_ num: Tensor<Float>, prec: Int = 4) -> Tensor<Float> {
+                    return round(num*1e4)/1e4
+                }
+
                 // TODO: compare mixture model old and new outputs
-                print("mixtureMeans ", predsO.mixtureMeans == predsN.mixtureMeans)
-                print("mixtureVars:", predsO.mixtureVars == predsN.mixtureVars)
-                print("mixtureWeights:", predsO.mixtureWeights == predsN.mixtureWeights)
+                print("mixtureMeans ", (predsO.mixtureMeans - predsN.mixtureMeans).sum())
+                print("mixtureVars:", (predsO.mixtureVars - predsN.mixtureVars).sum())
+                print("mixtureWeights:", (predsO.mixtureWeights - predsN.mixtureWeights).sum())
                 print("stops:", predsO.stops == predsN.stops)
 
                 predsO.printPreds()
                 print("predsO")
-                print(predsO.stops[0, 0...3])
+                print(roundT(predsO.mixtureMeans[0, 0...1]))
                 print("predsN")
                 // predsN.printPreds()
-                print(predsN.stops[0, 0...3])
+                print(roundT(predsN.mixtureMeans[0, 0...1]))
             }
             print(4)
             // let rslt = LangMotionTransformerOutput(preds: preds, encoded: encoded, decoded: decoded)
