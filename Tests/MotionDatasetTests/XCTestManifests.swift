@@ -15,7 +15,8 @@ extension MotionDatasetTests {
 
 extension LangMotionTransformerTests {
     static let __allTests__LangMotionTransformerTests = [
-        ("testForwardPass", testForwardPass),
+        ("testTimeDistributedMixtureModel", testTimeDistributedMixtureModel),        
+        // ("testForwardPass", testForwardPass),
         // ("testX10Performance", testX10Performance),
     ]
 }

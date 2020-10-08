@@ -55,22 +55,22 @@ public struct MotionGaussianMixtureModel: Module {
     }
 
     @differentiable
-    func forwardStep(_ x: Tensor<Float>) -> MixtureModelPreds {
+    func forwardStep_old(_ x: Tensor<Float>) -> MixtureModelPreds {
         // bs x input_size
         // Processing gaussian mixture params:
         let mixtureMeans = linearMixtureMeans(x)
         let mixtureVars = softplus(linearMixtureVars(x))
         var mixtureWeights = softmax(linearMixtureWeights(x), alongAxis: 1)
 
-        // if mixtureWeights.isNaN.any() {
-        //     // print("Fixing NaNs")
-        //     var divider = 1.0
-        //     let double_x = Tensor<Double>(linearMixtureWeights(x))
-        //     while mixtureWeights.isNaN.any() {
-        //         mixtureWeights = Tensor<Float>(softmax(double_x/divider, alongAxis: 1))
-        //         divider *= 10.0
-        //     }
-        // }
+        if mixtureWeights.isNaN.any() {
+            // print("Fixing NaNs")
+            var divider = 1.0
+            let double_x = Tensor<Double>(linearMixtureWeights(x))
+            while mixtureWeights.isNaN.any() {
+                mixtureWeights = Tensor<Float>(softmax(double_x/divider, alongAxis: 1))
+                divider *= 10.0
+            }
+        }
 
         // stop
         let stop = sigmoid(linearStop(x))
@@ -80,14 +80,14 @@ public struct MotionGaussianMixtureModel: Module {
     }
 
     @differentiable
-    public func callAsFunction(_ input: Tensor<Float>) -> MixtureModelPreds {
+    public func callAsFunction_old(_ input: Tensor<Float>) -> MixtureModelPreds {
         let targetLength = input.shape[1]
-        // TODO: use time distributed layers
+        // no time distributed layers
         // Run through mixture_model one time step at a time
         var all_outputs: [MixtureModelPreds] = []
         for t in 0..<targetLength {
             let decoder_input: Tensor<Float> = input[0..., t]
-            let decoder_output = self.forwardStep(decoder_input)
+            let decoder_output = self.forwardStep_old(decoder_input)
             all_outputs.append(decoder_output)
         }
         
@@ -95,11 +95,45 @@ public struct MotionGaussianMixtureModel: Module {
         return all_outputs_struct
     }
 
-    public func callAsFunction2(_ input: Tensor<Float>) -> MixtureModelPreds {
+    @differentiable
+    func fixMixtureWeightsStep(_ x: Tensor<Float>) -> Tensor<Float> {
+        // bs x input_size
+        var mixtureWeights = softmax(linearMixtureWeights(x), alongAxis: 1)
+
+        if mixtureWeights.isNaN.any() {
+            // print("Fixing NaNs")
+            var divider = 1.0
+            let double_x = Tensor<Double>(linearMixtureWeights(x))
+            while mixtureWeights.isNaN.any() {
+                mixtureWeights = Tensor<Float>(softmax(double_x/divider, alongAxis: 1))
+                divider *= 10.0
+            }
+        }
+        return mixtureWeights
+    }
+
+    @differentiable
+    func fixMixtureWeights(_ input: Tensor<Float>) -> Tensor<Float> {
+        let targetLength = input.shape[1]
+        // Run through mixture_model one time step at a time
+        var all_outputs: [Tensor<Float>] = []
+        for t in 0..<targetLength {
+            let decoder_input: Tensor<Float> = input[0..., t]
+            let decoder_output = self.fixMixtureWeightsStep(decoder_input)
+            all_outputs.append(decoder_output)
+        }
+        let all_outputs_struct = Tensor(stacking: all_outputs, alongAxis: 1)
+        return all_outputs_struct
+    }
+
+    @differentiable
+    public func callAsFunction(_ input: Tensor<Float>) -> MixtureModelPreds {
         let mixtureMeans = timeDistributed(input, linearMixtureMeans.weight)
         let mixtureVars = softplus(timeDistributed(input, linearMixtureVars.weight))
-        let mixtureWeights =  softmax(timeDistributed(input, linearMixtureWeights.weight), alongAxis: 2)
-        // TODO: fix mixtureWeights NaNs
+        var mixtureWeights =  softmax(timeDistributed(input, linearMixtureWeights.weight), alongAxis: 2)
+        if mixtureWeights.isNaN.any() {
+            mixtureWeights = fixMixtureWeights(input)
+        }
         let stops = sigmoid(timeDistributed(input, linearStop.weight))
         return MixtureModelPreds(mixtureMeans: mixtureMeans, mixtureVars: mixtureVars, mixtureWeights: mixtureWeights, stops: stops)
     }
