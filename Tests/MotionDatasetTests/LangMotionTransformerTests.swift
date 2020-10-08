@@ -90,8 +90,8 @@ class LangMotionTransformerTests: XCTestCase {
         let _ = _ExecutionContext.global
 
         /// Select eager or X10 backend
-        let device = Device.defaultXLA
-        // let device = Device.defaultTFEager
+        // let device = Device.defaultXLA
+        let device = Device.defaultTFEager
         print("backend: \(device)")
 
         textProcessor = getTextProcessor()
@@ -122,8 +122,22 @@ class LangMotionTransformerTests: XCTestCase {
             time {
                 print(3)
                 let mixtureModelInput = decoded.lastLayerOutput
-                let preds = model.mixtureModel(mixtureModelInput)
+                let predsO = model.mixtureModel.callAsFunction(mixtureModelInput)
+                let predsN = model.mixtureModel.callAsFunction2(mixtureModelInput)
                 LazyTensorBarrier()
+
+                // TODO: compare mixture model old and new outputs
+                print("mixtureMeans ", predsO.mixtureMeans == predsN.mixtureMeans)
+                print("mixtureVars:", predsO.mixtureVars == predsN.mixtureVars)
+                print("mixtureWeights:", predsO.mixtureWeights == predsN.mixtureWeights)
+                print("stops:", predsO.stops == predsN.stops)
+
+                predsO.printPreds()
+                print("predsO")
+                print(predsO.stops[0, 0...3])
+                print("predsN")
+                // predsN.printPreds()
+                print(predsN.stops[0, 0...3])
             }
             print(4)
             // let rslt = LangMotionTransformerOutput(preds: preds, encoded: encoded, decoded: decoded)
