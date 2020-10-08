@@ -118,15 +118,11 @@ extension MixtureModelPreds {
 
 @differentiable(wrt: y_pred)
 public func normalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMotionBatch.Target, args: LossArgs) -> Tensor<Float> {
+    let losses = _normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
     // masking
-    var y_pred = y_pred.squeezed()
-    var y_true = y_true.squeezed()
-    let ids = Tensor<Int32>(rangeFrom: 0, to: Int32(y_true.stops.shape[1]), stride: 1, on: args.device)
-    let indices = ids.gathering(where: y_true.segmentIDs .!= Tensor(0, on: args.device))
-    y_pred = y_pred.gathering(atIndices: indices, alongAxis: 1)
-    y_true = y_true.gathering(atIndices: indices, alongAxis: 1)
-    
-    let loss = _normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)    
-    let mean_loss = loss.mean()
-    return mean_loss
+    let segmentIDs = Tensor<Float>(y_true.segmentIDs)
+    let paddingTensor = Tensor(Float(LangMotionBatch.MotionSegment.padding.rawValue), on: args.device)
+    let onesTensor = Tensor(repeating: Float(1.0), shape: segmentIDs.shape, on: args.device)
+    let lossesMask = segmentIDs.replacing(with: onesTensor, where: segmentIDs .!= paddingTensor)
+    return (losses * lossesMask).sum()/lossesMask.sum()
 }
