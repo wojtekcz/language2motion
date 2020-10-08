@@ -12,12 +12,18 @@ extension MotionDatasetTests {
        ("testReadBinaryMotionData", testReadBinaryMotionData),
     ]
 }
+
+extension LangMotionTransformerTests {
+    static let __allTests__LangMotionTransformerTests = [
+        ("testForwardPass", testForwardPass),
+        // ("testX10Performance", testX10Performance),
     ]
 }
 
 public func __allTests() -> [XCTestCaseEntry] {
     return [
-        testCase(MotionDatasetTests.__allTests__MotionDatasetTests),
+        // testCase(MotionDatasetTests.__allTests__MotionDatasetTests),
+        testCase(LangMotionTransformerTests.__allTests__LangMotionTransformerTests)
     ]
 }
 #endif

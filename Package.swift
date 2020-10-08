@@ -33,7 +33,7 @@ let package = Package(
         .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.10.2")
     ],
     targets: [
-        .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets"]),
+        .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets", "ModelSupport", "LangMotionModels", "SummaryWriter"]),
         .target(
             name: "Checkpoints", dependencies: ["SwiftProtobuf", "ModelSupport"],
             path: "Sources/Checkpoints"),
