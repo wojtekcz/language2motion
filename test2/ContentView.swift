@@ -17,26 +17,39 @@ struct ContentView: View {
         
     var body: some View {
         VStack {
-            Text("Hello, World!")
+            Text("Motion generator")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Button(action: loadDataset) {
-                Text("Load dataset")
-            }
             Button(action: loadModel) {
-                Text("Load model")
+                Text("Load checkpoint")
             }
-            Button(action: generateMotion) {
-                Text("Generate motion")
+            HStack {
+                Text("maxMotionLength")
+                TextField("maxMotionLength", text: $nSamples)
             }
             HStack {
                 Text("nSamples")
                 TextField("samples", text: $nSamples)
             }
+            HStack {
+                Text("encoderSelfAttentionTemp")
+                TextField("encoderSelfAttentionTemp", text: $nSamples)
+            }
+            HStack {
+                Text("decoderSourceAttentionTemp")
+                TextField("decoderSourceAttentionTemp", text: $nSamples)
+            }
+            HStack {
+                Text("decoderSelfAttentionTemp")
+                TextField("decoderSelfAttentionTemp", text: $nSamples)
+            }
+            HStack {
+                Text("sentence")
+                TextField("sentence", text: $nSamples)
+            }
+            Button(action: generateMotion) {
+                Text("Generate motion")
+            }
         }
-    }
-    
-    func loadDataset() {
-        print("not needed anymore")
     }
 
     func loadModel() {
