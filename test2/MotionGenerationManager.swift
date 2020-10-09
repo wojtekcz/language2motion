@@ -26,6 +26,7 @@ public class MotionGenerationManager {
 
     var epoch = 1
     var motionsURL: URL?
+    var genNum = 1
 
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
 
@@ -106,7 +107,6 @@ public class MotionGenerationManager {
     func generateMotion(nSamples: String) {
         print("nSamples: \(nSamples)")
         let maxMotionLength = 25
-        var genNum = 1
 
         var s: String = ""
         var lf: SampleMotionClip?
