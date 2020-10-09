@@ -7,7 +7,7 @@
 
 import Cocoa
 import SwiftUI
-import TensorFlow
+//import TensorFlow
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -17,7 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view that provides the window contents.
-        let contentView = ContentView()
+        let contentView = ContentView(nSamples: "5")
 
         // Create the window and set the content view.
         window = NSWindow(
@@ -30,8 +30,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(rootView: contentView)
         window.makeKeyAndOrderFront(nil)
         
-        let t1 = Tensor<Float>([1.0, 2.0, 3.0])
-        print(t1 .* t1)
+//        let t1 = Tensor<Float>([1.0, 2.0, 3.0])
+//        print(t1 .* t1)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
