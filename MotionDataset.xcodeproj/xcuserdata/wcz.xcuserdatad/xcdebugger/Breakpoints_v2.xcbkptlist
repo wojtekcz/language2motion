@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "6F5D86E3-EE1F-436E-A0EC-811848BBB0FA"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "9FD7AC52-A0FD-41CA-AFA1-A2A3B56E968C"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/Models/Text/Attention.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "273"
+            endingLineNumber = "273"
+            landmarkName = "callAsFunction(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "9FD7AC52-A0FD-41CA-AFA1-A2A3B56E968C - 95c1647efcccb6e5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "TextModels.MultiHeadAttention.callAsFunction(TextModels.AttentionInput&lt;Swift.Float&gt;) -&gt; TextModels.AttentionOutput&lt;Swift.Float&gt;"
+                  moduleName = "TextModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/Text/Attention.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "271"
+                  endingLineNumber = "271"
+                  offsetFromSymbolStart = "9974">
+               </Location>
+               <Location
+                  uuid = "9FD7AC52-A0FD-41CA-AFA1-A2A3B56E968C - 523061fff409a55e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AD__$s10TextModels18MultiHeadAttentionV14callAsFunctionyAA0E6OutputVySfGAA0E5InputVySfGF__vjp_src_0_wrt_1"
+                  moduleName = "TextModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/Text/Attention.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "271"
+                  endingLineNumber = "271"
+                  offsetFromSymbolStart = "14284">
+               </Location>
+               <Location
+                  uuid = "9FD7AC52-A0FD-41CA-AFA1-A2A3B56E968C - a1bdb44d51a77fac"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AD__$s10TextModels18MultiHeadAttentionV14callAsFunctionyAA0E6OutputVySfGAA0E5InputVySfGF__pullback_src_0_wrt_1"
+                  moduleName = "TextModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/Text/Attention.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "271"
+                  endingLineNumber = "271"
+                  offsetFromSymbolStart = "43136">
+               </Location>
+               <Location
+                  uuid = "9FD7AC52-A0FD-41CA-AFA1-A2A3B56E968C - 8987940ababdd408"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AD__$s10TextModels18MultiHeadAttentionV14callAsFunctionyAA0E6OutputVySfGAA0E5InputVySfGF__vjp_src_0_wrt_0_1"
+                  moduleName = "TextModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/Text/Attention.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "271"
+                  endingLineNumber = "271"
+                  offsetFromSymbolStart = "15797">
+               </Location>
+               <Location
+                  uuid = "9FD7AC52-A0FD-41CA-AFA1-A2A3B56E968C - 6e9215131b6c82e7"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AD__$s10TextModels18MultiHeadAttentionV14callAsFunctionyAA0E6OutputVySfGAA0E5InputVySfGF__pullback_src_0_wrt_0_1"
+                  moduleName = "TextModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/Text/Attention.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "271"
+                  endingLineNumber = "271"
+                  offsetFromSymbolStart = "51175">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
