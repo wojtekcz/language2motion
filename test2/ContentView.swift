@@ -8,12 +8,10 @@
 import SwiftUI
 import TensorFlow
 
-
-var motionGenerationManager: MotionGenerationManager?
-
-
 struct ContentView: View {
     @State var nSamples: String
+    
+    var motionGenerationManager: MotionGenerationManager
     
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
         
@@ -38,23 +36,23 @@ struct ContentView: View {
     }
     
     func loadDataset() {
-        motionGenerationManager = MotionGenerationManager()
-        motionGenerationManager!.loadDataset()
+        print("not needed anymore")
     }
 
     func loadModel() {
-        motionGenerationManager!.loadModel()
+        motionGenerationManager.loadModel()
     }
     
     func generateMotion() {
         print("nSamples: \(nSamples)")
-        motionGenerationManager!.generateMotion(nSamples: nSamples)
+        motionGenerationManager.generateMotion(nSamples: nSamples)
     }
 }
 
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(nSamples: "10")
+        let motionGenerationManager = MotionGenerationManager()
+        ContentView(nSamples: "10", motionGenerationManager: motionGenerationManager)
     }
 }

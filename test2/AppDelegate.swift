@@ -7,7 +7,6 @@
 
 import Cocoa
 import SwiftUI
-//import TensorFlow
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -17,7 +16,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view that provides the window contents.
-        let contentView = ContentView(nSamples: "5")
+        let motionGenerationManager = MotionGenerationManager()
+        motionGenerationManager.loadDataset()
+        let contentView = ContentView(nSamples: "5", motionGenerationManager: motionGenerationManager)
 
         // Create the window and set the content view.
         window = NSWindow(

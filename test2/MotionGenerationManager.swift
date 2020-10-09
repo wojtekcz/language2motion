@@ -117,7 +117,7 @@ public class MotionGenerationManager {
         greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: s, leadingFrames: lf,
             prefix: "epoch_\(epoch)_motion_\(genNum)",
             saveMotion: true, memoryMultiplier: 1.0, motionsURL: motionsURL!,
-            maxMotionLength: maxMotionLength, showAttentionProbs: false, bestLogProbs: true
+            maxMotionLength: maxMotionLength, showAttentionProbs: false, bestLogProbs: true, nSamples: 10
         )
         genNum += 1
         

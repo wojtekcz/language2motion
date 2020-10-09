@@ -23,14 +23,15 @@ public class MotionDecoder2 {
         maxMotionLength: Int,
         memoryMultiplier: Float = 1.0,
         showAttentionProbs: Bool = false,
-        bestLogProbs: Bool = true
+        bestLogProbs: Bool = true,
+        nSamples: Int = 100
     ) -> (motion: Tensor<Float>, done: Tensor<Int32>) {
         print("\nEncode:")
         print("======")
         let encoded = transformer.encode(input: sentence)
         
         if showAttentionProbs {
-            encoded.allLayerOutputs.map {tensorShow2($0.attentionOutput!.attentionProbs[0, 0])}
+            let _ = encoded.allLayerOutputs.map {tensorShow2($0.attentionOutput!.attentionProbs[0, 0])}
         }
         
         let memory = encoded.lastLayerOutput * memoryMultiplier
@@ -53,7 +54,7 @@ public class MotionDecoder2 {
 
         let maxMotionLength2 = maxMotionLength-ys.shape[1]+1
 
-        for step in 0..<maxMotionLength2 {
+        for _ in 0..<maxMotionLength2 {
             // print("step: \(step)")
             print(".", terminator:"")
             // prepare input
@@ -70,8 +71,8 @@ public class MotionDecoder2 {
             let decoded = transformer.decode(sourceMask: source.sourceAttentionMask, motionPart: motionPart, memory: memory)
 
             if showAttentionProbs {
-                decoded.allLayerOutputs.map {tensorShow2($0.sourceAttentionOutput!.attentionProbs[0, 0])}
-                decoded.allLayerOutputs.map {tensorShow2($0.targetAttentionOutput!.attentionProbs[0, 0])}
+                let _ = decoded.allLayerOutputs.map {tensorShow2($0.sourceAttentionOutput!.attentionProbs[0, 0])}
+                let _ = decoded.allLayerOutputs.map {tensorShow2($0.targetAttentionOutput!.attentionProbs[0, 0])}
             }
 
             // let mixtureModelInput = Tensor<Float>(concatenating: decoded.allResults, alongAxis: 2)
@@ -84,7 +85,7 @@ public class MotionDecoder2 {
 //                 preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: maxMotionLength)
             // ==================== perform sampling 100x and pick highest log_probs value
             var samples: [DecodedSample] = []
-            for x in 0..<100 {
+            for _ in 0..<nSamples {
                 let aSample = MotionDecoder.performNormalMixtureSampling(
                     preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: maxMotionLength)
                 samples.append(aSample)
@@ -133,8 +134,7 @@ public func getClippedMotionFrames(dataset: Lang2Motion, clipInfo: SampleMotionC
     }
 }
 
-public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionTransformer, sentence: String, leadingFrames: SampleMotionClip?, prefix: String = "prefix",
-                                saveMotion: Bool = true, memoryMultiplier: Float = 0.0, motionsURL: URL?, maxMotionLength: Int, showAttentionProbs: Bool = true, bestLogProbs: Bool = true) {
+public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionTransformer, sentence: String, leadingFrames: SampleMotionClip?, prefix: String = "prefix", saveMotion: Bool = true, memoryMultiplier: Float = 0.0, motionsURL: URL?, maxMotionLength: Int, showAttentionProbs: Bool = true, bestLogProbs: Bool = true, nSamples: Int = 100) {
     let startMotion: Tensor<Float>? = getClippedMotionFrames(dataset: dataset, clipInfo: leadingFrames)
     var leadingFramesStr = "0"
     if startMotion != nil {
@@ -153,7 +153,8 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         transformer: model,
         maxMotionLength: maxMotionLength,
         memoryMultiplier: memoryMultiplier,
-        bestLogProbs: bestLogProbs
+        bestLogProbs: bestLogProbs,
+        nSamples: nSamples
     )
     print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
