@@ -26,8 +26,8 @@ public class MotionDecoder2 {
         bestLogProbs: Bool = true,
         nSamples: Int = 100
     ) -> (motion: Tensor<Float>, done: Tensor<Int32>) {
-        print("\nEncode:")
-        print("======")
+//        print("\nEncode:")
+//        print("======")
         let encoded = transformer.encode(input: sentence)
         
         if showAttentionProbs {
@@ -35,10 +35,10 @@ public class MotionDecoder2 {
         }
         
         let memory = encoded.lastLayerOutput * memoryMultiplier
-        print("  memory.count: \(memory.shape)")
+//        print("  memory.count: \(memory.shape)")
 
-        print("\nGenerate:")
-        print("=========")
+//        print("\nGenerate:")
+//        print("=========")
 
         // start with tensor for neutral motion frame
         let neutralMotionFrame = LangMotionBatch.neutralMotionFrame().expandingShape(at: 0)
@@ -47,7 +47,7 @@ public class MotionDecoder2 {
         if startMotion != nil {
             ys = Tensor<Float>(concatenating: [neutralMotionFrame, startMotion!.expandingShape(at:0)], alongAxis: 1)
         }
-        print("ys.shape: \(ys.shape)")
+//        print("ys.shape: \(ys.shape)")
 
         var log_probs2: [Float] = []
         var dones: [Tensor<Int32>] = []
@@ -56,7 +56,7 @@ public class MotionDecoder2 {
 
         for _ in 0..<maxMotionLength2 {
             // print("step: \(step)")
-            print(".", terminator:"")
+//            print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
@@ -111,8 +111,8 @@ public class MotionDecoder2 {
         }
         print()
         let dones2 = Tensor<Int32>(concatenating: dones, alongAxis: 0)
-        print("log_probs2: \(log_probs2.reduce(0.0, +))")
-        print(log_probs2)
+//        print("log_probs2: \(log_probs2.reduce(0.0, +))")
+//        print(log_probs2)
         return (motion: ys.squeezingShape(at:0)[1...], done: dones2)
     }
 }
@@ -134,21 +134,22 @@ public func getClippedMotionFrames(dataset: Lang2Motion, clipInfo: SampleMotionC
     }
 }
 
-public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionTransformer, sentence: String, leadingFrames: SampleMotionClip?, prefix: String = "prefix", saveMotion: Bool = true, memoryMultiplier: Float = 0.0, motionsURL: URL?, maxMotionLength: Int, showAttentionProbs: Bool = true, bestLogProbs: Bool = true, nSamples: Int = 100) {
+public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionTransformer, sentence: String, leadingFrames: SampleMotionClip?, prefix: String = "prefix", saveMotion: Bool = true, memoryMultiplier: Float = 0.0, motionsURL: URL?, maxMotionLength: Int, showAttentionProbs: Bool = true, bestLogProbs: Bool = true, nSamples: Int = 100) -> Tensor<Float> {
+    // returns motion: descaled groupped joints motion + motion flag tensor
     let startMotion: Tensor<Float>? = getClippedMotionFrames(dataset: dataset, clipInfo: leadingFrames)
-//    var leadingFramesStr = "0"
-//    if startMotion != nil {
-//        leadingFramesStr = "\(startMotion!.shape[0])"
-//    }
+    var leadingFramesStr = "0"
+    if startMotion != nil {
+        leadingFramesStr = "\(startMotion!.shape[0])"
+    }
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
-    print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
+//    print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
     let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
-    processedSentence.printSentence()
+//    processedSentence.printSentence()
 
     // decodedMotionFlag
-    let (decodedMotion, _) = MotionDecoder2.greedyDecodeMotion2(
+    let (decodedMotion, decodedMotionFlag) = MotionDecoder2.greedyDecodeMotion2(
         sentence: processedSentence,
         startMotion: startMotion,
         transformer: model,
@@ -157,19 +158,19 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         bestLogProbs: bestLogProbs,
         nSamples: nSamples
     )
-    print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
+//    print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
-    print("  descaledMotion.shape: \(descaledMotion.shape)")
-    print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
+//    print("  descaledMotion.shape: \(descaledMotion.shape)")
+//    print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
 
-//    var imageURL: URL? = nil
-//
-//    if !saveMotion { imageURL = nil } else {
-//        imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
-//    }
+    var imageURL: URL? = nil
+
+    if !saveMotion { imageURL = nil } else {
+        imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
+    }
     // use joint groupping
-//    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-//    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence), LF: \(leadingFramesStr)", cmapRange: 1.0)
+    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
+    let joined = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence), LF: \(leadingFramesStr)", cmapRange: 1.0)
 
     if saveMotion {
 //        print("Saved image: \(imageURL!.path)")
@@ -179,4 +180,5 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
         print("Saved motion: \(mmmURL.path)")
     }
+    return joined
 }

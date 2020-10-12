@@ -105,17 +105,18 @@ public class MotionGenerationManager {
         
     }
     
-    func generateMotion(genOpts: GenOpts) {
-        print("generateMotion()")
+    func generateMotion(genOpts: GenOpts) -> Tensor<Float> {
+//        print("generateMotion()")
         let lf: SampleMotionClip? = nil
 
-        greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: genOpts.sentence, leadingFrames: lf,
+        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: genOpts.sentence, leadingFrames: lf,
             prefix: "epoch_\(epoch)_motion_\(genNum)",
             saveMotion: genOpts.saveMMM, memoryMultiplier: 1.0, motionsURL: motionsURL!,
             maxMotionLength: genOpts.maxMotionLength, showAttentionProbs: false, bestLogProbs: genOpts.bestLogProbs, nSamples: genOpts.nSamples
         )
-        genNum += 1
         
+        genNum += 1
+        return joined
     }
 }
 

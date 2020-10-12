@@ -18,7 +18,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create the SwiftUI view that provides the window contents.
         let motionGenerationManager = MotionGenerationManager()
         motionGenerationManager.loadDataset()
-        let contentView = ContentView(nSamples: "5", motionGenerationManager: motionGenerationManager)
+        motionGenerationManager.loadModel()
+        let contentView = ContentView(motionGenerationManager: motionGenerationManager)
 
         // Create the window and set the content view.
         window = NSWindow(
