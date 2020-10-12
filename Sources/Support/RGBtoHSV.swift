@@ -1,6 +1,7 @@
 import Foundation
 
 // https://www.cs.rit.edu/~ncs/color/t_convert.html
+// https://gist.github.com/FredrikSjoberg/cdea97af68c6bdb0a89e3aba57a966ce
 public struct RGB {
     // Percent
     let r: Float // [0,1]
