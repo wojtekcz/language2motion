@@ -8,9 +8,32 @@
 import SwiftUI
 import TensorFlow
 
-struct ContentView: View {
-    @State var nSamples: String
+struct GenOpts {
+    let nSamples: Int
+    let bestLogProbs: Bool
+    let fixRotation: Bool
+    let saveMMM: Bool
     
+    let encoderSelfAttentionTemp: Float
+    let decoderSourceAttentionTemp: Float
+    let decoderSelfAttentionTemp: Float
+    
+    let maxMotionLength: Int
+
+    let sentence: String
+}
+
+struct ContentView: View {
+    @State var nSamples = "10"
+    @State private var bestLogProbs = true
+    @State private var fixRotation = true
+    @State private var saveMmm = true
+    @State var encoderSelfAttentionTemp = "1.0"
+    @State var decoderSourceAttentionTemp = "1.0"
+    @State var decoderSelfAttentionTemp = "1.0"
+    @State var sentence = "A person is walking forwards."
+    @State var maxMotionLength = "100"
+
     var motionGenerationManager: MotionGenerationManager
     
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
@@ -24,30 +47,41 @@ struct ContentView: View {
             }
             HStack {
                 Text("maxMotionLength")
-                TextField("maxMotionLength", text: $nSamples)
+                TextField("maxMotionLength", text: $maxMotionLength)
             }
             HStack {
                 Text("nSamples")
-                TextField("samples", text: $nSamples)
+                TextField("nSamples", text: $nSamples)
             }
             HStack {
                 Text("encoderSelfAttentionTemp")
-                TextField("encoderSelfAttentionTemp", text: $nSamples)
+                TextField("encoderSelfAttentionTemp", text: $encoderSelfAttentionTemp)
             }
             HStack {
                 Text("decoderSourceAttentionTemp")
-                TextField("decoderSourceAttentionTemp", text: $nSamples)
+                TextField("decoderSourceAttentionTemp", text: $decoderSourceAttentionTemp)
             }
             HStack {
                 Text("decoderSelfAttentionTemp")
-                TextField("decoderSelfAttentionTemp", text: $nSamples)
+                TextField("decoderSelfAttentionTemp", text: $decoderSelfAttentionTemp)
             }
             HStack {
                 Text("sentence")
-                TextField("sentence", text: $nSamples)
+                TextField("sentence", text: $sentence)
             }
             Button(action: generateMotion) {
                 Text("Generate motion")
+            }
+            VStack {
+                Toggle(isOn: $bestLogProbs) {
+                    Text("bestLogProbs")
+                }
+                Toggle(isOn: $fixRotation) {
+                    Text("fix rotation")
+                }
+                Toggle(isOn: $saveMmm) {
+                    Text("save mmm")
+                }
             }
         }
     }
@@ -57,8 +91,11 @@ struct ContentView: View {
     }
     
     func generateMotion() {
-        print("nSamples: \(nSamples)")
-        motionGenerationManager.generateMotion(nSamples: nSamples)
+        print("nSamples: \(Int(nSamples) ?? 99)")
+        
+        let opts = GenOpts(nSamples: Int(nSamples) ?? 10, bestLogProbs: bestLogProbs, fixRotation: fixRotation, saveMMM: saveMmm, encoderSelfAttentionTemp: Float(encoderSelfAttentionTemp) ?? 1.0, decoderSourceAttentionTemp: Float(decoderSourceAttentionTemp) ?? 1.0, decoderSelfAttentionTemp: Float(decoderSelfAttentionTemp) ?? 1.0, maxMotionLength: Int(maxMotionLength) ?? 10, sentence: sentence)
+        
+        motionGenerationManager.generateMotion(genOpts: opts)
     }
 }
 

@@ -16,7 +16,7 @@ import PythonKit
 let plt = Python.import("matplotlib.pyplot")
 
 let maxTextSequenceLength =  40
-let maxMotionLength = 150
+
 
 public class MotionGenerationManager {
     var dataset: Lang2Motion?
@@ -35,7 +35,8 @@ public class MotionGenerationManager {
                 
         let datasetSize: DatasetSize = .full
         let batchSize = 150
-        
+        let maxMotionLength = 150
+
         let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
         
         /// instantiate text processor
@@ -66,8 +67,8 @@ public class MotionGenerationManager {
 
     func loadModel() {
         /// Load model checkpoint
-        let runName = "run_74"
-        epoch = 10
+        let runName = "full_7x/run_75"
+        epoch = 100
 
         // let encoderSelfAttentionTemp = 1000.0
         // let decoderSourceAttentionTemp = 1000.0
@@ -104,27 +105,19 @@ public class MotionGenerationManager {
         
     }
     
-    func generateMotion(nSamples: String) {
-        print("nSamples: \(nSamples)")
-        let maxMotionLength = 25
+    func generateMotion(genOpts: GenOpts) {
+        print("generateMotion()")
+        let lf: SampleMotionClip? = nil
 
-        var s: String = ""
-        var lf: SampleMotionClip?
-
-        s = "A person is walking forwards."
-        lf = nil
-
-        greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: s, leadingFrames: lf,
+        greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: genOpts.sentence, leadingFrames: lf,
             prefix: "epoch_\(epoch)_motion_\(genNum)",
-            saveMotion: true, memoryMultiplier: 1.0, motionsURL: motionsURL!,
-            maxMotionLength: maxMotionLength, showAttentionProbs: false, bestLogProbs: true, nSamples: 10
+            saveMotion: genOpts.saveMMM, memoryMultiplier: 1.0, motionsURL: motionsURL!,
+            maxMotionLength: genOpts.maxMotionLength, showAttentionProbs: false, bestLogProbs: genOpts.bestLogProbs, nSamples: genOpts.nSamples
         )
         genNum += 1
         
     }
 }
-
-
 
 
 func tensorShow2(_ tensor: Tensor<Float>) {
