@@ -109,8 +109,11 @@ public class MotionGenerationManager {
 //        print("generateMotion()")
         let lf: SampleMotionClip? = nil
 
+//        let prefix = "epoch_\(epoch)_motion_\(genNum)"
+        let prefix = "temp_motion"
+        
         let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: genOpts.sentence, leadingFrames: lf,
-            prefix: "epoch_\(epoch)_motion_\(genNum)",
+            prefix: prefix,
             saveMotion: genOpts.saveMMM, memoryMultiplier: 1.0, motionsURL: motionsURL!,
             maxMotionLength: genOpts.maxMotionLength, showAttentionProbs: false, bestLogProbs: genOpts.bestLogProbs, nSamples: genOpts.nSamples
         )
