@@ -69,7 +69,7 @@ public class StatsRecorder {
             let epochTrainingLoss = trainingLossSum / Float(trainingBatchCount)
             summaryWriter.writeScalarSummary(tag: "EpochTrainingLoss", step: current_epoch, value: epochTrainingLoss)
         }
-        if event == .fitEnd {
+        if event == .epochEnd || event == .fitEnd {
             summaryWriter.flush()
         }
     }
