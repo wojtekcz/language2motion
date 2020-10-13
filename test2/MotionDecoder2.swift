@@ -15,30 +15,22 @@ typealias DecodedSample = (motion: Tensor<Float>, log_probs: [Float], done: Tens
 
 public class MotionDecoder2 {
 
-// extension MotionDecoder2 {
-    public static func greedyDecodeMotion2(
-        sentence: LangMotionBatch.Sentence,
-        startMotion: Tensor<Float>?,
-        transformer: LangMotionTransformer,
-        maxMotionLength: Int,
-        memoryMultiplier: Float = 1.0,
-        showAttentionProbs: Bool = false,
-        bestLogProbs: Bool = true,
-        nSamples: Int = 100
-    ) -> (motion: Tensor<Float>, done: Tensor<Int32>) {
-//        print("\nEncode:")
-//        print("======")
-        let encoded = transformer.encode(input: sentence)
+    public static func greedyDecodeMotion2(sentence: LangMotionBatch.Sentence, startMotion: Tensor<Float>?,
+        transformer: LangMotionTransformer, memoryMultiplier: Float = 1.0, showAttentionProbs: Bool = false, genOpts: GenOpts)
+        -> (motion: Tensor<Float>, done: Tensor<Int32>) {
+        // print("\nEncode:")
+        // print("======")
+        let encoded = transformer.encode(input: sentence, encoderSelfAttentionTemp: genOpts.encoderSelfAttentionTemp)
         
         if showAttentionProbs {
             let _ = encoded.allLayerOutputs.map {tensorShow2($0.attentionOutput!.attentionProbs[0, 0])}
         }
         
         let memory = encoded.lastLayerOutput * memoryMultiplier
-//        print("  memory.count: \(memory.shape)")
+        // print("  memory.count: \(memory.shape)")
 
-//        print("\nGenerate:")
-//        print("=========")
+        // print("\nGenerate:")
+        // print("=========")
 
         // start with tensor for neutral motion frame
         let neutralMotionFrame = LangMotionBatch.neutralMotionFrame().expandingShape(at: 0)
@@ -47,16 +39,16 @@ public class MotionDecoder2 {
         if startMotion != nil {
             ys = Tensor<Float>(concatenating: [neutralMotionFrame, startMotion!.expandingShape(at:0)], alongAxis: 1)
         }
-//        print("ys.shape: \(ys.shape)")
+        // print("ys.shape: \(ys.shape)")
 
         var log_probs2: [Float] = []
         var dones: [Tensor<Int32>] = []
 
-        let maxMotionLength2 = maxMotionLength-ys.shape[1]+1
+        let maxMotionLength2 = genOpts.maxMotionLength-ys.shape[1]+1
 
         for _ in 0..<maxMotionLength2 {
             // print("step: \(step)")
-//            print(".", terminator:"")
+            // print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
@@ -68,7 +60,7 @@ public class MotionDecoder2 {
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             // print("\(step), sourceAttentionMask.shape: \(source.sourceAttentionMask.shape)")
             // decode motion
-            let decoded = transformer.decode(sourceMask: source.sourceAttentionMask, motionPart: motionPart, memory: memory)
+            let decoded = transformer.decode(sourceMask: source.sourceAttentionMask, motionPart: motionPart, memory: memory, decoderSourceAttentionTemp: genOpts.decoderSourceAttentionTemp, decoderSelfAttentionTemp: genOpts.decoderSelfAttentionTemp)
 
             if showAttentionProbs {
                 let _ = decoded.allLayerOutputs.map {tensorShow2($0.sourceAttentionOutput!.attentionProbs[0, 0])}
@@ -81,19 +73,19 @@ public class MotionDecoder2 {
             let singlePreds = transformer.mixtureModel(mixtureModelInput2)
             
             // perform sampling
-//             let (sampledMotion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
-//                 preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: maxMotionLength)
+            // let (sampledMotion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(
+            //     preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: maxMotionLength)
             // ==================== perform sampling 100x and pick highest log_probs value
             var samples: [DecodedSample] = []
-            for _ in 0..<nSamples {
+            for _ in 0..<genOpts.nSamples {
                 let aSample = MotionDecoder.performNormalMixtureSampling(
-                    preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: maxMotionLength)
+                    preds: singlePreds, nb_joints: transformer.config.nbJoints, nb_mixtures: transformer.config.nbMixtures, maxMotionLength: genOpts.maxMotionLength)
                 samples.append(aSample)
             }
 
             // pick one with highest log_probs value
             var bestSample: DecodedSample
-            if bestLogProbs {
+            if genOpts.bestLogProbs {
                 bestSample = samples.sorted(by: { $0.log_probs[0] > $1.log_probs[0]})[0]
             } else {
                 bestSample = samples.sorted(by: { $0.log_probs[0] < $1.log_probs[0]})[0]
@@ -109,10 +101,19 @@ public class MotionDecoder2 {
             dones.append(done)
             log_probs2.append(log_probs[0])
         }
-        print()
+        // print()
+        
+        if genOpts.fixRotation {
+            let RRzIdx = MotionFrame.jpIdx(of: "RRz")
+            // print("ys.shape: \(ys.shape)")
+            // print("neutralMotionFrame.shape: \(neutralMotionFrame.shape)")
+
+            ys[0, 0..., RRzIdx] = neutralMotionFrame[0, 0, RRzIdx].broadcasted(to: [ys.shape[1]])
+        }
+        
         let dones2 = Tensor<Int32>(concatenating: dones, alongAxis: 0)
-//        print("log_probs2: \(log_probs2.reduce(0.0, +))")
-//        print(log_probs2)
+        // print("log_probs2: \(log_probs2.reduce(0.0, +))")
+        // print(log_probs2)
         return (motion: ys.squeezingShape(at:0)[1...], done: dones2)
     }
 }
@@ -134,7 +135,7 @@ public func getClippedMotionFrames(dataset: Lang2Motion, clipInfo: SampleMotionC
     }
 }
 
-public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionTransformer, sentence: String, leadingFrames: SampleMotionClip?, prefix: String = "prefix", saveMotion: Bool = true, memoryMultiplier: Float = 0.0, motionsURL: URL?, maxMotionLength: Int, showAttentionProbs: Bool = true, bestLogProbs: Bool = true, nSamples: Int = 100) -> Tensor<Float> {
+public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionTransformer, leadingFrames: SampleMotionClip?, prefix: String = "prefix", memoryMultiplier: Float = 0.0, motionsURL: URL?, showAttentionProbs: Bool = true, genOpts: GenOpts) -> Tensor<Float> {
     // returns motion: descaled groupped joints motion + motion flag tensor
     let startMotion: Tensor<Float>? = getClippedMotionFrames(dataset: dataset, clipInfo: leadingFrames)
     var leadingFramesStr = "0"
@@ -143,42 +144,37 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
     }
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
-//    print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
+    // print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
 
-    let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
-//    processedSentence.printSentence()
+    let processedSentence = textProcessor.preprocess(sentence: genOpts.sentence, maxTextSequenceLength: maxTextSequenceLength)
+    // processedSentence.printSentence()
 
     // decodedMotionFlag
     let (decodedMotion, decodedMotionFlag) = MotionDecoder2.greedyDecodeMotion2(
-        sentence: processedSentence,
-        startMotion: startMotion,
-        transformer: model,
-        maxMotionLength: maxMotionLength,
-        memoryMultiplier: memoryMultiplier,
-        bestLogProbs: bestLogProbs,
-        nSamples: nSamples
+        sentence: processedSentence, startMotion: startMotion, transformer: model,
+        memoryMultiplier: memoryMultiplier, genOpts: genOpts
     )
-//    print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
+    // print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
     let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
-//    print("  descaledMotion.shape: \(descaledMotion.shape)")
-//    print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
+    // print("  descaledMotion.shape: \(descaledMotion.shape)")
+    // print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
 
     var imageURL: URL? = nil
 
-    if !saveMotion { imageURL = nil } else {
+    if !genOpts.saveMMM { imageURL = nil } else {
         imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
     }
     // use joint groupping
     let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-    let joined = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence), LF: \(leadingFramesStr)", cmapRange: 1.0)
+    let joined = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: genOpts.maxMotionLength, descr: "\(genOpts.sentence), LF: \(leadingFramesStr)", cmapRange: 1.0)
 
-    if saveMotion {
-//        print("Saved image: \(imageURL!.path)")
+    if genOpts.saveMMM {
+        // print("Saved image: \(imageURL!.path)")
         let jointNames = dataset.motionSamples[0].jointNames
         let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
         let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
         try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-        print("Saved motion: \(mmmURL.path)")
+        // print("Saved motion: \(mmmURL.path)")
     }
     return joined
 }

@@ -18,14 +18,10 @@ public struct LangMotionTransformerConfig: ModelConfig {
     public let dropoutProbability: Double
     public let sentenceMaxPositionalLength: Int
     public let motionMaxPositionalLength: Int
-    public let encoderSelfAttentionTemp: Double
-    public let decoderSourceAttentionTemp: Double
-    public let decoderSelfAttentionTemp: Double
 
     public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
                 feedForwardSize: Int, headCount: Int, dropoutProbability: Double,
-                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int,
-                encoderSelfAttentionTemp: Double, decoderSourceAttentionTemp: Double, decoderSelfAttentionTemp: Double) {
+                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
         self.nbMixtures = nbMixtures
@@ -37,9 +33,6 @@ public struct LangMotionTransformerConfig: ModelConfig {
         self.dropoutProbability = dropoutProbability
         self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
         self.motionMaxPositionalLength = motionMaxPositionalLength
-        self.encoderSelfAttentionTemp = encoderSelfAttentionTemp
-        self.decoderSourceAttentionTemp = decoderSourceAttentionTemp
-        self.decoderSelfAttentionTemp = decoderSelfAttentionTemp
     }
 }
 
@@ -136,14 +129,15 @@ public struct LangMotionTransformer: Module {
     }
     
     @differentiable
-    public func encode(input: LangMotionBatch.Sentence) -> EncoderOutput<Float> {
+    public func encode(input: LangMotionBatch.Sentence, encoderSelfAttentionTemp: Float = 1.0) -> EncoderOutput<Float> {
         let embedded = self.langPositionalEncoding(self.langEmbedding(input.tokenIds))
-        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.selfAttentionMask, selfAttentionTemperature: Float(config.encoderSelfAttentionTemp))
+        let encoderInput = TransformerInput(sequence: embedded, attentionMask: input.selfAttentionMask, selfAttentionTemperature: encoderSelfAttentionTemp)
         return self.encoder(encoderInput)
     }
     
     @differentiable
-    public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>) -> DecoderOutput<Float> {
+    public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>,
+                       decoderSourceAttentionTemp: Float = 1.0, decoderSelfAttentionTemp: Float = 1.0) -> DecoderOutput<Float> {
         // start flag, pos enc, current motion, padding with motion
         let shape = motionPart.motion.shape
         let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
@@ -158,9 +152,9 @@ public struct LangMotionTransformer: Module {
         let segmentEmbeddings = motionSegmentEmbedding(motionPart.segmentIDs[0..., 0..., 0])
         motionFeatures = motionFeatures + segmentEmbeddings
         motionFeatures = motionNorm(motionFeatures)
-
+        
         let decoderInput = DecoderInput(sequence: motionFeatures, sourceMask: sourceMask, targetMask: motionPart.decSelfAttentionMask, memory: memory,
-                                        sourceAttentionTemperature: Float(config.decoderSourceAttentionTemp), selfAttentionTemperature: Float(config.decoderSelfAttentionTemp))
+                                        sourceAttentionTemperature: decoderSourceAttentionTemp, selfAttentionTemperature: decoderSelfAttentionTemp)
         return self.decoder(decoderInput)
     }
 }

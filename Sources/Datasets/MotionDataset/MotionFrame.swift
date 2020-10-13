@@ -23,6 +23,10 @@ public struct MotionFrame {
         return Array(combined)
     }
 
+    public static func jpIdx(of: String) -> Int {
+        return cjpRootRotationIdx + ["RRx", "RRy", "RRz"].firstIndex(of: of)!
+    }
+
     public func jpIdx(of: String) -> Int {
         return jointNames.firstIndex(of: of)!
     }

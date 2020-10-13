@@ -69,14 +69,6 @@ public class MotionGenerationManager {
         /// Load model checkpoint
         let runName = "full_7x/run_75"
         epoch = 100
-
-        // let encoderSelfAttentionTemp = 1000.0
-        // let decoderSourceAttentionTemp = 1000.0
-        // let decoderSelfAttentionTemp = 1000.0
-
-        let encoderSelfAttentionTemp = 1.0
-        let decoderSourceAttentionTemp = 1.0
-        let decoderSelfAttentionTemp = 100000.0
         
         let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
@@ -94,10 +86,7 @@ public class MotionGenerationManager {
             headCount: 16,
             dropoutProbability:  0.1,
             sentenceMaxPositionalLength: 100,
-            motionMaxPositionalLength: 500,
-            encoderSelfAttentionTemp: encoderSelfAttentionTemp,
-            decoderSourceAttentionTemp: decoderSourceAttentionTemp,
-            decoderSelfAttentionTemp: decoderSelfAttentionTemp
+            motionMaxPositionalLength: 500
         )
 
         model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(epoch)")
@@ -112,11 +101,8 @@ public class MotionGenerationManager {
 //        let prefix = "epoch_\(epoch)_motion_\(genNum)"
         let prefix = "temp_motion"
         
-        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, sentence: genOpts.sentence, leadingFrames: lf,
-            prefix: prefix,
-            saveMotion: genOpts.saveMMM, memoryMultiplier: 1.0, motionsURL: motionsURL!,
-            maxMotionLength: genOpts.maxMotionLength, showAttentionProbs: false, bestLogProbs: genOpts.bestLogProbs, nSamples: genOpts.nSamples
-        )
+        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, leadingFrames: lf,
+            prefix: prefix, memoryMultiplier: 1.0, motionsURL: motionsURL!, showAttentionProbs: false, genOpts: genOpts)
         
         genNum += 1
         return joined
@@ -134,7 +120,7 @@ func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
     let jointNames = dataset.motionSamples[0].jointNames
     let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
     try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-    print("Saved motion: \(mmmURL.path)")
+//    print("Saved motion: \(mmmURL.path)")
 }
 
 //func showMotionSample(dataset: Lang2Motion, _ motionSample: MotionSample) {
