@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_81"
+let runName = "run_83"
 let batchSize = 25
 // let batchSize = 150
 let maxTextSequenceLength =  40
@@ -22,7 +22,7 @@ let nEpochs = 30
 
 // peek LR for new training: 1e-3, for resuming: 5e-4
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 2e-5,
+    peakLearningRate: 2e-4,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
@@ -103,7 +103,7 @@ let config = LangMotionTransformerConfig(
     decoderDepth: 512,
     feedForwardSize: 2048,
     headCount: 16,
-    dropoutProbability:  0.0001,
+    dropoutProbability: 0.0001,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500
 )
