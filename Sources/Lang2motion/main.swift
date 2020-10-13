@@ -16,7 +16,7 @@ import x10_optimizers_optimizer
 let runName = "run_85"
 let batchSize = 50
 let maxTextSequenceLength =  40
-let maxMotionLength =  300
+let maxMotionLength =  150
 let nEpochs = 30
 
 // peek LR for new training: 1e-3, for resuming: 5e-4
@@ -77,7 +77,7 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     minMotionLength: 10,
-    maxMotionLength: 300,
+    maxMotionLength: 150,
     trainTestSplit: 0.9,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in
