@@ -14,7 +14,8 @@ import x10_optimizers_optimizer
 
 /// Set training params
 let runName = "run_81"
-let batchSize = 150
+let batchSize = 25
+// let batchSize = 150
 let maxTextSequenceLength =  40
 let maxMotionLength =  300
 let nEpochs = 30
@@ -29,7 +30,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_full
+let datasetSize: DatasetSize = .multi_mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -111,7 +112,7 @@ let config = LangMotionTransformerConfig(
 //var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_75"), config: config, name: "run_75.model.e100")
+var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_75"), config: config, name: "model.e100")
 
 // Loss function
 let args = LossArgs(
