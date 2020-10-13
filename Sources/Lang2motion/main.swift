@@ -13,8 +13,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_86"
-let batchSize = 150
+let runName = "run_87"
+let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
 let nEpochs = 30
@@ -102,7 +102,7 @@ let config = LangMotionTransformerConfig(
     decoderDepth: 512,
     feedForwardSize: 2048,
     headCount: 16,
-    dropoutProbability: 0.0001,
+    dropoutProbability: 0.0,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500
 )
@@ -111,7 +111,7 @@ let config = LangMotionTransformerConfig(
 //var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_75"), config: config, name: "model.e100")
+var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_86/checkpoints"), config: config, name: "model.e10")
 
 // Loss function
 let args = LossArgs(
@@ -129,7 +129,7 @@ func embeddedNormalMixtureSurrogateLoss(y_pred: LangMotionTransformerOutput<Floa
 
 /// Set up decoding
 // TODO: make possible to call greedyDecodeMotion() during training again
-public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer, 
+public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer,
                                sentence: String, prefix: String = "prefix", saveMotion: Bool = true, motionsURL: URL?) {
     // TODO: incorporate done/stop signal
     Context.local.learningPhase = .inference
