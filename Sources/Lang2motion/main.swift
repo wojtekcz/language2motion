@@ -13,15 +13,15 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_80"
-let batchSize = 2
-let maxTextSequenceLength =  10
-let maxMotionLength =  50
+let runName = "run_81"
+let batchSize = 150
+let maxTextSequenceLength =  40
+let maxMotionLength =  300
 let nEpochs = 30
 
 // peek LR for new training: 1e-3, for resuming: 5e-4
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 5e-6,
+    peakLearningRate: 2e-5,
     beta1: 0.9,
     beta2: 0.999,
     useBiasCorrection: false,
@@ -29,7 +29,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .same_micro
+let datasetSize: DatasetSize = .multi_full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -58,8 +58,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-//let device = Device.defaultXLA
- let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
@@ -76,8 +76,8 @@ print("\nLoading dataset...")
 var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
-    minMotionLength: 20,
-    maxMotionLength: 150,
+    minMotionLength: 10,
+    maxMotionLength: 300,
     trainTestSplit: 0.9,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in
@@ -111,7 +111,7 @@ let config = LangMotionTransformerConfig(
 //var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_79/checkpoints"), config: config, name: "model.e26")
+var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_75"), config: config, name: "run_75.model.e100")
 
 // Loss function
 let args = LossArgs(
