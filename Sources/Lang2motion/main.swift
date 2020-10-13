@@ -13,8 +13,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_75"
-let batchSize = 100
+let runName = "run_77"
+let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
 let nEpochs = 30
@@ -29,7 +29,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_full
+let datasetSize: DatasetSize = .same_micro
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -58,8 +58,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+//let device = Device.defaultXLA
+ let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
@@ -104,17 +104,14 @@ let config = LangMotionTransformerConfig(
     headCount: 16,
     dropoutProbability:  0.1,
     sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500,
-    encoderSelfAttentionTemp: 1,
-    decoderSourceAttentionTemp: 1,
-    decoderSelfAttentionTemp: 1
+    motionMaxPositionalLength: 500
 )
 
 /// create new model
 //var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_74/checkpoints"), config: config, name: "model.e10")
+var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_76/checkpoints"), config: config, name: "model.e6")
 
 // Loss function
 let args = LossArgs(
@@ -153,7 +150,7 @@ public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransforme
     }
     // use joint groupping
     let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-    motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
+    let _ = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
 
     if saveMotion {
         print("Saved image: \(imageURL!.path)")
