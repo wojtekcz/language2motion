@@ -9,6 +9,8 @@ import SwiftUI
 import TensorFlow
 import ModelSupport
 import AppKit
+import ImageSupportOSX
+
 
 public struct GenOpts {
     let nSamples: Int
@@ -32,7 +34,7 @@ struct ContentView: View {
     @State private var saveMmm = true
     @State var encoderSelfAttentionTemp = "1.0"
     @State var decoderSourceAttentionTemp = "1.0"
-    @State var decoderSelfAttentionTemp = "100000.0"
+    @State var decoderSelfAttentionTemp = "1.0"
     @State var sentence = "A person is walking forwards."
     @State var maxMotionLength = "50"
 //    @State var motionImageName = "motion_image"
