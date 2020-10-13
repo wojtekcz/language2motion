@@ -44,6 +44,7 @@
 		324377772534720900916BBA /* TensorCGImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324377742534720800916BBA /* TensorCGImage.swift */; };
 		32B29C4A2530BF81005E6DB6 /* MotionGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */; };
 		32B29C662530BFC2005E6DB6 /* MotionDecoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */; };
+		32B3D16C2535817500866FA1 /* MotionDatasetTests2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */; };
 		32E04EA62513F0370077B28A /* TrainingLoop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; };
 		32E04EA72513F0370077B28A /* TrainingLoop.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		32E04EAD2513F24A0077B28A /* MotionLangCheckpointReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */; };
@@ -1250,6 +1251,7 @@
 		324377742534720800916BBA /* TensorCGImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorCGImage.swift; sourceTree = "<group>"; };
 		32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGenerationManager.swift; sourceTree = "<group>"; };
 		32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDecoder2.swift; sourceTree = "<group>"; };
+		32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDatasetTests2.swift; sourceTree = "<group>"; };
 		32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangCheckpointReader.swift; sourceTree = "<group>"; };
 		32E04EAE2513F25E0077B28A /* MotionLangCheckpointWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangCheckpointWriter.swift; sourceTree = "<group>"; };
 		32E326E2252F35590088C8F8 /* TimeDistributed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeDistributed.swift; sourceTree = "<group>"; };
@@ -2002,6 +2004,7 @@
 				3229572F252EE6480063750F /* LangMotionTransformerTests.swift */,
 				OBJ_156 /* MotionFrameTests.swift */,
 				OBJ_157 /* XCTestManifests.swift */,
+				32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */,
 			);
 			name = MotionDatasetTests;
 			path = Tests/MotionDatasetTests;
@@ -3222,6 +3225,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_606 /* MotionFrameTests.swift in Sources */,
+				32B3D16C2535817500866FA1 /* MotionDatasetTests2.swift in Sources */,
 				32295730252EE6480063750F /* LangMotionTransformerTests.swift in Sources */,
 				324376EE253445E800916BBA /* ImageCreating.swift in Sources */,
 				OBJ_607 /* XCTestManifests.swift in Sources */,
