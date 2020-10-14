@@ -8,15 +8,17 @@ public struct OptimizerOpts {
     public let peakLearningRate: Float
     public let beta1: Float
     public let beta2: Float
+    public let weightDecayRate: Float
     public let useBiasCorrection: Bool
     public let lrSlopeMultiplier: Int
     public let nEpochs: Int
     public var stepsPerEpoch: Int
     
-    public init(peakLearningRate: Float = 5e-4, beta1: Float = 0.9, beta2: Float = 0.999, useBiasCorrection: Bool = false, lrSlopeMultiplier: Int = 1, nEpochs: Int = 10, stepsPerEpoch: Int = 1) {
+    public init(peakLearningRate: Float = 5e-4, beta1: Float = 0.9, beta2: Float = 0.999, weightDecayRate: Float, useBiasCorrection: Bool = false, lrSlopeMultiplier: Int = 1, nEpochs: Int = 10, stepsPerEpoch: Int = 1) {
         self.peakLearningRate = peakLearningRate
         self.beta1 = beta1
         self.beta2 = beta2
+        self.weightDecayRate = weightDecayRate
         self.useBiasCorrection = useBiasCorrection
         self.lrSlopeMultiplier = lrSlopeMultiplier
         self.nEpochs = nEpochs
@@ -38,7 +40,8 @@ public class OptimizerWrapper {
             defaultOptimizer: makeWeightDecayedAdam(
                 learningRate: opts.peakLearningRate,
                 beta1: opts.beta1,
-                beta2: opts.beta2
+                beta2: opts.beta2,
+                weightDecayRate: opts.weightDecayRate
             )
         )
         

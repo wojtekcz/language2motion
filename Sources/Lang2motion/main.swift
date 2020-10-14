@@ -13,19 +13,20 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_92"
+let runName = "run_93"
 let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
-let nEpochs = 5
+let nEpochs = 20
 
 // peek LR for new training: 1e-3, for resuming: 5e-4
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 5e-6,
+    peakLearningRate: 2e-5,
     beta1: 0.9,
     beta2: 0.999,
+    weightDecayRate: 0.00001, // default 0.01
     useBiasCorrection: false,
-    lrSlopeMultiplier: 1,
+    lrSlopeMultiplier: 2,
     nEpochs: nEpochs
 )
 
