@@ -68,7 +68,7 @@ public class MotionGenerationManager {
     func loadModel() {
         /// Load model checkpoint
         let runName = "run_86"
-        epoch = 2
+        epoch = 10
         
         let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
