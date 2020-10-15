@@ -1824,7 +1824,7 @@
 				32B3D21D2535DF4700866FA1 /* RGBtoHSV.swift */,
 			);
 			name = ImageSupportOSX;
-			path = Sources/Models/ImageClassification/ImageSupportOSX;
+			path = Sources/ImageSupportOSX;
 			sourceTree = "<group>";
 		};
 		32E04EA52513F0370077B28A /* Frameworks */ = {
