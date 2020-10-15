@@ -46,7 +46,7 @@ public struct MotionGaussianMixtureModel: Module {
         var mixtureWeights = softmax(linearMixtureWeights(x), alongAxis: 1)
 
         if mixtureWeights.isNaN.any() {
-            // print("Fixing NaNs")
+            print("Fixing NaNs")
             var divider = 1.0
             let double_x = Tensor<Double>(linearMixtureWeights(x))
             while mixtureWeights.isNaN.any() {
@@ -64,7 +64,7 @@ public struct MotionGaussianMixtureModel: Module {
         var all_outputs: [Tensor<Float>] = []
         for t in 0..<targetLength {
             let decoder_input: Tensor<Float> = input[0..., t]
-            let decoder_output = self.fixMixtureWeightsStep(decoder_input)
+            //let decoder_output = self.fixMixtureWeightsStep(decoder_input)
             all_outputs.append(decoder_output)
         }
         let all_outputs_struct = Tensor(stacking: all_outputs, alongAxis: 1)
