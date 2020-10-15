@@ -12,19 +12,20 @@ import ModelSupport
 import TextModels
 
 class MotionDatasetTests2: XCTestCase {
+    
+    var dataset: Lang2Motion? = nil
+    #if os(macOS)
+    let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+    #else
+    let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+    #endif
 
-    func testCreateSameDataset() throws {
-        // TODO: create dataset with one sample repeated 10k times
+    func loadData() {
         /// load dataset
         print("\nLoading dataset...")
 
         let datasetSize: DatasetSize = .full
 
-        #if os(macOS)
-            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
-        #else
-            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-        #endif
         let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
         /// instantiate text processor
@@ -34,7 +35,7 @@ class MotionDatasetTests2: XCTestCase {
         let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
         let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
         
-        let dataset = try Lang2Motion(
+        dataset = try! Lang2Motion(
             motionDatasetURL: motionDatasetURL,
             batchSize: 100,
             minMotionLength: 20,
@@ -49,10 +50,15 @@ class MotionDatasetTests2: XCTestCase {
             let singleBatch = LangMotionBatch(data: source, label: target)
             return singleBatch
         }
+    }
+
+    func testCreateSameDataset() throws {
+        // create dataset with one sample repeated n times
+        loadData()
         
         var motionSamples: [MotionSample] = []
         
-        let sample = dataset.motionSampleDict[1]!
+        let sample = dataset!.motionSampleDict[1]!
         
         // 10000 - same.midi
         // 1000 - same.mini
@@ -65,5 +71,4 @@ class MotionDatasetTests2: XCTestCase {
         let outputDataset = MotionDataset(datasetFolderURL: dataURL, motionSamples: motionSamples)
         outputDataset.write(to: serializedDatasetURL)
     }
-
 }
