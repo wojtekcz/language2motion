@@ -13,14 +13,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_3"
+let runSetName = "run_set_4"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 15
 
 let datasetSize: DatasetSize = .small_micro
-let multiplyFactor = 20
+let multiplyFactor = 100
 
 let runsSettings: [[String:Any]] = [
 //    ["lr": Float(1e-3)],
@@ -46,10 +46,6 @@ print("datasetSize: \(datasetSize)")
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 #endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
-
-#if os(Linux)
-    try! FileManager().createDirectory(at: checkpointURL, withIntermediateDirectories: true)
-#endif
 
 // The following is a workaround needed until X10 can set log levels and memory growth parameters.
 let _ = _ExecutionContext.global
