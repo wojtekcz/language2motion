@@ -13,17 +13,18 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_4"
+let runSetName = "run_set_7"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 15
+let nEpochs = 5
 
 let datasetSize: DatasetSize = .small_micro
-let multiplyFactor = 100
+let multiplyFactor = 50
 
+// peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-//    ["lr": Float(1e-3)],
+    ["lr": Float(1e-3)],
     ["lr": Float(1e-4)],
     ["lr": Float(2e-4)],
     ["lr": Float(5e-4)],
@@ -102,7 +103,7 @@ let config = LangMotionTransformerConfig(
     decoderDepth: 512,
     feedForwardSize: 2048,
     headCount: 16,
-    dropoutProbability: 0.0,
+    dropoutProbability: 0.00001,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500
 )
@@ -120,8 +121,8 @@ for runNum in 0..<runsSettings.count {
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
-        beta1: 0.9, beta2: 0.999,
-        weightDecayRate: 0.0, // default 0.01
+        beta1: 0.9, beta2: 0.9999,
+        weightDecayRate: 0.0001, // default 0.01
         useBiasCorrection: false, lrSlopeMultiplier: 2, nEpochs: nEpochs
     )
     optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize
