@@ -6,7 +6,7 @@ Also it's an attempt to answer the question if Swift for Tensorflow is ready for
 
 The use-case is based on a paper "[Learning a bidirectional mapping between human whole-body motion and natural language using deep recurrent neural networks"](https://arxiv.org/abs/1705.06400) by Matthias Plappert. He created a nice dataset of few thousand motions "[The KIT Motion-Language Dataset (paper)](https://arxiv.org/abs/1607.03827)", [website](https://motion-annotation.humanoids.kit.edu/dataset/).
 
-The Motion2Language Transformer which kind-of-works is there, already. I'm working towards completing language2motion solution.
+The Motion2Language Transformer which works is there, already. Lang2motion one started to work recently, and I'm implementing more sophisticated motion generation strategy now.
 
 I'm using modified [Swift Transformer implementation](https://github.com/acarrera94/swift-models/tree/translation/Models/Translation) by Andre Carrera.
 
@@ -32,7 +32,7 @@ I'm using modified [Swift Transformer implementation](https://github.com/acarrer
   - [x] Transformer from motion to annotation
 - language 2 motion
   - [x] Transformer encoder on annotation
-  - [ ] * Transformer decoder on motion
+  - [x] Transformer decoder on motion
 
 ## Dataset files
 * original: [2017-06-22.zip](https://motion-annotation.humanoids.kit.edu/downloads/4/)
