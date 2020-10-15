@@ -13,19 +13,23 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_1"
+let runSetName = "run_set_3"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 5
+let nEpochs = 15
 
 let datasetSize: DatasetSize = .small_micro
+let multiplyFactor = 20
 
 let runsSettings: [[String:Any]] = [
-    ["lr": Float(1e-3)],
+//    ["lr": Float(1e-3)],
     ["lr": Float(1e-4)],
+    ["lr": Float(2e-4)],
+    ["lr": Float(5e-4)],
     ["lr": Float(1e-5)],
-    ["lr": Float(1e-6)],
+    ["lr": Float(2e-5)],
+//    ["lr": Float(1e-6)],
 ]
 
 //print("runName: \(runName)")
@@ -77,7 +81,7 @@ var dataset = try Lang2Motion(
     batchSize: batchSize,
     minMotionLength: 10,
     maxMotionLength: 50,
-    multiplyFactor: 10,
+    multiplyFactor: multiplyFactor,
     trainTestSplit: 1.0,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in
@@ -110,7 +114,7 @@ let config = LangMotionTransformerConfig(
 print("\nTraining Transformer for the Lang2motion task!")
 for runNum in 0..<runsSettings.count {
     let runSettings = runsSettings[runNum]
-    print("runNum: \(runNum), runSettings: \(runSettings)")
+    print("runNum: \(runNum+1), runSettings: \(runSettings)")
     let peakLearningRate = runSettings["lr"] as! Float
     
     let runName = "run_\(runNum+1)_\(peakLearningRate)"
