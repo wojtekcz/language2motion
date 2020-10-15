@@ -10,6 +10,7 @@ import TensorFlow
 import Datasets
 import ModelSupport
 import TextModels
+import Foundation
 
 class MotionDatasetTests2: XCTestCase {
     
@@ -20,11 +21,9 @@ class MotionDatasetTests2: XCTestCase {
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
     #endif
 
-    func loadData() {
+    func loadData(datasetSize: DatasetSize = .full, minMotionLength: Int = 20, maxMotionLength: Int = 150) {
         /// load dataset
         print("\nLoading dataset...")
-
-        let datasetSize: DatasetSize = .full
 
         let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
@@ -37,10 +36,10 @@ class MotionDatasetTests2: XCTestCase {
         
         dataset = try! Lang2Motion(
             motionDatasetURL: motionDatasetURL,
-            batchSize: 100,
-            minMotionLength: 20,
-            maxMotionLength: 150,
-            trainTestSplit: 0.9,
+            batchSize: 2,
+            minMotionLength: minMotionLength,
+            maxMotionLength: maxMotionLength,
+            trainTestSplit: 1.0,
             device: Device.defaultTFEager
         ) { (motionSample: MotionSample) -> LangMotionBatch in
             let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: 40)
@@ -70,5 +69,83 @@ class MotionDatasetTests2: XCTestCase {
         let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.same.micro.plist")
         let outputDataset = MotionDataset(datasetFolderURL: dataURL, motionSamples: motionSamples)
         outputDataset.write(to: serializedDatasetURL)
+    }
+
+    func testCreateSmallDatasets() throws {
+        // create dataset with one sample repeated n times
+        loadData(datasetSize: .multi_full, minMotionLength: 10, maxMotionLength: 50)
+        
+        // with smallest dataset possible
+        // 2 samples
+        // 2 samples + multiplied samples
+        // 10 samples + multiplied samples
+        // 100 samples + multiplied
+        // pick short motions, < 50 frames
+        
+        
+        let allMotionSamples = dataset!.motionSamples
+        print("allMotionSamples: \(allMotionSamples.count)")
+
+        let allSampleIDs: [Int] = Array(Set(allMotionSamples.map { $0.sampleID }))
+        print("allSampleIDs: \(allSampleIDs.count)")
+        
+        print(( allMotionSamples.filter {$0.sampleID == 634} ).count)
+        
+        //   2 - small_micro
+        //   2 - small_multi_micro
+        //  10 - small_multi_mini
+        // 100 - small_multi_midi
+
+        func getMainMotionSamples(nSamples: Int = 1) -> [MotionSample] {
+            var mainMotionSamples: [MotionSample] = []
+            for _ in 0..<nSamples {
+                let sampleID = allSampleIDs[Int.random(in: 0..<allSampleIDs.count)]
+                let filteredSamples = allMotionSamples.filter { $0.sampleID == sampleID }
+                let sample = filteredSamples[0]
+                mainMotionSamples.append(sample)
+            }
+            return mainMotionSamples
+        }
+
+        func getMultiMotionSamples(mainMotionSamples: [MotionSample]) -> [MotionSample] {
+            var multiMotionSamples: [MotionSample] = []
+            for mainSample in mainMotionSamples {
+                let samples = allMotionSamples.filter { $0.sampleID == mainSample.sampleID && $0.annotations[0] == mainSample.annotations[0] }
+                multiMotionSamples.append(contentsOf: samples)
+            }
+            return multiMotionSamples
+        }
+
+        func writeDataset(datasetSize: DatasetSize, motionSamples: [MotionSample]) {
+            let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
+            let outputDataset = MotionDataset(datasetFolderURL: dataURL, motionSamples: motionSamples)
+            outputDataset.write(to: serializedDatasetURL)
+        }
+        var mainMotionSamples: [MotionSample] = []
+        var multiMotionSamples: [MotionSample] = []
+
+        // small_micro
+        mainMotionSamples = getMainMotionSamples(nSamples: 2)
+        print("small_micro.unique: \(mainMotionSamples.count)")
+        writeDataset(datasetSize: .small_micro, motionSamples: mainMotionSamples)
+        
+        // small_multi_micro
+        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples)
+        print("small_multi_micro.multi: \(multiMotionSamples.count)")
+        writeDataset(datasetSize: .small_multi_micro, motionSamples: multiMotionSamples)
+        
+        // small_multi_mini
+        mainMotionSamples = getMainMotionSamples(nSamples: 10)
+        print("small_multi_mini.unique: \(mainMotionSamples.count)")
+        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples)
+        print("small_multi_mini.multi: \(multiMotionSamples.count)")
+        writeDataset(datasetSize: .small_multi_mini, motionSamples: multiMotionSamples)
+
+        // small_multi_midi
+        mainMotionSamples = getMainMotionSamples(nSamples: 100)
+        print("small_multi_midi.unique: \(mainMotionSamples.count)")
+        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples)
+        print("small_multi_midi.multi: \(multiMotionSamples.count)")
+        writeDataset(datasetSize: .small_multi_midi, motionSamples: multiMotionSamples)
     }
 }

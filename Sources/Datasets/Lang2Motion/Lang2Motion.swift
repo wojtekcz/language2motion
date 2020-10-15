@@ -44,6 +44,7 @@ extension Lang2Motion {
         batchSize: Int,
         minMotionLength: Int = 10,
         maxMotionLength: Int = 100,
+        multiplyFactor: Int = 1,
         trainTestSplit: Double = 0.8,
         device: Device,
         exampleMap: @escaping (MotionSample) -> LangMotionBatch
@@ -87,10 +88,14 @@ extension Lang2Motion {
         }
         print("Having \(_motionSamplesWithDistinctAnnotations.count) annotations with motions.")
 
-        motionSamples = _motionSamplesWithDistinctAnnotations
+        // multiply samples by factor
+        let _multipliedSamples = Array(_motionSamplesWithDistinctAnnotations.map({sample in (0..<multiplyFactor).map({ _ in sample })}).joined())
+        
+        print("Having \(_multipliedSamples.count) multiplied samples.")
+        motionSamples = _multipliedSamples
 
         // create LangRecs
-        langRecs = _motionSamplesWithDistinctAnnotations.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0], motionSample: $0) }
+        langRecs = _multipliedSamples.map { LangRec(sampleID: $0.sampleID, text: $0.annotations[0], motionSample: $0) }
 
         // [sampleID:MotionSample] mapping
         var _motionSampleDict: [Int: MotionSample] = [:]
@@ -105,7 +110,7 @@ extension Lang2Motion {
         // split into train/test sets
         let _trainMotionSamples: [MotionSample]
         let _testMotionSamples: [MotionSample]
-        (_trainMotionSamples, _testMotionSamples) = _motionSamplesWithDistinctAnnotations.trainTestSplitMotionSamples(split: trainTestSplit)
+        (_trainMotionSamples, _testMotionSamples) = _multipliedSamples.trainTestSplitMotionSamples(split: trainTestSplit)
         trainMotionSamples = _trainMotionSamples
         testMotionSamples = _testMotionSamples
 

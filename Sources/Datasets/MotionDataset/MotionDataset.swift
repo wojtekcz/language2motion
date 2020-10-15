@@ -14,6 +14,15 @@ public enum DatasetSize: String {
     case same_midi = "same.midi."
     case same_mini = "same.mini."
     case same_micro = "same.micro."
+
+    //   2 - small_micro
+    //   2 - small_multi_micro
+    //  10 - small_multi_mini
+    // 100 - small_multi_midi
+    case small_micro = "small.micro."
+    case small_multi_micro = "small.multi.micro."
+    case small_multi_mini = "small.multi.mini."
+    case small_multi_midi = "small.multi.midi."
 }
 
 public class MotionDataset: Codable {
