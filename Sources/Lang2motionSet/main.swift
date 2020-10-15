@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_7"
+let runSetName = "run_set_8"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -25,11 +25,12 @@ let multiplyFactor = 50
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
     ["lr": Float(1e-3)],
-    ["lr": Float(1e-4)],
-    ["lr": Float(2e-4)],
     ["lr": Float(5e-4)],
-    ["lr": Float(1e-5)],
+    ["lr": Float(2e-4)],
+    ["lr": Float(1e-4)],
+    ["lr": Float(5e-5)],
     ["lr": Float(2e-5)],
+    ["lr": Float(1e-5)],
 //    ["lr": Float(1e-6)],
 ]
 
