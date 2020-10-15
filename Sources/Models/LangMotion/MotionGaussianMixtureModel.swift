@@ -64,7 +64,7 @@ public struct MotionGaussianMixtureModel: Module {
         var all_outputs: [Tensor<Float>] = []
         for t in 0..<targetLength {
             let decoder_input: Tensor<Float> = input[0..., t]
-            //let decoder_output = self.fixMixtureWeightsStep(decoder_input)
+            let decoder_output = self.fixMixtureWeightsStep(decoder_input)
             all_outputs.append(decoder_output)
         }
         let all_outputs_struct = Tensor(stacking: all_outputs, alongAxis: 1)
@@ -76,9 +76,9 @@ public struct MotionGaussianMixtureModel: Module {
         let mixtureMeans = timeDistributed(input, linearMixtureMeans.weight)
         let mixtureVars = softplus(timeDistributed(input, linearMixtureVars.weight))
         var mixtureWeights =  softmax(timeDistributed(input, linearMixtureWeights.weight), alongAxis: 2)
-        if mixtureWeights.isNaN.any() {
-            mixtureWeights = fixMixtureWeights(input)
-        }
+        // if mixtureWeights.isNaN.any() {
+        //     mixtureWeights = fixMixtureWeights(input)
+        // }
         let stops = sigmoid(timeDistributed(input, linearStop.weight))
         return MixtureModelPreds(mixtureMeans: mixtureMeans, mixtureVars: mixtureVars, mixtureWeights: mixtureWeights, stops: stops)
     }
