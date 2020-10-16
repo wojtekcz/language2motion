@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_11"
+let runSetName = "run_set_12"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -27,9 +27,10 @@ let runsSettings: [[String:Any]] = [
     // ["lr": Float(1e-3)],
     // ["lr": Float(5e-4)],
     // ["lr": Float(2e-4)],
-    ["lr": Float(1e-4)],
-    ["lr": Float(5e-5)],
-    ["lr": Float(2e-5)],
+    ["lr": Float(1e-4), "dropout": 0.1, "wd": 0.01, "beta2": 0.999],
+    ["lr": Float(1e-4), "dropout": 0.00001, "wd": 0.0001, "beta2": 0.9999],
+    // ["lr": Float(5e-5)],
+    // ["lr": Float(2e-5)],
     // ["lr": Float(1e-5)],
 //    ["lr": Float(1e-6)],
 ]
@@ -93,37 +94,36 @@ var dataset = try Lang2Motion(
 
 print("Dataset acquired.")
 
-/// instantiate model
-print("instantiate model")
-let config = LangMotionTransformerConfig(
-    vocabSize: vocabulary.count,
-    nbJoints: 47,
-    nbMixtures: 20,
-    layerCount: 6,
-    encoderDepth: 256,
-    decoderDepth: 512,
-    feedForwardSize: 2048,
-    headCount: 16,
-    dropoutProbability: 0.00001,
-    sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500
-)
+let nbJoints = 47
+let nbMixtures = 20
 
 print("\nTraining Transformer for the Lang2motion task!")
 for runNum in 0..<runsSettings.count {
     let runSettings = runsSettings[runNum]
     print("runNum: \(runNum+1), runSettings: \(runSettings)")
     let peakLearningRate = runSettings["lr"] as! Float
+    let dropoutProbability = runSettings["dropout"] as! Double
+    let weightDecayRate = runSettings["wd"] as! Float
+    let beta2 = runSettings["beta2"] as! Float
     
     let runName = "run_\(runNum+1)_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
+    let config = LangMotionTransformerConfig(
+        vocabSize: vocabulary.count, nbJoints: 47, nbMixtures: 20,
+        layerCount: 6,
+        encoderDepth: 256, decoderDepth: 512, feedForwardSize: 2048,
+        headCount: 16,
+        dropoutProbability: dropoutProbability,
+        sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500
+    )
+
     var model = LangMotionTransformer(config: config)
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
-        beta1: 0.9, beta2: 0.9999,
-        weightDecayRate: 0.0001, // default 0.01
+        beta1: 0.9, beta2: beta2,
+        weightDecayRate: weightDecayRate, // default 0.01
         useBiasCorrection: false, lrSlopeMultiplier: 2, nEpochs: nEpochs
     )
     optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize

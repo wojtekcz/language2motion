@@ -12,8 +12,8 @@ import LangMotionModels
 
 // Loss function
 let args = LossArgs(
-        nb_joints: config.nbJoints,
-        nb_mixtures: config.nbMixtures,
+        nb_joints: nbJoints,
+        nb_mixtures: nbMixtures,
         mixture_regularizer_type: "None",  // ["cv", "l2", "None"]
         mixture_regularizer: 0.0,
         device: device
