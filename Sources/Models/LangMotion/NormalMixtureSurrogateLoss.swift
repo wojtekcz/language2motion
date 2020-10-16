@@ -119,6 +119,11 @@ extension MixtureModelPreds {
 @differentiable(wrt: y_pred)
 public func normalMixtureSurrogateLoss(y_pred: MixtureModelPreds, y_true: LangMotionBatch.Target, args: LossArgs) -> Tensor<Float> {
     let losses = _normalMixtureSurrogateLoss(y_true: y_true, y_pred: y_pred, args: args)
+    
+    if losses.isNaN.any() {
+        print("\nnans in losses: \(Tensor<Float>(losses.isNaN).sum())")
+    }
+    
     // masking
     let segmentIDs = Tensor<Float>(y_true.segmentIDs)
     let paddingTensor = Tensor(Float(LangMotionBatch.MotionSegment.padding.rawValue), on: args.device)
