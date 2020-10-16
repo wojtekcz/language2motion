@@ -28,7 +28,7 @@ let commonRunsSettings: [String:Any] = [
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["lr": 2e-5],
+    ["lr": 1e-5],
 ]
 
 //print("runName: \(runName)")
