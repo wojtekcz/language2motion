@@ -27,8 +27,8 @@ let runsSettings: [[String:Any]] = [
     // ["lr": Float(1e-3)],
     // ["lr": Float(5e-4)],
     // ["lr": Float(2e-4)],
-    ["lr": Float(1e-4), "dropout": 0.1, "wd": 0.01, "beta2": 0.999],
-    ["lr": Float(1e-4), "dropout": 0.00001, "wd": 0.0001, "beta2": 0.9999],
+    ["lr": 1e-4, "dropout": 0.1, "wd": 0.01, "beta2": 0.999],
+    ["lr": 1e-4, "dropout": 0.00001, "wd": 0.0001, "beta2": 0.9999],
     // ["lr": Float(5e-5)],
     // ["lr": Float(2e-5)],
     // ["lr": Float(1e-5)],
@@ -101,10 +101,10 @@ print("\nTraining Transformer for the Lang2motion task!")
 for runNum in 0..<runsSettings.count {
     let runSettings = runsSettings[runNum]
     print("runNum: \(runNum+1), runSettings: \(runSettings)")
-    let peakLearningRate = runSettings["lr"] as! Float
+    let peakLearningRate = Float(runSettings["lr"] as! Double)
     let dropoutProbability = runSettings["dropout"] as! Double
-    let weightDecayRate = runSettings["wd"] as! Float
-    let beta2 = runSettings["beta2"] as! Float
+    let weightDecayRate = Float(runSettings["wd"] as! Double)
+    let beta2 = Float(runSettings["beta2"] as! Double)
     
     let runName = "run_\(runNum+1)_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
