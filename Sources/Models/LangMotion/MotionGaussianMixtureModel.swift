@@ -42,16 +42,22 @@ public struct MotionGaussianMixtureModel: Module {
 
     @differentiable
     func fixMixtureWeightsStep(_ x: Tensor<Float>) -> Tensor<Float> {
-        // bs x input_size
-        var mixtureWeights = softmax(linearMixtureWeights(x), alongAxis: 1)
+        // x should be 1 x input_size
+        //var x = x.expandingShape(at: 0)
+        print("x.shape: \(x.shape)")
+        let y = linearMixtureWeights(x)
+        print("y.shape: \(y.shape)")
+        var mixtureWeights = softmax(y, alongAxis: 1)
 
         if mixtureWeights.isNaN.any() {
-            print("\nFixing NaNs")
+//            print("\nFixing NaNs")
             var divider = 1.0
             let double_x = Tensor<Double>(linearMixtureWeights(x))
             var count = 5
             while mixtureWeights.isNaN.any() && count>0 {
-                mixtureWeights = Tensor<Float>(softmax(double_x/divider, alongAxis: 1))
+                let y = double_x/divider
+                print("count: \(count), y.shape: \(y.shape)")
+                mixtureWeights = Tensor<Float>(softmax(y, alongAxis: 1))
                 divider *= 10.0
                 count = count - 1
             }
@@ -61,15 +67,23 @@ public struct MotionGaussianMixtureModel: Module {
 
     @differentiable
     func fixMixtureWeights(_ input: Tensor<Float>) -> Tensor<Float> {
+        print("input.shape: \(input.shape)")
+        let bs = input.shape[0]
         let targetLength = input.shape[1]
         // Run through mixture_model one time step at a time
         var all_outputs: [Tensor<Float>] = []
-        for t in 0..<targetLength {
-            let decoder_input: Tensor<Float> = input[0..., t]
-            let decoder_output = self.fixMixtureWeightsStep(decoder_input)
-            all_outputs.append(decoder_output)
+        for s in 0..<bs {
+            var sample_outputs: [Tensor<Float>] = []
+            for t in 0..<targetLength {
+                let decoder_input: Tensor<Float> = input[s, t].expandingShape(at: 0)
+                print("s: \(s), t: \(t), decoder_input.shape: \(decoder_input.shape)")
+                let decoder_output = self.fixMixtureWeightsStep(decoder_input)
+                sample_outputs.append(decoder_output)
+            }
+            let sample_outputs_struct = Tensor(stacking: sample_outputs, alongAxis: 1).squeezingShape(at: 0)
+            all_outputs.append(sample_outputs_struct)
         }
-        let all_outputs_struct = Tensor(stacking: all_outputs, alongAxis: 1)
+        let all_outputs_struct = Tensor(stacking: all_outputs, alongAxis: 0)
         return all_outputs_struct
     }
 
@@ -78,9 +92,10 @@ public struct MotionGaussianMixtureModel: Module {
         let mixtureMeans = timeDistributed(input, linearMixtureMeans.weight)
         let mixtureVars = softplus(timeDistributed(input, linearMixtureVars.weight))
         var mixtureWeights =  softmax(timeDistributed(input, linearMixtureWeights.weight), alongAxis: 2)
-        if mixtureWeights.isNaN.any() {
-            mixtureWeights = fixMixtureWeights(input)
-        }
+//        if mixtureWeights.isNaN.any() {
+//            print("\nFixing NaNs")
+//            mixtureWeights = fixMixtureWeights(input)
+//        }
         let stops = sigmoid(timeDistributed(input, linearStop.weight))
         return MixtureModelPreds(mixtureMeans: mixtureMeans, mixtureVars: mixtureVars, mixtureWeights: mixtureWeights, stops: stops)
     }
