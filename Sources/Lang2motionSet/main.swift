@@ -13,26 +13,22 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_12"
+let runSetName = "run_set_14"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 25
+let nEpochs = 100
 
 let datasetSize: DatasetSize = .small_micro
 let multiplyFactor = 50
 
+let commonRunsSettings: [String:Any] = [
+    "dropout": 0.00001, "wd": 0.0001, "beta2": 0.9999
+]
+
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    // ["lr": Float(1e-3)],
-    // ["lr": Float(5e-4)],
-    // ["lr": Float(2e-4)],
-    ["lr": 1e-4, "dropout": 0.1, "wd": 0.01, "beta2": 0.999],
-    ["lr": 1e-4, "dropout": 0.00001, "wd": 0.0001, "beta2": 0.9999],
-    // ["lr": Float(5e-5)],
-    // ["lr": Float(2e-5)],
-    // ["lr": Float(1e-5)],
-//    ["lr": Float(1e-6)],
+    ["lr": 2e-5],
 ]
 
 //print("runName: \(runName)")
@@ -54,8 +50,8 @@ let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-//let device = Device.defaultXLA
- let device = Device.defaultTFEager
+let device = Device.defaultXLA
+//  let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
@@ -94,19 +90,22 @@ var dataset = try Lang2Motion(
 
 print("Dataset acquired.")
 
+// vars used in extra.swift
 let nbJoints = 47
 let nbMixtures = 20
+var runName = ""
 
 print("\nTraining Transformer for the Lang2motion task!")
 for runNum in 0..<runsSettings.count {
-    let runSettings = runsSettings[runNum]
+    var runSettings = runsSettings[runNum]
+    runSettings = runSettings.merging(commonRunsSettings, uniquingKeysWith: { (first, _) in first })
     print("runNum: \(runNum+1), runSettings: \(runSettings)")
     let peakLearningRate = Float(runSettings["lr"] as! Double)
     let dropoutProbability = runSettings["dropout"] as! Double
     let weightDecayRate = Float(runSettings["wd"] as! Double)
     let beta2 = Float(runSettings["beta2"] as! Double)
     
-    let runName = "run_\(runNum+1)_\(peakLearningRate)"
+    runName = "run_\(runNum+1)_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
@@ -118,7 +117,8 @@ for runNum in 0..<runsSettings.count {
         sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500
     )
 
-    var model = LangMotionTransformer(config: config)
+    //var model = LangMotionTransformer(config: config)
+    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_13/checkpoints"), config: config, name: "run_3_2e-05.final")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
@@ -136,7 +136,7 @@ for runNum in 0..<runsSettings.count {
         validation: dataset.testBatches,
         optimizer: optimizerWrapper.optimizer,
         lossFunction: embeddedNormalMixtureSurrogateLoss,
-        callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater]
+        callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
     )
 
     try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
