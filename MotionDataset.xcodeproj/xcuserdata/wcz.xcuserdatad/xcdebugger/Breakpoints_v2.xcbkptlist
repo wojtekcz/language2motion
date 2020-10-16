@@ -97,5 +97,68 @@
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6046EE70-2D0C-426E-9202-FFCB9B1F0ACE"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Sources/Models/LangMotion/MotionGaussianMixtureModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "65"
+            endingLineNumber = "65"
+            landmarkName = "fixMixtureWeightsStep(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "6046EE70-2D0C-426E-9202-FFCB9B1F0ACE - f339f60aa73b9e1f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "LangMotionModels.MotionGaussianMixtureModel.fixMixtureWeightsStep(TensorFlow.Tensor&lt;Swift.Float&gt;) -&gt; TensorFlow.Tensor&lt;Swift.Float&gt;"
+                  moduleName = "LangMotionModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/LangMotion/MotionGaussianMixtureModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "60"
+                  endingLineNumber = "60"
+                  offsetFromSymbolStart = "2520">
+               </Location>
+               <Location
+                  uuid = "6046EE70-2D0C-426E-9202-FFCB9B1F0ACE - 70e869bd465b3aeb"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AD__$s16LangMotionModels0B20GaussianMixtureModelV03fixE11WeightsStepy10TensorFlow0J0VySfGAHF__vjp_src_0_wrt_0_1"
+                  moduleName = "LangMotionModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/LangMotion/MotionGaussianMixtureModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "60"
+                  endingLineNumber = "60"
+                  offsetFromSymbolStart = "4755">
+               </Location>
+               <Location
+                  uuid = "6046EE70-2D0C-426E-9202-FFCB9B1F0ACE - d22845308a60b28"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AD__$s16LangMotionModels0B20GaussianMixtureModelV03fixE11WeightsStepy10TensorFlow0J0VySfGAHF__pullback_src_0_wrt_0_1"
+                  moduleName = "LangMotionModels"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/Sources/Models/LangMotion/MotionGaussianMixtureModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "60"
+                  endingLineNumber = "60"
+                  offsetFromSymbolStart = "3729">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>
