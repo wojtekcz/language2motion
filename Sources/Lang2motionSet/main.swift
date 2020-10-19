@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_19"
+let runSetName = "run_set_20"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -28,13 +28,17 @@ let commonRunsSettings: [String:Any] = [
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
+    ["wd": 0.016],
+    ["wd": 0.08],
+    ["wd": 0.04],
+    ["wd": 0.02],
     ["wd": 0.01],
     ["wd": 0.001],
     ["wd": 0.0001],
     ["wd": 0.00001],
     ["wd": 0.000001],
     ["wd": 0.0000001],
-    ["wd": 0.0],"
+    ["wd": 0.0],
 ]
 
 //print("runName: \(runName)")
