@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_28"
+let runSetName = "run_set_29"
 let batchSize = 22
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -130,7 +130,7 @@ for runNum in 0..<runsSettings.count {
         peakLearningRate: peakLearningRate,
         beta1: beta1, beta2: beta2,
         weightDecayRate: weightDecayRate, // default 0.01
-        useBiasCorrection: useBiasCorrection, lrSlopeMultiplier: 2, nEpochs: nEpochs
+        useBiasCorrection: useBiasCorrection, lrSlopeMultiplier: lrSlopeMultiplier, nEpochs: nEpochs
     )
     optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize
 
