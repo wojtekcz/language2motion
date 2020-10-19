@@ -13,24 +13,23 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_25"
+let runSetName = "run_set_26"
 let batchSize = 22
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 10
+let nEpochs = 50
 
 let datasetSize: DatasetSize = .small_multi_micro
 let multiplyFactor = 50
+let lrSlopeMultiplier: Float = 1.5
 
 let commonRunsSettings: [String:Any] = [
-    "lr": 1e-4, "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "useBiasCorrection": false
+    "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "useBiasCorrection": false, "wd": 0.01
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["wd": 0.01],
-    ["wd": 0.001],
-    ["wd": 0.0001],
+    ["lr": 1e-4],
 ]
 
 //print("runName: \(runName)")
