@@ -115,7 +115,7 @@ for runNum in 0..<runsSettings.count {
     let weightDecayRate = Float(runSettings["wd"] as! Double)
     let beta2 = Float(runSettings["beta2"] as! Double)
     
-    runName = "run_\(runNum+1)_\(weightDecayRate)"
+    runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
