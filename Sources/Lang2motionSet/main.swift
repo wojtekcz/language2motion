@@ -13,27 +13,22 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_23"
-let batchSize = 2
+let runSetName = "run_set_24"
+let batchSize = 22
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 10
 
-let datasetSize: DatasetSize = .small_micro
+let datasetSize: DatasetSize = .small_multi_micro
 let multiplyFactor = 50
 
 let commonRunsSettings: [String:Any] = [
-    "lr": 1e-6, "dropout": 0.0, "beta1": 0.9, "wd": 0.01, "useBiasCorrection": false
+    "lr": 1e-6, "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": false
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["beta2": 0.9],
-    ["beta2": 0.99],
-    ["beta2": 0.999],
-    ["beta2": 0.9999],
-    ["beta2": 0.99999],
-    ["beta2": 1.0],
+    ["lr": 1e-4],
 ]
 
 //print("runName: \(runName)")
@@ -114,7 +109,8 @@ for runNum in 0..<runsSettings.count {
     
     // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
     // runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
-    runName = "run_\(runNum+1)_beta2_\(beta2)"
+    // runName = "run_\(runNum+1)_beta2_\(beta2)"
+    runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
@@ -126,8 +122,8 @@ for runNum in 0..<runsSettings.count {
         sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500
     )
 
-    //var model = LangMotionTransformer(config: config)
-    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_14/checkpoints"), config: config, name: "run_1_1e-05.e80")
+    var model = LangMotionTransformer(config: config)
+    // var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_14/checkpoints"), config: config, name: "run_1_1e-05.e80")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
