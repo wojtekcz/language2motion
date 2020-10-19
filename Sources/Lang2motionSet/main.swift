@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_21"
+let runSetName = "run_set_22"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -23,13 +23,17 @@ let datasetSize: DatasetSize = .small_micro
 let multiplyFactor = 50
 
 let commonRunsSettings: [String:Any] = [
-    "lr": 1e-6, "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "wd": 0.01
+    "lr": 1e-6, "dropout": 0.0, "beta1": 0.9, "wd": 0.01, "useBiasCorrection": true
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["useBiasCorrection": false],
-    ["useBiasCorrection": true],
+    ["beta2": 0.9],
+    ["beta2": 0.99],
+    ["beta2": 0.999],
+    ["beta2": 0.9999],
+    ["beta2": 0.99999],
+    ["beta2": 1.0],
 ]
 
 //print("runName: \(runName)")
@@ -109,7 +113,8 @@ for runNum in 0..<runsSettings.count {
     let useBiasCorrection = runSettings["useBiasCorrection"] as! Bool
     
     // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
-    runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
+    // runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
+    runName = "run_\(runNum+1)_beta2_\(beta2)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
