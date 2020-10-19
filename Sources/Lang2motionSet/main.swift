@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_20"
+let runSetName = "run_set_21"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -23,22 +23,13 @@ let datasetSize: DatasetSize = .small_micro
 let multiplyFactor = 50
 
 let commonRunsSettings: [String:Any] = [
-    "lr": 1e-6, "dropout": 0.0, "beta2": 0.9999
+    "lr": 1e-6, "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "wd": 0.01
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["wd": 0.016],
-    ["wd": 0.08],
-    ["wd": 0.04],
-    ["wd": 0.02],
-    ["wd": 0.01],
-    ["wd": 0.001],
-    ["wd": 0.0001],
-    ["wd": 0.00001],
-    ["wd": 0.000001],
-    ["wd": 0.0000001],
-    ["wd": 0.0],
+    ["useBiasCorrection": false],
+    ["useBiasCorrection": true],
 ]
 
 //print("runName: \(runName)")
@@ -113,9 +104,12 @@ for runNum in 0..<runsSettings.count {
     let peakLearningRate = Float(runSettings["lr"] as! Double)
     let dropoutProbability = runSettings["dropout"] as! Double
     let weightDecayRate = Float(runSettings["wd"] as! Double)
+    let beta1 = Float(runSettings["beta1"] as! Double)
     let beta2 = Float(runSettings["beta2"] as! Double)
+    let useBiasCorrection = runSettings["useBiasCorrection"] as! Bool
     
-    runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
+    // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
+    runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
@@ -132,9 +126,9 @@ for runNum in 0..<runsSettings.count {
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
-        beta1: 0.9, beta2: beta2,
+        beta1: beta1, beta2: beta2,
         weightDecayRate: weightDecayRate, // default 0.01
-        useBiasCorrection: false, lrSlopeMultiplier: 2, nEpochs: nEpochs
+        useBiasCorrection: useBiasCorrection, lrSlopeMultiplier: 2, nEpochs: nEpochs
     )
     optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize
 
