@@ -13,23 +13,23 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_31"
-let batchSize = 22
+let runSetName = "run_set_33"
+let batchSize = 200
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 50
 
-let datasetSize: DatasetSize = .small_multi_micro
-let multiplyFactor = 50
+let datasetSize: DatasetSize = .small_multi_midi
+let multiplyFactor = 10
 let lrSlopeMultiplier: Float = 1.1
 
 let commonRunsSettings: [String:Any] = [
-    "lr": 2e-6, "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "useBiasCorrection": false
+    "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": false
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["wd": 0.01],
+    ["lr": 1e-3],
 ]
 
 //print("runName: \(runName)")
@@ -51,8 +51,8 @@ let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
@@ -108,10 +108,10 @@ for runNum in 0..<runsSettings.count {
     let beta2 = Float(runSettings["beta2"] as! Double)
     let useBiasCorrection = runSettings["useBiasCorrection"] as! Bool
     
-    runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
+    // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
     // runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
     // runName = "run_\(runNum+1)_beta2_\(beta2)"
-    // runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
+    runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
@@ -123,8 +123,8 @@ for runNum in 0..<runsSettings.count {
         sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500
     )
 
-    // var model = LangMotionTransformer(config: config)
-    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_29/checkpoints"), config: config, name: "run_1_lr_1e-05.e50")
+    var model = LangMotionTransformer(config: config)
+    // var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_29/checkpoints"), config: config, name: "run_1_lr_1e-05.e50")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
