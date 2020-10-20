@@ -22,6 +22,7 @@ let nEpochs = 50
 let datasetSize: DatasetSize = .small_multi_midi
 let multiplyFactor = 10
 let lrSlopeMultiplier: Float = 1.1
+let fixedPeekLR: Bool = false
 
 let commonRunsSettings: [String:Any] = [
     "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": false
@@ -130,7 +131,8 @@ for runNum in 0..<runsSettings.count {
         peakLearningRate: peakLearningRate,
         beta1: beta1, beta2: beta2,
         weightDecayRate: weightDecayRate, // default 0.01
-        useBiasCorrection: useBiasCorrection, lrSlopeMultiplier: lrSlopeMultiplier, nEpochs: nEpochs
+        useBiasCorrection: useBiasCorrection, lrSlopeMultiplier: lrSlopeMultiplier, nEpochs: nEpochs,
+        fixedPeekLR: fixedPeekLR
     )
     optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize
 

@@ -13,8 +13,9 @@ public struct OptimizerOpts {
     public let lrSlopeMultiplier: Float
     public let nEpochs: Int
     public var stepsPerEpoch: Int
+    public let fixedPeekLR: Bool
     
-    public init(peakLearningRate: Float = 5e-4, beta1: Float = 0.9, beta2: Float = 0.999, weightDecayRate: Float, useBiasCorrection: Bool = false, lrSlopeMultiplier: Float = 1.0, nEpochs: Int = 10, stepsPerEpoch: Int = 1) {
+    public init(peakLearningRate: Float = 5e-4, beta1: Float = 0.9, beta2: Float = 0.999, weightDecayRate: Float, useBiasCorrection: Bool = false, lrSlopeMultiplier: Float = 1.0, nEpochs: Int = 10, stepsPerEpoch: Int = 1, fixedPeekLR: Bool = false) {
         self.peakLearningRate = peakLearningRate
         self.beta1 = beta1
         self.beta2 = beta2
@@ -23,6 +24,7 @@ public struct OptimizerOpts {
         self.lrSlopeMultiplier = lrSlopeMultiplier
         self.nEpochs = nEpochs
         self.stepsPerEpoch = stepsPerEpoch
+        self.fixedPeekLR = fixedPeekLR
     }
 }
 
@@ -45,12 +47,18 @@ public class OptimizerWrapper {
             )
         )
         
+        var slope = -(opts.peakLearningRate / Float(Float(opts.stepsPerEpoch) * Float(opts.nEpochs) * opts.lrSlopeMultiplier))  // The LR decays linearly to zero.
+        
+        if opts.fixedPeekLR {
+            slope = 0
+        }
+        
         self.scheduledLearningRate = LinearlyDecayedParameter(
           baseParameter: LinearlyWarmedUpParameter(
             baseParameter: FixedParameter<Float>(opts.peakLearningRate),
               warmUpStepCount: 20,
               warmUpOffset: 0),
-            slope: -(opts.peakLearningRate / Float(Float(opts.stepsPerEpoch) * Float(opts.nEpochs) * opts.lrSlopeMultiplier)),  // The LR decays linearly to zero.
+            slope: slope,
           startStep: 10
         )
     }
