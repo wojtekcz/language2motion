@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_33"
+let runSetName = "run_set_34"
 let batchSize = 200
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -29,7 +29,7 @@ let commonRunsSettings: [String:Any] = [
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["lr": 1e-3],
+    ["lr": 1e-4],
 ]
 
 //print("runName: \(runName)")
@@ -51,8 +51,8 @@ let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
