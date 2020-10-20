@@ -13,16 +13,16 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_34"
+let runSetName = "run_set_35"
 let batchSize = 200
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 50
+let nEpochs = 5
 
 let datasetSize: DatasetSize = .small_multi_midi
 let multiplyFactor = 10
 let lrSlopeMultiplier: Float = 1.1
-let fixedPeekLR: Bool = false
+let fixedPeekLR: Bool = true
 
 let commonRunsSettings: [String:Any] = [
     "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": false
@@ -31,6 +31,10 @@ let commonRunsSettings: [String:Any] = [
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
     ["lr": 1e-4],
+    ["lr": 5e-5],
+    ["lr": 1e-5],
+    ["lr": 5e-6],
+    ["lr": 1e-6],
 ]
 
 //print("runName: \(runName)")
@@ -124,8 +128,8 @@ for runNum in 0..<runsSettings.count {
         sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500
     )
 
-    var model = LangMotionTransformer(config: config)
-    // var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_29/checkpoints"), config: config, name: "run_1_lr_1e-05.e50")
+    // var model = LangMotionTransformer(config: config)
+    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_34/checkpoints"), config: config, name: "run_1_lr_0.0001.e50")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
