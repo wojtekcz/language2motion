@@ -13,11 +13,11 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_38"
+let runSetName = "run_set_40"
 let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
-let nEpochs = 100
+let nEpochs = 5
 
 let datasetSize: DatasetSize = .small_multi_midi
 let multiplyFactor = 10
@@ -25,12 +25,15 @@ let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 
 let commonRunsSettings: [String:Any] = [
-    "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": true
+    "lr": 1e-4, "dropout": 0.0, "beta1": 0.9, "wd": 0.01, "useBiasCorrection": true
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["lr": 1e-4],
+    ["beta2": 0.95],
+    ["beta2": 0.99],
+    ["beta2": 0.999],
+    ["beta2": 0.9999],
 ]
 
 //print("runName: \(runName)")
@@ -111,8 +114,8 @@ for runNum in 0..<runsSettings.count {
     
     // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
     // runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
-    // runName = "run_\(runNum+1)_beta2_\(beta2)"
-    runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
+    runName = "run_\(runNum+1)_beta2_\(beta2)"
+    // runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
@@ -125,7 +128,7 @@ for runNum in 0..<runsSettings.count {
     )
 
     // var model = LangMotionTransformer(config: config)
-    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_34/checkpoints"), config: config, name: "run_1_lr_0.0001.e50")
+    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_38/checkpoints"), config: config, name: "run_1_lr_0.0001.e100")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
