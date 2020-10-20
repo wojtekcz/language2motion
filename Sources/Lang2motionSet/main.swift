@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_35"
+let runSetName = "run_set_36"
 let batchSize = 200
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -25,7 +25,7 @@ let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 
 let commonRunsSettings: [String:Any] = [
-    "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": false
+    "dropout": 0.0, "beta1": 0.9, "beta2": 0.9999, "wd": 0.01, "useBiasCorrection": true
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
