@@ -13,8 +13,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_37"
-let batchSize = 200
+let runSetName = "run_set_38"
+let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
