@@ -128,9 +128,7 @@ for runNum in 0..<runsSettings.count {
     )
 
     // var model = LangMotionTransformer(config: config)
-    print(1)
     var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_38/checkpoints"), config: config, name: "run_1_lr_0.0001.e98")
-    print(2)
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
