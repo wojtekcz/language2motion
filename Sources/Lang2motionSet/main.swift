@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_41"
+let runSetName = "run_set_42"
 let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -25,13 +25,16 @@ let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 
 let commonRunsSettings: [String:Any] = [
-    "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "wd": 0.01, "useBiasCorrection": true,
+    "lr": 2e-5, "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "useBiasCorrection": true,
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["lr": 5e-5],
-    ["lr": 2e-5],
+    ["wd": 0.0],
+    ["wd": 0.0001],
+    ["wd": 0.001],
+    ["wd": 0.01],
+    ["wd": 0.1],
 ]
 
 //print("runName: \(runName)")
@@ -110,10 +113,10 @@ for runNum in 0..<runsSettings.count {
     let beta2 = Float(runSettings["beta2"] as! Double)
     let useBiasCorrection = runSettings["useBiasCorrection"] as! Bool
     
-    // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
+    runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
     // runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
     // runName = "run_\(runNum+1)_beta2_\(beta2)"
-    runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
+    // runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
     let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
     
     let config = LangMotionTransformerConfig(
