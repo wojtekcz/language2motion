@@ -76,7 +76,7 @@ public class MotionGenerationManager {
 //        epoch = 30
         
         let runName = "run_100_michal"
-        epoch = 87
+        epoch = 100
         
 
         let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
