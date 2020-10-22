@@ -13,14 +13,14 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_46"
-let batchSize = 22
+let runSetName = "run_set_47"
+let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
 
-let datasetSize: DatasetSize = .small_multi_micro
-let multiplyFactor = 50
+let datasetSize: DatasetSize = .small_multi_midi
+let multiplyFactor = 10
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 
