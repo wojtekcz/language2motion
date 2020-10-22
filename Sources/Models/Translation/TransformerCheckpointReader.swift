@@ -31,12 +31,12 @@ public protocol InitializableFromPythonCheckpoint {
     init(reader: CheckpointReader, config: ModelConfig, scope: String)
 }
 
-extension Dense: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension Dense {
+    public init(reader: CheckpointReader, config: ModelConfig, scope: String, activation: @escaping Dense<Scalar>.Activation = identity) {
         self.init(
             weight: reader.readTensor(name: scope + "/weight"),
             bias: reader.readTensor(name: scope + "/bias"),
-            activation: identity
+            activation: activation
         )
     }
 }
