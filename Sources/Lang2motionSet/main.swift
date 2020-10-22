@@ -121,7 +121,7 @@ for runNum in 0..<runsSettings.count {
         encoderDepth: 256, decoderDepth: 512, feedForwardSize: 2048,
         headCount: 16,
         dropoutProbability: dropoutProbability,
-        sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500
+        sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500, mixtureDepth: 1500
     )
 
     // var model = LangMotionTransformer(config: config)

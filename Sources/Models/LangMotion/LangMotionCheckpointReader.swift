@@ -53,13 +53,14 @@ extension LangMotionTransformer {
             let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: true, scope: scope + "/decoder")
             
             // generating
+            let _preMixtureDense = Dense<Float>(reader: reader, config: config, scope: scope + "/preMixtureDense")
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
 
             self.init(config: config,
                       langEmbedding: _langEmbedding, langPositionalEncoding: _langPositionalEncoding, encoder: _encoder,
                       motionDense: _motionDense, motionPositionalEncoding: _motionPositionalEncoding,
                       motionSegmentEmbedding: _motionSegmentEmbedding, motionNorm: _motionNorm, decoder: _decoder,
-                      mixtureModel: _mixtureModel)
+                      preMixtureDense: _preMixtureDense, mixtureModel: _mixtureModel)
         } catch {
             // If checkpoint is invalid, throw the error and exit.
             print("Fail to load LangMotionTransformer from checkpoint. \(error)")
