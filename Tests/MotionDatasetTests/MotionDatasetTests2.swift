@@ -71,6 +71,32 @@ class MotionDatasetTests2: XCTestCase {
         outputDataset.write(to: serializedDatasetURL)
     }
 
+    func getMainMotionSamples(nSamples: Int = 1, allSampleIDs: [Int], allMotionSamples: [MotionSample]) -> [MotionSample] {
+        var mainMotionSamples: [MotionSample] = []
+        for _ in 0..<nSamples {
+            let sampleID = allSampleIDs[Int.random(in: 0..<allSampleIDs.count)]
+            let filteredSamples = allMotionSamples.filter { $0.sampleID == sampleID }
+            let sample = filteredSamples[0]
+            mainMotionSamples.append(sample)
+        }
+        return mainMotionSamples
+    }
+
+    func getMultiMotionSamples(mainMotionSamples: [MotionSample], allMotionSamples: [MotionSample]) -> [MotionSample] {
+        var multiMotionSamples: [MotionSample] = []
+        for mainSample in mainMotionSamples {
+            let samples = allMotionSamples.filter { $0.sampleID == mainSample.sampleID && $0.annotations[0] == mainSample.annotations[0] }
+            multiMotionSamples.append(contentsOf: samples)
+        }
+        return multiMotionSamples
+    }
+
+    func writeDataset(datasetSize: DatasetSize, motionSamples: [MotionSample]) {
+        let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
+        let outputDataset = MotionDataset(datasetFolderURL: dataURL, motionSamples: motionSamples)
+        outputDataset.write(to: serializedDatasetURL)
+    }
+
     func testCreateSmallDatasets() throws {
         // create dataset with one sample repeated n times
         loadData(datasetSize: .multi_full, minMotionLength: 10, maxMotionLength: 50)
@@ -96,56 +122,79 @@ class MotionDatasetTests2: XCTestCase {
         //  10 - small_multi_mini
         // 100 - small_multi_midi
 
-        func getMainMotionSamples(nSamples: Int = 1) -> [MotionSample] {
-            var mainMotionSamples: [MotionSample] = []
-            for _ in 0..<nSamples {
-                let sampleID = allSampleIDs[Int.random(in: 0..<allSampleIDs.count)]
-                let filteredSamples = allMotionSamples.filter { $0.sampleID == sampleID }
-                let sample = filteredSamples[0]
-                mainMotionSamples.append(sample)
-            }
-            return mainMotionSamples
-        }
-
-        func getMultiMotionSamples(mainMotionSamples: [MotionSample]) -> [MotionSample] {
-            var multiMotionSamples: [MotionSample] = []
-            for mainSample in mainMotionSamples {
-                let samples = allMotionSamples.filter { $0.sampleID == mainSample.sampleID && $0.annotations[0] == mainSample.annotations[0] }
-                multiMotionSamples.append(contentsOf: samples)
-            }
-            return multiMotionSamples
-        }
-
-        func writeDataset(datasetSize: DatasetSize, motionSamples: [MotionSample]) {
-            let serializedDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
-            let outputDataset = MotionDataset(datasetFolderURL: dataURL, motionSamples: motionSamples)
-            outputDataset.write(to: serializedDatasetURL)
-        }
         var mainMotionSamples: [MotionSample] = []
         var multiMotionSamples: [MotionSample] = []
 
         // small_micro
-        mainMotionSamples = getMainMotionSamples(nSamples: 2)
+        mainMotionSamples = getMainMotionSamples(nSamples: 2, allSampleIDs: allSampleIDs, allMotionSamples: allMotionSamples)
         print("small_micro.unique: \(mainMotionSamples.count)")
         writeDataset(datasetSize: .small_micro, motionSamples: mainMotionSamples)
         
         // small_multi_micro
-        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples)
+        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples, allMotionSamples: allMotionSamples)
         print("small_multi_micro.multi: \(multiMotionSamples.count)")
         writeDataset(datasetSize: .small_multi_micro, motionSamples: multiMotionSamples)
         
         // small_multi_mini
-        mainMotionSamples = getMainMotionSamples(nSamples: 10)
+        mainMotionSamples = getMainMotionSamples(nSamples: 10, allSampleIDs: allSampleIDs, allMotionSamples: allMotionSamples)
         print("small_multi_mini.unique: \(mainMotionSamples.count)")
-        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples)
+        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples, allMotionSamples: allMotionSamples)
         print("small_multi_mini.multi: \(multiMotionSamples.count)")
         writeDataset(datasetSize: .small_multi_mini, motionSamples: multiMotionSamples)
 
         // small_multi_midi
-        mainMotionSamples = getMainMotionSamples(nSamples: 100)
+        mainMotionSamples = getMainMotionSamples(nSamples: 100, allSampleIDs: allSampleIDs, allMotionSamples: allMotionSamples)
         print("small_multi_midi.unique: \(mainMotionSamples.count)")
-        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples)
+        multiMotionSamples = getMultiMotionSamples(mainMotionSamples: mainMotionSamples, allMotionSamples: allMotionSamples)
         print("small_multi_midi.multi: \(multiMotionSamples.count)")
         writeDataset(datasetSize: .small_multi_midi, motionSamples: multiMotionSamples)
+    }
+    
+    func getMainMotionSamples(allSampleIDs: [Int], allMotionSamples: [MotionSample]) -> [MotionSample] {
+        var mainMotionSamples: [MotionSample] = []
+        for sampleID in allSampleIDs {
+            let filteredSamples = allMotionSamples.filter { $0.sampleID == sampleID }
+            let sample = filteredSamples[0]
+            mainMotionSamples.append(sample)
+        }
+        return mainMotionSamples
+    }
+
+    func testSupplementSmallDatasets() throws {
+        
+        // 10 samples from multiplied samples
+        // 100 samples from multiplied
+        
+        //  10 - small_mini
+        // 100 - small_midi
+
+        var mainMotionSamples: [MotionSample] = []
+
+        // small_mini
+
+        loadData(datasetSize: .small_multi_mini, minMotionLength: 10, maxMotionLength: 50)
+
+        var allMotionSamples = dataset!.motionSamples
+        print("allMotionSamples: \(allMotionSamples.count)")
+
+        var allSampleIDs: [Int] = Array(Set(allMotionSamples.map { $0.sampleID }))
+        print("allSampleIDs: \(allSampleIDs.count)")
+
+        mainMotionSamples = getMainMotionSamples(allSampleIDs: allSampleIDs, allMotionSamples: allMotionSamples)
+        print("small_mini.unique: \(mainMotionSamples.count)")
+        writeDataset(datasetSize: .small_mini, motionSamples: mainMotionSamples)
+
+        // small_midi
+        loadData(datasetSize: .small_multi_midi, minMotionLength: 10, maxMotionLength: 50)
+
+        allMotionSamples = dataset!.motionSamples
+        print("allMotionSamples: \(allMotionSamples.count)")
+
+        allSampleIDs = Array(Set(allMotionSamples.map { $0.sampleID }))
+        print("allSampleIDs: \(allSampleIDs.count)")
+
+        mainMotionSamples = getMainMotionSamples(allSampleIDs: allSampleIDs, allMotionSamples: allMotionSamples)
+        print("small_midi.unique: \(mainMotionSamples.count)")
+        writeDataset(datasetSize: .small_midi, motionSamples: mainMotionSamples)
     }
 }

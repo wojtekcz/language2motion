@@ -20,6 +20,8 @@ public enum DatasetSize: String {
     //  10 - small_multi_mini
     // 100 - small_multi_midi
     case small_micro = "small.micro."
+    case small_mini = "small.mini."
+    case small_midi = "small.midi."
     case small_multi_micro = "small.multi.micro."
     case small_multi_mini = "small.multi.mini."
     case small_multi_midi = "small.multi.midi."
