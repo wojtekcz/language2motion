@@ -1324,7 +1324,7 @@
 		32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangCheckpointReader.swift; sourceTree = "<group>"; };
 		32E04EAE2513F25E0077B28A /* MotionLangCheckpointWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangCheckpointWriter.swift; sourceTree = "<group>"; };
 		32E326E2252F35590088C8F8 /* TimeDistributed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeDistributed.swift; sourceTree = "<group>"; };
-		32EFE3BC2539839300CB719D /* Motion2langSet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Motion2langSet; sourceTree = BUILT_PRODUCTS_DIR; };
+		32EFE3BC2539839300CB719D /* Lang2motionSet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lang2motionSet; sourceTree = BUILT_PRODUCTS_DIR; };
 		32EFE414253983EC00CB719D /* extra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = extra.swift; sourceTree = "<group>"; };
 		32EFE415253983EC00CB719D /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		32EFE48E253984FE00CB719D /* Motion2langSet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Motion2langSet.entitlements; path = Motion2langSet/Motion2langSet.entitlements; sourceTree = "<group>"; };
@@ -1913,13 +1913,13 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		32EFE3BD2539839300CB719D /* Motion2langSet */ = {
+		32EFE3BD2539839300CB719D /* Lang2motionSet */ = {
 			isa = PBXGroup;
 			children = (
 				32EFE414253983EC00CB719D /* extra.swift */,
 				32EFE415253983EC00CB719D /* main.swift */,
 			);
-			name = Motion2langSet;
+			name = Lang2motionSet;
 			path = Sources/Lang2motionSet;
 			sourceTree = "<group>";
 		};
@@ -2303,7 +2303,7 @@
 				"MotionDataset::STBImage::Product" /* STBImage.framework */,
 				32FE043B253040340044128D /* test2.app */,
 				32B3D1A42535DEBA00866FA1 /* ImageSupportOSX.framework */,
-				32EFE3BC2539839300CB719D /* Motion2langSet */,
+				32EFE3BC2539839300CB719D /* Lang2motionSet */,
 			);
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -2453,7 +2453,7 @@
 				OBJ_89 /* ModelSupport */,
 				OBJ_106 /* Motion2label */,
 				OBJ_108 /* Motion2lang */,
-				32EFE3BD2539839300CB719D /* Motion2langSet */,
+				32EFE3BD2539839300CB719D /* Lang2motionSet */,
 				OBJ_110 /* MotionClassifiers */,
 				OBJ_114 /* MotionLangModels */,
 				OBJ_116 /* PreprocessMotionDataset */,
@@ -2597,9 +2597,9 @@
 			productReference = 32B3D1A42535DEBA00866FA1 /* ImageSupportOSX.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		32EFE3BB2539839300CB719D /* Motion2langSet */ = {
+		32EFE3BB2539839300CB719D /* Lang2motionSet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32EFE3C22539839300CB719D /* Build configuration list for PBXNativeTarget "Motion2langSet" */;
+			buildConfigurationList = 32EFE3C22539839300CB719D /* Build configuration list for PBXNativeTarget "Lang2motionSet" */;
 			buildPhases = (
 				32EFE3B82539839300CB719D /* Sources */,
 				32EFE3B92539839300CB719D /* Frameworks */,
@@ -2614,9 +2614,9 @@
 				32EFE4E62539869B00CB719D /* PBXTargetDependency */,
 				32EFE4E42539869400CB719D /* PBXTargetDependency */,
 			);
-			name = Motion2langSet;
+			name = Lang2motionSet;
 			productName = Motion2langSet;
-			productReference = 32EFE3BC2539839300CB719D /* Motion2langSet */;
+			productReference = 32EFE3BC2539839300CB719D /* Lang2motionSet */;
 			productType = "com.apple.product-type.tool";
 		};
 		32FE043A253040340044128D /* test2 */ = {
@@ -3190,7 +3190,7 @@
 				"MotionDataset::ModelSupport" /* ModelSupport */,
 				"MotionDataset::Motion2label" /* Motion2label */,
 				"MotionDataset::Motion2lang" /* Motion2lang */,
-				32EFE3BB2539839300CB719D /* Motion2langSet */,
+				32EFE3BB2539839300CB719D /* Lang2motionSet */,
 				"MotionDataset::MotionClassifiers" /* MotionClassifiers */,
 				"MotionDataset::SwiftPMPackageDescription" /* MotionDatasetPackageDescription */,
 				"MotionDataset::MotionDatasetPackageTests::ProductTarget" /* MotionDatasetPackageTests */,
@@ -6084,7 +6084,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32EFE3C22539839300CB719D /* Build configuration list for PBXNativeTarget "Motion2langSet" */ = {
+		32EFE3C22539839300CB719D /* Build configuration list for PBXNativeTarget "Lang2motionSet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32EFE3C02539839300CB719D /* Debug */,

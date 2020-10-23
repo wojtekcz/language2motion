@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "32EFE3BB2539839300CB719D"
-               BuildableName = "Motion2langSet"
-               BlueprintName = "Motion2langSet"
+               BuildableName = "Lang2motionSet"
+               BlueprintName = "Lang2motionSet"
                ReferencedContainer = "container:MotionDataset.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32EFE3BB2539839300CB719D"
-            BuildableName = "Motion2langSet"
-            BlueprintName = "Motion2langSet"
+            BuildableName = "Lang2motionSet"
+            BlueprintName = "Lang2motionSet"
             ReferencedContainer = "container:MotionDataset.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32EFE3BB2539839300CB719D"
-            BuildableName = "Motion2langSet"
-            BlueprintName = "Motion2langSet"
+            BuildableName = "Lang2motionSet"
+            BlueprintName = "Lang2motionSet"
             ReferencedContainer = "container:MotionDataset.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
