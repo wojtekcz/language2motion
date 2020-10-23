@@ -13,19 +13,19 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_51"
-let batchSize = 2
+let runSetName = "run_set_52"
+let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
 
-let datasetSize: DatasetSize = .small_micro
+let datasetSize: DatasetSize = .small_midi
 let multiplyFactor = 100
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 
 let commonRunsSettings: [String:Any] = [
-    "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "wd": 0.0, "useBiasCorrection": true,
+    "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "wd": 0.0001, "useBiasCorrection": true,
 ]
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
@@ -125,7 +125,8 @@ for runNum in 0..<runsSettings.count {
     )
 
     //  var model = LangMotionTransformer(config: config)
-   var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_50/checkpoints"), config: config, name: "run_1_lr_2e-05.e14")
+   var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_47x/run_set_48/checkpoints"), config: config, name: "run_1_lr_1e-05.e42")
+//    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_47x/run_set_47/checkpoints"), config: config, name: "run_1_lr_0.0001.e100")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
