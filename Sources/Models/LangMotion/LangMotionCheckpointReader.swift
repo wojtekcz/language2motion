@@ -46,14 +46,14 @@ extension LangMotionTransformer {
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
 
             // decoding
-            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense", activation: relu)
+            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense", activation: swish)
             let _motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
             let _motionSegmentEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/motionSegmentEmbedding")
             let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
             let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: true, scope: scope + "/decoder")
             
             // generating
-            let _preMixtureDense = Dense<Float>(reader: reader, config: config, scope: scope + "/preMixtureDense", activation: relu)
+            let _preMixtureDense = Dense<Float>(reader: reader, config: config, scope: scope + "/preMixtureDense", activation: swish)
             let _mixtureModel = MotionGaussianMixtureModel(reader: reader, config: config, scope: scope + "/mixtureModel")
 
             self.init(config: config,

@@ -89,7 +89,7 @@ public struct LangMotionTransformer: Module {
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
 
         // decoding motion
-        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: relu)
+        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: swish)
         self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
 
         // The token type vocabulary will always be small and so we use the one-hot approach here
@@ -116,7 +116,7 @@ public struct LangMotionTransformer: Module {
         self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount, derivativeAllLayers: true)
 
         // generating motion
-        self.preMixtureDense = Dense<Float>(inputSize: config.decoderDepth, outputSize: config.mixtureDepth, activation: relu)
+        self.preMixtureDense = Dense<Float>(inputSize: config.decoderDepth, outputSize: config.mixtureDepth, activation: swish)
         //config.decoderDepth*config.layerCount
         self.mixtureModel = MotionGaussianMixtureModel(inputSize: config.mixtureDepth, nbJoints: config.nbJoints, nbMixtures: config.nbMixtures)
     }

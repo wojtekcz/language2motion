@@ -144,7 +144,7 @@ public struct PositionwiseFeedForward: Layer {
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        return relu(dense1(input)).sequenced(through: dense2, dropout)
+        return swish(dense1(input)).sequenced(through: dense2, dropout)
     }
 }
 
