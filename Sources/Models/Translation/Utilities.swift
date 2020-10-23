@@ -129,22 +129,25 @@ public struct PositionwiseFeedForward: Layer {
     public var dense1: Dense<Float>
     public var dense2: Dense<Float>
     @noDerivative public let dropout: Dropout<Float>
+    @noDerivative public let activation: Activation<Float>
     
-    public init(dimensionalityModel:Int, innerLayerDimensionality:Int, dropProbability: Double=0.1) {
+    public init(dimensionalityModel:Int, innerLayerDimensionality:Int, dropProbability: Double=0.1, activation: @escaping Activation<Float>) {
         dense1 = Dense(inputSize: dimensionalityModel, outputSize: innerLayerDimensionality, weightInitializer: glorotUniform())
         dense2 = Dense(inputSize: innerLayerDimensionality, outputSize: dimensionalityModel, weightInitializer: glorotUniform())
         dropout = Dropout<Float>(probability: dropProbability)
+        self.activation = activation
     }
 
-    public init(dense1: Dense<Float>, dense2: Dense<Float>, dropout: Dropout<Float>) {
+    public init(dense1: Dense<Float>, dense2: Dense<Float>, dropout: Dropout<Float>, activation: @escaping Activation<Float>) {
         self.dense1 = dense1
         self.dense2 = dense2
         self.dropout = dropout
+        self.activation = activation
     }
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> Tensor<Float> {
-        return relu(dense1(input)).sequenced(through: dense2, dropout)
+        return activation(dense1(input)).sequenced(through: dense2, dropout)
     }
 }
 

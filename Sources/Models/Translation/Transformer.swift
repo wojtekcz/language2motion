@@ -24,7 +24,7 @@ public struct TransformerModel: Module {
                                            headSize: modelSize/headCount,
                                            matrixResult: false)
         let feedForward = PositionwiseFeedForward(dimensionalityModel: modelSize,
-                                                  innerLayerDimensionality: feedForwardSize)
+                                                  innerLayerDimensionality: feedForwardSize, activation: relu)
         
         let positionalEncoding = PositionalEncoding(size: modelSize,
                                                     dropoutProbability: dropoutProbability)

@@ -91,12 +91,13 @@ extension MultiHeadAttention {
     }
 }
 
-extension PositionwiseFeedForward: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension PositionwiseFeedForward {
+    public init(reader: CheckpointReader, config: ModelConfig, scope: String, activation: @escaping Activation<Float>) {
         self.init(
             dense1: Dense<Float>(reader: reader, config: config, scope: scope + "/dense1"),
             dense2: Dense<Float>(reader: reader, config: config, scope: scope + "/dense2"),
-            dropout: Dropout<Float>(probability: config.dropoutProbability)
+            dropout: Dropout<Float>(probability: config.dropoutProbability),
+            activation: activation
         )
     }
 }
@@ -118,8 +119,8 @@ extension SublayerConnection: InitializableFromPythonCheckpoint {
     }
 }
 
-extension TransformerEncoderLayer2: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension TransformerEncoderLayer2 {
+    public init(reader: CheckpointReader, config: ModelConfig, scope: String, activation: @escaping Activation<Float>) {
 
         let selfAttConfig = AttentionConfig(
             sourceSize: config.encoderDepth,
@@ -131,7 +132,7 @@ extension TransformerEncoderLayer2: InitializableFromPythonCheckpoint {
         )
         
         let _selfAttention = MultiHeadAttention(reader: reader, config: selfAttConfig, scope: scope + "/selfAttention")
-        let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward")
+        let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward", activation: activation)
         let _sublayers = (0..<2).map { i in
             SublayerConnection(reader: reader, config: config, scope: scope + "/sublayers/SublayerConnection_h\(i)")
         }
@@ -143,18 +144,18 @@ extension TransformerEncoderLayer2: InitializableFromPythonCheckpoint {
     }
 }
 
-extension Encoder: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension Encoder {
+    public init(reader: CheckpointReader, config: ModelConfig, scope: String, activation: @escaping Activation<Float>) {
         let _layers = (0..<config.layerCount).map { i in
-            TransformerEncoderLayer2(reader: reader, config: config, scope: scope + "/layers/TransformerEncoderLayer2_h\(i)")
+            TransformerEncoderLayer2(reader: reader, config: config, scope: scope + "/layers/TransformerEncoderLayer2_h\(i)", activation: activation)
         }
         let _norm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/norm", axis: 2, epsilon: 0.001)
         self.init(layers: _layers, norm: _norm)
     }
 }
 
-extension TransformerDecoderLayer: InitializableFromPythonCheckpoint {
-    public init(reader: CheckpointReader, config: ModelConfig, scope: String) {
+extension TransformerDecoderLayer {
+    public init(reader: CheckpointReader, config: ModelConfig, scope: String, activation: @escaping Activation<Float>) {
         let selfAttConfig = AttentionConfig(
             sourceSize: config.decoderDepth,
             targetSize: config.decoderDepth,
@@ -175,7 +176,7 @@ extension TransformerDecoderLayer: InitializableFromPythonCheckpoint {
 
         let _selfAttention = MultiHeadAttention(reader: reader, config: selfAttConfig, scope: scope + "/selfAttention")
         let _sourceAttention = MultiHeadAttention(reader: reader, config: sourceAttConfig, scope: scope + "/sourceAttention")
-        let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward")
+        let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward", activation: activation)
         let _sublayers = (0..<3).map { i in
             SublayerConnection(reader: reader, config: config, scope: scope + "/sublayers/SublayerConnection_h\(i)")
         }
@@ -189,9 +190,9 @@ extension TransformerDecoderLayer: InitializableFromPythonCheckpoint {
 }
 
 extension Decoder {
-    public init(reader: CheckpointReader, config: ModelConfig, derivativeAllLayers: Bool, scope: String) {
+    public init(reader: CheckpointReader, config: ModelConfig, derivativeAllLayers: Bool, scope: String, activation: @escaping Activation<Float>) {
         let _layers = (0..<config.layerCount).map { i in
-            TransformerDecoderLayer(reader: reader, config: config, scope: scope + "/layers/TransformerDecoderLayer_h\(i)")
+            TransformerDecoderLayer(reader: reader, config: config, scope: scope + "/layers/TransformerDecoderLayer_h\(i)", activation: activation)
         }
         let _norm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/norm", axis: 2, epsilon: 0.001)
         self.init(layers: _layers, norm: _norm, derivativeAllLayers: derivativeAllLayers)
