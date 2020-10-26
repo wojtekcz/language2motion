@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runSetName = "run_set_54"
+let runSetName = "run_set_55"
 let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -30,7 +30,7 @@ let commonRunsSettings: [String:Any] = [
 
 // peek LR for new training: 1e-3, for resuming: 5e-4 (for full dataset)
 let runsSettings: [[String:Any]] = [
-    ["lr": 1e-4],
+    ["lr": 1e-5],
 ]
 
 //print("runName: \(runName)")
@@ -128,8 +128,8 @@ for runNum in 0..<runsSettings.count {
         activation: swish
     )
 
-    var model = LangMotionTransformer(config: config)
-    // var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_47x/run_set_48/checkpoints"), config: config, name: "run_1_lr_1e-05.e42")
+    // var model = LangMotionTransformer(config: config)
+    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_54/checkpoints"), config: config, name: "run_1.e100")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
