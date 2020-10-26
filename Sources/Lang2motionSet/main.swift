@@ -109,12 +109,15 @@ for runNum in 0..<runsSettings.count {
     let beta2 = Float(runSettings["beta2"] as! Double)
     let useBiasCorrection = runSettings["useBiasCorrection"] as! Bool
     
-    // runName = "run_\(runNum+1)_wd_\(weightDecayRate)"
-    // runName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
-    // runName = "run_\(runNum+1)_beta2_\(beta2)"
-    runName = "run_\(runNum+1)_lr_\(peakLearningRate)"
-    let rundirURL = runSetURL.appendingPathComponent(runName, isDirectory: true)
-    
+    var rundirName = ""
+    rundirName = "run_\(runNum+1)_lr_\(peakLearningRate)"
+    // rundirName = "run_\(runNum+1)_wd_\(weightDecayRate)"
+    // rundirName = "run_\(runNum+1)_bcor_\(useBiasCorrection)"
+    // rundirName = "run_\(runNum+1)_beta2_\(beta2)"
+    rundirName = "run_\(runNum+1)_lr_\(peakLearningRate)"
+    let rundirURL = runSetURL.appendingPathComponent(rundirName, isDirectory: true)
+    runName = "run_\(runNum+1)"
+
     let config = LangMotionTransformerConfig(
         vocabSize: vocabulary.count, nbJoints: 47, nbMixtures: 20,
         layerCount: 6,
