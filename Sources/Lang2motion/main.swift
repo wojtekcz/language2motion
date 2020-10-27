@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_115"
+let runName = "run_116"
 let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -24,7 +24,7 @@ let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 let peakLearningRate: Float = 5e-6
 let useBiasCorrection: Bool = true
-let weightDecayRate: Float = 0.0001
+let weightDecayRate: Float = 0.0
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
 
