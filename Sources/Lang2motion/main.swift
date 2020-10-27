@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_113"
+let runName = "run_114"
 let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -22,7 +22,7 @@ let multiplyFactor = 100
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 1e-4
+let peakLearningRate: Float = 1e-5
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.0001
 let beta2: Float = 0.99
@@ -124,10 +124,10 @@ let config = LangMotionTransformerConfig(
 )
 
 /// create new model
-var model = LangMotionTransformer(config: config)
+// var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-//var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_94/checkpoints"), config: config, name: "model.e30")
+var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_113/checkpoints"), config: config, name: "model.e100")
 
 // Loss function
 let args = LossArgs(
