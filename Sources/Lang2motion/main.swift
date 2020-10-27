@@ -105,7 +105,9 @@ let config = LangMotionTransformerConfig(
     headCount: 16,
     dropoutProbability: 0.0,
     sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500
+    motionMaxPositionalLength: 500,
+    mixtureDepth: 1500,
+    activation: relu
 )
 
 /// create new model

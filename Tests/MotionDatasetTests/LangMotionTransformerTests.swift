@@ -77,7 +77,8 @@ class LangMotionTransformerTests: XCTestCase {
             dropoutProbability:  0.1,
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
-            mixtureDepth: 1500
+            mixtureDepth: 1500,
+            activation: relu
         )
 
         return LangMotionTransformer(config: config)
