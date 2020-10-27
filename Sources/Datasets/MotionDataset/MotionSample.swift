@@ -8,6 +8,7 @@ public struct MotionSample: Codable {
 
     public let timesteps: Tensor<Float> // 1D, time steps
     public var motion: Tensor<Float> // 2D, [motion frames x joint positions], without motion flag
+    public var discreteMotion: Tensor<Int32>? = nil // motion frames x joint positions
 
     enum CodingKeys: String, CodingKey {
         case sampleID

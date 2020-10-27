@@ -13,15 +13,17 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_96"
-let batchSize = 25
+let runName = "run_110"
+let batchSize = 2
 let maxTextSequenceLength =  40
-let maxMotionLength =  150
+let maxMotionLength =  50
 let nEpochs = 30
+let multiplyFactor = 30
+let discreteBins = 10
 
 // peek LR for new training: 1e-3, for resuming: 5e-4
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 5e-5,
+    peakLearningRate: 1e-4,
     beta1: 0.9,
     beta2: 0.999,
     weightDecayRate: 0.0, // default 0.01
@@ -30,7 +32,7 @@ var optimizerOpts = OptimizerOpts(
     nEpochs: nEpochs
 )
 
-let datasetSize: DatasetSize = .multi_mini
+let datasetSize: DatasetSize = .small_micro
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -59,8 +61,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+//let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
@@ -69,6 +71,7 @@ let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
 let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
+var discretizer = MotionDiscretizer(n_bins: discreteBins)
 
 
 /// load dataset
@@ -78,12 +81,14 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     minMotionLength: 10,
-    maxMotionLength: 150,
+    maxMotionLength: 50,
+    multiplyFactor: multiplyFactor,
+    discretizer: &discretizer,
     trainTestSplit: 1.0,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
 
     let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
     let singleBatch = LangMotionBatch(data: source, label: target)
@@ -107,14 +112,14 @@ let config = LangMotionTransformerConfig(
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
     mixtureDepth: 1500,
-    activation: relu
+    activation: swish
 )
 
 /// create new model
-//var model = LangMotionTransformer(config: config)
+var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_94/checkpoints"), config: config, name: "model.e30")
+//var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_94/checkpoints"), config: config, name: "model.e30")
 
 // Loss function
 let args = LossArgs(

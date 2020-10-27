@@ -64,6 +64,7 @@ public struct LangMotionTransformer: Module {
     public var encoder: Encoder
 
     // decoding motion
+    public var jointEmbedding: Embedding<Float>
     public var motionDense: Dense<Float>
     public var motionPositionalEncoding: PositionalEncoding
     public var motionSegmentEmbedding: Embedding<Float>
@@ -91,7 +92,12 @@ public struct LangMotionTransformer: Module {
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
 
         // decoding motion
-        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: config.activation)
+        // TODO: parametrize jointEmbedding: discreteBins, jointEmbeddingSize
+        let discreteBins = 300
+        let jointEmbeddingSize = 5
+        self.jointEmbedding = Embedding<Float>(vocabularySize: discreteBins, embeddingSize: jointEmbeddingSize, embeddingsInitializer: glorotUniform())
+        self.motionDense = Dense<Float>(inputSize: config.nbJoints*jointEmbeddingSize, outputSize: config.decoderDepth, activation: config.activation)
+//        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: config.activation)
         self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
 
         // The token type vocabulary will always be small and so we use the one-hot approach here
@@ -149,9 +155,17 @@ public struct LangMotionTransformer: Module {
         let shape = motionPart.motion.shape
         let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
 
+        // squeeze all joint values in a batch into first dimension
+        let jointEmbeddingSize = 5
+        let embeddedJointValues = jointEmbedding(motionPart.discreteMotion.flattened().expandingShape(at: 0)).reshaped(to: [origBatchSize, numFrames, nbJoints, jointEmbeddingSize])
+        
+        let embeddedMotion = embeddedJointValues.reshaped(to: [origBatchSize, numFrames, nbJoints * jointEmbeddingSize])
+
         // squeeze all frames in a batch into first dimension
-        let tmpMotionFrames = motionPart.motion.reshaped(to: [origBatchSize*numFrames, nbJoints])
-        let tmpMotionFeatures = motionDense(tmpMotionFrames) // 47 -> decoderDepth
+        let tmpMotionFrames = embeddedMotion.reshaped(to: [origBatchSize*numFrames, nbJoints*jointEmbeddingSize])
+//        let tmpMotionFrames = motionPart.motion.reshaped(to: [origBatchSize*numFrames, nbJoints])
+
+        let tmpMotionFeatures = motionDense(tmpMotionFrames) // 47 -> decoderDepth, or 47x5 -> decoderDepth
         // unsqueeze back to bs x numFrames
         var motionFeatures = tmpMotionFeatures.reshaped(to: [origBatchSize, numFrames, config.decoderDepth])
 
@@ -170,7 +184,7 @@ extension LangMotionTransformer {
 
     public init(config: LangMotionTransformerConfig,
                 langEmbedding: Embedding<Float>, langPositionalEncoding: PositionalEncoding, encoder: Encoder,
-                motionDense: Dense<Float>, motionPositionalEncoding: PositionalEncoding, motionSegmentEmbedding: Embedding<Float>,
+                jointEmbedding: Embedding<Float>, motionDense: Dense<Float>, motionPositionalEncoding: PositionalEncoding, motionSegmentEmbedding: Embedding<Float>,
                 motionNorm: LayerNorm<Float>, decoder: Decoder, preMixtureDense: Dense<Float>,
                 mixtureModel: MotionGaussianMixtureModel
     ) {
@@ -180,6 +194,7 @@ extension LangMotionTransformer {
         self.langPositionalEncoding = langPositionalEncoding
         self.encoder = encoder
 
+        self.jointEmbedding = jointEmbedding
         self.motionDense = motionDense
         self.motionPositionalEncoding = motionPositionalEncoding
         self.motionSegmentEmbedding = motionSegmentEmbedding

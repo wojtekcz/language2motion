@@ -10,6 +10,7 @@ extension LangMotionTransformer: ExportableLayer {
         [
             "langEmbedding": "langEmbedding",
             "encoder": "encoder",
+            "jointEmbedding": "jointEmbedding",
             "motionDense": "motionDense",
             "motionSegmentEmbedding": "motionSegmentEmbedding",
             "motionNorm": "motionNorm",

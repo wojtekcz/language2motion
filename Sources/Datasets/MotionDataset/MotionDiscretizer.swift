@@ -14,6 +14,10 @@ public struct MotionDiscretizer {
         fit(X)
     }
 
+    public init(n_bins: Int = 300) {
+        discretizer = preprocessing.KBinsDiscretizer(n_bins: n_bins, encode: "ordinal", strategy: strategy)
+    }
+
     public mutating func fit(_ X: Tensor<Float>) {
         discretizer.fit(X.flattened().expandingShape(at: 1).makeNumpyArray())
     }

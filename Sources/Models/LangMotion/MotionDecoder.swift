@@ -127,7 +127,8 @@ public class MotionDecoder {
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
             var segmentIDs = Tensor<Int32>(repeating: LangMotionBatch.MotionSegment.motion.rawValue, shape: [1, ys.shape[1]]).expandingShape(at: 2)
             segmentIDs[0, 0, 0] = Tensor<Int32>(LangMotionBatch.MotionSegment.start.rawValue)
-            let motionPart = LangMotionBatch.MotionPart(motion: ys, decSelfAttentionMask: motionPartMask,
+            // TODO: prepare discreteMotion
+            let motionPart = LangMotionBatch.MotionPart(motion: ys, discreteMotion: Tensor<Int32>([[0]]), decSelfAttentionMask: motionPartMask,
                                                         motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: segmentIDs)
 
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)

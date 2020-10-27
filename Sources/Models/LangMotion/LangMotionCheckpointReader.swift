@@ -46,6 +46,7 @@ extension LangMotionTransformer {
             let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder", activation: config.activation)
 
             // decoding
+            let _jointEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/jointEmbedding")
             let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense", activation: config.activation)
             let _motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
             let _motionSegmentEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/motionSegmentEmbedding")
@@ -58,7 +59,7 @@ extension LangMotionTransformer {
 
             self.init(config: config,
                       langEmbedding: _langEmbedding, langPositionalEncoding: _langPositionalEncoding, encoder: _encoder,
-                      motionDense: _motionDense, motionPositionalEncoding: _motionPositionalEncoding,
+                      jointEmbedding: _jointEmbedding, motionDense: _motionDense, motionPositionalEncoding: _motionPositionalEncoding,
                       motionSegmentEmbedding: _motionSegmentEmbedding, motionNorm: _motionNorm, decoder: _decoder,
                       preMixtureDense: _preMixtureDense, mixtureModel: _mixtureModel)
         } catch {

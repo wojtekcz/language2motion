@@ -13,6 +13,7 @@ public struct Lang2Motion {
 
     public let motionDataset: MotionDataset
     public let scaler: Scaler
+    public var discretizer: MotionDiscretizer
 
     public let motionSamples: [MotionSample]
     public let langRecs: [LangRec]
@@ -45,6 +46,7 @@ extension Lang2Motion {
         minMotionLength: Int = 10,
         maxMotionLength: Int = 100,
         multiplyFactor: Int = 1,
+        discretizer: inout MotionDiscretizer,
         trainTestSplit: Double = 0.8,
         device: Device,
         exampleMap: @escaping (MotionSample) -> LangMotionBatch
@@ -71,12 +73,32 @@ extension Lang2Motion {
         let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
         let scaledMotions = motions.map { _scaler.transform($0) }
 
-        for idx in 0..<_motionSamples.count {
-            _motionSamples[idx].motion = scaledMotions[idx]
-        }
+//        for idx in 0..<_motionSamples.count {
+//            _motionSamples[idx].motion = scaledMotions[idx]
+//        }
         scaler = _scaler
         print("Motions scaled.")
 
+        // discretize motions
+        //let _discretizer = MotionDiscretizer(n_bins: discreteBins, X: Tensor(concatenating: scaledMotions, alongAxis: 0))
+        discretizer.fit(Tensor(concatenating: scaledMotions, alongAxis: 0))
+        print("discretizing...")
+        let discreteMotions = scaledMotions.map { discretizer.transform($0) }
+        print("discreteMotions.count: \(discreteMotions.count)")
+        // print("inversing...")
+         let inversedMotions = discreteMotions.map { discretizer.inverse_transform($0) }
+
+        for idx in 0..<_motionSamples.count {
+            _motionSamples[idx].discreteMotion = discreteMotions[idx]
+        }
+
+        // scaled and discretized
+        for idx in 0..<_motionSamples.count {
+            _motionSamples[idx].motion = inversedMotions[idx]
+        }
+        
+        self.discretizer = discretizer
+        
         // get all annotations from motionSamples
         var _motionSamplesWithDistinctAnnotations: [MotionSample] = []
 
