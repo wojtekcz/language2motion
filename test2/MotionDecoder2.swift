@@ -69,8 +69,9 @@ public class MotionDecoder2 {
 
             // let mixtureModelInput = Tensor<Float>(concatenating: decoded.allResults, alongAxis: 2)
             let mixtureModelInput = decoded.lastLayerOutput
-            let mixtureModelInput2 = mixtureModelInput[0...,-1].expandingShape(at: 0)
-            let singlePreds = transformer.mixtureModel(mixtureModelInput2)
+            let mixtureModelInput2 = mixtureModelInput[0...,-1].expandingShape(at: 0)//.expandingShape(at: 1)
+            let mixtureModelInput3 = transformer.preMixtureDense(mixtureModelInput2)
+            let singlePreds = transformer.mixtureModel(mixtureModelInput3)
             
             // perform sampling
             // let (sampledMotion, log_probs, done) = MotionDecoder.performNormalMixtureSampling(

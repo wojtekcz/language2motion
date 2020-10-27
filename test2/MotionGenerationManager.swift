@@ -50,7 +50,7 @@ public class MotionGenerationManager {
         dataset = try! Lang2Motion(
             motionDatasetURL: motionDatasetURL,
             batchSize: batchSize,
-            minMotionLength: 20,
+            minMotionLength: 10,
             maxMotionLength: 150,
             trainTestSplit: 1.0,
             device: device
@@ -75,11 +75,15 @@ public class MotionGenerationManager {
 //        let runName = "run_80"
 //        epoch = 30
         
-        let runName = "run_100_michal"
-        epoch = 100
-        
+//        let runName = "run_100_michal"
+//        epoch = 100
 
-        let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
+        let runName = "run_set_57"
+        epoch = 56
+
+
+//        let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
+        let runURL = dataURL.appendingPathComponent("runs/Lang2motionSet/\(runName)", isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
@@ -95,11 +99,14 @@ public class MotionGenerationManager {
             headCount: 16,
             dropoutProbability:  0.1,
             sentenceMaxPositionalLength: 100,
-            motionMaxPositionalLength: 500
+            motionMaxPositionalLength: 500,
+            mixtureDepth: 1500,
+            activation: swish
         )
 
-        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(epoch)")
-        print("Loaded.")
+//        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(epoch)")
+        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "run_1.e\(epoch)")
+       print("Loaded.")
         
     }
     
