@@ -13,26 +13,34 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_110"
-let batchSize = 2
+let runName = "run_111"
+let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 30
-let multiplyFactor = 30
-let discreteBins = 10
+let multiplyFactor = 100
+let discreteBins = 300
+let lrSlopeMultiplier: Float = 1.1
+let fixedPeekLR: Bool = true
+let peakLearningRate: Float = 1e-4
+let useBiasCorrection: Bool = true
+let weightDecayRate: Float = 0.0001
+let beta2: Float = 0.99
+let dropoutProbability: Double = 0.0
 
 // peek LR for new training: 1e-3, for resuming: 5e-4
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 1e-4,
+    peakLearningRate: peakLearningRate,
     beta1: 0.9,
-    beta2: 0.999,
-    weightDecayRate: 0.0, // default 0.01
-    useBiasCorrection: false,
-    lrSlopeMultiplier: 2,
-    nEpochs: nEpochs
+    beta2: beta2,
+    weightDecayRate: weightDecayRate, // default 0.01
+    useBiasCorrection: useBiasCorrection,
+    lrSlopeMultiplier: lrSlopeMultiplier,
+    nEpochs: nEpochs,
+    fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .small_micro
+let datasetSize: DatasetSize = .small_midi
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -108,7 +116,7 @@ let config = LangMotionTransformerConfig(
     decoderDepth: 512,
     feedForwardSize: 2048,
     headCount: 16,
-    dropoutProbability: 0.0,
+    dropoutProbability: dropoutProbability,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
     mixtureDepth: 1500,
