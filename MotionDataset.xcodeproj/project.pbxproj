@@ -28,6 +28,8 @@
 		3208C1C2251CED4200D4555F /* OptimizerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3208C1C0251CED4200D4555F /* OptimizerWrapper.swift */; };
 		32112FC825189B0500894FFE /* TransformerCheckpointReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32112FC625189B0400894FFE /* TransformerCheckpointReader.swift */; };
 		32112FC925189B0500894FFE /* TransformerCheckpointWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32112FC725189B0400894FFE /* TransformerCheckpointWriter.swift */; };
+		3217BADE254812C70011669A /* DiscretizeJointValuesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3217BADD254812C70011669A /* DiscretizeJointValuesTests.swift */; };
+		3217BAFB2548161C0011669A /* MotionDiscretizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3217BAFA2548161C0011669A /* MotionDiscretizer.swift */; };
 		32205DDA251B2D5400EC46C4 /* MotionLangDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32205DD9251B2D5400EC46C4 /* MotionLangDecoder.swift */; };
 		32295730252EE6480063750F /* LangMotionTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3229572F252EE6480063750F /* LangMotionTransformerTests.swift */; };
 		322ACF452530ADC6009F95B0 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
@@ -1308,6 +1310,8 @@
 		3208C1C0251CED4200D4555F /* OptimizerWrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptimizerWrapper.swift; sourceTree = "<group>"; };
 		32112FC625189B0400894FFE /* TransformerCheckpointReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerCheckpointReader.swift; sourceTree = "<group>"; };
 		32112FC725189B0400894FFE /* TransformerCheckpointWriter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransformerCheckpointWriter.swift; sourceTree = "<group>"; };
+		3217BADD254812C70011669A /* DiscretizeJointValuesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscretizeJointValuesTests.swift; sourceTree = "<group>"; };
+		3217BAFA2548161C0011669A /* MotionDiscretizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDiscretizer.swift; sourceTree = "<group>"; };
 		32205DD9251B2D5400EC46C4 /* MotionLangDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangDecoder.swift; sourceTree = "<group>"; };
 		32205DF3251B2E3C00EC46C4 /* StatsRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsRecorder.swift; sourceTree = "<group>"; };
 		3229572F252EE6480063750F /* LangMotionTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionTransformerTests.swift; sourceTree = "<group>"; };
@@ -2134,6 +2138,7 @@
 				OBJ_156 /* MotionFrameTests.swift */,
 				OBJ_157 /* XCTestManifests.swift */,
 				32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */,
+				3217BADD254812C70011669A /* DiscretizeJointValuesTests.swift */,
 			);
 			name = MotionDatasetTests;
 			path = Tests/MotionDatasetTests;
@@ -2426,6 +2431,7 @@
 				OBJ_62 /* MotionSample.swift */,
 				OBJ_63 /* MotionToImg.swift */,
 				OBJ_64 /* Scaler.swift */,
+				3217BAFA2548161C0011669A /* MotionDiscretizer.swift */,
 			);
 			path = MotionDataset;
 			sourceTree = "<group>";
@@ -3310,6 +3316,7 @@
 				OBJ_330 /* LegacyMotionSample-trainTestSplit.swift in Sources */,
 				OBJ_331 /* LegacyMotionSample.swift in Sources */,
 				OBJ_332 /* Motion2Label.swift in Sources */,
+				3217BAFB2548161C0011669A /* MotionDiscretizer.swift in Sources */,
 				OBJ_333 /* MotionBatch.swift in Sources */,
 				OBJ_334 /* LegacyTextProcessor.swift in Sources */,
 				OBJ_335 /* Motion2Lang.swift in Sources */,
@@ -3448,6 +3455,7 @@
 				32B3D16C2535817500866FA1 /* MotionDatasetTests2.swift in Sources */,
 				32295730252EE6480063750F /* LangMotionTransformerTests.swift in Sources */,
 				324376EE253445E800916BBA /* ImageCreating.swift in Sources */,
+				3217BADE254812C70011669A /* DiscretizeJointValuesTests.swift in Sources */,
 				OBJ_607 /* XCTestManifests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
