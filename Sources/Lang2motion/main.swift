@@ -13,24 +13,34 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_96"
-let batchSize = 25
+let runName = "run_119"
+let batchSize = 80
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
-let nEpochs = 30
+let nEpochs = 100
+let multiplyFactor = 1
+let discreteBins = 300
+let lrSlopeMultiplier: Float = 1.1
+let fixedPeekLR: Bool = true
+let peakLearningRate: Float = 1e-4
+let useBiasCorrection: Bool = true
+let weightDecayRate: Float = 0.0001
+let beta2: Float = 0.99
+let dropoutProbability: Double = 0.0
 
-// peek LR for new training: 1e-3, for resuming: 5e-4
+// peek LR for new training: 1e-4, for resuming: 2e-5
 var optimizerOpts = OptimizerOpts(
-    peakLearningRate: 5e-5,
+    peakLearningRate: peakLearningRate,
     beta1: 0.9,
-    beta2: 0.999,
-    weightDecayRate: 0.0, // default 0.01
-    useBiasCorrection: false,
-    lrSlopeMultiplier: 2,
-    nEpochs: nEpochs
+    beta2: beta2,
+    weightDecayRate: weightDecayRate, // default 0.01
+    useBiasCorrection: useBiasCorrection,
+    lrSlopeMultiplier: lrSlopeMultiplier,
+    nEpochs: nEpochs,
+    fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .multi_mini
+let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -59,8 +69,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+//let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
@@ -78,7 +88,8 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     minMotionLength: 10,
-    maxMotionLength: 150,
+    maxMotionLength: maxMotionLength,
+    multiplyFactor: multiplyFactor,
     trainTestSplit: 1.0,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in
@@ -103,16 +114,18 @@ let config = LangMotionTransformerConfig(
     decoderDepth: 512,
     feedForwardSize: 2048,
     headCount: 16,
-    dropoutProbability: 0.0,
+    dropoutProbability: dropoutProbability,
     sentenceMaxPositionalLength: 100,
-    motionMaxPositionalLength: 500
+    motionMaxPositionalLength: 500,
+    mixtureDepth: 1500,
+    activation: swish
 )
 
 /// create new model
-//var model = LangMotionTransformer(config: config)
+ var model = LangMotionTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_94/checkpoints"), config: config, name: "model.e30")
+//var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_113/checkpoints"), config: config, name: "model.e100")
 
 // Loss function
 let args = LossArgs(
