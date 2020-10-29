@@ -19,7 +19,6 @@ let maxTextSequenceLength =  40
 let maxMotionLength =  150
 let nEpochs = 100
 let multiplyFactor = 1
-let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
 let peakLearningRate: Float = 1e-4
@@ -69,8 +68,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-//let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
