@@ -44,19 +44,22 @@ public struct TransformerDecoderLayer: Layer {
     public var selfAttention: MultiHeadAttention,
     sourceAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
+    conv1D: Conv1D<Float>,
     sublayers: [SublayerConnection]
     
-    public init(size: Int, selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double) {
+    public init(size: Int, selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double, conv1D: Conv1D<Float>) {
         self.selfAttention = selfAttention
         self.sourceAttention = sourceAttention
         self.feedForward = feedForward
-        self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 3)
+        self.conv1D = conv1D
+        self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 4)
     }
 
-    public init(selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, sublayers: [SublayerConnection]) {
+    public init(selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, sublayers: [SublayerConnection], conv1D: Conv1D<Float>) {
         self.selfAttention = selfAttention
         self.sourceAttention = sourceAttention
         self.feedForward = feedForward
+        self.conv1D = conv1D
         self.sublayers = sublayers
     }
 
@@ -95,7 +98,12 @@ public struct TransformerDecoderLayer: Layer {
         }))
         output = self.sublayers[2].decoderForward(.init(sequence: output, decoderContext: input, activation: {(result, _) in
             selfNoDerivative.feedForward(result)
-        }))        
+        }))
+        // pass through conv1d
+        output = self.sublayers[3].decoderForward(.init(sequence: output, decoderContext: input, activation: {(result, _) in
+            selfNoDerivative.conv1D(result)
+        }))
+
         return DecoderLayerOutput(result: output, targetAttentionOutput: _targetAttentionOutput, sourceAttentionOutput: _sourceAttentionOutput)
     }
 }
