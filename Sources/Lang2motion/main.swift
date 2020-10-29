@@ -128,41 +128,6 @@ func embeddedNormalMixtureSurrogateLoss(y_pred: LangMotionTransformerOutput<Floa
     return normalMixtureSurrogateLoss(y_pred: y_pred.preds, y_true: y_true, args: args)
 }
 
-/// Set up decoding
-// TODO: make possible to call greedyDecodeMotion() during training again
-public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer,
-                               sentence: String, prefix: String = "prefix", saveMotion: Bool = true, motionsURL: URL?) {
-    // TODO: incorporate done/stop signal
-    Context.local.learningPhase = .inference
-    print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
-
-    let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
-    processedSentence.printSentence()
-
-    let (decodedMotion, decodedMotionFlag) = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, startMotion: nil, transformer: model, maxMotionLength: maxMotionLength)
-    print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
-    let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
-    print("  descaledMotion.shape: \(descaledMotion.shape)")
-    print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
-    var imageURL: URL? = nil
-    
-    if !saveMotion { imageURL = nil } else {
-        imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
-    }
-    // use joint groupping
-    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-    let _ = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
-
-    if saveMotion {
-        print("Saved image: \(imageURL!.path)")
-        let jointNames = dataset.motionSamples[0].jointNames
-        let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
-        let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
-        try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-        print("Saved motion: \(mmmURL.path)")
-    }
-}
-
 public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: LangMotionTransformer) throws {
     if event == .epochEnd {
         guard let epochIndex = loop.epochIndex else {
