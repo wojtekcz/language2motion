@@ -8,83 +8,8 @@ import Datasets
 
 import LangMotionModels
 
+
 class LangMotionTransformerTests: XCTestCase {
-
-    #if os(macOS)
-        let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
-    #else
-        let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-    #endif
-
-    var dataset: Lang2Motion? = nil
-    var textProcessor: TextProcessor? = nil
-    let maxTextSequenceLength =  40
-    let maxMotionLength =  150
-    let batchSize = 10
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func loadDataset(datasetSize: DatasetSize, device: Device) throws -> Lang2Motion {
-        /// load dataset
-        print("\nLoading dataset...")
-
-        let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
-        var discretizer = MotionDiscretizer(n_bins: 300)
-
-        let dataset = try Lang2Motion(
-            motionDatasetURL: motionDatasetURL,
-            batchSize: batchSize,
-            minMotionLength: 20,
-            maxMotionLength: 150,
-            discretizer: &discretizer,
-            trainTestSplit: 1.0,
-            device: device
-        ) { [self] (motionSample: MotionSample) -> LangMotionBatch in
-            let sentence = self.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: self.maxTextSequenceLength)
-            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
-
-            let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-            let singleBatch = LangMotionBatch(data: source, label: target)
-            return singleBatch
-        }
-        print("Dataset acquired.")
-        return dataset
-    }
-    
-    func getTextProcessor() -> TextProcessor {
-        /// instantiate text processor
-        print("instantiate text processor")
-        let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
-        let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
-        let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-        return TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
-    }
-    
-    func getModel(vocabSize: Int) -> LangMotionTransformer {
-        let config = LangMotionTransformerConfig(
-            vocabSize: vocabSize,
-            nbJoints: 47,
-            nbMixtures: 20,
-            layerCount: 6,
-            encoderDepth: 256,
-            decoderDepth: 512,
-            feedForwardSize: 2048,
-            headCount: 16,
-            dropoutProbability:  0.1,
-            sentenceMaxPositionalLength: 100,
-            motionMaxPositionalLength: 500,
-            mixtureDepth: 1500,
-            activation: relu
-        )
-
-        return LangMotionTransformer(config: config)
-    }
     
     func testTimeDistributedMixtureModel() throws {
         print("\n===> setup test")
@@ -94,15 +19,14 @@ class LangMotionTransformerTests: XCTestCase {
         // let device = Device.defaultXLA
         let device = Device.defaultTFEager
         print("backend: \(device)")
-
-        textProcessor = getTextProcessor()
-        var discretizer = MotionDiscretizer(n_bins: 300)
-        dataset = try! loadDataset(datasetSize: .micro, device: device)
-        var model = getModel(vocabSize: textProcessor!.vocabulary.count)
         
-        let motionSample = dataset!.motionSamples[0]
-        let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
+        let dsMgr = DatasetManager(datasetSize: .micro, device: device)
+
+        var model = ModelFactory.getModel(vocabSize: dsMgr.textProcessor!.vocabulary.count)
+        
+        let motionSample = dsMgr.dataset!.motionSamples[0]
+        let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
+        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
 
         var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 
@@ -158,18 +82,17 @@ class LangMotionTransformerTests: XCTestCase {
         let _ = _ExecutionContext.global
 
         /// Select eager or X10 backend
-        let device = Device.defaultXLA
-        // let device = Device.defaultTFEager
+        // let device = Device.defaultXLA
+        let device = Device.defaultTFEager
         print("backend: \(device)")
 
-        textProcessor = getTextProcessor()
-        var discretizer = MotionDiscretizer(n_bins: 300)
-        dataset = try! loadDataset(datasetSize: .micro, device: device)
-        var model = getModel(vocabSize: textProcessor!.vocabulary.count)
+        let dsMgr = DatasetManager(datasetSize: .micro, device: device)
+
+        var model = ModelFactory.getModel(vocabSize: dsMgr.textProcessor!.vocabulary.count)
         
-        let motionSample = dataset!.motionSamples[0]
-        let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
+        let motionSample = dsMgr.dataset!.motionSamples[0]
+        let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
+        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
 
         var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 
@@ -191,14 +114,12 @@ class LangMotionTransformerTests: XCTestCase {
         let device = Device.defaultTFEager
         print("backend: \(device)")
 
-        textProcessor = getTextProcessor()
-        var discretizer = MotionDiscretizer(n_bins: 300)
-        dataset = try! loadDataset(datasetSize: .micro, device: device)
-        let model = getModel(vocabSize: textProcessor!.vocabulary.count)
+        let dsMgr = DatasetManager(datasetSize: .micro, device: device)
+        let model = ModelFactory.getModel(vocabSize: dsMgr.textProcessor!.vocabulary.count)
         
-        let motionSample = dataset!.motionSamples[0]
-        let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
+        let motionSample = dsMgr.dataset!.motionSamples[0]
+        let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
+        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
 
         let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 

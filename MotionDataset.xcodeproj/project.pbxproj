@@ -42,6 +42,8 @@
 		322ACF802530AE2B009F95B0 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
 		3237B928254CA51300D9609C /* CategoricalDistributionHeadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3237B927254CA51300D9609C /* CategoricalDistributionHeadTests.swift */; };
 		324376EE253445E800916BBA /* ImageCreating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324376ED253445E800916BBA /* ImageCreating.swift */; };
+		3272D76B254DA6FF00A465B9 /* DatasetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D76A254DA6FF00A465B9 /* DatasetManager.swift */; };
+		3272D788254DA86800A465B9 /* ModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D787254DA86800A465B9 /* ModelFactory.swift */; };
 		32B29C4A2530BF81005E6DB6 /* MotionGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */; };
 		32B29C662530BFC2005E6DB6 /* MotionDecoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */; };
 		32B3D16C2535817500866FA1 /* MotionDatasetTests2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */; };
@@ -1318,6 +1320,8 @@
 		3229572F252EE6480063750F /* LangMotionTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionTransformerTests.swift; sourceTree = "<group>"; };
 		3237B927254CA51300D9609C /* CategoricalDistributionHeadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoricalDistributionHeadTests.swift; sourceTree = "<group>"; };
 		324376ED253445E800916BBA /* ImageCreating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCreating.swift; sourceTree = "<group>"; };
+		3272D76A254DA6FF00A465B9 /* DatasetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetManager.swift; sourceTree = "<group>"; };
+		3272D787254DA86800A465B9 /* ModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFactory.swift; sourceTree = "<group>"; };
 		32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGenerationManager.swift; sourceTree = "<group>"; };
 		32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDecoder2.swift; sourceTree = "<group>"; };
 		32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDatasetTests2.swift; sourceTree = "<group>"; };
@@ -2142,6 +2146,8 @@
 				OBJ_157 /* XCTestManifests.swift */,
 				32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */,
 				3217BADD254812C70011669A /* DiscretizeJointValuesTests.swift */,
+				3272D76A254DA6FF00A465B9 /* DatasetManager.swift */,
+				3272D787254DA86800A465B9 /* ModelFactory.swift */,
 			);
 			name = MotionDatasetTests;
 			path = Tests/MotionDatasetTests;
@@ -3454,10 +3460,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				3272D76B254DA6FF00A465B9 /* DatasetManager.swift in Sources */,
 				OBJ_606 /* MotionFrameTests.swift in Sources */,
 				32B3D16C2535817500866FA1 /* MotionDatasetTests2.swift in Sources */,
 				32295730252EE6480063750F /* LangMotionTransformerTests.swift in Sources */,
 				3237B928254CA51300D9609C /* CategoricalDistributionHeadTests.swift in Sources */,
+				3272D788254DA86800A465B9 /* ModelFactory.swift in Sources */,
 				324376EE253445E800916BBA /* ImageCreating.swift in Sources */,
 				3217BADE254812C70011669A /* DiscretizeJointValuesTests.swift in Sources */,
 				OBJ_607 /* XCTestManifests.swift in Sources */,
