@@ -52,6 +52,7 @@
 		32B3D21E2535DF4700866FA1 /* SpectralColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D21B2535DF4700866FA1 /* SpectralColormap.swift */; };
 		32B3D21F2535DF4700866FA1 /* TensorCGImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D21C2535DF4700866FA1 /* TensorCGImage.swift */; };
 		32B3D2202535DF4700866FA1 /* RGBtoHSV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D21D2535DF4700866FA1 /* RGBtoHSV.swift */; };
+		32CF6AD2254DCFC6008BD0D7 /* MotionCatDistHead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */; };
 		32E04EA62513F0370077B28A /* TrainingLoop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; };
 		32E04EA72513F0370077B28A /* TrainingLoop.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		32E04EAD2513F24A0077B28A /* MotionLangCheckpointReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */; };
@@ -1322,6 +1323,7 @@
 		324376ED253445E800916BBA /* ImageCreating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCreating.swift; sourceTree = "<group>"; };
 		3272D76A254DA6FF00A465B9 /* DatasetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetManager.swift; sourceTree = "<group>"; };
 		3272D787254DA86800A465B9 /* ModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFactory.swift; sourceTree = "<group>"; };
+		3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionCatDistHead.swift; sourceTree = "<group>"; };
 		32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGenerationManager.swift; sourceTree = "<group>"; };
 		32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDecoder2.swift; sourceTree = "<group>"; };
 		32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDatasetTests2.swift; sourceTree = "<group>"; };
@@ -2525,6 +2527,7 @@
 				OBJ_85 /* MotionGaussianMixtureModel.swift */,
 				OBJ_86 /* NormalMixtureSurrogateLoss.swift */,
 				32E326E2252F35590088C8F8 /* TimeDistributed.swift */,
+				3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */,
 			);
 			name = LangMotionModels;
 			path = Sources/Models/LangMotion;
@@ -3388,6 +3391,7 @@
 				32E326E3252F35590088C8F8 /* TimeDistributed.swift in Sources */,
 				OBJ_438 /* MotionDecoder.swift in Sources */,
 				OBJ_439 /* MotionGaussianMixtureModel.swift in Sources */,
+				32CF6AD2254DCFC6008BD0D7 /* MotionCatDistHead.swift in Sources */,
 				OBJ_440 /* NormalMixtureSurrogateLoss.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
