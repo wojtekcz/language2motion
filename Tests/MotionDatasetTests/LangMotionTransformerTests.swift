@@ -35,17 +35,19 @@ class LangMotionTransformerTests: XCTestCase {
         print("\nLoading dataset...")
 
         let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
+        var discretizer = MotionDiscretizer(n_bins: 300)
 
         let dataset = try Lang2Motion(
             motionDatasetURL: motionDatasetURL,
             batchSize: batchSize,
             minMotionLength: 20,
             maxMotionLength: 150,
+            discretizer: &discretizer,
             trainTestSplit: 1.0,
             device: device
         ) { [self] (motionSample: MotionSample) -> LangMotionBatch in
             let sentence = self.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: self.maxTextSequenceLength)
-            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
 
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             let singleBatch = LangMotionBatch(data: source, label: target)
@@ -94,12 +96,13 @@ class LangMotionTransformerTests: XCTestCase {
         print("backend: \(device)")
 
         textProcessor = getTextProcessor()
+        var discretizer = MotionDiscretizer(n_bins: 300)
         dataset = try! loadDataset(datasetSize: .micro, device: device)
         var model = getModel(vocabSize: textProcessor!.vocabulary.count)
         
         let motionSample = dataset!.motionSamples[0]
         let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
 
         var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 
@@ -160,12 +163,13 @@ class LangMotionTransformerTests: XCTestCase {
         print("backend: \(device)")
 
         textProcessor = getTextProcessor()
+        var discretizer = MotionDiscretizer(n_bins: 300)
         dataset = try! loadDataset(datasetSize: .micro, device: device)
         var model = getModel(vocabSize: textProcessor!.vocabulary.count)
         
         let motionSample = dataset!.motionSamples[0]
         let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
 
         var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 
@@ -188,12 +192,13 @@ class LangMotionTransformerTests: XCTestCase {
         print("backend: \(device)")
 
         textProcessor = getTextProcessor()
+        var discretizer = MotionDiscretizer(n_bins: 300)
         dataset = try! loadDataset(datasetSize: .micro, device: device)
         let model = getModel(vocabSize: textProcessor!.vocabulary.count)
         
         let motionSample = dataset!.motionSamples[0]
         let sentence = textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
 
         let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
 

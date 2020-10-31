@@ -33,17 +33,19 @@ class MotionDatasetTests2: XCTestCase {
         let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
         let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
         let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
-        
+        var discretizer = MotionDiscretizer(n_bins: 300)
+
         dataset = try! Lang2Motion(
             motionDatasetURL: motionDatasetURL,
             batchSize: 2,
             minMotionLength: minMotionLength,
             maxMotionLength: maxMotionLength,
+            discretizer: &discretizer,
             trainTestSplit: 1.0,
             device: Device.defaultTFEager
         ) { (motionSample: MotionSample) -> LangMotionBatch in
             let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: 40)
-            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: 100)
+            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: 100, discretizer: discretizer)
 
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             let singleBatch = LangMotionBatch(data: source, label: target)
