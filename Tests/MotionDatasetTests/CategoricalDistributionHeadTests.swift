@@ -86,12 +86,12 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let np = Python.import("numpy")
         func sampleCatDistMotion(catDistProbs: Tensor<Float>) -> Tensor<Int32> {
             var samples: [Int32] = []
-            let s = catDistProbs.shape
-            let (bs, nFrames, nbJoints) = (s[0], s[1], s[2])
+            let sh = catDistProbs.shape
+            let (bs, nFrames, nbJoints) = (sh[0], sh[1], sh[2])
             for s in 0..<bs {
-                for t in 0..<nFrames {
+                for f in 0..<nFrames {
                     for j in 0..<nbJoints {
-                        let pvals = catDistProbs[s, t, j].scalars.map { Double($0)}
+                        let pvals = catDistProbs[s, f, j].scalars.map { Double($0)}
                         // TODO: try to make sampling faster with a tensorflow call
                         let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
                         samples.append(sample)
