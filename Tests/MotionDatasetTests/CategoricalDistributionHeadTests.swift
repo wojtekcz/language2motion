@@ -22,7 +22,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         // + de-discretize
         // + de-scale
         // + use categorical cross-entropy loss
-        // TODO: integrate cce loss with bernoulli loss
+        // + integrate cce loss with bernoulli loss
         
         print("\n===> setup test")
         let _ = _ExecutionContext.global
@@ -66,11 +66,11 @@ class CategoricalDistributionHeadTests: XCTestCase {
         LazyTensorBarrier()
         
         preds.printPreds()
-        print("catDistProbs")
-        print(roundT(preds.catDistProbs))
-        let sums = preds.catDistProbs.sum(alongAxes: 3)
-        print("sums.shape: \(sums.shape)")
-        print(roundT(sums))
+        //print("catDistProbs")
+        //print(roundT(preds.catDistProbs))
+        //let sums = preds.catDistProbs.sum(alongAxes: 3)
+        //print("sums.shape: \(sums.shape)")
+        //print(roundT(sums))
         
         // + use categorical cross-entropy loss
         let labels = target.discreteMotion.reshaped(to: [-1])
@@ -78,8 +78,15 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let resultSize =  sh[0] * sh[1] * sh[2]
         let logits = preds.catDistProbs.reshaped(to: [resultSize, -1])
         
-        let loss = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _mean)
-        print("loss: \(loss)")
+        let sceLoss = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _mean)
+        print("sceLoss: \(sceLoss)")
+        
+        // + integrate sce loss with bernoulli loss
+        let args = CDLossArgs(
+            device: device
+        )
+        let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds, y_true: target, args: args)
+        print("cdsLoss: \(cdsLoss)")
 
         
         // + sample & argmax & de-discretize & de-scale
