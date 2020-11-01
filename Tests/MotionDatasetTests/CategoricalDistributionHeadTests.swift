@@ -73,21 +73,26 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print(roundT(sums))
         
         // + sample & argmax & de-discretize & de-scale
-        var samples: [Int32] = []
         let np = Python.import("numpy")
-        let s = preds.catDistProbs.shape
-        let (bs, nFrames, nbJoints) = (s[0], s[1], s[2])
-        for s in 0..<bs {
-            for t in 0..<nFrames {
-                for j in 0..<nbJoints {
-                    let pvals = preds.catDistProbs[s, t, j].scalars.map { Double($0)}
-                    // TODO: try to make sampling faster with a tensorflow call
-                    let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
-                    samples.append(sample)
+        func sampleCatDistMotion(catDistProbs: Tensor<Float>) -> Tensor<Int32> {
+            var samples: [Int32] = []
+            let s = catDistProbs.shape
+            let (bs, nFrames, nbJoints) = (s[0], s[1], s[2])
+            for s in 0..<bs {
+                for t in 0..<nFrames {
+                    for j in 0..<nbJoints {
+                        let pvals = catDistProbs[s, t, j].scalars.map { Double($0)}
+                        // TODO: try to make sampling faster with a tensorflow call
+                        let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
+                        samples.append(sample)
+                    }
                 }
             }
+            let samplesTensor = Tensor<Int32>(shape: [bs, nFrames, nbJoints], scalars: samples)
+            return samplesTensor
         }
-        let samplesTensor = Tensor<Int32>(shape: [bs, nFrames, nbJoints], scalars: samples)
+        
+        let samplesTensor = sampleCatDistMotion(catDistProbs: preds.catDistProbs)
         print("samplesTensor.shape: \(samplesTensor.shape)")
         print("samplesTensor: \(samplesTensor)")
 
