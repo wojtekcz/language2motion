@@ -24,7 +24,7 @@ public class DatasetManager {
     var textProcessor: TextProcessor? = nil
     var discretizer: MotionDiscretizer? = nil
     let maxTextSequenceLength =  40
-    let maxMotionLength =  150
+    let maxMotionLength =  50
     let batchSize = 10
 
     func loadDataset(datasetSize: DatasetSize, device: Device) throws -> Lang2Motion {
@@ -36,8 +36,8 @@ public class DatasetManager {
         let dataset = try Lang2Motion(
             motionDatasetURL: motionDatasetURL,
             batchSize: batchSize,
-            minMotionLength: 20,
-            maxMotionLength: 150,
+            minMotionLength: 10,
+            maxMotionLength: 50,
             discretizer: &discretizer!,
             trainTestSplit: 1.0,
             device: device

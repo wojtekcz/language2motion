@@ -21,7 +21,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         // TODO: try to make sampling faster with a tensorflow call
         // + de-discretize
         // + de-scale
-        // TODO: use categorical cross-entropy loss
+        // + use categorical cross-entropy loss
         // TODO: integrate cce loss with bernoulli loss
         
         print("\n===> setup test")
@@ -39,7 +39,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         let motionSample = dsMgr.dataset!.motionSamples[0]
         let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
-        let (motionPart, _) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
+        let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
 
         var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
         source = LangMotionBatch.Source(copying: source, to: device)
@@ -71,6 +71,16 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let sums = preds.catDistProbs.sum(alongAxes: 3)
         print("sums.shape: \(sums.shape)")
         print(roundT(sums))
+        
+        // + use categorical cross-entropy loss
+        let labels = target.discreteMotion.reshaped(to: [-1])
+        let sh = target.discreteMotion.shape
+        let resultSize =  sh[0] * sh[1] * sh[2]
+        let logits = preds.catDistProbs.reshaped(to: [resultSize, -1])
+        
+        let loss = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _mean)
+        print("loss: \(loss)")
+
         
         // + sample & argmax & de-discretize & de-scale
         let np = Python.import("numpy")
