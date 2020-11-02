@@ -32,9 +32,9 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let device = Device.defaultTFEager
         print("backend: \(device)")
         
-        let dsMgr = DatasetManager(datasetSize: .micro, device: device)
+        let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
-        var model = ModelFactory.getModel(vocabSize: dsMgr.textProcessor!.vocabulary.count)
+        var model = ModelFactory.getModel2(vocabSize: dsMgr.textProcessor!.vocabulary.count)
         let catDistHead = MotionCatDistHead(inputSize: model.config.decoderDepth, nbJoints: model.config.nbJoints, discreteBins: 300)
         
         let motionSample = dsMgr.dataset!.motionSamples[0]
@@ -78,7 +78,10 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let resultSize =  sh[0] * sh[1] * sh[2]
         let logits = preds.catDistProbs.reshaped(to: [resultSize, -1])
         
-        let sceLoss = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _mean)
+        @differentiable
+        func _none(t: Tensor<Float>) -> Tensor<Float> { t }
+        let sceLoss = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _none)
+        print("sceLoss.shape: \(sceLoss.shape)")
         print("sceLoss: \(sceLoss)")
         
         // + integrate sce loss with bernoulli loss
@@ -88,39 +91,39 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds, y_true: target, args: args)
         print("cdsLoss: \(cdsLoss)")
 
-        
+        print()
         // + sample & argmax & de-discretize & de-scale
-        let np = Python.import("numpy")
-        func sampleCatDistMotion(catDistProbs: Tensor<Float>) -> Tensor<Int32> {
-            var samples: [Int32] = []
-            let sh = catDistProbs.shape
-            let (bs, nFrames, nbJoints) = (sh[0], sh[1], sh[2])
-            for s in 0..<bs {
-                for f in 0..<nFrames {
-                    for j in 0..<nbJoints {
-                        let pvals = catDistProbs[s, f, j].scalars.map { Double($0)}
-                        // TODO: try to make sampling faster with a tensorflow call
-                        let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
-                        samples.append(sample)
-                    }
-                }
-            }
-            let samplesTensor = Tensor<Int32>(shape: [bs, nFrames, nbJoints], scalars: samples)
-            return samplesTensor
-        }
+//        let np = Python.import("numpy")
+//        func sampleCatDistMotion(catDistProbs: Tensor<Float>) -> Tensor<Int32> {
+//            var samples: [Int32] = []
+//            let sh = catDistProbs.shape
+//            let (bs, nFrames, nbJoints) = (sh[0], sh[1], sh[2])
+//            for s in 0..<bs {
+//                for f in 0..<nFrames {
+//                    for j in 0..<nbJoints {
+//                        let pvals = catDistProbs[s, f, j].scalars.map { Double($0)}
+//                        // TODO: try to make sampling faster with a tensorflow call
+//                        let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
+//                        samples.append(sample)
+//                    }
+//                }
+//            }
+//            let samplesTensor = Tensor<Int32>(shape: [bs, nFrames, nbJoints], scalars: samples)
+//            return samplesTensor
+//        }
         
-        let samplesTensor = sampleCatDistMotion(catDistProbs: preds.catDistProbs)
-        print("samplesTensor.shape: \(samplesTensor.shape)")
-        print("samplesTensor: \(samplesTensor)")
-
-        // de-discretize
-        let invSamplesTensor = dsMgr.discretizer!.inverse_transform(samplesTensor)
-        print("invSamplesTensor.shape: \(invSamplesTensor.shape)")
-        print("invSamplesTensor: \(roundT(invSamplesTensor))")
-        // de-scale
-        let descaledSamplesTensor = dsMgr.dataset!.scaler.inverse_transform(invSamplesTensor)
-        print("descaledSamplesTensor.shape: \(descaledSamplesTensor.shape)")
-        print("descaledSamplesTensor: \(roundT(descaledSamplesTensor))")
+//        let samplesTensor = sampleCatDistMotion(catDistProbs: preds.catDistProbs)
+//        print("samplesTensor.shape: \(samplesTensor.shape)")
+//        print("samplesTensor: \(samplesTensor)")
+//
+//        // de-discretize
+//        let invSamplesTensor = dsMgr.discretizer!.inverse_transform(samplesTensor)
+//        print("invSamplesTensor.shape: \(invSamplesTensor.shape)")
+//        print("invSamplesTensor: \(roundT(invSamplesTensor))")
+//        // de-scale
+//        let descaledSamplesTensor = dsMgr.dataset!.scaler.inverse_transform(invSamplesTensor)
+//        print("descaledSamplesTensor.shape: \(descaledSamplesTensor.shape)")
+//        print("descaledSamplesTensor: \(roundT(descaledSamplesTensor))")
 
         print("===> end test\n")
     }

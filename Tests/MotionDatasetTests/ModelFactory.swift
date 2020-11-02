@@ -32,4 +32,24 @@ public class ModelFactory {
         return LangMotionTransformer(config: config)
     }
 
+    public static func getModel2(vocabSize: Int) -> LangMotionCatDistTransformer {
+        let config = LangMotionCatDistTransformerConfig(
+            vocabSize: vocabSize,
+            nbJoints: 47,
+            nbMixtures: 20,
+            layerCount: 6,
+            encoderDepth: 256,
+            decoderDepth: 512,
+            feedForwardSize: 2048,
+            headCount: 16,
+            dropoutProbability:  0.1,
+            sentenceMaxPositionalLength: 100,
+            motionMaxPositionalLength: 500,
+            discreteBins: 300,
+            activation: relu
+        )
+
+        return LangMotionCatDistTransformer(config: config)
+    }
+
 }
