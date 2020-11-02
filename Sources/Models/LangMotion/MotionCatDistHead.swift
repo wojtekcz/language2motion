@@ -47,6 +47,17 @@ public struct MotionCatDistHead: Module {
         linearStop = Dense<Float>(inputSize: inputSize, outputSize: 1)
     }
 
+    public init(
+        inputSize: Int, nbJoints: Int, discreteBins: Int,
+        catDistWeights: Dense<Float>, linearStop: Dense<Float>
+    ) {
+        self.inputSize = inputSize
+        self.nbJoints = nbJoints
+        self.discreteBins = discreteBins
+        self.catDistWeights = catDistWeights
+        self.linearStop = linearStop
+    }
+
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> MotionCatDistPreds {
         let s = input.shape

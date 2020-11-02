@@ -54,6 +54,8 @@
 		32B3D2202535DF4700866FA1 /* RGBtoHSV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D21D2535DF4700866FA1 /* RGBtoHSV.swift */; };
 		32CF6AD2254DCFC6008BD0D7 /* MotionCatDistHead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */; };
 		32CFD3CE254FF1C7005821A8 /* LangMotionCatDistTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */; };
+		32CFD3EB2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32CFD3EA2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift */; };
+		32CFD4082550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32CFD4072550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift */; };
 		32E04EA62513F0370077B28A /* TrainingLoop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; };
 		32E04EA72513F0370077B28A /* TrainingLoop.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		32E04EAD2513F24A0077B28A /* MotionLangCheckpointReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */; };
@@ -1335,6 +1337,8 @@
 		32B3D21C2535DF4700866FA1 /* TensorCGImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorCGImage.swift; sourceTree = "<group>"; };
 		32B3D21D2535DF4700866FA1 /* RGBtoHSV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBtoHSV.swift; sourceTree = "<group>"; };
 		32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionCatDistTransformer.swift; sourceTree = "<group>"; };
+		32CFD3EA2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionCatDistCheckpointWriter.swift; sourceTree = "<group>"; };
+		32CFD4072550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionCatDistCheckpointReader.swift; sourceTree = "<group>"; };
 		32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangCheckpointReader.swift; sourceTree = "<group>"; };
 		32E04EAE2513F25E0077B28A /* MotionLangCheckpointWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangCheckpointWriter.swift; sourceTree = "<group>"; };
 		32E326E2252F35590088C8F8 /* TimeDistributed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeDistributed.swift; sourceTree = "<group>"; };
@@ -2531,6 +2535,8 @@
 				32E326E2252F35590088C8F8 /* TimeDistributed.swift */,
 				3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */,
 				32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */,
+				32CFD3EA2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift */,
+				32CFD4072550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift */,
 			);
 			name = LangMotionModels;
 			path = Sources/Models/LangMotion;
@@ -3392,7 +3398,9 @@
 				32CFD3CE254FF1C7005821A8 /* LangMotionCatDistTransformer.swift in Sources */,
 				OBJ_437 /* LangMotionCheckpointWriter.swift in Sources */,
 				3208C1C2251CED4200D4555F /* OptimizerWrapper.swift in Sources */,
+				32CFD3EB2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift in Sources */,
 				32E326E3252F35590088C8F8 /* TimeDistributed.swift in Sources */,
+				32CFD4082550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift in Sources */,
 				OBJ_438 /* MotionDecoder.swift in Sources */,
 				OBJ_439 /* MotionGaussianMixtureModel.swift in Sources */,
 				32CF6AD2254DCFC6008BD0D7 /* MotionCatDistHead.swift in Sources */,

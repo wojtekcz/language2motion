@@ -13,8 +13,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_127"
-let batchSize = 93
+let runName = "run_123"
+let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
@@ -22,7 +22,7 @@ let multiplyFactor = 100
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 1e-2
+let peakLearningRate: Float = 1e-1
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.0001
 let beta2: Float = 0.99
@@ -40,7 +40,7 @@ var optimizerOpts = OptimizerOpts(
     fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .small_midi
+let datasetSize: DatasetSize = .small_micro1
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -139,42 +139,7 @@ func embeddedCategoryDistributionSurrogateLoss(y_pred: LangMotionCatDistTransfor
     return categoryDistributionSurrogateLoss(y_pred: y_pred.preds, y_true: y_true, args: args)
 }
 
-/// Set up decoding
-// TODO: make possible to call greedyDecodeMotion() during training again
-public func greedyDecodeMotion(dataset: Lang2Motion, model: LangMotionTransformer,
-                               sentence: String, prefix: String = "prefix", saveMotion: Bool = true, motionsURL: URL?) {
-    // TODO: incorporate done/stop signal
-    Context.local.learningPhase = .inference
-    print("\ngreedyDecodeMotion(sentence: \"\(sentence)\")")
-
-    let processedSentence = textProcessor.preprocess(sentence: sentence, maxTextSequenceLength: maxTextSequenceLength)
-    processedSentence.printSentence()
-
-    let (decodedMotion, decodedMotionFlag) = MotionDecoder.greedyDecodeMotion(sentence: processedSentence, startMotion: nil, transformer: model, maxMotionLength: maxMotionLength)
-    print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
-    let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
-    print("  descaledMotion.shape: \(descaledMotion.shape)")
-    print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
-    var imageURL: URL? = nil
-    
-    if !saveMotion { imageURL = nil } else {
-        imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
-    }
-    // use joint groupping
-    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
-    let _ = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: maxMotionLength, descr: "\(sentence)", cmapRange: 2.0)
-
-    if saveMotion {
-        print("Saved image: \(imageURL!.path)")
-        let jointNames = dataset.motionSamples[0].jointNames
-        let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
-        let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
-        try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-        print("Saved motion: \(mmmURL.path)")
-    }
-}
-
-public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: LangMotionTransformer) throws {
+public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: LangMotionCatDistTransformer) throws {
     if event == .epochEnd {
         guard let epochIndex = loop.epochIndex else {
             return
@@ -196,10 +161,10 @@ var trainingLoop = TrainingLoop(
     validation: dataset.testBatches,
     optimizer: optimizerWrapper.optimizer,
     lossFunction: embeddedCategoryDistributionSurrogateLoss,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater]
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
 )
 
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 
-//try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
+try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 print("\nFinished training.")
