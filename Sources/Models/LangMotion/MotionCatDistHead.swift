@@ -54,7 +54,7 @@ public struct MotionCatDistHead: Module {
 
         var catWeights1 = timeDistributed(input, catDistWeights.weight)
         catWeights1 = catWeights1.reshaped(to: [bs, numFrames, nbJoints, discreteBins])
-        catWeights1 = softmax(catWeights1, alongAxis: 3)
+        //catWeights1 = softmax(catWeights1, alongAxis: 3)
                 
         let stops = sigmoid(timeDistributed(input, linearStop.weight))
         return MotionCatDistPreds(catDistProbs: catWeights1, stops: stops)
