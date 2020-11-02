@@ -1,27 +1,28 @@
 import Foundation
 import TensorFlow
 import Datasets
+import PythonKit
 
 
 public struct MotionCatDistPreds: Differentiable {
-    public var catDistProbs: Tensor<Float> // bs x motionLength x nbJoints x discreteBins
+    public var catDistLogits: Tensor<Float> // bs x motionLength x nbJoints x discreteBins
     public var stops: Tensor<Float>        // bs x motionLength x 1
 
     @differentiable
-    public init(catDistProbs: Tensor<Float>, stops: Tensor<Float>) {
-        self.catDistProbs = catDistProbs
+    public init(catDistLogits: Tensor<Float>, stops: Tensor<Float>) {
+        self.catDistLogits = catDistLogits
         self.stops = stops
     }
 
     @differentiable
     public init(stacking preds: [MotionCatDistPreds], alongAxis axis: Int) {
-        self.catDistProbs = Tensor<Float>(stacking: preds.differentiableMap{$0.catDistProbs}, alongAxis: axis)
-        self.stops        = Tensor<Float>(stacking: preds.differentiableMap{$0.stops}, alongAxis: axis)
+        self.catDistLogits = Tensor<Float>(stacking: preds.differentiableMap{$0.catDistLogits}, alongAxis: axis)
+        self.stops         = Tensor<Float>(stacking: preds.differentiableMap{$0.stops}, alongAxis: axis)
     }
 
     public func printPreds() {
         print("MotionCatDistPreds")
-        print("  catDistProbs.shape: \(self.catDistProbs.shape)")
+        print("  catDistLogits.shape: \(self.catDistLogits.shape)")
         print("  stops.shape: \(self.stops.shape)")
     }
 }
@@ -63,13 +64,33 @@ public struct MotionCatDistHead: Module {
         let s = input.shape
         let (bs, numFrames) = (s[0], s[1])
 
-        var catWeights1 = timeDistributed(input, catDistWeights.weight)
-        catWeights1 = catWeights1.reshaped(to: [bs, numFrames, nbJoints, discreteBins])
-        //catWeights1 = softmax(catWeights1, alongAxis: 3)
+        var catLogits = timeDistributed(input, catDistWeights.weight)
+        catLogits = catLogits.reshaped(to: [bs, numFrames, nbJoints, discreteBins])
+        //catLogits = softmax(catLogits, alongAxis: 3)
                 
         let stops = sigmoid(timeDistributed(input, linearStop.weight))
-        return MotionCatDistPreds(catDistProbs: catWeights1, stops: stops)
+        return MotionCatDistPreds(catDistLogits: catLogits, stops: stops)
     }
+}
+
+//let np = Python.import("numpy")
+public func sampleCatDistMotion(catDistLogits: Tensor<Float>) -> Tensor<Int32> {
+    var samples: [Int32] = []
+    let sh = catDistLogits.shape
+    let (bs, nFrames, nbJoints) = (sh[0], sh[1], sh[2])
+    for s in 0..<bs {
+        for f in 0..<nFrames {
+            for j in 0..<nbJoints {
+                let pvals = softmax(catDistLogits[s, f, j]).scalars.map { Double($0)}
+                // TODO: try to make sampling faster with a tensorflow call
+                let sample: Int32 = Int32(np.argmax(randomNumber(probabilities: pvals)))!
+                //let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
+                samples.append(sample)
+            }
+        }
+    }
+    let samplesTensor = Tensor<Int32>(shape: [bs, nFrames, nbJoints], scalars: samples)
+    return samplesTensor
 }
 
 public struct CDLossArgs {
@@ -87,7 +108,7 @@ public func _categoryDistributionSurrogateLoss(y_true: LangMotionBatch.Target, y
     let labels = y_true.discreteMotion.reshaped(to: [-1])
     let sh = y_true.discreteMotion.shape
     let resultSize =  sh[0] * sh[1] * sh[2]
-    let logits = y_pred.catDistProbs.reshaped(to: [resultSize, -1])
+    let logits = y_pred.catDistLogits.reshaped(to: [resultSize, -1])
 
     @differentiable
     func _none(t: Tensor<Float>) -> Tensor<Float> { t }

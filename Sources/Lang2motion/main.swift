@@ -13,12 +13,12 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_123"
+let runName = "run_125"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
-let multiplyFactor = 100
+let multiplyFactor = 30
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
@@ -110,12 +110,11 @@ print("instantiate model")
 let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
-    nbMixtures: 20,
-    layerCount: 6,
-    encoderDepth: 256,
-    decoderDepth: 512,
-    feedForwardSize: 2048,
-    headCount: 16,
+    layerCount: 4,
+    encoderDepth: 64,
+    decoderDepth: 128,
+    feedForwardSize: 256,
+    headCount: 4,
     dropoutProbability: dropoutProbability,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
@@ -124,10 +123,10 @@ let config = LangMotionCatDistTransformerConfig(
 )
 
 /// create new model
- var model = LangMotionCatDistTransformer(config: config)
+var model = LangMotionCatDistTransformer(config: config)
 
 /// load model checkpoint
-//var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_113/checkpoints"), config: config, name: "model.e100")
+//var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_123/checkpoints"), config: config, name: "model.e1")
 
 // Loss function
 let args = CDLossArgs(

@@ -7,7 +7,6 @@ import TranslationModels
 public struct LangMotionCatDistTransformerConfig: ModelConfig {
     public let vocabSize: Int
     public let nbJoints: Int
-    public let nbMixtures: Int
     public let layerCount: Int
     public let encoderDepth: Int
     public let decoderDepth: Int
@@ -19,12 +18,11 @@ public struct LangMotionCatDistTransformerConfig: ModelConfig {
     public let discreteBins: Int
     public let activation: Activation<Float>
 
-    public init(vocabSize: Int, nbJoints: Int, nbMixtures: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
+    public init(vocabSize: Int, nbJoints: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
                 feedForwardSize: Int, headCount: Int, dropoutProbability: Double,
                 sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, discreteBins: Int, activation: @escaping Activation<Float>) {
         self.vocabSize = vocabSize
         self.nbJoints = nbJoints
-        self.nbMixtures = nbMixtures
         self.layerCount = layerCount
         self.encoderDepth = encoderDepth
         self.decoderDepth = decoderDepth
