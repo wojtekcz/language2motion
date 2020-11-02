@@ -135,8 +135,8 @@ public struct LangMotionCatDistTransformer: Module {
         let decoded = self.decode(sourceMask: input.sourceAttentionMask, motionPart: input.motionPart, memory: encoded.lastLayerOutput)
         // reformat decoded.allOutputs[] into one tensor
         //let mixtureModelInput = Tensor<Float>(concatenating: decoded.allResults, alongAxis: 2)
-        let mixtureModelInput = decoded.lastLayerOutput
-        let rslt = LangMotionCatDistTransformerOutput(preds: self.catDistHead(mixtureModelInput), encoded: encoded, decoded: decoded)
+        let catDistHeadInput = decoded.lastLayerOutput
+        let rslt = LangMotionCatDistTransformerOutput(preds: self.catDistHead(catDistHeadInput), encoded: encoded, decoded: decoded)
         return rslt
     }
     
