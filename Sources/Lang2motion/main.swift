@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_118"
+let runName = "run_120"
 let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -22,7 +22,7 @@ let multiplyFactor = 100
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 1e-4
+let peakLearningRate: Float = 1e-3
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.0001
 let beta2: Float = 0.99
@@ -40,7 +40,7 @@ var optimizerOpts = OptimizerOpts(
     fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .small_micro
+let datasetSize: DatasetSize = .small_micro1
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -107,7 +107,7 @@ print("Dataset acquired.")
 
 /// instantiate model
 print("instantiate model")
-let config = LangMotionTransformerConfig(
+let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
     nbMixtures: 20,
@@ -119,28 +119,24 @@ let config = LangMotionTransformerConfig(
     dropoutProbability: dropoutProbability,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
-    mixtureDepth: 1500,
+    discreteBins: discreteBins,
     activation: swish
 )
 
 /// create new model
- var model = LangMotionTransformer(config: config)
+ var model = LangMotionCatDistTransformer(config: config)
 
 /// load model checkpoint
-//var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_113/checkpoints"), config: config, name: "model.e100")
+//var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_113/checkpoints"), config: config, name: "model.e100")
 
 // Loss function
-let args = LossArgs(
-        nb_joints: config.nbJoints,
-        nb_mixtures: config.nbMixtures,
-        mixture_regularizer_type: "None",  // ["cv", "l2", "None"]
-        mixture_regularizer: 0.0,
+let args = CDLossArgs(
         device: device
 )
 
 @differentiable(wrt: y_pred)
-func embeddedNormalMixtureSurrogateLoss(y_pred: LangMotionTransformerOutput<Float>, y_true: LangMotionBatch.Target) -> Tensor<Float> {
-    return normalMixtureSurrogateLoss(y_pred: y_pred.preds, y_true: y_true, args: args)
+func embeddedCategoryDistributionSurrogateLoss(y_pred: LangMotionCatDistTransformerOutput<Float>, y_true: LangMotionBatch.Target) -> Tensor<Float> {
+    return categoryDistributionSurrogateLoss(y_pred: y_pred.preds, y_true: y_true, args: args)
 }
 
 /// Set up decoding
@@ -199,11 +195,11 @@ var trainingLoop = TrainingLoop(
     training: dataset.trainEpochs,
     validation: dataset.testBatches,
     optimizer: optimizerWrapper.optimizer,
-    lossFunction: embeddedNormalMixtureSurrogateLoss,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
+    lossFunction: embeddedCategoryDistributionSurrogateLoss,
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater]
 )
 
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)
 
-try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
+//try! model.writeCheckpoint(to: checkpointURL, name: "model.final")
 print("\nFinished training.")

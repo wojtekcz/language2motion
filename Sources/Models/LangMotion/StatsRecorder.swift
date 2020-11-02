@@ -44,7 +44,7 @@ public class StatsRecorder {
             if !inValidationPhase {
                 summaryWriter.writeScalarSummary(tag: "TrainingLoss", step: trainingStepCount, value: lastLoss.scalar!)
                 
-                let optimizer: GeneralOptimizer<LangMotionTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionTransformer>
+                let optimizer: GeneralOptimizer<LangMotionCatDistTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionCatDistTransformer>
                 summaryWriter.writeScalarSummary(tag: "LearningRate", step: trainingStepCount, value: optimizer.learningRate)
 
                 trainingStepCount += 1

@@ -30,10 +30,10 @@ public struct OptimizerOpts {
 
 public class OptimizerWrapper {
     public let opts: OptimizerOpts
-    public var optimizer: GeneralOptimizer<LangMotionTransformer>
+    public var optimizer: GeneralOptimizer<LangMotionCatDistTransformer>
     public var scheduledLearningRate: LinearlyDecayedParameter<LinearlyWarmedUpParameter<FixedParameter<Float>>>
 
-    public init(opts: OptimizerOpts, model: GeneralOptimizer<LangMotionTransformer>.Model) {
+    public init(opts: OptimizerOpts, model: GeneralOptimizer<LangMotionCatDistTransformer>.Model) {
         self.opts = opts
         
         self.optimizer = x10_optimizers_optimizer.GeneralOptimizer(
@@ -65,7 +65,7 @@ public class OptimizerWrapper {
     
     public func learningRateUpdater<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: Any) throws {
         if event == .updateStart {
-            let optimizer: GeneralOptimizer<LangMotionTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionTransformer>
+            let optimizer: GeneralOptimizer<LangMotionCatDistTransformer> = loop.optimizer as! GeneralOptimizer<LangMotionCatDistTransformer>
             let step = optimizer.step + 1 // for scheduled rates and bias correction, steps start at 1
             optimizer.learningRate = scheduledLearningRate(forStep: UInt64(step))
             if opts.useBiasCorrection {
