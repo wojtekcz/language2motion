@@ -13,16 +13,16 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_134"
-let batchSize = 93
+let runName = "run_135"
+let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
-let multiplyFactor = 3
+let multiplyFactor = 30
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 5e-3
+let peakLearningRate: Float = 1e-2
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.01
 let beta2: Float = 0.99
@@ -40,7 +40,7 @@ var optimizerOpts = OptimizerOpts(
     fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .small_multi_midi
+let datasetSize: DatasetSize = .small_micro1
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -110,7 +110,7 @@ print("instantiate model")
 let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
-    layerCount: 12,
+    layerCount: 6,
     encoderDepth: 128,
     decoderDepth: 512,
     feedForwardSize: 2048,

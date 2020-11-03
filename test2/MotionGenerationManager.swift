@@ -34,7 +34,7 @@ public class MotionGenerationManager {
     func loadDataset() {
         let device = Device.defaultTFEager
                 
-        let datasetSize: DatasetSize = .small_midi
+        let datasetSize: DatasetSize = .small_micro1
         let batchSize = 2
         let maxMotionLength = 50
 
@@ -120,9 +120,9 @@ public class MotionGenerationManager {
             vocabSize: vocabSize,
             nbJoints: 47,
             layerCount: 6,
-            encoderDepth: 64,
-            decoderDepth: 256,
-            feedForwardSize: 1024,
+            encoderDepth: 128,
+            decoderDepth: 512,
+            feedForwardSize: 2048,
             headCount: 16,
             dropoutProbability: 0.1,
             sentenceMaxPositionalLength: 100,
@@ -131,13 +131,13 @@ public class MotionGenerationManager {
             activation: swish
         )
         
-        let runName = "run_128"
+        let runName = "run_135"
         let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
 
-        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e26")
+        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e2")
         return model
     }
 
@@ -163,7 +163,8 @@ func tensorShow2(_ tensor: Tensor<Float>) {
 }
 
 func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
-    let descaledMotion = dataset.scaler.inverse_transform(motion)
+//    let descaledMotion = dataset.scaler.inverse_transform(motion)
+    let descaledMotion = motion//dataset.scaler.inverse_transform(motion)
     let jointNames = dataset.motionSamples[0].jointNames
     let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
     try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
