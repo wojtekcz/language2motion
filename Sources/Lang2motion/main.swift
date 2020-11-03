@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_127"
+let runName = "run_128"
 let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
@@ -110,11 +110,11 @@ print("instantiate model")
 let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
-    layerCount: 4,
+    layerCount: 6,
     encoderDepth: 64,
-    decoderDepth: 128,
-    feedForwardSize: 256,
-    headCount: 4,
+    decoderDepth: 256,
+    feedForwardSize: 1024,
+    headCount: 16,
     dropoutProbability: dropoutProbability,
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
