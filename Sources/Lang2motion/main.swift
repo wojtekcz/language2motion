@@ -13,8 +13,8 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_125"
-let batchSize = 2
+let runName = "run_127"
+let batchSize = 93
 let maxTextSequenceLength =  40
 let maxMotionLength =  50
 let nEpochs = 100
@@ -22,7 +22,7 @@ let multiplyFactor = 30
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 1e-1
+let peakLearningRate: Float = 1e-2
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.0001
 let beta2: Float = 0.99
@@ -40,7 +40,7 @@ var optimizerOpts = OptimizerOpts(
     fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .small_micro1
+let datasetSize: DatasetSize = .small_midi
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
