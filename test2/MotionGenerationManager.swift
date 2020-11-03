@@ -120,9 +120,9 @@ public class MotionGenerationManager {
             vocabSize: vocabSize,
             nbJoints: 47,
             layerCount: 6,
-            encoderDepth: 64,
-            decoderDepth: 128,
-            feedForwardSize: 512,
+            encoderDepth: 256,
+            decoderDepth: 512,
+            feedForwardSize: 2048,
             headCount: 16,
             dropoutProbability: 0.1,
             sentenceMaxPositionalLength: 100,
@@ -131,13 +131,13 @@ public class MotionGenerationManager {
             activation: swish
         )
         
-        let runName = "run_137"
+        let runName = "run_138"
         let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
 
-        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e12")
+        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e11")
         return model
     }
 

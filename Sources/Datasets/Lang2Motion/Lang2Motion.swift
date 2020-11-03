@@ -87,7 +87,7 @@ extension Lang2Motion {
         let discreteMotions = scaledMotions.map { discretizer.transform($0) }
         print("discreteMotions.count: \(discreteMotions.count)")
         // print("inversing...")
-         let inversedMotions = discreteMotions.map { discretizer.inverse_transform($0) }
+//         let inversedMotions = discreteMotions.map { discretizer.inverse_transform($0) }
 
         for idx in 0..<_motionSamples.count {
             _motionSamples[idx].discreteMotion = discreteMotions[idx]
