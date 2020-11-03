@@ -20,9 +20,10 @@ let maxTextSequenceLength =  40
 
 public class MotionGenerationManager {
     var dataset: Lang2Motion?
-    var model: LangMotionTransformer?
+    var model: LangMotionCatDistTransformer?
     var vocabulary: Vocabulary?
     var textProcessor: TextProcessor?
+    var discretizer: MotionDiscretizer?
 
     var epoch = 1
     var motionsURL: URL?
@@ -33,9 +34,9 @@ public class MotionGenerationManager {
     func loadDataset() {
         let device = Device.defaultTFEager
                 
-        let datasetSize: DatasetSize = .full
-        let batchSize = 150
-        let maxMotionLength = 150
+        let datasetSize: DatasetSize = .small_midi
+        let batchSize = 2
+        let maxMotionLength = 50
 
         let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
         
@@ -44,6 +45,7 @@ public class MotionGenerationManager {
         vocabulary = try! Vocabulary(fromFile: vocabularyURL)
         let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary!, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
         textProcessor = TextProcessor(vocabulary: vocabulary!, tokenizer: tokenizer)
+        discretizer = MotionDiscretizer(n_bins: 300)
         
         print("\nLoading dataset...")
 
@@ -51,12 +53,13 @@ public class MotionGenerationManager {
             motionDatasetURL: motionDatasetURL,
             batchSize: batchSize,
             minMotionLength: 10,
-            maxMotionLength: 150,
+            maxMotionLength: 50,
+            discretizer: &discretizer!,
             trainTestSplit: 1.0,
             device: device
         ) { (motionSample: MotionSample) -> LangMotionBatch in
             let sentence = self.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: self.discretizer!)
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             let singleBatch = LangMotionBatch(data: source,label: target)
             return singleBatch
@@ -66,50 +69,78 @@ public class MotionGenerationManager {
     }
 
     func loadModel() {
-        /// Load model checkpoint
-        // colab training
-//        let runName = "run_86"
-//        epoch = 10
+//        /// Load model checkpoint
+//        // colab training
+////        let runName = "run_86"
+////        epoch = 10
+//
+//        // one sample training
+////        let runName = "run_80"
+////        epoch = 30
+//
+////        let runName = "run_100_michal"
+////        epoch = 100
+//
+//        let runName = "run_set_57"
+//        epoch = 56
+//
+//
+////        let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
+//        let runURL = dataURL.appendingPathComponent("runs/Lang2motionSet/\(runName)", isDirectory: true)
+//        let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
+//        motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
+//        try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
+//
+//        let config = LangMotionTransformerConfig(
+//            vocabSize: vocabulary!.count,
+//            nbJoints: 47,
+//            nbMixtures: 20,
+//            layerCount: 6,
+//            encoderDepth: 256,
+//            decoderDepth: 512,
+//            feedForwardSize: 2048,
+//            headCount: 16,
+//            dropoutProbability:  0.1,
+//            sentenceMaxPositionalLength: 100,
+//            motionMaxPositionalLength: 500,
+//            mixtureDepth: 1500,
+//            activation: swish
+//        )
+//
+////        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(epoch)")
+//        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "run_1.e\(epoch)")
+    let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+        model = getModel4(vocabSize: vocabulary!.count, logdirURL: logdirURL)
+       print("Loaded.")
 
-        // one sample training
-//        let runName = "run_80"
-//        epoch = 30
+    }
+    
+    public func getModel4(vocabSize: Int, logdirURL: URL) -> LangMotionCatDistTransformer {
+        let config = LangMotionCatDistTransformerConfig(
+            vocabSize: vocabSize,
+            nbJoints: 47,
+            layerCount: 4,
+            encoderDepth: 64,
+            decoderDepth: 128,
+            feedForwardSize: 256,
+            headCount: 4,
+            dropoutProbability: 0.1,
+            sentenceMaxPositionalLength: 100,
+            motionMaxPositionalLength: 500,
+            discreteBins: 300,
+            activation: swish
+        )
         
-//        let runName = "run_100_michal"
-//        epoch = 100
-
-        let runName = "run_set_57"
-        epoch = 56
-
-
-//        let runURL = dataURL.appendingPathComponent("runs/Lang2motion/\(runName)", isDirectory: true)
-        let runURL = dataURL.appendingPathComponent("runs/Lang2motionSet/\(runName)", isDirectory: true)
+        let runName = "run_127"
+        let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
 
-        let config = LangMotionTransformerConfig(
-            vocabSize: vocabulary!.count,
-            nbJoints: 47,
-            nbMixtures: 20,
-            layerCount: 6,
-            encoderDepth: 256,
-            decoderDepth: 512,
-            feedForwardSize: 2048,
-            headCount: 16,
-            dropoutProbability:  0.1,
-            sentenceMaxPositionalLength: 100,
-            motionMaxPositionalLength: 500,
-            mixtureDepth: 1500,
-            activation: swish
-        )
-
-//        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(epoch)")
-        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "run_1.e\(epoch)")
-       print("Loaded.")
-        
+        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e23")
+        return model
     }
-    
+
     func generateMotion(genOpts: GenOpts) -> Tensor<Float> {
 //        print("generateMotion()")
         let lf: SampleMotionClip? = nil
@@ -117,7 +148,7 @@ public class MotionGenerationManager {
 //        let prefix = "epoch_\(epoch)_motion_\(genNum)"
         let prefix = "temp_motion"
         
-        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, leadingFrames: lf,
+        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, discretizer: discretizer!, leadingFrames: lf,
             prefix: prefix, memoryMultiplier: 1.0, motionsURL: motionsURL!, showAttentionProbs: false, genOpts: genOpts)
         
         genNum += 1

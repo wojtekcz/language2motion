@@ -37,6 +37,29 @@
                BlueprintName = "MotionDatasetTests"
                ReferencedContainer = "container:MotionDataset.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testCatDistHead()">
+               </Test>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testCatDistHeadMotionGeneration()">
+               </Test>
+               <Test
+                  Identifier = "DiscretizeJointValuesTests">
+               </Test>
+               <Test
+                  Identifier = "ImageCreating">
+               </Test>
+               <Test
+                  Identifier = "LangMotionTransformerTests">
+               </Test>
+               <Test
+                  Identifier = "MotionDatasetTests">
+               </Test>
+               <Test
+                  Identifier = "MotionDatasetTests2">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>
@@ -64,12 +87,12 @@
          <EnvironmentVariable
             key = "PYTHON_LIBRARY"
             value = "/Users/wcz/opt/anaconda3/envs/bvh/lib/libpython3.8.dylib"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "PYTHON_LIBRARY"
             value = "/Users/wcz/opt/anaconda3/envs/swift4f/lib/libpython3.8.dylib"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </EnvironmentVariable>
       </EnvironmentVariables>
    </LaunchAction>

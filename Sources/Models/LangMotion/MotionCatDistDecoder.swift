@@ -39,7 +39,7 @@ public class MotionCatDistDecoder {
         let maxMotionLength2 = maxMotionLength-ys.shape[1]+1
 
         for f in 0..<maxMotionLength2 {
-            print("frame: \(f)")
+            //print("frame: \(f)")
             print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
@@ -64,7 +64,7 @@ public class MotionCatDistDecoder {
             let (sampledMotion, _, done) = Self.performNormalMixtureSampling(
                 preds: singlePreds, maxMotionLength: maxMotionLength)
             
-            print("sampledMotion: \(sampledMotion)")
+            //print("sampledMotion: \(sampledMotion)")
             
             // concatenate motion
             discrete_ys = Tensor(concatenating: [discrete_ys, sampledMotion], alongAxis: 1)

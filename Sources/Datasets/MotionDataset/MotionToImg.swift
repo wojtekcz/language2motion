@@ -24,7 +24,7 @@ public func motionToImg(url: URL?, motion: Tensor<Float>, motionFlag: Tensor<Int
     var joined: Tensor<Float>
     if motionFlag != nil {
         let motionFlag = motionFlag!.paddedTo(padTo: padTo)
-        let motionFlag2 = Tensor<Float>(motionFlag).expandingShape(at: 1)*motion.max()
+        let motionFlag2 = Tensor<Float>(motionFlag)*motion.max()
         joined = Tensor(concatenating: [motionFlag2, motion], alongAxis: 1)
     } else {
         joined = motion
