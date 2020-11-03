@@ -38,7 +38,7 @@ public class MotionCatDistDecoder {
 
         let maxMotionLength2 = maxMotionLength-ys.shape[1]+1
 
-        for f in 0..<maxMotionLength2 {
+        for _ in 0..<maxMotionLength2 {
             //print("frame: \(f)")
             print(".", terminator:"")
             // prepare input
