@@ -42,6 +42,9 @@
                   Identifier = "CategoricalDistributionHeadTests/testCatDistHead()">
                </Test>
                <Test
+                  Identifier = "CategoricalDistributionHeadTests/testCatDistHeadMotionDecoding()">
+               </Test>
+               <Test
                   Identifier = "CategoricalDistributionHeadTests/testCatDistHeadMotionGeneration()">
                </Test>
                <Test

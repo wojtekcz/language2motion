@@ -139,7 +139,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print("invSamplesTensor.shape: \(invSamplesTensor.shape)")
         print("invSamplesTensor: \(roundT(invSamplesTensor))")
         // de-scale
-        let descaledSamplesTensor = dsMgr.dataset!.scaler.inverse_transform(invSamplesTensor)
+        let descaledSamplesTensor = invSamplesTensor//dsMgr.dataset!.scaler.inverse_transform(invSamplesTensor)
         print("descaledSamplesTensor.shape: \(descaledSamplesTensor.shape)")
         print("descaledSamplesTensor: \(roundT(descaledSamplesTensor))")
 
@@ -173,10 +173,72 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let (decodedMotion, _) = motionDecoder.greedyDecodeMotion(sentence: sentence, startMotion: nil, maxMotionLength: 50)
         
         // de-scale
-        let descaledMotion = dsMgr.dataset!.scaler.inverse_transform(decodedMotion)
+        let descaledMotion = decodedMotion //dsMgr.dataset!.scaler.inverse_transform(decodedMotion)
         print("descaledMotion.shape: \(descaledMotion.shape)")
         print("descaledMotion: \(roundT(descaledMotion))")
         
+        print("===> end test\n")
+    }
+
+    func testMotionDescalingIssue() throws {
+        print("\n===> setup test")
+
+        let device = Device.defaultTFEager
+        print("backend: \(device)")
+        
+        let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
+
+        #if os(macOS)
+            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+        #else
+            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+        #endif
+        let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+
+        let model = ModelFactory.getModel5(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
+        
+        let motionSample = dsMgr.dataset!.motionSamples[0]
+        let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
+        let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
+
+        var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
+        source = LangMotionBatch.Source(copying: source, to: device)
+
+        print("\n===> start test")
+
+        let input = source
+        
+        
+        Context.local.learningPhase = .inference
+        
+        let preds = model(input)
+        
+        // loss?
+        let args = CDLossArgs(
+            device: device
+        )
+        let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds.preds, y_true: target, args: args)
+        print("cdsLoss: \(cdsLoss)")
+        
+        // show input sample
+        let sampleMotion = target.discreteMotion
+        print("sampleMotion.shape: \(sampleMotion.shape)")
+        print("sampleMotion: \(sampleMotion)")
+
+        // decode motion
+        let decodedMotion = MotionCatDistDecoder.sampleCatDistMotion(catDistLogits: preds.preds.catDistLogits)
+        print("decodedMotion.shape: \(decodedMotion.shape)")
+        print("decodedMotion: \(decodedMotion)")
+
+        let stops = preds.preds.stops
+        print("stops.shape: \(stops.shape)")
+        print("stops: \(stops.squeezingShape(at: [0, 2]))")
+
+        // de-discretize
+//        let invSamplesTensor = dsMgr.discretizer!.inverse_transform(samplesTensor)
+//        print("invSamplesTensor.shape: \(invSamplesTensor.shape)")
+//        print("invSamplesTensor: \(roundT(invSamplesTensor))")
+
         print("===> end test\n")
     }
 }
