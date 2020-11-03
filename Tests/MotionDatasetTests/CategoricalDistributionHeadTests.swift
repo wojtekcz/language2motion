@@ -186,7 +186,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let device = Device.defaultTFEager
         print("backend: \(device)")
         
-        let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
+        let dsMgr = DatasetManager(datasetSize: .micro, device: device)
 
         #if os(macOS)
             let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
@@ -234,10 +234,33 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print("stops.shape: \(stops.shape)")
         print("stops: \(stops.squeezingShape(at: [0, 2]))")
 
+        print()
+        // show original motion
+        let sourceMotion = source.motionPart.motion[0]
+        print("sourceMotion.shape: \(sourceMotion.shape)")
+        print("sourceMotion: \(roundT(sourceMotion))")
+
+        let targetMotion = target.motion[0]
+        print("targetMotion.shape: \(targetMotion.shape)")
+        print("targetMotion: \(roundT(targetMotion))")
+
         // de-discretize
-//        let invSamplesTensor = dsMgr.discretizer!.inverse_transform(samplesTensor)
-//        print("invSamplesTensor.shape: \(invSamplesTensor.shape)")
-//        print("invSamplesTensor: \(roundT(invSamplesTensor))")
+        let dediscretizedMotion = dsMgr.discretizer!.inverse_transform(decodedMotion)[0]
+        print("dediscretizedMotion.shape: \(dediscretizedMotion.shape)")
+        print("dediscretizedMotion: \(roundT(dediscretizedMotion))")
+
+        // save mmm file(s)
+        func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
+            let jointNames = dataset.motionSamples[0].jointNames
+            let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: motion)
+            try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+            print("Saved motion: \(mmmURL.path)")
+        }
+        
+        let rundirURL = logdirURL.appendingPathComponent("run_136")
+        saveMotionToMMM(dataset: dsMgr.dataset!, motion: sourceMotion, mmmURL: rundirURL.appendingPathComponent("sourceMotion.mmm.xml"))
+        saveMotionToMMM(dataset: dsMgr.dataset!, motion: targetMotion, mmmURL: rundirURL.appendingPathComponent("targetMotion.mmm.xml"))
+        saveMotionToMMM(dataset: dsMgr.dataset!, motion: dediscretizedMotion, mmmURL: rundirURL.appendingPathComponent("dediscretizedMotion.mmm.xml"))
 
         print("===> end test\n")
     }

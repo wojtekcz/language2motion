@@ -93,10 +93,10 @@ extension Lang2Motion {
             _motionSamples[idx].discreteMotion = discreteMotions[idx]
         }
 
-        // scaled and discretized
-        for idx in 0..<_motionSamples.count {
-            _motionSamples[idx].motion = inversedMotions[idx]
-        }
+        // de-discretized
+//        for idx in 0..<_motionSamples.count {
+//            _motionSamples[idx].motion = inversedMotions[idx]
+//        }
         
         self.discretizer = discretizer
         
