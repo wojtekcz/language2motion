@@ -35,8 +35,8 @@ struct ContentView: View {
     @State var encoderSelfAttentionTemp = "1.0"
     @State var decoderSourceAttentionTemp = "1.0"
     @State var decoderSelfAttentionTemp = "1.0"
-//    @State var sentence = "A person is walking forwards."
-    @State var sentence = "Someone makes a sidestep to the left"
+    @State var sentence = "A person is walking forwards."
+//    @State var sentence = "Someone makes a sidestep to the left"
     @State var maxMotionLength = "50"
 //    @State var motionImageName = "motion_image"
     @State var motionCGImage: CGImage? = NSImage(named: "motion_image")?.cgImage(forProposedRect: nil, context: nil, hints: nil)

@@ -108,7 +108,7 @@ public class ModelFactory {
             activation: swish
         )
 
-        let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_137/checkpoints"), config: config, name: "model.e2")
+        let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_137/checkpoints"), config: config, name: "model.e7")
         return model
     }
 }
