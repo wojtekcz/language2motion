@@ -91,47 +91,10 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds, y_true: target, args: args)
         print("cdsLoss: \(cdsLoss)")
 
-        print()
-        // + sample & argmax & de-discretize & de-scale
-//        let np = Python.import("numpy")
-//        func sampleCatDistMotion(catDistProbs: Tensor<Float>) -> Tensor<Int32> {
-//            var samples: [Int32] = []
-//            let sh = catDistProbs.shape
-//            let (bs, nFrames, nbJoints) = (sh[0], sh[1], sh[2])
-//            for s in 0..<bs {
-//                for f in 0..<nFrames {
-//                    for j in 0..<nbJoints {
-//                        let pvals = catDistProbs[s, f, j].scalars.map { Double($0)}
-//                        // TODO: try to make sampling faster with a tensorflow call
-//                        let sample: Int32 = Int32(np.argmax(np.random.multinomial(1, pvals)))!
-//                        samples.append(sample)
-//                    }
-//                }
-//            }
-//            let samplesTensor = Tensor<Int32>(shape: [bs, nFrames, nbJoints], scalars: samples)
-//            return samplesTensor
-//        }
-        
-//        let samplesTensor = sampleCatDistMotion(catDistProbs: preds.catDistProbs)
-//        print("samplesTensor.shape: \(samplesTensor.shape)")
-//        print("samplesTensor: \(samplesTensor)")
-//
-//        // de-discretize
-//        let invSamplesTensor = dsMgr.discretizer!.inverse_transform(samplesTensor)
-//        print("invSamplesTensor.shape: \(invSamplesTensor.shape)")
-//        print("invSamplesTensor: \(roundT(invSamplesTensor))")
-//        // de-scale
-//        let descaledSamplesTensor = dsMgr.dataset!.scaler.inverse_transform(invSamplesTensor)
-//        print("descaledSamplesTensor.shape: \(descaledSamplesTensor.shape)")
-//        print("descaledSamplesTensor: \(roundT(descaledSamplesTensor))")
-
         print("===> end test\n")
     }
 
     func testCatDistHeadMotionGeneration() throws {
-        // TODO: load model
-        // TODO: generate one motion
-        
         print("\n===> setup test")
 
         let device = Device.defaultTFEager
@@ -167,7 +130,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print()
         // + sample & argmax & de-discretize & de-scale
         
-        let samplesTensor = sampleCatDistMotion(catDistLogits: preds.preds.catDistLogits)
+        let samplesTensor = MotionCatDistDecoder.sampleCatDistMotion(catDistLogits: preds.preds.catDistLogits)
         print("samplesTensor.shape: \(samplesTensor.shape)")
         print("samplesTensor: \(samplesTensor)")
 
@@ -183,4 +146,37 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print("===> end test\n")
     }
 
+    func testCatDistHeadMotionDecoding() throws {
+        print("\n===> setup test")
+
+        let device = Device.defaultTFEager
+        print("backend: \(device)")
+        
+        let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
+
+        #if os(macOS)
+            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+        #else
+            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+        #endif
+        let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+
+        let model = ModelFactory.getModel4(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
+        let motionDecoder = MotionCatDistDecoder(discretizer: dsMgr.discretizer!, transformer: model)
+        
+        let motionSample = dsMgr.dataset!.motionSamples[0]
+        let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
+
+        print("\n===> start test")
+
+        Context.local.learningPhase = .inference
+        let (decodedMotion, _) = motionDecoder.greedyDecodeMotion(sentence: sentence, startMotion: nil, maxMotionLength: 50)
+        
+        // de-scale
+        let descaledMotion = dsMgr.dataset!.scaler.inverse_transform(decodedMotion)
+        print("descaledMotion.shape: \(descaledMotion.shape)")
+        print("descaledMotion: \(roundT(descaledMotion))")
+        
+        print("===> end test\n")
+    }
 }

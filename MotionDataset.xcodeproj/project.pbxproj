@@ -42,6 +42,7 @@
 		322ACF802530AE2B009F95B0 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
 		3237B928254CA51300D9609C /* CategoricalDistributionHeadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3237B927254CA51300D9609C /* CategoricalDistributionHeadTests.swift */; };
 		324376EE253445E800916BBA /* ImageCreating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324376ED253445E800916BBA /* ImageCreating.swift */; };
+		324923B225513E1500BD1D75 /* MotionCatDistDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */; };
 		3272D76B254DA6FF00A465B9 /* DatasetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D76A254DA6FF00A465B9 /* DatasetManager.swift */; };
 		3272D788254DA86800A465B9 /* ModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D787254DA86800A465B9 /* ModelFactory.swift */; };
 		32B29C4A2530BF81005E6DB6 /* MotionGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */; };
@@ -1324,6 +1325,7 @@
 		3229572F252EE6480063750F /* LangMotionTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionTransformerTests.swift; sourceTree = "<group>"; };
 		3237B927254CA51300D9609C /* CategoricalDistributionHeadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoricalDistributionHeadTests.swift; sourceTree = "<group>"; };
 		324376ED253445E800916BBA /* ImageCreating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCreating.swift; sourceTree = "<group>"; };
+		324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionCatDistDecoder.swift; sourceTree = "<group>"; };
 		3272D76A254DA6FF00A465B9 /* DatasetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetManager.swift; sourceTree = "<group>"; };
 		3272D787254DA86800A465B9 /* ModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFactory.swift; sourceTree = "<group>"; };
 		3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionCatDistHead.swift; sourceTree = "<group>"; };
@@ -2537,6 +2539,7 @@
 				32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */,
 				32CFD3EA2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift */,
 				32CFD4072550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift */,
+				324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */,
 			);
 			name = LangMotionModels;
 			path = Sources/Models/LangMotion;
@@ -3394,6 +3397,7 @@
 				OBJ_434 /* LangMotionTransformer.swift in Sources */,
 				OBJ_435 /* MixtureModelPreds.swift in Sources */,
 				OBJ_436 /* LangMotionCheckpointReader.swift in Sources */,
+				324923B225513E1500BD1D75 /* MotionCatDistDecoder.swift in Sources */,
 				3208C1C1251CED4200D4555F /* StatsRecorder.swift in Sources */,
 				32CFD3CE254FF1C7005821A8 /* LangMotionCatDistTransformer.swift in Sources */,
 				OBJ_437 /* LangMotionCheckpointWriter.swift in Sources */,
