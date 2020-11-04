@@ -131,7 +131,7 @@ public class MotionGenerationManager {
             activation: swish
         )
         
-        let runName = "run_141"
+        let runName = "run_143"
         let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
@@ -163,8 +163,8 @@ func tensorShow2(_ tensor: Tensor<Float>) {
 }
 
 func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
-//    let descaledMotion = dataset.scaler.inverse_transform(motion)
-    let descaledMotion = motion//dataset.scaler.inverse_transform(motion)
+    let descaledMotion = dataset.scaler.inverse_transform(motion)
+//    let descaledMotion = motion
     let jointNames = dataset.motionSamples[0].jointNames
     let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
     try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)

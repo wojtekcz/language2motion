@@ -186,7 +186,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         let device = Device.defaultTFEager
         print("backend: \(device)")
         
-        let dsMgr = DatasetManager(datasetSize: .micro, device: device)
+        let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
         #if os(macOS)
             let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
@@ -195,7 +195,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         #endif
         let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
 
-        let model = ModelFactory.getModel5(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
+        let model = ModelFactory.getModel6(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
         
         let motionSample = dsMgr.dataset!.motionSamples[0]
         let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
@@ -211,14 +211,14 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         Context.local.learningPhase = .inference
         
-        let preds = model(input)
+//        let preds = model(input)
         
         // loss?
         let args = CDLossArgs(
             device: device
         )
-        let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds.preds, y_true: target, args: args)
-        print("cdsLoss: \(cdsLoss)")
+//        let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds.preds, y_true: target, args: args)
+//        print("cdsLoss: \(cdsLoss)")
         
         // show input sample
         let sampleMotion = target.discreteMotion
@@ -226,13 +226,14 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print("sampleMotion: \(sampleMotion)")
 
         // decode motion
-        let decodedMotion = MotionCatDistDecoder.sampleCatDistMotion(catDistLogits: preds.preds.catDistLogits)
-        print("decodedMotion.shape: \(decodedMotion.shape)")
-        print("decodedMotion: \(decodedMotion)")
+        let decodedMotion = sampleMotion
+//        let decodedMotion = MotionCatDistDecoder.sampleCatDistMotion(catDistLogits: preds.preds.catDistLogits)
+//        print("decodedMotion.shape: \(decodedMotion.shape)")
+//        print("decodedMotion: \(decodedMotion)")
 
-        let stops = preds.preds.stops
-        print("stops.shape: \(stops.shape)")
-        print("stops: \(stops.squeezingShape(at: [0, 2]))")
+//        let stops = preds.preds.stops
+//        print("stops.shape: \(stops.shape)")
+//        print("stops: \(stops.squeezingShape(at: [0, 2]))")
 
         print()
         // show original motion
@@ -249,6 +250,11 @@ class CategoricalDistributionHeadTests: XCTestCase {
         print("dediscretizedMotion.shape: \(dediscretizedMotion.shape)")
         print("dediscretizedMotion: \(roundT(dediscretizedMotion))")
 
+        // de-scale
+        let descaledMotion = dsMgr.dataset!.scaler.inverse_transform(dediscretizedMotion)
+        print("descaledMotion.shape: \(descaledMotion.shape)")
+        print("descaledMotion: \(roundT(descaledMotion))")
+
         // save mmm file(s)
         func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
             let jointNames = dataset.motionSamples[0].jointNames
@@ -257,11 +263,15 @@ class CategoricalDistributionHeadTests: XCTestCase {
             print("Saved motion: \(mmmURL.path)")
         }
         
-        let rundirURL = logdirURL.appendingPathComponent("run_136")
+        let rundirURL = logdirURL.appendingPathComponent("run_142")
         saveMotionToMMM(dataset: dsMgr.dataset!, motion: sourceMotion, mmmURL: rundirURL.appendingPathComponent("sourceMotion.mmm.xml"))
         saveMotionToMMM(dataset: dsMgr.dataset!, motion: targetMotion, mmmURL: rundirURL.appendingPathComponent("targetMotion.mmm.xml"))
         saveMotionToMMM(dataset: dsMgr.dataset!, motion: dediscretizedMotion, mmmURL: rundirURL.appendingPathComponent("dediscretizedMotion.mmm.xml"))
+        saveMotionToMMM(dataset: dsMgr.dataset!, motion: descaledMotion, mmmURL: rundirURL.appendingPathComponent("descaledMotion.mmm.xml"))
 
+//        _Raw.dequantize(<#T##input: Tensor<TensorFlowScalar>##Tensor<TensorFlowScalar>#>, minRange: <#T##Tensor<Float>#>, maxRange: <#T##Tensor<Float>#>)
+//        _Raw.fakeQuantWithMinMaxVarsPerChannel(inputs: <#T##Tensor<Float>#>, min: <#T##Tensor<Float>#>, max: <#T##Tensor<Float>#>, numBits: <#T##Int64#>, narrowRange: <#T##Bool#>)
+        
         print("===> end test\n")
     }
 }

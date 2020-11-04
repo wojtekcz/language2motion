@@ -13,16 +13,16 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_141"
-let batchSize = 2
+let runName = "run_144"
+let batchSize = 5
 let maxTextSequenceLength =  40
-let maxMotionLength =  50
+let maxMotionLength =  150
 let nEpochs = 5
-let multiplyFactor = 15
+let multiplyFactor = 1
 let discreteBins = 300
-let lrSlopeMultiplier: Float = 2.0
+let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = false
-let peakLearningRate: Float = 1e-2
+let peakLearningRate: Float = 1e-3
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.01
 let beta2: Float = 0.99
@@ -40,7 +40,7 @@ var optimizerOpts = OptimizerOpts(
     fixedPeekLR: fixedPeekLR
 )
 
-let datasetSize: DatasetSize = .small_micro1
+let datasetSize: DatasetSize = .micro
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -89,7 +89,7 @@ var dataset = try Lang2Motion(
     motionDatasetURL: motionDatasetURL,
     batchSize: batchSize,
     minMotionLength: 10,
-    maxMotionLength: 50,
+    maxMotionLength: maxMotionLength,
     multiplyFactor: multiplyFactor,
     discretizer: &discretizer,
     trainTestSplit: 1.0,

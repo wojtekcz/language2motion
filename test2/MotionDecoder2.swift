@@ -161,8 +161,8 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         sentence: processedSentence, startMotion: startMotion, maxMotionLength: 50
     )
     // print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
-//    let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
-    let descaledMotion = decodedMotion
+    let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
+//    let descaledMotion = decodedMotion
     // print("  descaledMotion.shape: \(descaledMotion.shape)")
     // print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
 

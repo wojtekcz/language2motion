@@ -43,6 +43,7 @@
 		3237B928254CA51300D9609C /* CategoricalDistributionHeadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3237B927254CA51300D9609C /* CategoricalDistributionHeadTests.swift */; };
 		324376EE253445E800916BBA /* ImageCreating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324376ED253445E800916BBA /* ImageCreating.swift */; };
 		324923B225513E1500BD1D75 /* MotionCatDistDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */; };
+		3249634D2552CF3F003190D9 /* MinMaxScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3249634C2552CF3F003190D9 /* MinMaxScaler.swift */; };
 		3272D76B254DA6FF00A465B9 /* DatasetManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D76A254DA6FF00A465B9 /* DatasetManager.swift */; };
 		3272D788254DA86800A465B9 /* ModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3272D787254DA86800A465B9 /* ModelFactory.swift */; };
 		32B29C4A2530BF81005E6DB6 /* MotionGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */; };
@@ -1326,6 +1327,7 @@
 		3237B927254CA51300D9609C /* CategoricalDistributionHeadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoricalDistributionHeadTests.swift; sourceTree = "<group>"; };
 		324376ED253445E800916BBA /* ImageCreating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCreating.swift; sourceTree = "<group>"; };
 		324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionCatDistDecoder.swift; sourceTree = "<group>"; };
+		3249634C2552CF3F003190D9 /* MinMaxScaler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinMaxScaler.swift; sourceTree = "<group>"; };
 		3272D76A254DA6FF00A465B9 /* DatasetManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetManager.swift; sourceTree = "<group>"; };
 		3272D787254DA86800A465B9 /* ModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelFactory.swift; sourceTree = "<group>"; };
 		3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionCatDistHead.swift; sourceTree = "<group>"; };
@@ -2451,6 +2453,7 @@
 				OBJ_63 /* MotionToImg.swift */,
 				OBJ_64 /* Scaler.swift */,
 				3217BAFA2548161C0011669A /* MotionDiscretizer.swift */,
+				3249634C2552CF3F003190D9 /* MinMaxScaler.swift */,
 			);
 			path = MotionDataset;
 			sourceTree = "<group>";
@@ -3327,6 +3330,7 @@
 				OBJ_317 /* ArrayUtils.swift in Sources */,
 				OBJ_318 /* Batchable.swift in Sources */,
 				OBJ_319 /* DataUtilities.swift in Sources */,
+				3249634D2552CF3F003190D9 /* MinMaxScaler.swift in Sources */,
 				OBJ_320 /* DatasetUtilities.swift in Sources */,
 				OBJ_321 /* ImageClassificationDataset.swift in Sources */,
 				OBJ_322 /* Lang2Lang.swift in Sources */,

@@ -111,4 +111,24 @@ public class ModelFactory {
         let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_137/checkpoints"), config: config, name: "model.e7")
         return model
     }
+
+    public static func getModel6(vocabSize: Int, logdirURL: URL) -> LangMotionCatDistTransformer {
+        let config = LangMotionCatDistTransformerConfig(
+            vocabSize: vocabSize,
+            nbJoints: 47,
+            layerCount: 6,
+            encoderDepth: 256,
+            decoderDepth: 512,
+            feedForwardSize: 2048,
+            headCount: 16,
+            dropoutProbability: 0.0,
+            sentenceMaxPositionalLength: 100,
+            motionMaxPositionalLength: 500,
+            discreteBins: 300,
+            activation: swish
+        )
+
+        let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_143/checkpoints"), config: config, name: "model.e5")
+        return model
+    }
 }

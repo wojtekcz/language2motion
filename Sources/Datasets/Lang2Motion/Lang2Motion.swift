@@ -12,7 +12,7 @@ public struct Lang2Motion {
     }
 
     public let motionDataset: MotionDataset
-    //public let scaler: Scaler
+    public let scaler: MinMaxScaler
     public var discretizer: MotionDiscretizer
 
     public let motionSamples: [MotionSample]
@@ -70,18 +70,17 @@ extension Lang2Motion {
         // scale motions
         print("Scaling motions...")
         let motions = _motionSamples.map { $0.motion }
-        //let _scaler = Scaler(X: Tensor(concatenating: motions, alongAxis: 0))
-//        let scaledMotions = motions.map { _scaler.transform($0) }
-        let scaledMotions = motions.map { $0 }
+        let _scaler = MinMaxScaler(X: Tensor(concatenating: motions, alongAxis: 0))
+        let scaledMotions = motions.map { _scaler.transform($0) }
+//        let scaledMotions = motions.map { $0 }
 
-//        for idx in 0..<_motionSamples.count {
-//            _motionSamples[idx].motion = scaledMotions[idx]
-//        }
-        //scaler = _scaler
+        for idx in 0..<_motionSamples.count {
+            _motionSamples[idx].motion = scaledMotions[idx]
+        }
+        scaler = _scaler
         print("Motions scaled.")
 
         // discretize motions
-        //let _discretizer = MotionDiscretizer(n_bins: discreteBins, X: Tensor(concatenating: scaledMotions, alongAxis: 0))
         discretizer.fit(Tensor(concatenating: scaledMotions, alongAxis: 0))
         print("discretizing...")
         let discreteMotions = scaledMotions.map { discretizer.transform($0) }
