@@ -13,7 +13,7 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_147"
+let runName = "run_148"
 let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
@@ -22,7 +22,7 @@ let multiplyFactor = 1
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 2e-5
+let peakLearningRate: Float = 1e-4
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.0001
 let beta2: Float = 0.99
@@ -126,7 +126,7 @@ let config = LangMotionCatDistTransformerConfig(
 // var model = LangMotionCatDistTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_145/checkpoints"), config: config, name: "model.e49")
+var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_147/checkpoints"), config: config, name: "model.e23")
 
 // Loss function
 let args = CDLossArgs(
