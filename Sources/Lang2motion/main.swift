@@ -14,14 +14,14 @@ import x10_optimizers_optimizer
 
 /// Set training params
 let runName = "run_144"
-let batchSize = 5
+let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength =  150
-let nEpochs = 5
-let multiplyFactor = 1
+let nEpochs = 100
+let multiplyFactor = 30
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
-let fixedPeekLR: Bool = false
+let fixedPeekLR: Bool = true
 let peakLearningRate: Float = 1e-3
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.01
