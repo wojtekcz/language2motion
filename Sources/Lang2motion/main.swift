@@ -13,12 +13,13 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let runName = "run_149"
+let maxSamples = 226
+let runName = "run_150_maxSamples_\(maxSamples)"
 let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
 let nEpochs = 100
-let multiplyFactor = 1
+let multiplyFactor = 9
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
@@ -91,7 +92,7 @@ var dataset = try Lang2Motion(
     minMotionLength: 10,
     maxMotionLength: maxMotionLength,
     multiplyFactor: multiplyFactor,
-    trim: 700,
+    maxSamples: maxSamples,
     discretizer: &discretizer,
     trainTestSplit: 1.0,
     device: device
