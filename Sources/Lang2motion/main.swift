@@ -22,9 +22,9 @@ let multiplyFactor = 1
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 1e-4
+let peakLearningRate: Float = 5e-3
 let useBiasCorrection: Bool = true
-let weightDecayRate: Float = 0.0001
+let weightDecayRate: Float = 0.01
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
 
@@ -91,7 +91,7 @@ var dataset = try Lang2Motion(
     minMotionLength: 10,
     maxMotionLength: maxMotionLength,
     multiplyFactor: multiplyFactor,
-    trim: 1000,
+    trim: 700,
     discretizer: &discretizer,
     trainTestSplit: 1.0,
     device: device
@@ -124,10 +124,10 @@ let config = LangMotionCatDistTransformerConfig(
 )
 
 /// create new model
-// var model = LangMotionCatDistTransformer(config: config)
+var model = LangMotionCatDistTransformer(config: config)
 
 /// load model checkpoint
-var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_147/checkpoints"), config: config, name: "model.e23")
+// var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_147/checkpoints"), config: config, name: "model.e23")
 
 // Loss function
 let args = CDLossArgs(
