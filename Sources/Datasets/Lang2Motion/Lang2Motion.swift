@@ -46,6 +46,7 @@ extension Lang2Motion {
         minMotionLength: Int = 10,
         maxMotionLength: Int = 100,
         multiplyFactor: Int = 1,
+        trim: Int? = nil,
         discretizer: inout MotionDiscretizer,
         trainTestSplit: Double = 0.8,
         device: Device,
@@ -66,6 +67,12 @@ extension Lang2Motion {
         // filter out longest samples
         _motionSamples = _motionSamples.filter { $0.motion.shape[0] <= maxMotionLength }
         print("Keeping \(_motionSamples.count) shorter motions, with maximum \(maxMotionLength) frames.")
+        
+        // cap dataset samples
+        if trim != nil {
+            _motionSamples = Array(_motionSamples[0..<trim!])
+            print("Keeping \(_motionSamples.count) capped motions.")
+        }
 
         // scale motions
         print("Scaling motions...")
