@@ -13,33 +13,21 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let maxSamples = 226
-let runName = "run_150_maxSamples_\(maxSamples)"
+let maxSamples = 500
+let runName = "run_151_maxSamples_\(maxSamples)"
 let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
 let nEpochs = 100
-let multiplyFactor = 9
+let multiplyFactor = 4
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 5e-3
+let peakLearningRate: Float = 1e-2 //5e-3
 let useBiasCorrection: Bool = true
-let weightDecayRate: Float = 0.01
+let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
-
-// peek LR for new training: 1e-3, for resuming: 5e-4
-var optimizerOpts = OptimizerOpts(
-    peakLearningRate: peakLearningRate,
-    beta1: 0.9,
-    beta2: beta2,
-    weightDecayRate: weightDecayRate, // default 0.01
-    useBiasCorrection: useBiasCorrection,
-    lrSlopeMultiplier: lrSlopeMultiplier,
-    nEpochs: nEpochs,
-    fixedPeekLR: fixedPeekLR
-)
 
 let datasetSize: DatasetSize = .full
 
@@ -48,7 +36,7 @@ print("batchSize: \(batchSize)")
 print("maxTextSequenceLength: \(maxTextSequenceLength)")
 print("maxMotionLength: \(maxMotionLength)")
 print("nEpochs: \(nEpochs)")
-print("peakLearningRate: \(optimizerOpts.peakLearningRate)")
+print("peakLearningRate: \(peakLearningRate)")
 print("datasetSize: \(datasetSize)")
 
 #if os(macOS)
@@ -150,6 +138,18 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
 }
 
 // Training loop
+
+var optimizerOpts = OptimizerOpts(
+    peakLearningRate: peakLearningRate,
+    beta1: 0.9,
+    beta2: beta2,
+    weightDecayRate: weightDecayRate, // default 0.01
+    useBiasCorrection: useBiasCorrection,
+    lrSlopeMultiplier: lrSlopeMultiplier,
+    nEpochs: nEpochs,
+    fixedPeekLR: fixedPeekLR
+)
+
 optimizerOpts.stepsPerEpoch = dataset.motionSamples.count/batchSize
 print("stepsPerEpoch: \(optimizerOpts.stepsPerEpoch)")
 
