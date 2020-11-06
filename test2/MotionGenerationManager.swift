@@ -131,7 +131,7 @@ public class MotionGenerationManager {
             activation: swish
         )
         
-        let runName = "run_154_maxSamples_500"
+        let runName = "run_160_maxSamples"
         let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
