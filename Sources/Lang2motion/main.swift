@@ -17,7 +17,7 @@ let maxSamples: Int? = nil//2000
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_158_maxSamples\(maxSamplesStr)"
+let runName = "run_159_maxSamples\(maxSamplesStr)"
 let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
@@ -61,8 +61,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-// let device = Device.defaultXLA
-let device = Device.defaultTFEager
+let device = Device.defaultXLA
+// let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
