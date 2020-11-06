@@ -34,7 +34,7 @@ public class MotionGenerationManager {
     func loadDataset() {
         let device = Device.defaultTFEager
                 
-        let datasetSize: DatasetSize = .micro
+        let datasetSize: DatasetSize = .full
         let batchSize = 2
         let maxMotionLength = 75
 
@@ -131,13 +131,13 @@ public class MotionGenerationManager {
             activation: swish
         )
         
-        let runName = "run_153"
+        let runName = "run_154_maxSamples_500"
         let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
 
-        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e89")
+        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e44")
         return model
     }
 
