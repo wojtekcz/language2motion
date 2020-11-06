@@ -14,6 +14,13 @@ func roundT(_ num: Tensor<Float>, prec: Int = 4) -> Tensor<Float> {
 
 class CategoricalDistributionHeadTests: XCTestCase {
 
+    #if os(macOS)
+        let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+    #else
+        let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+    #endif
+
+    
     func testCatDistHead() throws {
         // + configure forward pass
         // + create new head class
@@ -34,7 +41,15 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
-        var model = ModelFactory.getModel2(vocabSize: dsMgr.textProcessor!.vocabulary.count)
+        #if os(macOS)
+            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+        #else
+            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+        #endif
+        let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+
+        let model = ModelFactory.getModel4(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
+
         let catDistHead = MotionCatDistHead(inputSize: model.config.decoderDepth, nbJoints: model.config.nbJoints, discreteBins: 300)
         
         let motionSample = dsMgr.dataset!.motionSamples[0]
@@ -45,7 +60,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         source = LangMotionBatch.Source(copying: source, to: device)
 
         print("\n===> start test")
-        model.move(to: device)
+//        model.move(to: device)
 
         let input = source
         
@@ -195,7 +210,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
         #endif
         let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
 
-        let model = ModelFactory.getModel6(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
+//        let model = ModelFactory.getModel6(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
         
         let motionSample = dsMgr.dataset!.motionSamples[0]
         let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
@@ -206,7 +221,7 @@ class CategoricalDistributionHeadTests: XCTestCase {
 
         print("\n===> start test")
 
-        let input = source
+//        let input = source
         
         
         Context.local.learningPhase = .inference
@@ -214,9 +229,9 @@ class CategoricalDistributionHeadTests: XCTestCase {
 //        let preds = model(input)
         
         // loss?
-        let args = CDLossArgs(
-            device: device
-        )
+//        let args = CDLossArgs(
+//            device: device
+//        )
 //        let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds.preds, y_true: target, args: args)
 //        print("cdsLoss: \(cdsLoss)")
         
@@ -273,5 +288,39 @@ class CategoricalDistributionHeadTests: XCTestCase {
 //        _Raw.fakeQuantWithMinMaxVarsPerChannel(inputs: <#T##Tensor<Float>#>, min: <#T##Tensor<Float>#>, max: <#T##Tensor<Float>#>, numBits: <#T##Int64#>, narrowRange: <#T##Bool#>)
         
         print("===> end test\n")
+    }
+    
+    func testLossFunction() throws {
+        print("\n===> setup test")
+
+        let device = Device.defaultTFEager
+        print("backend: \(device)")
+        
+        let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
+
+        let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+        let model = ModelFactory.getModel4(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
+        
+        let motionSample = dsMgr.dataset!.motionSamples[0]
+        let sentence = dsMgr.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: dsMgr.maxTextSequenceLength)
+        let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: dsMgr.maxMotionLength, discretizer: dsMgr.discretizer!)
+
+        var source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
+        source = LangMotionBatch.Source(copying: source, to: device)
+
+        print("\n===> start test")
+
+        let input = source
+        
+        Context.local.learningPhase = .inference
+        
+        let preds = model(input)
+        
+        // loss?
+        let args = CDLossArgs(
+            device: device
+        )
+        let cdsLoss = categoryDistributionSurrogateLoss(y_pred: preds.preds, y_true: target, args: args)
+        print("cdsLoss: \(cdsLoss)")
     }
 }

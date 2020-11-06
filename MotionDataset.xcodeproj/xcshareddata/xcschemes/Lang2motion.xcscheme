@@ -23,9 +23,9 @@
       </BuildActionEntries>
    </BuildAction>
    <TestAction
-      buildConfiguration = "Release"
-      selectedDebuggerIdentifier = ""
-      selectedLauncherIdentifier = "Xcode.IDEFoundation.Launcher.PosixSpawn"
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
          <TestableReference
@@ -46,6 +46,9 @@
                </Test>
                <Test
                   Identifier = "CategoricalDistributionHeadTests/testCatDistHeadMotionGeneration()">
+               </Test>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testMotionDescalingIssue()">
                </Test>
                <Test
                   Identifier = "DiscretizeJointValuesTests">

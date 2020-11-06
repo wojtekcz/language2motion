@@ -81,18 +81,30 @@ public struct CDLossArgs {
      }
 }
 
+@differentiable
+func _none(t: Tensor<Float>) -> Tensor<Float> { t }
+
 @differentiable(wrt: y_pred)
 public func _categoryDistributionSurrogateLoss(y_true: LangMotionBatch.Target, y_pred: MotionCatDistPreds, args: CDLossArgs) -> Tensor<Float> {
-    
-    // use categorical cross-entropy loss (over discretized joint positions)
-    let labels = y_true.discreteMotion.reshaped(to: [-1])
-    let sh = y_true.discreteMotion.shape
-    let resultSize =  sh[0] * sh[1] * sh[2]
-    let logits = y_pred.catDistLogits.reshaped(to: [resultSize, -1])
 
-    @differentiable
-    func _none(t: Tensor<Float>) -> Tensor<Float> { t }
-    var catDistLoss = softmaxCrossEntropy(logits: logits, labels: labels, reduction: _none).reshaped(like: y_true.discreteMotion)
+    // use categorical cross-entropy loss (over discretized joint positions)
+    let all_logits = y_pred.catDistLogits
+    let all_labels = y_true.discreteMotion
+    
+    let nb_joints = all_labels.shape[2]
+
+    // loop over joints
+    var all_CatDistLosses: [Tensor<Float>] = []
+    for joint_idx in 0..<nb_joints {
+        let logits = all_logits[0..., 0..., joint_idx, 0...]
+        let labels = all_labels[0..., 0..., joint_idx]
+
+        let resultSize =  labels.shape[0] * labels.shape[1]
+
+        let catDistLoss = softmaxCrossEntropy(logits: logits.reshaped(to: [resultSize, -1]), labels: labels.reshaped(to: [-1]), reduction: _none).reshaped(like: labels)
+        all_CatDistLosses.append(catDistLoss)
+    }
+    var catDistLoss = Tensor<Float>(stacking: all_CatDistLosses, alongAxis: 2)
 
     let stops = y_pred.stops.squeezingShape(at: 2)
     
