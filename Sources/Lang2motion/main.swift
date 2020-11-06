@@ -14,7 +14,7 @@ import x10_optimizers_optimizer
 
 /// Set training params
 let maxSamples: Int? = 500
-let runName = "run_154_maxSamples_\(maxSamples!)"
+let runName = "run_155_maxSamples_\(maxSamples!)"
 let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
@@ -23,7 +23,7 @@ let multiplyFactor = 4
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 2e-3 //5e-3
+let peakLearningRate: Float = 1e-2 //5e-3
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
