@@ -13,13 +13,16 @@ import TrainingLoop
 import x10_optimizers_optimizer
 
 /// Set training params
-let maxSamples: Int? = 500
-let runName = "run_156_maxSamples_\(maxSamples!)"
-let batchSize = 50
+let maxSamples: Int? = nil//2000
+
+let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
+
+let runName = "run_158_maxSamples\(maxSamplesStr)"
+let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
 let nEpochs = 100
-let multiplyFactor = 4
+let multiplyFactor = 2
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
@@ -58,8 +61,8 @@ let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory:
 let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
-let device = Device.defaultXLA
-// let device = Device.defaultTFEager
+// let device = Device.defaultXLA
+let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
