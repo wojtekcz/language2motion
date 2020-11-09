@@ -104,7 +104,7 @@ let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
     layerCount: 12,
-    encoderDepth: 128,
+    encoderDepth: 64,
     decoderDepth: 240,
     feedForwardSize: 1536,
     headCount: 16,
