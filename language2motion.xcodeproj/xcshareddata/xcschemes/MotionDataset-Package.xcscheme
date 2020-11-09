@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::PreprocessMotionDataset"
+               BlueprintIdentifier = "language2motion::PreprocessMotionDataset"
                BuildableName = "PreprocessMotionDataset"
                BlueprintName = "PreprocessMotionDataset"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -28,10 +28,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::TextModels"
+               BlueprintIdentifier = "language2motion::TextModels"
                BuildableName = "TextModels.framework"
                BlueprintName = "TextModels"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -42,10 +42,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::TranslationModels"
+               BlueprintIdentifier = "language2motion::TranslationModels"
                BuildableName = "TranslationModels.framework"
                BlueprintName = "TranslationModels"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -56,10 +56,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::ImageClassificationModels"
+               BlueprintIdentifier = "language2motion::ImageClassificationModels"
                BuildableName = "ImageClassificationModels.framework"
                BlueprintName = "ImageClassificationModels"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -70,10 +70,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Checkpoints"
+               BlueprintIdentifier = "language2motion::Checkpoints"
                BuildableName = "Checkpoints.framework"
                BlueprintName = "Checkpoints"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -84,10 +84,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Batcher"
+               BlueprintIdentifier = "language2motion::Batcher"
                BuildableName = "Batcher.framework"
                BlueprintName = "Batcher"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -98,10 +98,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::MotionLangModels"
+               BlueprintIdentifier = "language2motion::MotionLangModels"
                BuildableName = "MotionLangModels.framework"
                BlueprintName = "MotionLangModels"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -112,10 +112,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::MotionClassifiers"
+               BlueprintIdentifier = "language2motion::MotionClassifiers"
                BuildableName = "MotionClassifiers.framework"
                BlueprintName = "MotionClassifiers"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -126,10 +126,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Lang2lang"
+               BlueprintIdentifier = "language2motion::Lang2lang"
                BuildableName = "Lang2lang"
                BlueprintName = "Lang2lang"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -140,10 +140,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Language2label"
+               BlueprintIdentifier = "language2motion::Language2label"
                BuildableName = "Language2label"
                BlueprintName = "Language2label"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -154,10 +154,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::ModelSupport"
+               BlueprintIdentifier = "language2motion::ModelSupport"
                BuildableName = "ModelSupport.framework"
                BlueprintName = "ModelSupport"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -168,10 +168,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Transformer-Translation"
+               BlueprintIdentifier = "language2motion::Transformer-Translation"
                BuildableName = "Transformer-Translation"
                BlueprintName = "Transformer-Translation"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -182,10 +182,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Lang2motion"
+               BlueprintIdentifier = "language2motion::Lang2motion"
                BuildableName = "Lang2motion"
                BlueprintName = "Lang2motion"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -196,10 +196,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Motion2label"
+               BlueprintIdentifier = "language2motion::Motion2label"
                BuildableName = "Motion2label"
                BlueprintName = "Motion2label"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -210,10 +210,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::LangMotionModels"
+               BlueprintIdentifier = "language2motion::LangMotionModels"
                BuildableName = "LangMotionModels.framework"
                BlueprintName = "LangMotionModels"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -224,10 +224,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::TrainingLoop"
+               BlueprintIdentifier = "language2motion::TrainingLoop"
                BuildableName = "TrainingLoop.framework"
                BlueprintName = "TrainingLoop"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -238,10 +238,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::SummaryWriter"
+               BlueprintIdentifier = "language2motion::SummaryWriter"
                BuildableName = "SummaryWriter.framework"
                BlueprintName = "SummaryWriter"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -252,10 +252,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Motion2lang"
+               BlueprintIdentifier = "language2motion::Motion2lang"
                BuildableName = "Motion2lang"
                BlueprintName = "Motion2lang"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -266,10 +266,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::STBImage"
+               BlueprintIdentifier = "language2motion::STBImage"
                BuildableName = "STBImage.framework"
                BlueprintName = "STBImage"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -280,10 +280,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Datasets"
+               BlueprintIdentifier = "language2motion::Datasets"
                BuildableName = "Datasets.framework"
                BlueprintName = "Datasets"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -298,10 +298,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::MotionDatasetTests"
+               BlueprintIdentifier = "language2motion::MotionDatasetTests"
                BuildableName = "MotionDatasetTests.xctest"
                BlueprintName = "MotionDatasetTests"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

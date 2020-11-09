@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "MotionDataset",
+    name: "language2motion",
     platforms: [
         .macOS(.v10_13),
     ],

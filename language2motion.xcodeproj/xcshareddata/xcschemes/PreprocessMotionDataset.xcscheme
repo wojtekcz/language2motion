@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Motion2lang"
-               BuildableName = "Motion2lang"
-               BlueprintName = "Motion2lang"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               BlueprintIdentifier = "language2motion::PreprocessMotionDataset"
+               BuildableName = "PreprocessMotionDataset"
+               BlueprintName = "PreprocessMotionDataset"
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::MotionDatasetTests"
+               BlueprintIdentifier = "language2motion::MotionDatasetTests"
                BuildableName = "MotionDatasetTests.xctest"
                BlueprintName = "MotionDatasetTests"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -54,19 +54,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "MotionDataset::Motion2lang"
-            BuildableName = "Motion2lang"
-            BlueprintName = "Motion2lang"
-            ReferencedContainer = "container:MotionDataset.xcodeproj">
+            BlueprintIdentifier = "language2motion::PreprocessMotionDataset"
+            BuildableName = "PreprocessMotionDataset"
+            BlueprintName = "PreprocessMotionDataset"
+            ReferencedContainer = "container:language2motion.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "PYTHON_LIBRARY"
-            value = "/Users/wcz/opt/anaconda3/envs/bvh/lib/libpython3.8.dylib"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::Lang2motion"
+               BlueprintIdentifier = "language2motion::Lang2motion"
                BuildableName = "Lang2motion"
                BlueprintName = "Lang2motion"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "MotionDataset::MotionDatasetTests"
+               BlueprintIdentifier = "language2motion::MotionDatasetTests"
                BuildableName = "MotionDatasetTests.xctest"
                BlueprintName = "MotionDatasetTests"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
             <SkippedTests>
                <Test
@@ -83,10 +83,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "MotionDataset::Lang2motion"
+            BlueprintIdentifier = "language2motion::Lang2motion"
             BuildableName = "Lang2motion"
             BlueprintName = "Lang2motion"
-            ReferencedContainer = "container:MotionDataset.xcodeproj">
+            ReferencedContainer = "container:language2motion.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>

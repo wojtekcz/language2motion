@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "32FE043A253040340044128D"
-               BuildableName = "test2.app"
-               BlueprintName = "test2"
-               ReferencedContainer = "container:MotionDataset.xcodeproj">
+               BlueprintIdentifier = "32EFE3BB2539839300CB719D"
+               BuildableName = "Lang2motionSet"
+               BlueprintName = "Lang2motionSet"
+               ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -44,19 +44,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "32FE043A253040340044128D"
-            BuildableName = "test2.app"
-            BlueprintName = "test2"
-            ReferencedContainer = "container:MotionDataset.xcodeproj">
+            BlueprintIdentifier = "32EFE3BB2539839300CB719D"
+            BuildableName = "Lang2motionSet"
+            BlueprintName = "Lang2motionSet"
+            ReferencedContainer = "container:language2motion.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "PYTHON_LIBRARY"
-            value = "/Users/wcz/opt/anaconda3/envs/bvh/lib/libpython3.8.dylib"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -68,10 +61,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "32FE043A253040340044128D"
-            BuildableName = "test2.app"
-            BlueprintName = "test2"
-            ReferencedContainer = "container:MotionDataset.xcodeproj">
+            BlueprintIdentifier = "32EFE3BB2539839300CB719D"
+            BuildableName = "Lang2motionSet"
+            BlueprintName = "Lang2motionSet"
+            ReferencedContainer = "container:language2motion.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
