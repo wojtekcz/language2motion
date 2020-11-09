@@ -4,11 +4,6 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Lang2lang.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>0</integer>
-		</dict>
 		<key>Lang2motion.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,16 +13,6 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>9</integer>
-		</dict>
-		<key>Language2label.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
-		<key>Motion2label.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>3</integer>
 		</dict>
 		<key>Motion2lang.xcscheme_^#shared#^_</key>
 		<dict>
@@ -43,11 +28,6 @@
 		<dict>
 			<key>orderHint</key>
 			<integer>6</integer>
-		</dict>
-		<key>Transformer-Translation.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>7</integer>
 		</dict>
 		<key>test2.xcscheme_^#shared#^_</key>
 		<dict>
@@ -73,6 +53,31 @@
 			<true/>
 		</dict>
 		<key>32FE043A253040340044128D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>MotionDataset::Lang2lang</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>MotionDataset::Language2label</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>MotionDataset::Motion2label</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>MotionDataset::MotionDatasetTests</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>MotionDataset::Transformer-Translation</key>
 		<dict>
 			<key>primary</key>
 			<true/>

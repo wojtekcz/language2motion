@@ -49,7 +49,6 @@
 		32B29C4A2530BF81005E6DB6 /* MotionGenerationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C492530BF81005E6DB6 /* MotionGenerationManager.swift */; };
 		32B29C662530BFC2005E6DB6 /* MotionDecoder2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */; };
 		32B3D16C2535817500866FA1 /* MotionDatasetTests2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */; };
-		32B3D1A82535DEBA00866FA1 /* ImageSupportOSX.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B3D1A62535DEBA00866FA1 /* ImageSupportOSX.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		32B3D1AB2535DEBA00866FA1 /* ImageSupportOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32B3D1A42535DEBA00866FA1 /* ImageSupportOSX.framework */; };
 		32B3D21E2535DF4700866FA1 /* SpectralColormap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D21B2535DF4700866FA1 /* SpectralColormap.swift */; };
 		32B3D21F2535DF4700866FA1 /* TensorCGImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B3D21C2535DF4700866FA1 /* TensorCGImage.swift */; };
@@ -137,20 +136,6 @@
 		OBJ_354 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
 		OBJ_355 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
 		OBJ_356 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
-		OBJ_366 /* ResNet-extractFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_71 /* ResNet-extractFeatures.swift */; };
-		OBJ_367 /* ResNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_72 /* ResNet.swift */; };
-		OBJ_368 /* ResNet1ch.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_73 /* ResNet1ch.swift */; };
-		OBJ_375 /* TextProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_75 /* TextProcessor.swift */; };
-		OBJ_376 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_76 /* main.swift */; };
-		OBJ_378 /* SummaryWriter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::SummaryWriter::Product" /* SummaryWriter.framework */; };
-		OBJ_379 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TranslationModels::Product" /* TranslationModels.framework */; };
-		OBJ_380 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
-		OBJ_381 /* Datasets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Datasets::Product" /* Datasets.framework */; };
-		OBJ_382 /* Batcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Batcher::Product" /* Batcher.framework */; };
-		OBJ_383 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
-		OBJ_384 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
-		OBJ_385 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
-		OBJ_386 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
 		OBJ_404 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_78 /* main.swift */; };
 		OBJ_406 /* TrainingLoop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */; };
 		OBJ_407 /* LangMotionModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::LangMotionModels::Product" /* LangMotionModels.framework */; };
@@ -178,15 +163,6 @@
 		OBJ_447 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
 		OBJ_448 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
 		OBJ_449 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
-		OBJ_463 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_88 /* main.swift */; };
-		OBJ_465 /* SummaryWriter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::SummaryWriter::Product" /* SummaryWriter.framework */; };
-		OBJ_466 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
-		OBJ_467 /* Datasets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Datasets::Product" /* Datasets.framework */; };
-		OBJ_468 /* Batcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Batcher::Product" /* Batcher.framework */; };
-		OBJ_469 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
-		OBJ_470 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
-		OBJ_471 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
-		OBJ_472 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
 		OBJ_485 /* BijectiveDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_90 /* BijectiveDictionary.swift */; };
 		OBJ_486 /* FileManagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_91 /* FileManagement.swift */; };
 		OBJ_487 /* FileSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_92 /* FileSystem.swift */; };
@@ -203,21 +179,8 @@
 		OBJ_498 /* timing.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_105 /* timing.swift */; };
 		OBJ_500 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
 		OBJ_501 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
-		OBJ_509 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_107 /* main.swift */; };
-		OBJ_511 /* SummaryWriter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::SummaryWriter::Product" /* SummaryWriter.framework */; };
-		OBJ_512 /* MotionClassifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::MotionClassifiers::Product" /* MotionClassifiers.framework */; };
-		OBJ_513 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TranslationModels::Product" /* TranslationModels.framework */; };
-		OBJ_514 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
-		OBJ_515 /* Datasets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Datasets::Product" /* Datasets.framework */; };
-		OBJ_516 /* Batcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Batcher::Product" /* Batcher.framework */; };
-		OBJ_517 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
-		OBJ_518 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
-		OBJ_519 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
-		OBJ_520 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
-		OBJ_521 /* ImageClassificationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */; };
 		OBJ_539 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_109 /* main.swift */; };
 		OBJ_541 /* MotionLangModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::MotionLangModels::Product" /* MotionLangModels.framework */; };
-		OBJ_542 /* ImageClassificationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */; };
 		OBJ_543 /* SummaryWriter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::SummaryWriter::Product" /* SummaryWriter.framework */; };
 		OBJ_544 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TranslationModels::Product" /* TranslationModels.framework */; };
 		OBJ_545 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
@@ -227,18 +190,6 @@
 		OBJ_549 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
 		OBJ_550 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
 		OBJ_551 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
-		OBJ_568 /* DenseMotionClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_111 /* DenseMotionClassifier.swift */; };
-		OBJ_569 /* MotionClassifierProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_112 /* MotionClassifierProtocol.swift */; };
-		OBJ_570 /* ResNetMotionClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_113 /* ResNetMotionClassifier.swift */; };
-		OBJ_572 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TranslationModels::Product" /* TranslationModels.framework */; };
-		OBJ_573 /* ImageClassificationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */; };
-		OBJ_574 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
-		OBJ_575 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
-		OBJ_576 /* Datasets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Datasets::Product" /* Datasets.framework */; };
-		OBJ_577 /* Batcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Batcher::Product" /* Batcher.framework */; };
-		OBJ_578 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
-		OBJ_579 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
-		OBJ_580 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
 		OBJ_595 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_606 /* MotionFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_156 /* MotionFrameTests.swift */; };
 		OBJ_607 /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_157 /* XCTestManifests.swift */; };
@@ -249,7 +200,6 @@
 		OBJ_613 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
 		OBJ_623 /* MotionLangTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_115 /* MotionLangTransformer.swift */; };
 		OBJ_625 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TranslationModels::Product" /* TranslationModels.framework */; };
-		OBJ_626 /* ImageClassificationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */; };
 		OBJ_627 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
 		OBJ_628 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
 		OBJ_629 /* Datasets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Datasets::Product" /* Datasets.framework */; };
@@ -373,16 +323,6 @@
 		OBJ_803 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
 		OBJ_804 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
 		OBJ_805 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
-		OBJ_814 /* WMT2104Training.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_146 /* WMT2104Training.swift */; };
-		OBJ_815 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_147 /* main.swift */; };
-		OBJ_817 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TranslationModels::Product" /* TranslationModels.framework */; };
-		OBJ_818 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::TextModels::Product" /* TextModels.framework */; };
-		OBJ_819 /* Datasets.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Datasets::Product" /* Datasets.framework */; };
-		OBJ_820 /* Batcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Batcher::Product" /* Batcher.framework */; };
-		OBJ_821 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::Checkpoints::Product" /* Checkpoints.framework */; };
-		OBJ_822 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */; };
-		OBJ_823 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
-		OBJ_824 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "MotionDataset::STBImage::Product" /* STBImage.framework */; };
 		OBJ_837 /* Decoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_149 /* Decoder.swift */; };
 		OBJ_838 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_150 /* Encoder.swift */; };
 		OBJ_839 /* Tokenization.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_151 /* Tokenization.swift */; };
@@ -713,118 +653,6 @@
 			remoteGlobalIDString = "MotionDataset::STBImage";
 			remoteInfo = STBImage;
 		};
-		32E04E5A25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::SummaryWriter";
-			remoteInfo = SummaryWriter;
-		};
-		32E04E5B25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TextModels";
-			remoteInfo = TextModels;
-		};
-		32E04E5C25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Datasets";
-			remoteInfo = Datasets;
-		};
-		32E04E5D25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Batcher";
-			remoteInfo = Batcher;
-		};
-		32E04E5E25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Checkpoints";
-			remoteInfo = Checkpoints;
-		};
-		32E04E5F25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ModelSupport";
-			remoteInfo = ModelSupport;
-		};
-		32E04E6025136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "SwiftProtobuf::SwiftProtobuf";
-			remoteInfo = SwiftProtobuf;
-		};
-		32E04E6125136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::STBImage";
-			remoteInfo = STBImage;
-		};
-		32E04E6225136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TranslationModels";
-			remoteInfo = TranslationModels;
-		};
-		32E04E6325136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TextModels";
-			remoteInfo = TextModels;
-		};
-		32E04E6425136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Datasets";
-			remoteInfo = Datasets;
-		};
-		32E04E6525136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Batcher";
-			remoteInfo = Batcher;
-		};
-		32E04E6625136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Checkpoints";
-			remoteInfo = Checkpoints;
-		};
-		32E04E6725136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ModelSupport";
-			remoteInfo = ModelSupport;
-		};
-		32E04E6825136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "SwiftProtobuf::SwiftProtobuf";
-			remoteInfo = SwiftProtobuf;
-		};
-		32E04E6925136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::STBImage";
-			remoteInfo = STBImage;
-		};
 		32E04E6A25136DD90077B28A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
@@ -866,13 +694,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = "MotionDataset::TranslationModels";
 			remoteInfo = TranslationModels;
-		};
-		32E04E7025136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ImageClassificationModels";
-			remoteInfo = ImageClassificationModels;
 		};
 		32E04E7125136DD90077B28A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -923,222 +744,12 @@
 			remoteGlobalIDString = "MotionDataset::STBImage";
 			remoteInfo = STBImage;
 		};
-		32E04E7825136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TranslationModels";
-			remoteInfo = TranslationModels;
-		};
-		32E04E7925136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ImageClassificationModels";
-			remoteInfo = ImageClassificationModels;
-		};
-		32E04E7A25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TextModels";
-			remoteInfo = TextModels;
-		};
-		32E04E7B25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Checkpoints";
-			remoteInfo = Checkpoints;
-		};
-		32E04E7C25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Datasets";
-			remoteInfo = Datasets;
-		};
-		32E04E7D25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Batcher";
-			remoteInfo = Batcher;
-		};
-		32E04E7E25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ModelSupport";
-			remoteInfo = ModelSupport;
-		};
-		32E04E7F25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "SwiftProtobuf::SwiftProtobuf";
-			remoteInfo = SwiftProtobuf;
-		};
-		32E04E8025136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::STBImage";
-			remoteInfo = STBImage;
-		};
-		32E04E8125136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::SummaryWriter";
-			remoteInfo = SummaryWriter;
-		};
-		32E04E8225136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TranslationModels";
-			remoteInfo = TranslationModels;
-		};
-		32E04E8325136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TextModels";
-			remoteInfo = TextModels;
-		};
-		32E04E8425136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Datasets";
-			remoteInfo = Datasets;
-		};
-		32E04E8525136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Batcher";
-			remoteInfo = Batcher;
-		};
-		32E04E8625136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Checkpoints";
-			remoteInfo = Checkpoints;
-		};
-		32E04E8725136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ModelSupport";
-			remoteInfo = ModelSupport;
-		};
-		32E04E8825136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "SwiftProtobuf::SwiftProtobuf";
-			remoteInfo = SwiftProtobuf;
-		};
-		32E04E8925136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::STBImage";
-			remoteInfo = STBImage;
-		};
-		32E04E8A25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::SummaryWriter";
-			remoteInfo = SummaryWriter;
-		};
-		32E04E8B25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::MotionClassifiers";
-			remoteInfo = MotionClassifiers;
-		};
-		32E04E8C25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TranslationModels";
-			remoteInfo = TranslationModels;
-		};
-		32E04E8D25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::TextModels";
-			remoteInfo = TextModels;
-		};
-		32E04E8E25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Datasets";
-			remoteInfo = Datasets;
-		};
-		32E04E8F25136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Batcher";
-			remoteInfo = Batcher;
-		};
-		32E04E9025136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::Checkpoints";
-			remoteInfo = Checkpoints;
-		};
-		32E04E9125136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ModelSupport";
-			remoteInfo = ModelSupport;
-		};
-		32E04E9225136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "SwiftProtobuf::SwiftProtobuf";
-			remoteInfo = SwiftProtobuf;
-		};
-		32E04E9325136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::STBImage";
-			remoteInfo = STBImage;
-		};
-		32E04E9425136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ImageClassificationModels";
-			remoteInfo = ImageClassificationModels;
-		};
 		32E04E9525136DD90077B28A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "MotionDataset::MotionLangModels";
 			remoteInfo = MotionLangModels;
-		};
-		32E04E9625136DD90077B28A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "MotionDataset::ImageClassificationModels";
-			remoteInfo = ImageClassificationModels;
 		};
 		32E04E9725136DD90077B28A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1335,8 +946,6 @@
 		32B29C652530BFC2005E6DB6 /* MotionDecoder2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDecoder2.swift; sourceTree = "<group>"; };
 		32B3D16B2535817500866FA1 /* MotionDatasetTests2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDatasetTests2.swift; sourceTree = "<group>"; };
 		32B3D1A42535DEBA00866FA1 /* ImageSupportOSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ImageSupportOSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		32B3D1A62535DEBA00866FA1 /* ImageSupportOSX.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageSupportOSX.h; sourceTree = "<group>"; };
-		32B3D1A72535DEBA00866FA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		32B3D21B2535DF4700866FA1 /* SpectralColormap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpectralColormap.swift; sourceTree = "<group>"; };
 		32B3D21C2535DF4700866FA1 /* TensorCGImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorCGImage.swift; sourceTree = "<group>"; };
 		32B3D21D2535DF4700866FA1 /* RGBtoHSV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBtoHSV.swift; sourceTree = "<group>"; };
@@ -1349,7 +958,6 @@
 		32EFE3BC2539839300CB719D /* Lang2motionSet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lang2motionSet; sourceTree = BUILT_PRODUCTS_DIR; };
 		32EFE414253983EC00CB719D /* extra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = extra.swift; sourceTree = "<group>"; };
 		32EFE415253983EC00CB719D /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		32EFE48E253984FE00CB719D /* Motion2langSet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Motion2langSet.entitlements; path = Motion2langSet/Motion2langSet.entitlements; sourceTree = "<group>"; };
 		32FE043B253040340044128D /* test2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32FE043D253040340044128D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		32FE043F253040340044128D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -1361,15 +969,10 @@
 		"MotionDataset::Batcher::Product" /* Batcher.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Batcher.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::Checkpoints::Product" /* Checkpoints.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Checkpoints.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::Datasets::Product" /* Datasets.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Datasets.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ImageClassificationModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"MotionDataset::Lang2lang::Product" /* Lang2lang */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lang2lang; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::Lang2motion::Product" /* Lang2motion */ = {isa = PBXFileReference; lastKnownFileType = text; path = Lang2motion; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::LangMotionModels::Product" /* LangMotionModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = LangMotionModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"MotionDataset::Language2label::Product" /* Language2label */ = {isa = PBXFileReference; lastKnownFileType = text; path = Language2label; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::ModelSupport::Product" /* ModelSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ModelSupport.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"MotionDataset::Motion2label::Product" /* Motion2label */ = {isa = PBXFileReference; lastKnownFileType = text; path = Motion2label; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::Motion2lang::Product" /* Motion2lang */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = Motion2lang; sourceTree = BUILT_PRODUCTS_DIR; };
-		"MotionDataset::MotionClassifiers::Product" /* MotionClassifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MotionClassifiers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::MotionDatasetTests::Product" /* MotionDatasetTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = MotionDatasetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::MotionLangModels::Product" /* MotionLangModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MotionLangModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::PreprocessMotionDataset::Product" /* PreprocessMotionDataset */ = {isa = PBXFileReference; lastKnownFileType = text; path = PreprocessMotionDataset; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1377,7 +980,6 @@
 		"MotionDataset::SummaryWriter::Product" /* SummaryWriter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SummaryWriter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::TextModels::Product" /* TextModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TextModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TrainingLoop.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"MotionDataset::Transformer-Translation::Product" /* Transformer-Translation */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Transformer-Translation"; sourceTree = BUILT_PRODUCTS_DIR; };
 		"MotionDataset::TranslationModels::Product" /* TranslationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TranslationModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_10 /* Batcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Batcher.swift; sourceTree = "<group>"; };
 		OBJ_101 /* SentencePieceModel.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentencePieceModel.pb.swift; sourceTree = "<group>"; };
@@ -1385,12 +987,8 @@
 		OBJ_103 /* Tokenization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tokenization.swift; sourceTree = "<group>"; };
 		OBJ_104 /* TranslationBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationBatch.swift; sourceTree = "<group>"; };
 		OBJ_105 /* timing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = timing.swift; sourceTree = "<group>"; };
-		OBJ_107 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_109 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_11 /* Collatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collatable.swift; sourceTree = "<group>"; };
-		OBJ_111 /* DenseMotionClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DenseMotionClassifier.swift; sourceTree = "<group>"; };
-		OBJ_112 /* MotionClassifierProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionClassifierProtocol.swift; sourceTree = "<group>"; };
-		OBJ_113 /* ResNetMotionClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResNetMotionClassifier.swift; sourceTree = "<group>"; };
 		OBJ_115 /* MotionLangTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangTransformer.swift; sourceTree = "<group>"; };
 		OBJ_117 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_119 /* stb_image.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = stb_image.c; sourceTree = "<group>"; };
@@ -1416,8 +1014,6 @@
 		OBJ_142 /* TrainingLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingLoop.swift; sourceTree = "<group>"; };
 		OBJ_143 /* TrainingProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingProgress.swift; sourceTree = "<group>"; };
 		OBJ_144 /* TrainingStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingStatistics.swift; sourceTree = "<group>"; };
-		OBJ_146 /* WMT2104Training.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMT2104Training.swift; sourceTree = "<group>"; };
-		OBJ_147 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_149 /* Decoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Decoder.swift; sourceTree = "<group>"; };
 		OBJ_15 /* CheckpointIndexWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckpointIndexWriter.swift; sourceTree = "<group>"; };
 		OBJ_150 /* Encoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
@@ -1518,11 +1114,9 @@
 		OBJ_242 /* wrappers.pb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = wrappers.pb.swift; sourceTree = "<group>"; };
 		OBJ_245 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/.build/checkouts/swift-protobuf/Package.swift"; sourceTree = "<group>"; };
 		OBJ_25 /* SnappyDecompression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnappyDecompression.swift; sourceTree = "<group>"; };
-		OBJ_269 /* research */ = {isa = PBXFileReference; lastKnownFileType = folder; path = research; sourceTree = SOURCE_ROOT; };
 		OBJ_27 /* ArrayUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayUtils.swift; sourceTree = "<group>"; };
 		OBJ_270 /* swift-install */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "swift-install"; sourceTree = SOURCE_ROOT; };
 		OBJ_271 /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = docs; sourceTree = SOURCE_ROOT; };
-		OBJ_272 /* dataset_labeling */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dataset_labeling; sourceTree = SOURCE_ROOT; };
 		OBJ_273 /* data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = data; sourceTree = SOURCE_ROOT; };
 		OBJ_274 /* notebooks */ = {isa = PBXFileReference; lastKnownFileType = folder; path = notebooks; sourceTree = SOURCE_ROOT; };
 		OBJ_275 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -1562,11 +1156,6 @@
 		OBJ_66 /* TensorPair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TensorPair.swift; sourceTree = "<group>"; };
 		OBJ_67 /* TensorUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TensorUtils.swift; sourceTree = "<group>"; };
 		OBJ_69 /* WMT2014.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMT2014.swift; sourceTree = "<group>"; };
-		OBJ_71 /* ResNet-extractFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ResNet-extractFeatures.swift"; sourceTree = "<group>"; };
-		OBJ_72 /* ResNet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResNet.swift; sourceTree = "<group>"; };
-		OBJ_73 /* ResNet1ch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResNet1ch.swift; sourceTree = "<group>"; };
-		OBJ_75 /* TextProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessor.swift; sourceTree = "<group>"; };
-		OBJ_76 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_78 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_80 /* LangMotionTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionTransformer.swift; sourceTree = "<group>"; };
 		OBJ_81 /* MixtureModelPreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixtureModelPreds.swift; sourceTree = "<group>"; };
@@ -1575,7 +1164,6 @@
 		OBJ_84 /* MotionDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDecoder.swift; sourceTree = "<group>"; };
 		OBJ_85 /* MotionGaussianMixtureModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGaussianMixtureModel.swift; sourceTree = "<group>"; };
 		OBJ_86 /* NormalMixtureSurrogateLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormalMixtureSurrogateLoss.swift; sourceTree = "<group>"; };
-		OBJ_88 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Backend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backend.swift; sourceTree = "<group>"; };
 		OBJ_90 /* BijectiveDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BijectiveDictionary.swift; sourceTree = "<group>"; };
 		OBJ_91 /* FileManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagement.swift; sourceTree = "<group>"; };
@@ -1659,29 +1247,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_369 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_377 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_378 /* SummaryWriter.framework in Frameworks */,
-				OBJ_379 /* TranslationModels.framework in Frameworks */,
-				OBJ_380 /* TextModels.framework in Frameworks */,
-				OBJ_381 /* Datasets.framework in Frameworks */,
-				OBJ_382 /* Batcher.framework in Frameworks */,
-				OBJ_383 /* Checkpoints.framework in Frameworks */,
-				OBJ_384 /* ModelSupport.framework in Frameworks */,
-				OBJ_385 /* SwiftProtobuf.framework in Frameworks */,
-				OBJ_386 /* STBImage.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_405 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
@@ -1715,21 +1280,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_464 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_465 /* SummaryWriter.framework in Frameworks */,
-				OBJ_466 /* TextModels.framework in Frameworks */,
-				OBJ_467 /* Datasets.framework in Frameworks */,
-				OBJ_468 /* Batcher.framework in Frameworks */,
-				OBJ_469 /* Checkpoints.framework in Frameworks */,
-				OBJ_470 /* ModelSupport.framework in Frameworks */,
-				OBJ_471 /* SwiftProtobuf.framework in Frameworks */,
-				OBJ_472 /* STBImage.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_499 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
@@ -1739,30 +1289,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_510 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_511 /* SummaryWriter.framework in Frameworks */,
-				OBJ_512 /* MotionClassifiers.framework in Frameworks */,
-				OBJ_513 /* TranslationModels.framework in Frameworks */,
-				OBJ_514 /* TextModels.framework in Frameworks */,
-				OBJ_515 /* Datasets.framework in Frameworks */,
-				OBJ_516 /* Batcher.framework in Frameworks */,
-				OBJ_517 /* Checkpoints.framework in Frameworks */,
-				OBJ_518 /* ModelSupport.framework in Frameworks */,
-				OBJ_519 /* SwiftProtobuf.framework in Frameworks */,
-				OBJ_520 /* STBImage.framework in Frameworks */,
-				OBJ_521 /* ImageClassificationModels.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_540 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
 				OBJ_541 /* MotionLangModels.framework in Frameworks */,
-				OBJ_542 /* ImageClassificationModels.framework in Frameworks */,
 				OBJ_543 /* SummaryWriter.framework in Frameworks */,
 				OBJ_544 /* TranslationModels.framework in Frameworks */,
 				32E04EA62513F0370077B28A /* TrainingLoop.framework in Frameworks */,
@@ -1773,22 +1304,6 @@
 				OBJ_549 /* ModelSupport.framework in Frameworks */,
 				OBJ_550 /* SwiftProtobuf.framework in Frameworks */,
 				OBJ_551 /* STBImage.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_571 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_572 /* TranslationModels.framework in Frameworks */,
-				OBJ_573 /* ImageClassificationModels.framework in Frameworks */,
-				OBJ_574 /* TextModels.framework in Frameworks */,
-				OBJ_575 /* Checkpoints.framework in Frameworks */,
-				OBJ_576 /* Datasets.framework in Frameworks */,
-				OBJ_577 /* Batcher.framework in Frameworks */,
-				OBJ_578 /* ModelSupport.framework in Frameworks */,
-				OBJ_579 /* SwiftProtobuf.framework in Frameworks */,
-				OBJ_580 /* STBImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1809,7 +1324,6 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_625 /* TranslationModels.framework in Frameworks */,
-				OBJ_626 /* ImageClassificationModels.framework in Frameworks */,
 				OBJ_627 /* TextModels.framework in Frameworks */,
 				OBJ_628 /* Checkpoints.framework in Frameworks */,
 				OBJ_629 /* Datasets.framework in Frameworks */,
@@ -1876,21 +1390,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_816 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_817 /* TranslationModels.framework in Frameworks */,
-				OBJ_818 /* TextModels.framework in Frameworks */,
-				OBJ_819 /* Datasets.framework in Frameworks */,
-				OBJ_820 /* Batcher.framework in Frameworks */,
-				OBJ_821 /* Checkpoints.framework in Frameworks */,
-				OBJ_822 /* ModelSupport.framework in Frameworks */,
-				OBJ_823 /* SwiftProtobuf.framework in Frameworks */,
-				OBJ_824 /* STBImage.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_842 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
@@ -1908,15 +1407,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		32B3D1A52535DEBA00866FA1 /* ImageSupportOSX */ = {
-			isa = PBXGroup;
-			children = (
-				32B3D1A62535DEBA00866FA1 /* ImageSupportOSX.h */,
-				32B3D1A72535DEBA00866FA1 /* Info.plist */,
-			);
-			path = ImageSupportOSX;
-			sourceTree = "<group>";
-		};
 		32B3D21A2535DF4700866FA1 /* ImageSupportOSX */ = {
 			isa = PBXGroup;
 			children = (
@@ -1977,15 +1467,6 @@
 			path = SentencePiece;
 			sourceTree = "<group>";
 		};
-		OBJ_106 /* Motion2label */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_107 /* main.swift */,
-			);
-			name = Motion2label;
-			path = Sources/Motion2label;
-			sourceTree = SOURCE_ROOT;
-		};
 		OBJ_108 /* Motion2lang */ = {
 			isa = PBXGroup;
 			children = (
@@ -1994,17 +1475,6 @@
 			);
 			name = Motion2lang;
 			path = Sources/Motion2lang;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_110 /* MotionClassifiers */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_111 /* DenseMotionClassifier.swift */,
-				OBJ_112 /* MotionClassifierProtocol.swift */,
-				OBJ_113 /* ResNetMotionClassifier.swift */,
-			);
-			name = MotionClassifiers;
-			path = Sources/Models/MotionClassifiers;
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_114 /* MotionLangModels */ = {
@@ -2113,16 +1583,6 @@
 			);
 			name = TrainingLoop;
 			path = Sources/TrainingLoop;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_145 /* Transformer-Translation */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_146 /* WMT2104Training.swift */,
-				OBJ_147 /* main.swift */,
-			);
-			name = "Transformer-Translation";
-			path = "Sources/Transformer-Translation";
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_148 /* TranslationModels */ = {
@@ -2311,21 +1771,15 @@
 				"MotionDataset::Motion2lang::Product" /* Motion2lang */,
 				"MotionDataset::Checkpoints::Product" /* Checkpoints.framework */,
 				"MotionDataset::Lang2motion::Product" /* Lang2motion */,
-				"MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */,
 				"MotionDataset::Datasets::Product" /* Datasets.framework */,
 				"MotionDataset::Batcher::Product" /* Batcher.framework */,
-				"MotionDataset::Lang2lang::Product" /* Lang2lang */,
 				"MotionDataset::LangMotionModels::Product" /* LangMotionModels.framework */,
 				"MotionDataset::MotionDatasetTests::Product" /* MotionDatasetTests.xctest */,
 				"MotionDataset::ModelSupport::Product" /* ModelSupport.framework */,
 				"MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */,
 				"MotionDataset::TextModels::Product" /* TextModels.framework */,
-				"MotionDataset::Motion2label::Product" /* Motion2label */,
 				"MotionDataset::PreprocessMotionDataset::Product" /* PreprocessMotionDataset */,
-				"MotionDataset::Language2label::Product" /* Language2label */,
 				"MotionDataset::TranslationModels::Product" /* TranslationModels.framework */,
-				"MotionDataset::MotionClassifiers::Product" /* MotionClassifiers.framework */,
-				"MotionDataset::Transformer-Translation::Product" /* Transformer-Translation */,
 				"MotionDataset::STBImage::Product" /* STBImage.framework */,
 				32FE043B253040340044128D /* test2.app */,
 				32B3D1A42535DEBA00866FA1 /* ImageSupportOSX.framework */,
@@ -2418,18 +1872,14 @@
 		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
-				32EFE48E253984FE00CB719D /* Motion2langSet.entitlements */,
 				OBJ_6 /* Package.swift */,
 				OBJ_7 /* Sources */,
 				OBJ_154 /* Tests */,
 				OBJ_158 /* Dependencies */,
 				32FE043C253040340044128D /* test2 */,
-				32B3D1A52535DEBA00866FA1 /* ImageSupportOSX */,
 				OBJ_246 /* Products */,
-				OBJ_269 /* research */,
 				OBJ_270 /* swift-install */,
 				OBJ_271 /* docs */,
-				OBJ_272 /* dataset_labeling */,
 				OBJ_273 /* data */,
 				OBJ_274 /* notebooks */,
 				OBJ_275 /* README.md */,
@@ -2472,48 +1922,21 @@
 				OBJ_8 /* Batcher */,
 				OBJ_12 /* Checkpoints */,
 				OBJ_26 /* Datasets */,
-				OBJ_70 /* ImageClassificationModels */,
 				32B3D21A2535DF4700866FA1 /* ImageSupportOSX */,
-				OBJ_74 /* Lang2lang */,
 				OBJ_77 /* Lang2motion */,
 				OBJ_79 /* LangMotionModels */,
-				OBJ_87 /* Language2label */,
 				OBJ_89 /* ModelSupport */,
-				OBJ_106 /* Motion2label */,
 				OBJ_108 /* Motion2lang */,
 				32EFE3BD2539839300CB719D /* Lang2motionSet */,
-				OBJ_110 /* MotionClassifiers */,
 				OBJ_114 /* MotionLangModels */,
 				OBJ_116 /* PreprocessMotionDataset */,
 				OBJ_118 /* STBImage */,
 				OBJ_125 /* SummaryWriter */,
 				OBJ_127 /* TextModels */,
 				OBJ_140 /* TrainingLoop */,
-				OBJ_145 /* Transformer-Translation */,
 				OBJ_148 /* TranslationModels */,
 			);
 			name = Sources;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_70 /* ImageClassificationModels */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_71 /* ResNet-extractFeatures.swift */,
-				OBJ_72 /* ResNet.swift */,
-				OBJ_73 /* ResNet1ch.swift */,
-			);
-			name = ImageClassificationModels;
-			path = Sources/Models/ImageClassification;
-			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_74 /* Lang2lang */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_75 /* TextProcessor.swift */,
-				OBJ_76 /* main.swift */,
-			);
-			name = Lang2lang;
-			path = Sources/Lang2lang;
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_77 /* Lang2motion */ = {
@@ -2559,15 +1982,6 @@
 			path = Sources/Batcher;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_87 /* Language2label */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_88 /* main.swift */,
-			);
-			name = Language2label;
-			path = Sources/Language2label;
-			sourceTree = SOURCE_ROOT;
-		};
 		OBJ_89 /* ModelSupport */ = {
 			isa = PBXGroup;
 			children = (
@@ -2605,7 +2019,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32B3D1A82535DEBA00866FA1 /* ImageSupportOSX.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2725,47 +2138,6 @@
 			productReference = "MotionDataset::Datasets::Product" /* Datasets.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		"MotionDataset::ImageClassificationModels" /* ImageClassificationModels */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_362 /* Build configuration list for PBXNativeTarget "ImageClassificationModels" */;
-			buildPhases = (
-				OBJ_365 /* Sources */,
-				OBJ_369 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = ImageClassificationModels;
-			productName = ImageClassificationModels;
-			productReference = "MotionDataset::ImageClassificationModels::Product" /* ImageClassificationModels.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		"MotionDataset::Lang2lang" /* Lang2lang */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_371 /* Build configuration list for PBXNativeTarget "Lang2lang" */;
-			buildPhases = (
-				OBJ_374 /* Sources */,
-				OBJ_377 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				OBJ_387 /* PBXTargetDependency */,
-				OBJ_389 /* PBXTargetDependency */,
-				OBJ_391 /* PBXTargetDependency */,
-				OBJ_393 /* PBXTargetDependency */,
-				OBJ_394 /* PBXTargetDependency */,
-				OBJ_395 /* PBXTargetDependency */,
-				OBJ_396 /* PBXTargetDependency */,
-				OBJ_397 /* PBXTargetDependency */,
-				OBJ_398 /* PBXTargetDependency */,
-			);
-			name = Lang2lang;
-			productName = Lang2lang;
-			productReference = "MotionDataset::Lang2lang::Product" /* Lang2lang */;
-			productType = "com.apple.product-type.tool";
-		};
 		"MotionDataset::Lang2motion" /* Lang2motion */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_400 /* Build configuration list for PBXNativeTarget "Lang2motion" */;
@@ -2817,30 +2189,6 @@
 			productReference = "MotionDataset::LangMotionModels::Product" /* LangMotionModels.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		"MotionDataset::Language2label" /* Language2label */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_459 /* Build configuration list for PBXNativeTarget "Language2label" */;
-			buildPhases = (
-				OBJ_462 /* Sources */,
-				OBJ_464 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				OBJ_473 /* PBXTargetDependency */,
-				OBJ_474 /* PBXTargetDependency */,
-				OBJ_475 /* PBXTargetDependency */,
-				OBJ_476 /* PBXTargetDependency */,
-				OBJ_477 /* PBXTargetDependency */,
-				OBJ_478 /* PBXTargetDependency */,
-				OBJ_479 /* PBXTargetDependency */,
-				OBJ_480 /* PBXTargetDependency */,
-			);
-			name = Language2label;
-			productName = Language2label;
-			productReference = "MotionDataset::Language2label::Product" /* Language2label */;
-			productType = "com.apple.product-type.tool";
-		};
 		"MotionDataset::ModelSupport" /* ModelSupport */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_481 /* Build configuration list for PBXNativeTarget "ModelSupport" */;
@@ -2859,33 +2207,6 @@
 			productReference = "MotionDataset::ModelSupport::Product" /* ModelSupport.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		"MotionDataset::Motion2label" /* Motion2label */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_505 /* Build configuration list for PBXNativeTarget "Motion2label" */;
-			buildPhases = (
-				OBJ_508 /* Sources */,
-				OBJ_510 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				OBJ_522 /* PBXTargetDependency */,
-				OBJ_523 /* PBXTargetDependency */,
-				OBJ_525 /* PBXTargetDependency */,
-				OBJ_526 /* PBXTargetDependency */,
-				OBJ_527 /* PBXTargetDependency */,
-				OBJ_528 /* PBXTargetDependency */,
-				OBJ_529 /* PBXTargetDependency */,
-				OBJ_530 /* PBXTargetDependency */,
-				OBJ_531 /* PBXTargetDependency */,
-				OBJ_532 /* PBXTargetDependency */,
-				OBJ_533 /* PBXTargetDependency */,
-			);
-			name = Motion2label;
-			productName = Motion2label;
-			productReference = "MotionDataset::Motion2label::Product" /* Motion2label */;
-			productType = "com.apple.product-type.tool";
-		};
 		"MotionDataset::Motion2lang" /* Motion2lang */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_535 /* Build configuration list for PBXNativeTarget "Motion2lang" */;
@@ -2898,7 +2219,6 @@
 			);
 			dependencies = (
 				OBJ_552 /* PBXTargetDependency */,
-				OBJ_554 /* PBXTargetDependency */,
 				OBJ_555 /* PBXTargetDependency */,
 				OBJ_556 /* PBXTargetDependency */,
 				OBJ_557 /* PBXTargetDependency */,
@@ -2914,31 +2234,6 @@
 			productName = Motion2lang;
 			productReference = "MotionDataset::Motion2lang::Product" /* Motion2lang */;
 			productType = "com.apple.product-type.tool";
-		};
-		"MotionDataset::MotionClassifiers" /* MotionClassifiers */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_564 /* Build configuration list for PBXNativeTarget "MotionClassifiers" */;
-			buildPhases = (
-				OBJ_567 /* Sources */,
-				OBJ_571 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				OBJ_581 /* PBXTargetDependency */,
-				OBJ_582 /* PBXTargetDependency */,
-				OBJ_583 /* PBXTargetDependency */,
-				OBJ_584 /* PBXTargetDependency */,
-				OBJ_585 /* PBXTargetDependency */,
-				OBJ_586 /* PBXTargetDependency */,
-				OBJ_587 /* PBXTargetDependency */,
-				OBJ_588 /* PBXTargetDependency */,
-				OBJ_589 /* PBXTargetDependency */,
-			);
-			name = MotionClassifiers;
-			productName = MotionClassifiers;
-			productReference = "MotionDataset::MotionClassifiers::Product" /* MotionClassifiers.framework */;
-			productType = "com.apple.product-type.framework";
 		};
 		"MotionDataset::MotionDatasetTests" /* MotionDatasetTests */ = {
 			isa = PBXNativeTarget;
@@ -2972,7 +2267,6 @@
 			);
 			dependencies = (
 				OBJ_634 /* PBXTargetDependency */,
-				OBJ_635 /* PBXTargetDependency */,
 				OBJ_636 /* PBXTargetDependency */,
 				OBJ_637 /* PBXTargetDependency */,
 				OBJ_638 /* PBXTargetDependency */,
@@ -3094,30 +2388,6 @@
 			productReference = "MotionDataset::TrainingLoop::Product" /* TrainingLoop.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		"MotionDataset::Transformer-Translation" /* Transformer-Translation */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_810 /* Build configuration list for PBXNativeTarget "Transformer-Translation" */;
-			buildPhases = (
-				OBJ_813 /* Sources */,
-				OBJ_816 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				OBJ_825 /* PBXTargetDependency */,
-				OBJ_826 /* PBXTargetDependency */,
-				OBJ_827 /* PBXTargetDependency */,
-				OBJ_828 /* PBXTargetDependency */,
-				OBJ_829 /* PBXTargetDependency */,
-				OBJ_830 /* PBXTargetDependency */,
-				OBJ_831 /* PBXTargetDependency */,
-				OBJ_832 /* PBXTargetDependency */,
-			);
-			name = "Transformer-Translation";
-			productName = Transformer_Translation;
-			productReference = "MotionDataset::Transformer-Translation::Product" /* Transformer-Translation */;
-			productType = "com.apple.product-type.tool";
-		};
 		"MotionDataset::TranslationModels" /* TranslationModels */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_833 /* Build configuration list for PBXNativeTarget "TranslationModels" */;
@@ -3215,16 +2485,11 @@
 				"MotionDataset::Batcher" /* Batcher */,
 				"MotionDataset::Checkpoints" /* Checkpoints */,
 				"MotionDataset::Datasets" /* Datasets */,
-				"MotionDataset::ImageClassificationModels" /* ImageClassificationModels */,
-				"MotionDataset::Lang2lang" /* Lang2lang */,
 				"MotionDataset::Lang2motion" /* Lang2motion */,
 				"MotionDataset::LangMotionModels" /* LangMotionModels */,
-				"MotionDataset::Language2label" /* Language2label */,
 				"MotionDataset::ModelSupport" /* ModelSupport */,
-				"MotionDataset::Motion2label" /* Motion2label */,
 				"MotionDataset::Motion2lang" /* Motion2lang */,
 				32EFE3BB2539839300CB719D /* Lang2motionSet */,
-				"MotionDataset::MotionClassifiers" /* MotionClassifiers */,
 				"MotionDataset::SwiftPMPackageDescription" /* MotionDatasetPackageDescription */,
 				"MotionDataset::MotionDatasetPackageTests::ProductTarget" /* MotionDatasetPackageTests */,
 				"MotionDataset::MotionDatasetTests" /* MotionDatasetTests */,
@@ -3236,7 +2501,6 @@
 				"SwiftProtobuf::SwiftPMPackageDescription" /* SwiftProtobufPackageDescription */,
 				"MotionDataset::TextModels" /* TextModels */,
 				"MotionDataset::TrainingLoop" /* TrainingLoop */,
-				"MotionDataset::Transformer-Translation" /* Transformer-Translation */,
 				"MotionDataset::TranslationModels" /* TranslationModels */,
 				32B3D1A32535DEBA00866FA1 /* ImageSupportOSX */,
 				32FE043A253040340044128D /* test2 */,
@@ -3367,25 +2631,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_365 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_366 /* ResNet-extractFeatures.swift in Sources */,
-				OBJ_367 /* ResNet.swift in Sources */,
-				OBJ_368 /* ResNet1ch.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_374 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_375 /* TextProcessor.swift in Sources */,
-				OBJ_376 /* main.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_403 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -3416,14 +2661,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_462 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_463 /* main.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_484 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -3445,30 +2682,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_508 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_509 /* main.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_538 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
 				OBJ_539 /* main.swift in Sources */,
 				3208C0F6251B39A000D4555F /* scratchpad.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_567 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_568 /* DenseMotionClassifier.swift in Sources */,
-				OBJ_569 /* MotionClassifierProtocol.swift in Sources */,
-				OBJ_570 /* ResNetMotionClassifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3660,15 +2879,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		OBJ_813 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_814 /* WMT2104Training.swift in Sources */,
-				OBJ_815 /* main.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		OBJ_836 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
@@ -3755,51 +2965,6 @@
 			isa = PBXTargetDependency;
 			target = "MotionDataset::STBImage" /* STBImage */;
 			targetProxy = 32E04E3B25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_387 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::SummaryWriter" /* SummaryWriter */;
-			targetProxy = 32E04E8125136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_389 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TranslationModels" /* TranslationModels */;
-			targetProxy = 32E04E8225136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_391 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TextModels" /* TextModels */;
-			targetProxy = 32E04E8325136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_393 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Datasets" /* Datasets */;
-			targetProxy = 32E04E8425136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_394 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Batcher" /* Batcher */;
-			targetProxy = 32E04E8525136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_395 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Checkpoints" /* Checkpoints */;
-			targetProxy = 32E04E8625136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_396 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ModelSupport" /* ModelSupport */;
-			targetProxy = 32E04E8725136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_397 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "SwiftProtobuf::SwiftProtobuf" /* SwiftProtobuf */;
-			targetProxy = 32E04E8825136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_398 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::STBImage" /* STBImage */;
-			targetProxy = 32E04E8925136DD90077B28A /* PBXContainerItemProxy */;
 		};
 		OBJ_417 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3896,46 +3061,6 @@
 			target = "MotionDataset::STBImage" /* STBImage */;
 			targetProxy = 32E04E5025136DD90077B28A /* PBXContainerItemProxy */;
 		};
-		OBJ_473 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::SummaryWriter" /* SummaryWriter */;
-			targetProxy = 32E04E5A25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_474 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TextModels" /* TextModels */;
-			targetProxy = 32E04E5B25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_475 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Datasets" /* Datasets */;
-			targetProxy = 32E04E5C25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_476 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Batcher" /* Batcher */;
-			targetProxy = 32E04E5D25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_477 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Checkpoints" /* Checkpoints */;
-			targetProxy = 32E04E5E25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_478 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ModelSupport" /* ModelSupport */;
-			targetProxy = 32E04E5F25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_479 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "SwiftProtobuf::SwiftProtobuf" /* SwiftProtobuf */;
-			targetProxy = 32E04E6025136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_480 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::STBImage" /* STBImage */;
-			targetProxy = 32E04E6125136DD90077B28A /* PBXContainerItemProxy */;
-		};
 		OBJ_502 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "SwiftProtobuf::SwiftProtobuf" /* SwiftProtobuf */;
@@ -3946,70 +3071,10 @@
 			target = "MotionDataset::STBImage" /* STBImage */;
 			targetProxy = 32E04E3125136DD90077B28A /* PBXContainerItemProxy */;
 		};
-		OBJ_522 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::SummaryWriter" /* SummaryWriter */;
-			targetProxy = 32E04E8A25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_523 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::MotionClassifiers" /* MotionClassifiers */;
-			targetProxy = 32E04E8B25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_525 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TranslationModels" /* TranslationModels */;
-			targetProxy = 32E04E8C25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_526 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TextModels" /* TextModels */;
-			targetProxy = 32E04E8D25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_527 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Datasets" /* Datasets */;
-			targetProxy = 32E04E8E25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_528 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Batcher" /* Batcher */;
-			targetProxy = 32E04E8F25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_529 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Checkpoints" /* Checkpoints */;
-			targetProxy = 32E04E9025136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_530 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ModelSupport" /* ModelSupport */;
-			targetProxy = 32E04E9125136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_531 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "SwiftProtobuf::SwiftProtobuf" /* SwiftProtobuf */;
-			targetProxy = 32E04E9225136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_532 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::STBImage" /* STBImage */;
-			targetProxy = 32E04E9325136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_533 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ImageClassificationModels" /* ImageClassificationModels */;
-			targetProxy = 32E04E9425136DD90077B28A /* PBXContainerItemProxy */;
-		};
 		OBJ_552 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "MotionDataset::MotionLangModels" /* MotionLangModels */;
 			targetProxy = 32E04E9525136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_554 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ImageClassificationModels" /* ImageClassificationModels */;
-			targetProxy = 32E04E9625136DD90077B28A /* PBXContainerItemProxy */;
 		};
 		OBJ_555 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4056,51 +3121,6 @@
 			target = "MotionDataset::STBImage" /* STBImage */;
 			targetProxy = 32E04E9F25136DD90077B28A /* PBXContainerItemProxy */;
 		};
-		OBJ_581 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TranslationModels" /* TranslationModels */;
-			targetProxy = 32E04E7825136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_582 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ImageClassificationModels" /* ImageClassificationModels */;
-			targetProxy = 32E04E7925136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_583 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TextModels" /* TextModels */;
-			targetProxy = 32E04E7A25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_584 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Checkpoints" /* Checkpoints */;
-			targetProxy = 32E04E7B25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_585 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Datasets" /* Datasets */;
-			targetProxy = 32E04E7C25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_586 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Batcher" /* Batcher */;
-			targetProxy = 32E04E7D25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_587 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ModelSupport" /* ModelSupport */;
-			targetProxy = 32E04E7E25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_588 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "SwiftProtobuf::SwiftProtobuf" /* SwiftProtobuf */;
-			targetProxy = 32E04E7F25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_589 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::STBImage" /* STBImage */;
-			targetProxy = 32E04E8025136DD90077B28A /* PBXContainerItemProxy */;
-		};
 		OBJ_600 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "MotionDataset::MotionDatasetTests" /* MotionDatasetTests */;
@@ -4135,11 +3155,6 @@
 			isa = PBXTargetDependency;
 			target = "MotionDataset::TranslationModels" /* TranslationModels */;
 			targetProxy = 32E04E6F25136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_635 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ImageClassificationModels" /* ImageClassificationModels */;
-			targetProxy = 32E04E7025136DD90077B28A /* PBXContainerItemProxy */;
 		};
 		OBJ_636 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4246,46 +3261,6 @@
 			target = "MotionDataset::STBImage" /* STBImage */;
 			targetProxy = 32E04E3325136DD90077B28A /* PBXContainerItemProxy */;
 		};
-		OBJ_825 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TranslationModels" /* TranslationModels */;
-			targetProxy = 32E04E6225136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_826 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::TextModels" /* TextModels */;
-			targetProxy = 32E04E6325136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_827 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Datasets" /* Datasets */;
-			targetProxy = 32E04E6425136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_828 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Batcher" /* Batcher */;
-			targetProxy = 32E04E6525136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_829 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::Checkpoints" /* Checkpoints */;
-			targetProxy = 32E04E6625136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_830 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::ModelSupport" /* ModelSupport */;
-			targetProxy = 32E04E6725136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_831 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "SwiftProtobuf::SwiftProtobuf" /* SwiftProtobuf */;
-			targetProxy = 32E04E6825136DD90077B28A /* PBXContainerItemProxy */;
-		};
-		OBJ_832 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "MotionDataset::STBImage" /* STBImage */;
-			targetProxy = 32E04E6925136DD90077B28A /* PBXContainerItemProxy */;
-		};
 		OBJ_850 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = "MotionDataset::TextModels" /* TextModels */;
@@ -4367,6 +3342,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -4390,7 +3366,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = ImageSupportOSX/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
@@ -4438,6 +3413,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -4457,7 +3433,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = ImageSupportOSX/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
@@ -4504,7 +3479,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = Motion2langSet/Motion2langSet.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = TVY88QK69K;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -4566,7 +3541,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = Motion2langSet/Motion2langSet.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = TVY88QK69K;
@@ -4933,118 +3908,6 @@
 			};
 			name = Release;
 		};
-		OBJ_363 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = MotionDataset.xcodeproj/ImageClassificationModels_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = ImageClassificationModels;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = ImageClassificationModels;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_364 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = MotionDataset.xcodeproj/ImageClassificationModels_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = ImageClassificationModels;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = ImageClassificationModels;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
-		OBJ_372 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Lang2lang_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = Lang2lang;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_373 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Lang2lang_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = Lang2lang;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
 		OBJ_4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5193,62 +4056,6 @@
 			};
 			name = Release;
 		};
-		OBJ_460 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Language2label_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = Language2label;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_461 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Language2label_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = Language2label;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
 		OBJ_482 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5311,62 +4118,6 @@
 			};
 			name = Release;
 		};
-		OBJ_506 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Motion2label_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = Motion2label;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_507 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Motion2label_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = Motion2label;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
 		OBJ_536 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -5418,68 +4169,6 @@
 				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
 				SWIFT_VERSION = 5.0;
 				TARGET_NAME = Motion2lang;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
-		OBJ_565 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/MotionClassifiers_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				PRODUCT_BUNDLE_IDENTIFIER = MotionClassifiers;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = MotionClassifiers;
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_566 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/MotionClassifiers_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				PRODUCT_BUNDLE_IDENTIFIER = MotionClassifiers;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = MotionClassifiers;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
 			};
@@ -5998,62 +4687,6 @@
 			};
 			name = Release;
 		};
-		OBJ_811 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Transformer_Translation_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = "Transformer-Translation";
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Debug;
-		};
-		OBJ_812 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Sources/Support/STBImage/include",
-				);
-				INFOPLIST_FILE = MotionDataset.xcodeproj/Transformer_Translation_Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/Sources/Support/STBImage/include/module.modulemap";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_FORCE_DYNAMIC_LINK_STDLIB = YES;
-				SWIFT_FORCE_STATIC_LINK_STDLIB = NO;
-				SWIFT_VERSION = 5.0;
-				TARGET_NAME = "Transformer-Translation";
-				TVOS_DEPLOYMENT_TARGET = 9.0;
-				WATCHOS_DEPLOYMENT_TARGET = 2.0;
-			};
-			name = Release;
-		};
 		OBJ_834 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -6182,24 +4815,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_362 /* Build configuration list for PBXNativeTarget "ImageClassificationModels" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_363 /* Debug */,
-				OBJ_364 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_371 /* Build configuration list for PBXNativeTarget "Lang2lang" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_372 /* Debug */,
-				OBJ_373 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		OBJ_400 /* Build configuration list for PBXNativeTarget "Lang2motion" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -6218,15 +4833,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_459 /* Build configuration list for PBXNativeTarget "Language2label" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_460 /* Debug */,
-				OBJ_461 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		OBJ_481 /* Build configuration list for PBXNativeTarget "ModelSupport" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -6236,29 +4842,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		OBJ_505 /* Build configuration list for PBXNativeTarget "Motion2label" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_506 /* Debug */,
-				OBJ_507 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		OBJ_535 /* Build configuration list for PBXNativeTarget "Motion2lang" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_536 /* Debug */,
 				OBJ_537 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_564 /* Build configuration list for PBXNativeTarget "MotionClassifiers" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_565 /* Debug */,
-				OBJ_566 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -6358,15 +4946,6 @@
 			buildConfigurations = (
 				OBJ_795 /* Debug */,
 				OBJ_796 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_810 /* Build configuration list for PBXNativeTarget "Transformer-Translation" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_811 /* Debug */,
-				OBJ_812 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
