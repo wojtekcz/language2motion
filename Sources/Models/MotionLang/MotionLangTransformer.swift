@@ -68,10 +68,10 @@ public struct MotionLangTransformer: Module {
                                            matrixResult: false)
 
         let encFeedForward = PositionwiseFeedForward(dimensionalityModel: config.encoderDepth,
-                                                     innerLayerDimensionality: config.feedForwardSize)
+                                                     innerLayerDimensionality: config.feedForwardSize, activation: relu)
 
         let decFeedForward = PositionwiseFeedForward(dimensionalityModel: config.decoderDepth,
-                                                  innerLayerDimensionality: config.feedForwardSize)
+                                                  innerLayerDimensionality: config.feedForwardSize, activation: relu)
 
         self.embedding = Embedding(vocabularySize: config.vocabSize, embeddingSize: config.decoderDepth, embeddingsInitializer: glorotUniform())
         self.positionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)

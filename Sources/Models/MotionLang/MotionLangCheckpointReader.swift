@@ -23,8 +23,8 @@ extension MotionLangTransformer {
             
             // load objects
             let scope = "model"
-            let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder")
-            let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: false, scope: scope + "/decoder")
+            let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder", activation: relu)
+            let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: false, scope: scope + "/decoder", activation: relu)
             let _embedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/embedding")
             let _positionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
 

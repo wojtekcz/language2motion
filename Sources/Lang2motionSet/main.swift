@@ -23,6 +23,7 @@ let datasetSize: DatasetSize = .small_midi
 let multiplyFactor = 100
 let lrSlopeMultiplier: Float = 1.1
 let fixedPeekLR: Bool = true
+let discreteBins = 300
 
 let commonRunsSettings: [String:Any] = [
     "dropout": 0.0, "beta1": 0.9, "beta2": 0.99, "wd": 0.0001, "useBiasCorrection": true,
@@ -62,6 +63,7 @@ let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
 let vocabulary: Vocabulary = try! Vocabulary(fromFile: vocabularyURL)
 let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
 let textProcessor = TextProcessor(vocabulary: vocabulary, tokenizer: tokenizer)
+var discretizer = MotionDiscretizer(n_bins: discreteBins)
 
 let logdirURL = dataURL.appendingPathComponent("runs/Lang2motionSet/", isDirectory: true)
 let runSetURL = logdirURL.appendingPathComponent(runSetName, isDirectory: true)
@@ -79,11 +81,12 @@ var dataset = try Lang2Motion(
     minMotionLength: 10,
     maxMotionLength: 50,
     multiplyFactor: multiplyFactor,
+    discretizer: &discretizer,
     trainTestSplit: 1.0,
     device: device
 ) { (motionSample: MotionSample) -> LangMotionBatch in
     let sentence = textProcessor.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength)
+    let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: discretizer)
 
     let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
     let singleBatch = LangMotionBatch(data: source, label: target)
@@ -91,6 +94,25 @@ var dataset = try Lang2Motion(
 }
 
 print("Dataset acquired.")
+
+// Loss function
+let args = CDLossArgs(
+        device: device
+)
+
+@differentiable(wrt: y_pred)
+func embeddedCategoryDistributionSurrogateLoss(y_pred: LangMotionCatDistTransformerOutput<Float>, y_true: LangMotionBatch.Target) -> Tensor<Float> {
+    return categoryDistributionSurrogateLoss(y_pred: y_pred.preds, y_true: y_true, args: args)
+}
+
+public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: LangMotionCatDistTransformer) throws {
+    if event == .epochEnd {
+        guard let epochIndex = loop.epochIndex else {
+            return
+        }
+        try! model.writeCheckpoint(to: checkpointURL, name: "model.e\(epochIndex+1)")
+    }
+}
 
 // vars used in extra.swift
 let nbJoints = 47
@@ -118,18 +140,23 @@ for runNum in 0..<runsSettings.count {
     let rundirURL = runSetURL.appendingPathComponent(rundirName, isDirectory: true)
     runName = "run_\(runNum+1)"
 
-    let config = LangMotionTransformerConfig(
-        vocabSize: vocabulary.count, nbJoints: 47, nbMixtures: 20,
-        layerCount: 6,
-        encoderDepth: 256, decoderDepth: 512, feedForwardSize: 2048,
+    let config = LangMotionCatDistTransformerConfig(
+        vocabSize: vocabulary.count,
+        nbJoints: 47,
+        layerCount: 12,
+        encoderDepth: 64,
+        decoderDepth: 240,
+        feedForwardSize: 1536,
         headCount: 16,
         dropoutProbability: dropoutProbability,
-        sentenceMaxPositionalLength: 100, motionMaxPositionalLength: 500, mixtureDepth: 1500,
+        sentenceMaxPositionalLength: 100,
+        motionMaxPositionalLength: 500,
+        discreteBins: discreteBins,
         activation: swish
     )
 
-    // var model = LangMotionTransformer(config: config)
-    var model = try! LangMotionTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_55/checkpoints"), config: config, name: "run_1.e39")
+    // var model = LangMotionCatDistTransformer(config: config)
+    var model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_set_55/checkpoints"), config: config, name: "run_1.e39")
 
     var optimizerOpts = OptimizerOpts(
         peakLearningRate: peakLearningRate,
@@ -147,7 +174,7 @@ for runNum in 0..<runsSettings.count {
         training: dataset.trainEpochs,
         validation: dataset.testBatches,
         optimizer: optimizerWrapper.optimizer,
-        lossFunction: embeddedNormalMixtureSurrogateLoss,
+        lossFunction: embeddedCategoryDistributionSurrogateLoss,
         callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
     )
 
