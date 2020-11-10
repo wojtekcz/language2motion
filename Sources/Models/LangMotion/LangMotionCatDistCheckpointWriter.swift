@@ -24,7 +24,8 @@ extension MotionCatDistHead: ExportableLayer {
     public var nameMappings: [String: String] {
         [
             "catDistWeights": "catDistWeights",
-            "linearStop": "linearStop"
+            "linearStop": "linearStop",
+            "norm": "norm"
         ]
     }
 }

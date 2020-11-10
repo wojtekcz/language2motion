@@ -36,12 +36,15 @@ public struct MotionCatDistHead: Module {
 
     public var catDistWeights: Dense<Float>
     public var linearStop: Dense<Float>
+    public var norm: LayerNorm<Float>
 
     public init(inputSize: Int, nbJoints: Int, discreteBins: Int) {
         self.inputSize = inputSize
         self.nbJoints = nbJoints
         self.discreteBins = discreteBins
 
+        self.norm = LayerNorm(featureCount: inputSize, axis: 2)
+        
         catDistWeights = Dense<Float>(inputSize: inputSize, outputSize: nbJoints*discreteBins)
 
         // and stop bit
@@ -50,21 +53,22 @@ public struct MotionCatDistHead: Module {
 
     public init(
         inputSize: Int, nbJoints: Int, discreteBins: Int,
-        catDistWeights: Dense<Float>, linearStop: Dense<Float>
+        catDistWeights: Dense<Float>, linearStop: Dense<Float>, norm: LayerNorm<Float>
     ) {
         self.inputSize = inputSize
         self.nbJoints = nbJoints
         self.discreteBins = discreteBins
         self.catDistWeights = catDistWeights
         self.linearStop = linearStop
+        self.norm = norm
     }
 
     @differentiable
     public func callAsFunction(_ input: Tensor<Float>) -> MotionCatDistPreds {
         let s = input.shape
         let (bs, numFrames) = (s[0], s[1])
-
-        var catLogits = timeDistributed(input, catDistWeights.weight)
+        
+        var catLogits = timeDistributed(self.norm(input), catDistWeights.weight)
         catLogits = catLogits.reshaped(to: [bs, numFrames, nbJoints, discreteBins])
         //catLogits = softmax(catLogits, alongAxis: 3)
                 
