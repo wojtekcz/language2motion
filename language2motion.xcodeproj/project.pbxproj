@@ -941,7 +941,7 @@
 		32EFE3BC2539839300CB719D /* Lang2motionSet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lang2motionSet; sourceTree = BUILT_PRODUCTS_DIR; };
 		32EFE414253983EC00CB719D /* extra.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = extra.swift; sourceTree = "<group>"; };
 		32EFE415253983EC00CB719D /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		32FE043B253040340044128D /* test2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		32FE043B253040340044128D /* MotionGenerator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MotionGenerator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32FE043D253040340044128D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		32FE043F253040340044128D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		32FE0441253040350044128D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1401,7 +1401,7 @@
 			path = Sources/Lang2motionSet;
 			sourceTree = "<group>";
 		};
-		32FE043C253040340044128D /* test2 */ = {
+		32FE043C253040340044128D /* MotionGenerator */ = {
 			isa = PBXGroup;
 			children = (
 				32FE043D253040340044128D /* AppDelegate.swift */,
@@ -1414,7 +1414,7 @@
 				32FE044A253040350044128D /* test2.entitlements */,
 				32FE0443253040350044128D /* Preview Content */,
 			);
-			path = test2;
+			path = MotionGenerator;
 			sourceTree = "<group>";
 		};
 		32FE0443253040350044128D /* Preview Content */ = {
@@ -1747,7 +1747,7 @@
 				"language2motion::PreprocessMotionDataset::Product" /* PreprocessMotionDataset */,
 				"language2motion::TranslationModels::Product" /* TranslationModels.framework */,
 				"language2motion::STBImage::Product" /* STBImage.framework */,
-				32FE043B253040340044128D /* test2.app */,
+				32FE043B253040340044128D /* MotionGenerator.app */,
 				32B3D1A42535DEBA00866FA1 /* ImageSupportOSX.framework */,
 				32EFE3BC2539839300CB719D /* Lang2motionSet */,
 			);
@@ -1800,7 +1800,7 @@
 				OBJ_7 /* Sources */,
 				OBJ_154 /* Tests */,
 				OBJ_158 /* Dependencies */,
-				32FE043C253040340044128D /* test2 */,
+				32FE043C253040340044128D /* MotionGenerator */,
 				OBJ_246 /* Products */,
 				OBJ_270 /* swift-install */,
 				OBJ_271 /* docs */,
@@ -1974,9 +1974,9 @@
 			productReference = 32EFE3BC2539839300CB719D /* Lang2motionSet */;
 			productType = "com.apple.product-type.tool";
 		};
-		32FE043A253040340044128D /* test2 */ = {
+		32FE043A253040340044128D /* MotionGenerator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32FE044D253040350044128D /* Build configuration list for PBXNativeTarget "test2" */;
+			buildConfigurationList = 32FE044D253040350044128D /* Build configuration list for PBXNativeTarget "MotionGenerator" */;
 			buildPhases = (
 				32FE0437253040340044128D /* Sources */,
 				32FE0438253040340044128D /* Frameworks */,
@@ -1987,9 +1987,9 @@
 			dependencies = (
 				32B3D1AA2535DEBA00866FA1 /* PBXTargetDependency */,
 			);
-			name = test2;
+			name = MotionGenerator;
 			productName = test2;
-			productReference = 32FE043B253040340044128D /* test2.app */;
+			productReference = 32FE043B253040340044128D /* MotionGenerator.app */;
 			productType = "com.apple.product-type.application";
 		};
 		"SwiftProtobuf::SwiftPMPackageDescription" /* SwiftProtobufPackageDescription */ = {
@@ -2412,7 +2412,7 @@
 				"language2motion::TrainingLoop" /* TrainingLoop */,
 				"language2motion::TranslationModels" /* TranslationModels */,
 				32B3D1A32535DEBA00866FA1 /* ImageSupportOSX */,
-				32FE043A253040340044128D /* test2 */,
+				32FE043A253040340044128D /* MotionGenerator */,
 			);
 		};
 /* End PBXProject section */
@@ -3491,10 +3491,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = test2/test2.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MotionGenerator/test2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"test2/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"MotionGenerator/Preview Content\"";
 				DEVELOPMENT_TEAM = TVY88QK69K;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -3513,12 +3513,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = test2/Info.plist;
+				INFOPLIST_FILE = MotionGenerator/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = pl.com.jatar.test2;
+				PRODUCT_BUNDLE_IDENTIFIER = pl.com.jatar.MotionGenerator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -3559,11 +3559,11 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = test2/test2.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MotionGenerator/test2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_ASSET_PATHS = "\"test2/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"MotionGenerator/Preview Content\"";
 				DEVELOPMENT_TEAM = TVY88QK69K;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -3577,12 +3577,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = test2/Info.plist;
+				INFOPLIST_FILE = MotionGenerator/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = pl.com.jatar.test2;
+				PRODUCT_BUNDLE_IDENTIFIER = pl.com.jatar.MotionGenerator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -4662,7 +4662,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32FE044D253040350044128D /* Build configuration list for PBXNativeTarget "test2" */ = {
+		32FE044D253040350044128D /* Build configuration list for PBXNativeTarget "MotionGenerator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32FE044B253040350044128D /* Debug */,

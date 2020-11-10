@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "32FE043A253040340044128D"
-               BuildableName = "test2.app"
-               BlueprintName = "test2"
+               BuildableName = "MotionGenerator.app"
+               BlueprintName = "MotionGenerator"
                ReferencedContainer = "container:language2motion.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32FE043A253040340044128D"
-            BuildableName = "test2.app"
-            BlueprintName = "test2"
+            BuildableName = "MotionGenerator.app"
+            BlueprintName = "MotionGenerator"
             ReferencedContainer = "container:language2motion.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -69,8 +69,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32FE043A253040340044128D"
-            BuildableName = "test2.app"
-            BlueprintName = "test2"
+            BuildableName = "MotionGenerator.app"
+            BlueprintName = "MotionGenerator"
             ReferencedContainer = "container:language2motion.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
