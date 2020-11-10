@@ -1483,12 +1483,12 @@
 		OBJ_114 /* MotionLangModels */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_115 /* MotionLangTransformer.swift */,
 				32E04EAC2513F24A0077B28A /* MotionLangCheckpointReader.swift */,
 				32E04EAE2513F25E0077B28A /* MotionLangCheckpointWriter.swift */,
 				32205DD9251B2D5400EC46C4 /* MotionLangDecoder.swift */,
-				32205DF3251B2E3C00EC46C4 /* StatsRecorder.swift */,
+				OBJ_115 /* MotionLangTransformer.swift */,
 				3208C10F251B3C7300D4555F /* OptimizerWrapper.swift */,
+				32205DF3251B2E3C00EC46C4 /* StatsRecorder.swift */,
 			);
 			name = MotionLangModels;
 			path = MotionLang;
@@ -1553,8 +1553,8 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_128 /* Attention.swift */,
-				OBJ_129 /* BERT.swift */,
 				OBJ_130 /* BERT */,
+				OBJ_129 /* BERT.swift */,
 				OBJ_132 /* BERTClassifier-predict.swift */,
 				OBJ_133 /* BERTClassifier.swift */,
 				OBJ_134 /* Evaluation.swift */,
@@ -1892,14 +1892,14 @@
 		OBJ_79 /* LangMotionModels */ = {
 			isa = PBXGroup;
 			children = (
+				32CFD4072550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift */,
+				32CFD3EA2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift */,
+				32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */,
+				324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */,
+				3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */,
 				3208C1C0251CED4200D4555F /* OptimizerWrapper.swift */,
 				3208C1BF251CED4200D4555F /* StatsRecorder.swift */,
 				32E326E2252F35590088C8F8 /* TimeDistributed.swift */,
-				3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */,
-				32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */,
-				32CFD3EA2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift */,
-				32CFD4072550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift */,
-				324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */,
 			);
 			name = LangMotionModels;
 			path = LangMotion;
