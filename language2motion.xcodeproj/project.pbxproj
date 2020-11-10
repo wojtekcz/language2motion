@@ -102,18 +102,9 @@
 		OBJ_319 /* DataUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* DataUtilities.swift */; };
 		OBJ_320 /* DatasetUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* DatasetUtilities.swift */; };
 		OBJ_321 /* ImageClassificationDataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* ImageClassificationDataset.swift */; };
-		OBJ_322 /* Lang2Lang.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* Lang2Lang.swift */; };
 		OBJ_323 /* Lang2Motion.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* Lang2Motion.swift */; };
 		OBJ_324 /* LangMotionBatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* LangMotionBatch.swift */; };
 		OBJ_325 /* TextProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* TextProcessor.swift */; };
-		OBJ_326 /* Language2Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* Language2Label.swift */; };
-		OBJ_327 /* FastCodableShapedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* FastCodableShapedArray.swift */; };
-		OBJ_328 /* LegacyMotionDataset.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* LegacyMotionDataset.swift */; };
-		OBJ_329 /* LegacyMotionFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* LegacyMotionFrame.swift */; };
-		OBJ_330 /* LegacyMotionSample-trainTestSplit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_44 /* LegacyMotionSample-trainTestSplit.swift */; };
-		OBJ_331 /* LegacyMotionSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* LegacyMotionSample.swift */; };
-		OBJ_332 /* Motion2Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* Motion2Label.swift */; };
-		OBJ_333 /* MotionBatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* MotionBatch.swift */; };
 		OBJ_334 /* LegacyTextProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* LegacyTextProcessor.swift */; };
 		OBJ_335 /* Motion2Lang.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* Motion2Lang.swift */; };
 		OBJ_336 /* MotionLangBatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* MotionLangBatch.swift */; };
@@ -131,7 +122,6 @@
 		OBJ_348 /* PythonImports.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_65 /* PythonImports.swift */; };
 		OBJ_349 /* TensorPair.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_66 /* TensorPair.swift */; };
 		OBJ_350 /* TensorUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_67 /* TensorUtils.swift */; };
-		OBJ_351 /* WMT2014.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_69 /* WMT2014.swift */; };
 		OBJ_353 /* Batcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::Batcher::Product" /* Batcher.framework */; };
 		OBJ_354 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::ModelSupport::Product" /* ModelSupport.framework */; };
 		OBJ_355 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
@@ -148,13 +138,6 @@
 		OBJ_414 /* ModelSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::ModelSupport::Product" /* ModelSupport.framework */; };
 		OBJ_415 /* SwiftProtobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "SwiftProtobuf::SwiftProtobuf::Product" /* SwiftProtobuf.framework */; };
 		OBJ_416 /* STBImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::STBImage::Product" /* STBImage.framework */; };
-		OBJ_434 /* LangMotionTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_80 /* LangMotionTransformer.swift */; };
-		OBJ_435 /* MixtureModelPreds.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_81 /* MixtureModelPreds.swift */; };
-		OBJ_436 /* LangMotionCheckpointReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_82 /* LangMotionCheckpointReader.swift */; };
-		OBJ_437 /* LangMotionCheckpointWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_83 /* LangMotionCheckpointWriter.swift */; };
-		OBJ_438 /* MotionDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_84 /* MotionDecoder.swift */; };
-		OBJ_439 /* MotionGaussianMixtureModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_85 /* MotionGaussianMixtureModel.swift */; };
-		OBJ_440 /* NormalMixtureSurrogateLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_86 /* NormalMixtureSurrogateLoss.swift */; };
 		OBJ_442 /* TranslationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::TranslationModels::Product" /* TranslationModels.framework */; };
 		OBJ_443 /* TextModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::TextModels::Product" /* TextModels.framework */; };
 		OBJ_444 /* Checkpoints.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "language2motion::Checkpoints::Product" /* Checkpoints.framework */; };
@@ -1110,18 +1093,9 @@
 		OBJ_29 /* DataUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUtilities.swift; sourceTree = "<group>"; };
 		OBJ_30 /* DatasetUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatasetUtilities.swift; sourceTree = "<group>"; };
 		OBJ_31 /* ImageClassificationDataset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageClassificationDataset.swift; sourceTree = "<group>"; };
-		OBJ_33 /* Lang2Lang.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lang2Lang.swift; sourceTree = "<group>"; };
 		OBJ_35 /* Lang2Motion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lang2Motion.swift; sourceTree = "<group>"; };
 		OBJ_36 /* LangMotionBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionBatch.swift; sourceTree = "<group>"; };
 		OBJ_37 /* TextProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessor.swift; sourceTree = "<group>"; };
-		OBJ_39 /* Language2Label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Language2Label.swift; sourceTree = "<group>"; };
-		OBJ_41 /* FastCodableShapedArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastCodableShapedArray.swift; sourceTree = "<group>"; };
-		OBJ_42 /* LegacyMotionDataset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMotionDataset.swift; sourceTree = "<group>"; };
-		OBJ_43 /* LegacyMotionFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMotionFrame.swift; sourceTree = "<group>"; };
-		OBJ_44 /* LegacyMotionSample-trainTestSplit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LegacyMotionSample-trainTestSplit.swift"; sourceTree = "<group>"; };
-		OBJ_45 /* LegacyMotionSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMotionSample.swift; sourceTree = "<group>"; };
-		OBJ_47 /* Motion2Label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion2Label.swift; sourceTree = "<group>"; };
-		OBJ_48 /* MotionBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionBatch.swift; sourceTree = "<group>"; };
 		OBJ_50 /* LegacyTextProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyTextProcessor.swift; sourceTree = "<group>"; };
 		OBJ_51 /* Motion2Lang.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Motion2Lang.swift; sourceTree = "<group>"; };
 		OBJ_52 /* MotionLangBatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionLangBatch.swift; sourceTree = "<group>"; };
@@ -1140,15 +1114,7 @@
 		OBJ_65 /* PythonImports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PythonImports.swift; sourceTree = "<group>"; };
 		OBJ_66 /* TensorPair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TensorPair.swift; sourceTree = "<group>"; };
 		OBJ_67 /* TensorUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TensorUtils.swift; sourceTree = "<group>"; };
-		OBJ_69 /* WMT2014.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WMT2014.swift; sourceTree = "<group>"; };
 		OBJ_78 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		OBJ_80 /* LangMotionTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionTransformer.swift; sourceTree = "<group>"; };
-		OBJ_81 /* MixtureModelPreds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixtureModelPreds.swift; sourceTree = "<group>"; };
-		OBJ_82 /* LangMotionCheckpointReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionCheckpointReader.swift; sourceTree = "<group>"; };
-		OBJ_83 /* LangMotionCheckpointWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LangMotionCheckpointWriter.swift; sourceTree = "<group>"; };
-		OBJ_84 /* MotionDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDecoder.swift; sourceTree = "<group>"; };
-		OBJ_85 /* MotionGaussianMixtureModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGaussianMixtureModel.swift; sourceTree = "<group>"; };
-		OBJ_86 /* NormalMixtureSurrogateLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormalMixtureSurrogateLoss.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Backend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backend.swift; sourceTree = "<group>"; };
 		OBJ_90 /* BijectiveDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BijectiveDictionary.swift; sourceTree = "<group>"; };
 		OBJ_91 /* FileManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManagement.swift; sourceTree = "<group>"; };
@@ -1796,29 +1762,16 @@
 				OBJ_29 /* DataUtilities.swift */,
 				OBJ_30 /* DatasetUtilities.swift */,
 				OBJ_31 /* ImageClassificationDataset.swift */,
-				OBJ_32 /* Lang2Lang */,
 				OBJ_34 /* Lang2Motion */,
-				OBJ_38 /* Language2Label */,
-				OBJ_40 /* LegacyMotionDataset */,
-				OBJ_46 /* Motion2Label */,
 				OBJ_49 /* Motion2Lang */,
 				OBJ_53 /* MotionDataset */,
 				OBJ_65 /* PythonImports.swift */,
 				OBJ_66 /* TensorPair.swift */,
 				OBJ_67 /* TensorUtils.swift */,
-				OBJ_68 /* WMT2014 */,
 			);
 			name = Datasets;
 			path = Sources/Datasets;
 			sourceTree = SOURCE_ROOT;
-		};
-		OBJ_32 /* Lang2Lang */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_33 /* Lang2Lang.swift */,
-			);
-			path = Lang2Lang;
-			sourceTree = "<group>";
 		};
 		OBJ_34 /* Lang2Motion */ = {
 			isa = PBXGroup;
@@ -1828,35 +1781,6 @@
 				OBJ_37 /* TextProcessor.swift */,
 			);
 			path = Lang2Motion;
-			sourceTree = "<group>";
-		};
-		OBJ_38 /* Language2Label */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_39 /* Language2Label.swift */,
-			);
-			path = Language2Label;
-			sourceTree = "<group>";
-		};
-		OBJ_40 /* LegacyMotionDataset */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_41 /* FastCodableShapedArray.swift */,
-				OBJ_42 /* LegacyMotionDataset.swift */,
-				OBJ_43 /* LegacyMotionFrame.swift */,
-				OBJ_44 /* LegacyMotionSample-trainTestSplit.swift */,
-				OBJ_45 /* LegacyMotionSample.swift */,
-			);
-			path = LegacyMotionDataset;
-			sourceTree = "<group>";
-		};
-		OBJ_46 /* Motion2Label */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_47 /* Motion2Label.swift */,
-				OBJ_48 /* MotionBatch.swift */,
-			);
-			path = Motion2Label;
 			sourceTree = "<group>";
 		};
 		OBJ_49 /* Motion2Lang */ = {
@@ -1908,14 +1832,6 @@
 			path = MotionDataset;
 			sourceTree = "<group>";
 		};
-		OBJ_68 /* WMT2014 */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_69 /* WMT2014.swift */,
-			);
-			path = WMT2014;
-			sourceTree = "<group>";
-		};
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -1953,13 +1869,6 @@
 			children = (
 				3208C1C0251CED4200D4555F /* OptimizerWrapper.swift */,
 				3208C1BF251CED4200D4555F /* StatsRecorder.swift */,
-				OBJ_80 /* LangMotionTransformer.swift */,
-				OBJ_82 /* LangMotionCheckpointReader.swift */,
-				OBJ_83 /* LangMotionCheckpointWriter.swift */,
-				OBJ_81 /* MixtureModelPreds.swift */,
-				OBJ_84 /* MotionDecoder.swift */,
-				OBJ_85 /* MotionGaussianMixtureModel.swift */,
-				OBJ_86 /* NormalMixtureSurrogateLoss.swift */,
 				32E326E2252F35590088C8F8 /* TimeDistributed.swift */,
 				3272D7A4254DCAED00A465B9 /* MotionCatDistHead.swift */,
 				32CFD3CD254FF1C7005821A8 /* LangMotionCatDistTransformer.swift */,
@@ -2597,19 +2506,10 @@
 				3249634D2552CF3F003190D9 /* MinMaxScaler.swift in Sources */,
 				OBJ_320 /* DatasetUtilities.swift in Sources */,
 				OBJ_321 /* ImageClassificationDataset.swift in Sources */,
-				OBJ_322 /* Lang2Lang.swift in Sources */,
 				OBJ_323 /* Lang2Motion.swift in Sources */,
 				OBJ_324 /* LangMotionBatch.swift in Sources */,
 				OBJ_325 /* TextProcessor.swift in Sources */,
-				OBJ_326 /* Language2Label.swift in Sources */,
-				OBJ_327 /* FastCodableShapedArray.swift in Sources */,
-				OBJ_328 /* LegacyMotionDataset.swift in Sources */,
-				OBJ_329 /* LegacyMotionFrame.swift in Sources */,
-				OBJ_330 /* LegacyMotionSample-trainTestSplit.swift in Sources */,
-				OBJ_331 /* LegacyMotionSample.swift in Sources */,
-				OBJ_332 /* Motion2Label.swift in Sources */,
 				3217BAFB2548161C0011669A /* MotionDiscretizer.swift in Sources */,
-				OBJ_333 /* MotionBatch.swift in Sources */,
 				OBJ_334 /* LegacyTextProcessor.swift in Sources */,
 				OBJ_335 /* Motion2Lang.swift in Sources */,
 				OBJ_336 /* MotionLangBatch.swift in Sources */,
@@ -2627,7 +2527,6 @@
 				OBJ_348 /* PythonImports.swift in Sources */,
 				OBJ_349 /* TensorPair.swift in Sources */,
 				OBJ_350 /* TensorUtils.swift in Sources */,
-				OBJ_351 /* WMT2014.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2643,21 +2542,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_434 /* LangMotionTransformer.swift in Sources */,
-				OBJ_435 /* MixtureModelPreds.swift in Sources */,
-				OBJ_436 /* LangMotionCheckpointReader.swift in Sources */,
 				324923B225513E1500BD1D75 /* MotionCatDistDecoder.swift in Sources */,
 				3208C1C1251CED4200D4555F /* StatsRecorder.swift in Sources */,
 				32CFD3CE254FF1C7005821A8 /* LangMotionCatDistTransformer.swift in Sources */,
-				OBJ_437 /* LangMotionCheckpointWriter.swift in Sources */,
 				3208C1C2251CED4200D4555F /* OptimizerWrapper.swift in Sources */,
 				32CFD3EB2550A4A8005821A8 /* LangMotionCatDistCheckpointWriter.swift in Sources */,
 				32E326E3252F35590088C8F8 /* TimeDistributed.swift in Sources */,
 				32CFD4082550A4C0005821A8 /* LangMotionCatDistCheckpointReader.swift in Sources */,
-				OBJ_438 /* MotionDecoder.swift in Sources */,
-				OBJ_439 /* MotionGaussianMixtureModel.swift in Sources */,
 				32CF6AD2254DCFC6008BD0D7 /* MotionCatDistHead.swift in Sources */,
-				OBJ_440 /* NormalMixtureSurrogateLoss.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

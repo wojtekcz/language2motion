@@ -327,3 +327,26 @@ extension LangMotionBatch {
         return Tensor<Float>(targetMask)
     }
 }
+
+extension LangMotionBatch.Target {
+
+    public func squeezed() -> Self {
+        let bs = self.motion.shape[0]
+        let nFrames = self.motion.shape[1]
+        let nJoints = self.motion.shape[2]
+        let motion = self.motion.reshaped(to: [1, bs*nFrames, nJoints])
+        let discreteMotion = self.discreteMotion.reshaped(to: [1, bs*nFrames, nJoints])
+        let stops = self.stops.reshaped(to: [1, bs*nFrames])
+        let segmentIDs = self.segmentIDs.reshaped(to: [1, bs*nFrames])
+        let origMotionFramesCount = self.origMotionFramesCount.sum().expandingShape(at: 0)
+        return Self(sampleID: self.sampleID, motion: motion, discreteMotion: discreteMotion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: origMotionFramesCount)
+    }
+
+    public func gathering(atIndices indices: Tensor<Int32>, alongAxis axis: Int) -> Self {
+        let motion = self.motion.gathering(atIndices: indices, alongAxis: axis)
+        let discreteMotion = self.discreteMotion.gathering(atIndices: indices, alongAxis: axis)
+        let stops = self.stops.gathering(atIndices: indices, alongAxis: axis)
+        let segmentIDs = self.segmentIDs.gathering(atIndices: indices, alongAxis: axis)
+        return Self(sampleID: self.sampleID, motion: motion, discreteMotion: discreteMotion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: self.origMotionFramesCount)
+    }
+}

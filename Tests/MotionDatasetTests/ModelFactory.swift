@@ -12,25 +12,25 @@ import LangMotionModels
 
 public class ModelFactory {
 
-    public static func getModel(vocabSize: Int) -> LangMotionTransformer {
-        let config = LangMotionTransformerConfig(
-            vocabSize: vocabSize,
-            nbJoints: 47,
-            nbMixtures: 20,
-            layerCount: 6,
-            encoderDepth: 256,
-            decoderDepth: 512,
-            feedForwardSize: 2048,
-            headCount: 16,
-            dropoutProbability:  0.1,
-            sentenceMaxPositionalLength: 100,
-            motionMaxPositionalLength: 500,
-            mixtureDepth: 1500,
-            activation: swish
-        )
-
-        return LangMotionTransformer(config: config)
-    }
+//    public static func getModel(vocabSize: Int) -> LangMotionTransformer {
+//        let config = LangMotionTransformerConfig(
+//            vocabSize: vocabSize,
+//            nbJoints: 47,
+//            nbMixtures: 20,
+//            layerCount: 6,
+//            encoderDepth: 256,
+//            decoderDepth: 512,
+//            feedForwardSize: 2048,
+//            headCount: 16,
+//            dropoutProbability:  0.1,
+//            sentenceMaxPositionalLength: 100,
+//            motionMaxPositionalLength: 500,
+//            mixtureDepth: 1500,
+//            activation: swish
+//        )
+//
+//        return LangMotionTransformer(config: config)
+//    }
 
     public static func getModel2(vocabSize: Int) -> LangMotionCatDistTransformer {
         let config = LangMotionCatDistTransformerConfig(
