@@ -87,10 +87,9 @@ public struct LangMotionCatDistTransformer: Module {
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
 
         // decoding motion
-        // TODO: parametrize jointEmbedding: discreteBins, jointEmbeddingSize
-        let discreteBins = 300
+        // TODO: parametrize jointEmbeddingSize
         let jointEmbeddingSize = 5
-        self.jointEmbedding = Embedding<Float>(vocabularySize: discreteBins, embeddingSize: jointEmbeddingSize, embeddingsInitializer: glorotUniform())
+        self.jointEmbedding = Embedding<Float>(vocabularySize: config.discreteBins, embeddingSize: jointEmbeddingSize, embeddingsInitializer: glorotUniform())
         self.motionDense = Dense<Float>(inputSize: config.nbJoints*jointEmbeddingSize, outputSize: config.decoderDepth, activation: config.activation)
 //        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: config.activation)
         self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
