@@ -1373,6 +1373,44 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3232A32F255ABD8900800F90 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_79 /* LangMotionModels */,
+				OBJ_114 /* MotionLangModels */,
+				OBJ_127 /* TextModels */,
+				OBJ_148 /* TranslationModels */,
+				OBJ_89 /* ModelSupport */,
+			);
+			name = Models;
+			path = Sources/Models;
+			sourceTree = "<group>";
+		};
+		3232A330255ABE2100800F90 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_8 /* Batcher */,
+				OBJ_12 /* Checkpoints */,
+				32B3D21A2535DF4700866FA1 /* ImageSupportOSX */,
+				OBJ_118 /* STBImage */,
+				OBJ_125 /* SummaryWriter */,
+				OBJ_140 /* TrainingLoop */,
+			);
+			name = Other;
+			path = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		3232A331255ABE7B00800F90 /* Binaries */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_77 /* Lang2motion */,
+				32EFE3BD2539839300CB719D /* Lang2motionSet */,
+				OBJ_108 /* Motion2lang */,
+				OBJ_116 /* PreprocessMotionDataset */,
+			);
+			path = Binaries;
+			sourceTree = "<group>";
+		};
 		32B3D21A2535DF4700866FA1 /* ImageSupportOSX */ = {
 			isa = PBXGroup;
 			children = (
@@ -1380,8 +1418,7 @@
 				32B3D21C2535DF4700866FA1 /* TensorCGImage.swift */,
 				32B3D21D2535DF4700866FA1 /* RGBtoHSV.swift */,
 			);
-			name = ImageSupportOSX;
-			path = Sources/ImageSupportOSX;
+			path = ImageSupportOSX;
 			sourceTree = "<group>";
 		};
 		32E04EA52513F0370077B28A /* Frameworks */ = {
@@ -1398,7 +1435,7 @@
 				32EFE415253983EC00CB719D /* main.swift */,
 			);
 			name = Lang2motionSet;
-			path = Sources/Lang2motionSet;
+			path = ../Sources/Lang2motionSet;
 			sourceTree = "<group>";
 		};
 		32FE043C253040340044128D /* MotionGenerator */ = {
@@ -1454,8 +1491,8 @@
 				3208C10F251B3C7300D4555F /* OptimizerWrapper.swift */,
 			);
 			name = MotionLangModels;
-			path = Sources/Models/MotionLang;
-			sourceTree = SOURCE_ROOT;
+			path = MotionLang;
+			sourceTree = "<group>";
 		};
 		OBJ_116 /* PreprocessMotionDataset */ = {
 			isa = PBXGroup;
@@ -1528,8 +1565,8 @@
 				OBJ_139 /* WeightDecayedAdam.swift */,
 			);
 			name = TextModels;
-			path = Sources/Models/Text;
-			sourceTree = SOURCE_ROOT;
+			path = Text;
+			sourceTree = "<group>";
 		};
 		OBJ_130 /* BERT */ = {
 			isa = PBXGroup;
@@ -1563,8 +1600,8 @@
 				OBJ_153 /* Utilities.swift */,
 			);
 			name = TranslationModels;
-			path = Sources/Models/Translation;
-			sourceTree = SOURCE_ROOT;
+			path = Translation;
+			sourceTree = "<group>";
 		};
 		OBJ_154 /* Tests */ = {
 			isa = PBXGroup;
@@ -1835,22 +1872,10 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_8 /* Batcher */,
-				OBJ_12 /* Checkpoints */,
+				3232A331255ABE7B00800F90 /* Binaries */,
 				OBJ_26 /* Datasets */,
-				32B3D21A2535DF4700866FA1 /* ImageSupportOSX */,
-				OBJ_77 /* Lang2motion */,
-				OBJ_79 /* LangMotionModels */,
-				OBJ_89 /* ModelSupport */,
-				OBJ_108 /* Motion2lang */,
-				32EFE3BD2539839300CB719D /* Lang2motionSet */,
-				OBJ_114 /* MotionLangModels */,
-				OBJ_116 /* PreprocessMotionDataset */,
-				OBJ_118 /* STBImage */,
-				OBJ_125 /* SummaryWriter */,
-				OBJ_127 /* TextModels */,
-				OBJ_140 /* TrainingLoop */,
-				OBJ_148 /* TranslationModels */,
+				3232A32F255ABD8900800F90 /* Models */,
+				3232A330255ABE2100800F90 /* Other */,
 			);
 			name = Sources;
 			sourceTree = SOURCE_ROOT;
@@ -1877,8 +1902,8 @@
 				324923B125513E1500BD1D75 /* MotionCatDistDecoder.swift */,
 			);
 			name = LangMotionModels;
-			path = Sources/Models/LangMotion;
-			sourceTree = SOURCE_ROOT;
+			path = LangMotion;
+			sourceTree = "<group>";
 		};
 		OBJ_8 /* Batcher */ = {
 			isa = PBXGroup;
