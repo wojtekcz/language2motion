@@ -18,7 +18,7 @@ let maxSamples: Int? = nil// 500
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
 let runName = "run_167"//_maxSamples\(maxSamplesStr)"
-let batchSize = 2
+let batchSize = 50
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
 let nEpochs = 100
@@ -26,13 +26,13 @@ let multiplyFactor = 100
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
-let peakLearningRate: Float = 1e-2 //5e-3
+let peakLearningRate: Float = 5e-2 //5e-3
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
 
-let datasetSize: DatasetSize = .small_micro1
+let datasetSize: DatasetSize = .full
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -62,7 +62,7 @@ let _ = _ExecutionContext.global
 
 /// Select eager or X10 backend
 //let device = Device.defaultXLA
- let device = Device.defaultTFEager
+let device = Device.defaultTFEager
 print("backend: \(device)")
 
 /// instantiate text processor
