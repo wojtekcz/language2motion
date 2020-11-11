@@ -177,17 +177,17 @@ extension TransformerDecoderLayer {
         let _selfAttention = MultiHeadAttention(reader: reader, config: selfAttConfig, scope: scope + "/selfAttention")
         let _sourceAttention = MultiHeadAttention(reader: reader, config: sourceAttConfig, scope: scope + "/sourceAttention")
         let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward", activation: activation)
-        // let kernel_size = 3
-        // let _conv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: activation)
-        let _sublayers = (0..<3).map { i in
+         let kernel_size = 3
+         let _conv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: activation)
+        let _sublayers = (0..<4).map { i in
             SublayerConnection(reader: reader, config: config, scope: scope + "/sublayers/SublayerConnection_h\(i)")
         }
         self.init(
             selfAttention: _selfAttention,
             sourceAttention: _sourceAttention,
             feedForward: _feedForward,
-            sublayers: _sublayers//,
-            // conv1D: _conv1D
+            sublayers: _sublayers,
+             conv1D: _conv1D
         )
     }
 }
