@@ -148,7 +148,7 @@ public struct LangMotionCatDistTransformer: Module {
     public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>,
                        decoderSourceAttentionTemp: Float = 1.0, decoderSelfAttentionTemp: Float = 1.0) -> DecoderOutput<Float> {
         // start flag, pos enc, current motion, padding with motion
-        let shape = motionPart.motion.shape
+        let shape = motionPart.discreteMotion.shape
         let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
 
         // squeeze all joint values in a batch into first dimension

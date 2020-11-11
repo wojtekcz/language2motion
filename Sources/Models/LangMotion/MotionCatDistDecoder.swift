@@ -68,7 +68,7 @@ public class MotionCatDistDecoder {
             segmentIDs[0, 0, 0] = Tensor<Int32>(LangMotionBatch.MotionSegment.start.rawValue)
 
             
-            let motionPart = LangMotionBatch.MotionPart(motion: ys, discreteMotion: discrete_ys, decSelfAttentionMask: motionPartMask,
+            let motionPart = LangMotionBatch.MotionPart(discreteMotion: discrete_ys, decSelfAttentionMask: motionPartMask,
                                                         motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: segmentIDs)
 
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
