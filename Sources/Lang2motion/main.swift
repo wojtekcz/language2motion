@@ -17,12 +17,12 @@ let maxSamples: Int? = nil// 500
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_167"//_maxSamples\(maxSamplesStr)"
-let batchSize = 50
+let runName = "run_168"//_maxSamples\(maxSamplesStr)"
+let batchSize = 77
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
 let nEpochs = 100
-let multiplyFactor = 100
+let multiplyFactor = 15
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
@@ -32,7 +32,7 @@ let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
 
-let datasetSize: DatasetSize = .full
+let datasetSize: DatasetSize = .micro
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
