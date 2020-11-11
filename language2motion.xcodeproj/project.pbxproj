@@ -1408,8 +1408,9 @@
 				OBJ_108 /* Motion2lang */,
 				OBJ_116 /* PreprocessMotionDataset */,
 			);
-			path = Binaries;
-			sourceTree = "<group>";
+			name = Binaries;
+			path = Sources;
+			sourceTree = SOURCE_ROOT;
 		};
 		32B3D21A2535DF4700866FA1 /* ImageSupportOSX */ = {
 			isa = PBXGroup;
@@ -1435,8 +1436,8 @@
 				32EFE415253983EC00CB719D /* main.swift */,
 			);
 			name = Lang2motionSet;
-			path = ../Sources/Lang2motionSet;
-			sourceTree = "<group>";
+			path = Sources/Lang2motionSet;
+			sourceTree = SOURCE_ROOT;
 		};
 		32FE043C253040340044128D /* MotionGenerator */ = {
 			isa = PBXGroup;
