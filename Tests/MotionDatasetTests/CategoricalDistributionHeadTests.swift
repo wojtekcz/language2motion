@@ -252,13 +252,13 @@ class CategoricalDistributionHeadTests: XCTestCase {
 
         print()
         // show original motion
-        let sourceMotion = source.motionPart.motion[0]
-        print("sourceMotion.shape: \(sourceMotion.shape)")
-        print("sourceMotion: \(roundT(sourceMotion))")
+//        let sourceMotion = source.motionPart.motion[0]
+//        print("sourceMotion.shape: \(sourceMotion.shape)")
+//        print("sourceMotion: \(roundT(sourceMotion))")
 
-        let targetMotion = target.motion[0]
-        print("targetMotion.shape: \(targetMotion.shape)")
-        print("targetMotion: \(roundT(targetMotion))")
+//        let targetMotion = target.motion[0]
+//        print("targetMotion.shape: \(targetMotion.shape)")
+//        print("targetMotion: \(roundT(targetMotion))")
 
         // de-discretize
         let dediscretizedMotion = dsMgr.discretizer!.inverse_transform(decodedMotion)[0]
@@ -279,8 +279,8 @@ class CategoricalDistributionHeadTests: XCTestCase {
         }
         
         let rundirURL = logdirURL.appendingPathComponent("run_142")
-        saveMotionToMMM(dataset: dsMgr.dataset!, motion: sourceMotion, mmmURL: rundirURL.appendingPathComponent("sourceMotion.mmm.xml"))
-        saveMotionToMMM(dataset: dsMgr.dataset!, motion: targetMotion, mmmURL: rundirURL.appendingPathComponent("targetMotion.mmm.xml"))
+//        saveMotionToMMM(dataset: dsMgr.dataset!, motion: sourceMotion, mmmURL: rundirURL.appendingPathComponent("sourceMotion.mmm.xml"))
+//        saveMotionToMMM(dataset: dsMgr.dataset!, motion: targetMotion, mmmURL: rundirURL.appendingPathComponent("targetMotion.mmm.xml"))
         saveMotionToMMM(dataset: dsMgr.dataset!, motion: dediscretizedMotion, mmmURL: rundirURL.appendingPathComponent("dediscretizedMotion.mmm.xml"))
         saveMotionToMMM(dataset: dsMgr.dataset!, motion: descaledMotion, mmmURL: rundirURL.appendingPathComponent("descaledMotion.mmm.xml"))
 
