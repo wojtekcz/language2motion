@@ -34,7 +34,9 @@ public class MotionGenerationManager {
     func loadDataset() {
         let device = Device.defaultTFEager
                 
-        let datasetSize: DatasetSize = .full
+        let maxSamples: Int? = nil
+
+        let datasetSize: DatasetSize = .small_micro1
         let batchSize = 2
         let maxMotionLength = 75
 
@@ -54,6 +56,7 @@ public class MotionGenerationManager {
             batchSize: batchSize,
             minMotionLength: 10,
             maxMotionLength: maxMotionLength,
+            maxSamples: maxSamples,
             discretizer: &discretizer!,
             trainTestSplit: 1.0,
             device: device
@@ -110,7 +113,7 @@ public class MotionGenerationManager {
 ////        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "model.e\(epoch)")
 //        model = try! LangMotionTransformer(checkpoint: checkpointURL, config: config, name: "run_1.e\(epoch)")
     let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
-        model = getModel4(vocabSize: vocabulary!.count, logdirURL: logdirURL)
+        model = getModel5(vocabSize: vocabulary!.count, logdirURL: logdirURL)
        print("Loaded.")
 
     }
@@ -138,6 +141,32 @@ public class MotionGenerationManager {
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
 
         let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e44")
+        return model
+    }
+
+    public func getModel5(vocabSize: Int, logdirURL: URL) -> LangMotionCatDistTransformer {
+        let config = LangMotionCatDistTransformerConfig(
+            vocabSize: vocabSize,
+            nbJoints: 47,
+            layerCount: 12,
+            encoderDepth: 64,
+            decoderDepth: 240,
+            feedForwardSize: 1536,
+            headCount: 16,
+            dropoutProbability: 0.1,
+            sentenceMaxPositionalLength: 100,
+            motionMaxPositionalLength: 500,
+            discreteBins: 300,
+            activation: swish
+        )
+        
+        let runName = "run_171"
+        let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
+        let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
+        motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
+        try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
+
+        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e1")
         return model
     }
 
