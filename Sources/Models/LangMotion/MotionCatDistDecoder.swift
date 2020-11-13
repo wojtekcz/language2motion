@@ -44,6 +44,7 @@ public class MotionCatDistDecoder {
         print("=========")
 
         // TODO: kill ys
+        // TODO: gather discretized neutral motion frame
         // start with tensor for neutral motion frame
         let neutralMotionFrame = LangMotionBatch.neutralMotionFrame().expandingShape(at: 0)
         var ys: Tensor<Float> = neutralMotionFrame
