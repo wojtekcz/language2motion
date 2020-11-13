@@ -17,12 +17,12 @@ let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_172" //_maxSamples\(maxSamplesStr)"
-let batchSize = 5
+let runName = "run_173" //_maxSamples\(maxSamplesStr)"
+let batchSize = 80
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
-let nEpochs = 10
-let multiplyFactor = 1
+let nEpochs = 100
+let multiplyFactor = 54
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
