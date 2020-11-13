@@ -44,7 +44,7 @@ public struct TransformerDecoderLayer: Layer {
     public var selfAttention: MultiHeadAttention,
     sourceAttention: MultiHeadAttention,
     feedForward: PositionwiseFeedForward,
-     conv1D: Conv1D<Float>,
+    conv1D: Conv1D<Float>,
     sublayers: [SublayerConnection]
     
     public init(size: Int, selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, dropoutProb: Double, conv1D: Conv1D<Float>
@@ -52,8 +52,8 @@ public struct TransformerDecoderLayer: Layer {
         self.selfAttention = selfAttention
         self.sourceAttention = sourceAttention
         self.feedForward = feedForward
-         self.conv1D = conv1D
-        self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 4)
+        self.conv1D = conv1D
+        self.sublayers = [SublayerConnection](repeating: .init(size: size, droputProb: dropoutProb), count: 4) //3 or 4
     }
 
     public init(selfAttention: MultiHeadAttention, sourceAttention: MultiHeadAttention, feedForward: PositionwiseFeedForward, sublayers: [SublayerConnection], conv1D: Conv1D<Float>
@@ -61,7 +61,7 @@ public struct TransformerDecoderLayer: Layer {
         self.selfAttention = selfAttention
         self.sourceAttention = sourceAttention
         self.feedForward = feedForward
-         self.conv1D = conv1D
+        self.conv1D = conv1D
         self.sublayers = sublayers
     }
 
@@ -102,7 +102,11 @@ public struct TransformerDecoderLayer: Layer {
             selfNoDerivative.feedForward(result)
         }))
         // pass through conv1d
-         output = self.sublayers[3].decoderForward(.init(sequence: output, decoderContext: input, activation: {(result, _) in
+        //let kernel_size = 3
+        let pad_after = 0//(kernel_size-1)/2
+        let output_shifted = output.padded(forSizes: [(before: 0, after: 0), (before: 0, after: pad_after), (before: 0, after: 0)])[0..., pad_after..., 0...]
+        //print("output_shifted: \(output_shifted[0])")
+         output = self.sublayers[3].decoderForward(.init(sequence: output_shifted, decoderContext: input, activation: {(result, _) in
              selfNoDerivative.conv1D(result)
          }))
 

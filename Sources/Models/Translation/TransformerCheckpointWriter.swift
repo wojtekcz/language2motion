@@ -102,6 +102,16 @@ extension TransformerDecoderLayer: ExportableLayer {
             "sourceAttention": "sourceAttention",
             "feedForward": "feedForward",
             "sublayers": "sublayers",
+            "conv1D": "conv1D",
+        ]
+    }
+}
+
+extension Conv1D: ExportableLayer {
+    public var nameMappings: [String: String] {
+        [
+            "filter": "filter",
+            "bias": "bias",
         ]
     }
 }

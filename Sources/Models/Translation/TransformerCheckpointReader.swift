@@ -154,6 +154,20 @@ extension Encoder {
     }
 }
 
+extension Conv1D {
+    public init(reader: CheckpointReader, scope: String,
+                useBias: Bool = true,
+                activation: @escaping Activation,
+                stride: Int = 1,
+                padding: Padding = .valid,
+                dilation: Int = 1
+    ) {
+        let filter: Tensor<Scalar> = reader.readTensor(name: scope + "/filter")
+        let bias: Tensor<Scalar>? = useBias ? reader.readTensor(name: scope + "/bias") : nil
+        self.init(filter: filter, bias: bias, activation: activation, stride: stride, padding: padding, dilation: dilation)
+    }
+}
+
 extension TransformerDecoderLayer {
     public init(reader: CheckpointReader, config: ModelConfig, scope: String, activation: @escaping Activation<Float>) {
         let selfAttConfig = AttentionConfig(
@@ -177,9 +191,8 @@ extension TransformerDecoderLayer {
         let _selfAttention = MultiHeadAttention(reader: reader, config: selfAttConfig, scope: scope + "/selfAttention")
         let _sourceAttention = MultiHeadAttention(reader: reader, config: sourceAttConfig, scope: scope + "/sourceAttention")
         let _feedForward = PositionwiseFeedForward(reader: reader, config: config, scope: scope + "/feedForward", activation: activation)
-         let kernel_size = 3
-         let _conv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: activation)
-        let _sublayers = (0..<4).map { i in
+        let _conv1D = Conv1D<Float>(reader: reader, scope: scope + "/conv1D", activation: activation, stride: 1, padding: .same)
+        let _sublayers = (0..<4).map { i in //3 or 4
             SublayerConnection(reader: reader, config: config, scope: scope + "/sublayers/SublayerConnection_h\(i)")
         }
         self.init(
@@ -187,7 +200,7 @@ extension TransformerDecoderLayer {
             sourceAttention: _sourceAttention,
             feedForward: _feedForward,
             sublayers: _sublayers,
-             conv1D: _conv1D
+            conv1D: _conv1D
         )
     }
 }
