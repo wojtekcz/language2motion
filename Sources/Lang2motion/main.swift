@@ -17,7 +17,7 @@ let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_175" //_maxSamples\(maxSamplesStr)"
+let runName = "run_176" //_maxSamples\(maxSamplesStr)"
 let batchSize = 80
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
