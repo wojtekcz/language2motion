@@ -102,8 +102,8 @@ public struct TransformerDecoderLayer: Layer {
             selfNoDerivative.feedForward(result)
         }))
         // pass through conv1d
-        //let kernel_size = 3
-        let pad_after = 1//(kernel_size-1)/2
+        //let kernel_size = 1
+        let pad_after = 0//(kernel_size-1)/2
         let output_shifted = output.padded(forSizes: [(before: 0, after: 0), (before: 0, after: pad_after), (before: 0, after: 0)])[0..., pad_after..., 0...]
         //print("output_shifted: \(output_shifted[0])")
          output = self.sublayers[3].decoderForward(.init(sequence: output_shifted, decoderContext: input, activation: {(result, _) in

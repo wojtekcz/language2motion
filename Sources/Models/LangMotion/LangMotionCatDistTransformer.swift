@@ -116,7 +116,7 @@ public struct LangMotionCatDistTransformer: Module {
                                                      innerLayerDimensionality: config.feedForwardSize, activation: config.activation)
         
         // TODO: parametrize kernel_size
-        let kernel_size = 3
+        let kernel_size = 1
         let decConv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: config.activation, useBias: true)
 
         self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability, conv1D: decConv1D
