@@ -38,7 +38,7 @@ public class MotionGenerationManager {
 
         let datasetSize: DatasetSize = .small_micro1
         let batchSize = 2
-        let maxMotionLength = 45
+        let maxMotionLength = 75
 
         let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
         
@@ -160,13 +160,13 @@ public class MotionGenerationManager {
             activation: swish
         )
         
-        let runName = "run_170"
+        let runName = "run_171"
         let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
         let checkpointURL = runURL.appendingPathComponent("checkpoints", isDirectory: true)
         motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
 
-        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e6")
+        let model = try! LangMotionCatDistTransformer(checkpoint: checkpointURL, config: config, name: "model.e2")
         return model
     }
 
