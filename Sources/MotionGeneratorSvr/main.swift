@@ -1,25 +1,11 @@
 import Foundation
+import MotionGenerator
 
 print("MotionGenerator")
 
 let motionGenerationManager = MotionGenerationManager()
 motionGenerationManager.loadDataset()
 motionGenerationManager.loadModel()
-
-public struct GenOpts {
-    let nSamples: Int
-    let bestLogProbs: Bool
-    let fixRotation: Bool
-    let saveMMM: Bool
-    
-    let encoderSelfAttentionTemp: Float
-    let decoderSourceAttentionTemp: Float
-    let decoderSelfAttentionTemp: Float
-    
-    let maxMotionLength: Int
-
-    let sentence: String
-}
 
 func generateMotion() {
     let bestLogProbs = true

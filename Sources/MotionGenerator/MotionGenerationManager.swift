@@ -17,6 +17,33 @@ let plt = Python.import("matplotlib.pyplot")
 
 let maxTextSequenceLength =  40
 
+public struct GenOpts {
+    
+    public let nSamples: Int
+    public let bestLogProbs: Bool
+    public let fixRotation: Bool
+    public let saveMMM: Bool
+    
+    public let encoderSelfAttentionTemp: Float
+    public let decoderSourceAttentionTemp: Float
+    public let decoderSelfAttentionTemp: Float
+    
+    public let maxMotionLength: Int
+
+    public let sentence: String
+    
+    public init(nSamples: Int, bestLogProbs: Bool, fixRotation: Bool, saveMMM: Bool, encoderSelfAttentionTemp: Float, decoderSourceAttentionTemp: Float, decoderSelfAttentionTemp: Float, maxMotionLength: Int, sentence: String) {
+        self.nSamples = nSamples
+        self.bestLogProbs = bestLogProbs
+        self.fixRotation = fixRotation
+        self.saveMMM = saveMMM
+        self.encoderSelfAttentionTemp = encoderSelfAttentionTemp
+        self.decoderSourceAttentionTemp = decoderSourceAttentionTemp
+        self.decoderSelfAttentionTemp = decoderSelfAttentionTemp
+        self.maxMotionLength = maxMotionLength
+        self.sentence = sentence
+    }
+}
 
 public class MotionGenerationManager {
     var dataset: Lang2Motion?
@@ -31,7 +58,11 @@ public class MotionGenerationManager {
 
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
 
-    func loadDataset() {
+    public init() {
+        
+    }
+    
+    public func loadDataset() {
         let device = Device.defaultTFEager
                 
         let maxSamples: Int? = nil
@@ -71,7 +102,7 @@ public class MotionGenerationManager {
         print("Dataset acquired.")
     }
 
-    func loadModel() {
+    public func loadModel() {
 //        /// Load model checkpoint
 //        // colab training
 ////        let runName = "run_86"
@@ -170,7 +201,7 @@ public class MotionGenerationManager {
         return model
     }
 
-    func generateMotion(genOpts: GenOpts) -> Tensor<Float> {
+    public func generateMotion(genOpts: GenOpts) -> Tensor<Float> {
 //        print("generateMotion()")
         let lf: SampleMotionClip? = nil
 

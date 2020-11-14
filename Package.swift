@@ -19,6 +19,7 @@ let package = Package(
         .library(name: "SummaryWriter", targets: ["SummaryWriter"]),
         .library(name: "TranslationModels", targets: ["TranslationModels"]),
         .library(name: "TrainingLoop", targets: ["TrainingLoop"]),
+        .library(name: "MotionGenerator", targets: ["MotionGenerator"]),
         .executable(name: "PreprocessMotionDataset", targets: ["PreprocessMotionDataset"]),
         .executable(name: "Motion2lang", targets: ["Motion2lang"]),
         .executable(name: "Lang2motion", targets: ["Lang2motion"]),
@@ -59,8 +60,12 @@ let package = Package(
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "TrainingLoop"],
             path: "Sources/Lang2motionSet"),
         .target(
-            name: "MotionGeneratorSvr",
+            name: "MotionGenerator",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels"],
+            path: "Sources/MotionGenerator"),
+        .target(
+            name: "MotionGeneratorSvr",
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "MotionGenerator"],
             path: "Sources/MotionGeneratorSvr"),
     ]
 )
