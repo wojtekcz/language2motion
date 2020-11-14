@@ -11,18 +11,19 @@ import SummaryWriter
 import LangMotionModels
 import TrainingLoop
 import x10_optimizers_optimizer
+import MotionGenerator
 
 /// Set training params
 let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_176" //_maxSamples\(maxSamplesStr)"
-let batchSize = 80
+let runName = "run_177" //_maxSamples\(maxSamplesStr)"
+let batchSize = 2
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
-let nEpochs = 100
-let multiplyFactor = 54
+let nEpochs = 5
+let multiplyFactor = 15
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.0
 let fixedPeekLR: Bool = true
@@ -32,7 +33,7 @@ let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
 
-let datasetSize: DatasetSize = .micro
+let datasetSize: DatasetSize = .small_micro1
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
@@ -49,7 +50,8 @@ print("datasetSize: \(datasetSize)")
 #endif
 let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
 
-let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
+let logdir = "runs/Lang2motion/"
+let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
 let rundirURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
 let checkpointURL = rundirURL.appendingPathComponent("checkpoints", isDirectory: true)
 
@@ -140,6 +142,31 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
     }
 }
 
+let mgMgr = MotionGenerationManager(dataset: dataset, textProcessor: textProcessor, discretizer: discretizer, logdir: logdir, runName: runName)
+
+func generateMotion(sentence: String, prefix: String, model: LangMotionCatDistTransformer) {
+    let bestLogProbs = true
+    let fixRotation = true
+    let saveMMM = true
+    let maxMotionLength = 50
+
+    let opts = GenOpts(nSamples: 10, bestLogProbs: bestLogProbs, fixRotation: fixRotation, saveMMM: saveMMM, encoderSelfAttentionTemp: 1.0, decoderSourceAttentionTemp: 1.0, decoderSelfAttentionTemp: 1.0, maxMotionLength: maxMotionLength, sentence: sentence)
+    
+    let _ = mgMgr.generateMotion(genOpts: opts, prefix: prefix, model: model)
+}
+
+public func generateMotions<L: TrainingLoopProtocol>(_ loop: inout L, event: TrainingLoopEvent, model: LangMotionCatDistTransformer) throws {
+    if event == .epochEnd {
+        guard let epochIndex = loop.epochIndex else {
+            return
+        }
+        let prefix = "model.e\(epochIndex+1)"
+        print("generateMotions() for \"\(prefix)\"")
+        // TODO: setup multiple input sentences
+        generateMotion(sentence: "A person is walking forwards.", prefix: prefix, model: model)
+    }
+}
+
 // Training loop
 
 var optimizerOpts = OptimizerOpts(
@@ -165,7 +192,7 @@ var trainingLoop = TrainingLoop(
     validation: dataset.testBatches,
     optimizer: optimizerWrapper.optimizer,
     lossFunction: embeddedCategoryDistributionSurrogateLoss,
-    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, saveCheckpoint]
+    callbacks: [trainingProgress.update, statsRecorder.writeStats, optimizerWrapper.learningRateUpdater, generateMotions, saveCheckpoint]
 )
 
 try! trainingLoop.fit(&model, epochs: nEpochs, on: device)

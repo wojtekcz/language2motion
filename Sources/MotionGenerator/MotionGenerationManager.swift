@@ -59,9 +59,19 @@ public class MotionGenerationManager {
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
 
     public init() {
-        
     }
-    
+
+    public init(dataset: Lang2Motion, textProcessor: TextProcessor, discretizer: MotionDiscretizer, logdir: String, runName: String) {
+        self.dataset = dataset
+        self.textProcessor = textProcessor
+        self.discretizer = discretizer
+        
+        let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
+        let runURL = logdirURL.appendingPathComponent(runName, isDirectory: true)
+        motionsURL = runURL.appendingPathComponent("generated_motions_app", isDirectory: true)
+        try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
+    }
+
     public func loadDataset(datasetSize: DatasetSize, maxSamples: Int? = nil, maxMotionLength: Int = 75) {
         let device = Device.defaultTFEager
         let batchSize = 2
@@ -95,7 +105,7 @@ public class MotionGenerationManager {
 
         print("Dataset acquired.")
     }
-
+    
     public func loadModel(logdir: String, runName: String, modelName: String) {
         let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
         model = getModel5(vocabSize: vocabulary!.count, logdirURL: logdirURL, runName: runName, modelName: modelName)
@@ -155,14 +165,16 @@ public class MotionGenerationManager {
         return model
     }
 
-    public func generateMotion(genOpts: GenOpts, prefix: String = "temp_motion") -> Tensor<Float> {
+    public func generateMotion(genOpts: GenOpts, prefix: String = "temp_motion", model: LangMotionCatDistTransformer?) -> Tensor<Float> {
 //        print("generateMotion()")
         let lf: SampleMotionClip? = nil
 
 //        let prefix = "epoch_\(epoch)_motion_\(genNum)"
 //        let prefix = "temp_motion"
         
-        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: model!, discretizer: discretizer!, leadingFrames: lf,
+        let usedModel = model ?? self.model!
+        
+        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: usedModel, discretizer: discretizer!, leadingFrames: lf,
             prefix: prefix, memoryMultiplier: 1.0, motionsURL: motionsURL!, showAttentionProbs: false, genOpts: genOpts)
         
         genNum += 1

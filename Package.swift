@@ -53,7 +53,7 @@ let package = Package(
             path: "Sources/Motion2lang"),
         .target(
             name: "Lang2motion",
-            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "TrainingLoop"],
+            dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "TrainingLoop", "MotionGenerator"],
             path: "Sources/Lang2motion"),
         .target(
             name: "Lang2motionSet",
