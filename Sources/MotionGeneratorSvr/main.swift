@@ -3,9 +3,9 @@ import MotionGenerator
 
 print("MotionGenerator")
 
-let motionGenerationManager = MotionGenerationManager()
-motionGenerationManager.loadDataset()
-motionGenerationManager.loadModel()
+let mgMgr = MotionGenerationManager()
+mgMgr.loadDataset(datasetSize: .micro, maxSamples: nil, maxMotionLength: 75)
+mgMgr.loadModel(logdir: "runs/Lang2motion/", runName: "run_176", modelName: "model.e3")
 
 func generateMotion() {
     let bestLogProbs = true
@@ -16,8 +16,7 @@ func generateMotion() {
 
     let opts = GenOpts(nSamples: 10, bestLogProbs: bestLogProbs, fixRotation: fixRotation, saveMMM: saveMMM, encoderSelfAttentionTemp: 1.0, decoderSourceAttentionTemp: 1.0, decoderSelfAttentionTemp: 1.0, maxMotionLength: maxMotionLength, sentence: sentence)
     
-    let _ = motionGenerationManager.generateMotion(genOpts: opts)
-//    motionCGImage = tensor.toCGImage()
+    let _ = mgMgr.generateMotion(genOpts: opts, prefix: "temp_motion")
 }
 
 generateMotion()

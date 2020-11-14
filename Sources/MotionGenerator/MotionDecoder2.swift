@@ -176,12 +176,12 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
     let joined = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: genOpts.maxMotionLength, descr: "\(genOpts.sentence), LF: \(leadingFramesStr)", cmapRange: 1.0)
 
     if genOpts.saveMMM {
-        // print("Saved image: \(imageURL!.path)")
+        print("Saved image: \(imageURL!.path)")
         let jointNames = dataset.motionSamples[0].jointNames
         let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
         let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
         try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-        // print("Saved motion: \(mmmURL.path)")
+        print("Saved motion: \(mmmURL.path)")
     }
     return joined
 }
