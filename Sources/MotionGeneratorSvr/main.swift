@@ -16,7 +16,7 @@ func generateMotion() {
 
     let opts = GenOpts(nSamples: 10, bestLogProbs: bestLogProbs, fixRotation: fixRotation, saveMMM: saveMMM, encoderSelfAttentionTemp: 1.0, decoderSourceAttentionTemp: 1.0, decoderSelfAttentionTemp: 1.0, maxMotionLength: maxMotionLength, sentence: sentence)
     
-    let _ = mgMgr.generateMotion(genOpts: opts, prefix: "temp_motion")
+    let _ = mgMgr.generateMotion(genOpts: opts, prefix: "temp_motion", model: nil)
 }
 
 generateMotion()
