@@ -142,13 +142,30 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
     }
 }
 
+//let samplesToDecode: [[String:Any]] = [
+//   ["sampleID": 449, "text": "A person runs forward."],
+//   ["sampleID": 3921, "text": "A human is swimming."],
+//   ["sampleID": 843, "text": "A person walks."],
+//   ["sampleID": 1426, "text": "A person plays the air guitar."],
+//   ["sampleID": 1292, "text": "A person performs a squat."],
+//   ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
+//]
+
+// micro dataset
 let samplesToDecode: [[String:Any]] = [
-   ["sampleID": 449, "text": "A person runs forward."],
-   ["sampleID": 3921, "text": "A human is swimming."],
-   ["sampleID": 843, "text": "A person walks."],
-   ["sampleID": 1426, "text": "A person plays the air guitar."],
-   ["sampleID": 1292, "text": "A person performs a squat."],
-   ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
+    ["sampleID": 1886, "text": "A human is being pushed."],
+    ["sampleID": 106, "text": "A person walks forwards."],
+    ["sampleID": 1364, "text": "A person hits something."],
+    ["sampleID": 1379, "text": "A person waves with the right hand."],
+    ["sampleID": 1425, "text": "A person plays the guitar."],
+    ["sampleID": 2001, "text": "A person turns 180 degrees on his left foot."],
+    ["sampleID": 576, "text": "A person walks and turns left"],
+    ["sampleID": 1034, "text": "A person is walking forward"],
+    ["sampleID": 2083, "text": "A person goes down to his knees."],
+    ["sampleID": 738, "text": "A person walking a left curve"],
+    ["sampleID": 1291, "text": "Somone is raising his fists in front of his upper body and doing a low kick with his left foot."],
+    ["sampleID": 2114, "text": "Someone is kneeling down."],
+    ["sampleID": 67, "text": "A human walks in a counter-clockwise circle."]
 ]
 
 let mgMgr = MotionGenerationManager(dataset: dataset, textProcessor: textProcessor, discretizer: discretizer, logdir: logdir, runName: runName)
