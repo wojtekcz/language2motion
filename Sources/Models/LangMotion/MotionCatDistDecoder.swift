@@ -34,14 +34,14 @@ public class MotionCatDistDecoder {
     
     public func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, startMotion: Tensor<Float>?, maxMotionLength: Int) -> (motion: Tensor<Float>, done: Tensor<Int32>)
     {
-        print("\nEncode:")
-        print("======")
+        // print("\nEncode:")
+        // print("======")
         let encoded = transformer.encode(input: sentence)
         let memory = encoded.lastLayerOutput
-        print("  memory.count: \(memory.shape)")
+        // print("  memory.count: \(memory.shape)")
 
-        print("\nGenerate:")
-        print("=========")
+        // print("\nGenerate:")
+        // print("=========")
 
         // TODO: kill ys
         // TODO: gather discretized neutral motion frame
@@ -52,7 +52,7 @@ public class MotionCatDistDecoder {
         if startMotion != nil {
             ys = Tensor<Float>(concatenating: [neutralMotionFrame, startMotion!.expandingShape(at:0)], alongAxis: 1)
         }
-        print("ys.shape: \(ys.shape)")
+        // print("ys.shape: \(ys.shape)")
         var discrete_ys = discretizer.transform(ys)
         
         var dones: [Tensor<Int32>] = []
@@ -61,7 +61,7 @@ public class MotionCatDistDecoder {
 
         for _ in 0..<maxMotionLength2 {
             //print("frame: \(f)")
-            print(".", terminator:"")
+            // print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
