@@ -65,12 +65,14 @@ public class MotionCatDistDecoder {
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
-            var segmentIDs = Tensor<Int32>(repeating: LangMotionBatch.MotionSegment.motion.rawValue, shape: [1, ys.shape[1]]).expandingShape(at: 2)
-            segmentIDs[0, 0, 0] = Tensor<Int32>(LangMotionBatch.MotionSegment.start.rawValue)
+
+            // FIXME: woarkaround, can't assign to tensor int32 element
+            var segmentIDs = Tensor<Float>(repeating: Float(LangMotionBatch.MotionSegment.motion.rawValue), shape: [1, ys.shape[1], 1])//.expandingShape(at: 2)
+            segmentIDs[0, 0, 0] = Tensor<Float>(Float(LangMotionBatch.MotionSegment.start.rawValue))
 
             
             let motionPart = LangMotionBatch.MotionPart(discreteMotion: discrete_ys, decSelfAttentionMask: motionPartMask,
-                                                        motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: segmentIDs)
+                                                        motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: Tensor<Int32>(segmentIDs))
 
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             // decode motion
