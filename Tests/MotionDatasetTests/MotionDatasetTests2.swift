@@ -21,7 +21,7 @@ class MotionDatasetTests2: XCTestCase {
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
     #endif
 
-    func loadData(datasetSize: DatasetSize = .full, minMotionLength: Int = 20, maxMotionLength: Int = 150) {
+    func loadData(datasetSize: DatasetSize = .full, minMotionLength: Int = 20, maxMotionLength: Int = 150) -> Lang2Motion {
         /// load dataset
         print("\nLoading dataset...")
 
@@ -51,6 +51,8 @@ class MotionDatasetTests2: XCTestCase {
             let singleBatch = LangMotionBatch(data: source, label: target)
             return singleBatch
         }
+        
+        return dataset!
     }
 
     func testCreateSameDataset() throws {
@@ -198,5 +200,15 @@ class MotionDatasetTests2: XCTestCase {
         mainMotionSamples = getMainMotionSamples(allSampleIDs: allSampleIDs, allMotionSamples: allMotionSamples)
         print("small_midi.unique: \(mainMotionSamples.count)")
         writeDataset(datasetSize: .small_midi, motionSamples: mainMotionSamples)
+    }
+    
+    func testLookIntoDataset() throws {
+        print("Ala ma kota")
+        let dataset = loadData(datasetSize: .micro, minMotionLength: 10, maxMotionLength: 75)
+        print("dataset.motionSamples.count: \(dataset.motionSamples.count)")
+        
+        for (idx, ms) in dataset.motionSamples.enumerated() {
+            print("\(idx)\t\(ms.sampleID)\t\(ms.annotations[0])")
+        }
     }
 }
