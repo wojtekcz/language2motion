@@ -142,6 +142,15 @@ public func saveCheckpoint<L: TrainingLoopProtocol>(_ loop: inout L, event: Trai
     }
 }
 
+let samplesToDecode: [[String:Any]] = [
+   ["sampleID": 449, "text": "A person runs forward."],
+   ["sampleID": 3921, "text": "A human is swimming."],
+   ["sampleID": 843, "text": "A person walks."],
+   ["sampleID": 1426, "text": "A person plays the air guitar."],
+   ["sampleID": 1292, "text": "A person performs a squat."],
+   ["sampleID": 1315, "text": "A human raises their left foot and touches it with the right hand."]
+]
+
 let mgMgr = MotionGenerationManager(dataset: dataset, textProcessor: textProcessor, discretizer: discretizer, logdir: logdir, runName: runName)
 
 func generateMotion(sentence: String, prefix: String, model: LangMotionCatDistTransformer) {
@@ -162,8 +171,14 @@ public func generateMotions<L: TrainingLoopProtocol>(_ loop: inout L, event: Tra
         }
         let prefix = "model.e\(epochIndex+1)"
         print("generateMotions() for \"\(prefix)\"")
-        // TODO: setup multiple input sentences
-        generateMotion(sentence: "A person is walking forwards.", prefix: prefix, model: model)
+
+        Context.local.learningPhase = .inference
+        var _model = model
+        _model.move(to: Device.defaultTFEager)
+        for sample in samplesToDecode {
+            generateMotion(sentence: sample["text"] as! String, prefix: "\(prefix).\(sample["sampleID"]!)", model: _model)
+        }
+        _model.move(to: device)
     }
 }
 
