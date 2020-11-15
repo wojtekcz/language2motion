@@ -56,7 +56,11 @@ public class MotionGenerationManager {
     var motionsURL: URL?
     var genNum = 1
 
+#if os(macOS)
     let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
+#else
+    let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
+#endif
 
     public init() {
     }
@@ -193,7 +197,8 @@ func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
 //    let descaledMotion = motion
     let jointNames = dataset.motionSamples[0].jointNames
     let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
-    try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+    // try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+    try! mmmXMLDoc.xmlData().write(to: mmmURL)
 //    print("Saved motion: \(mmmURL.path)")
 }
 
