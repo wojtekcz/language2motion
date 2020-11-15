@@ -49,5 +49,6 @@ public func motionToImg(url: URL?, motion: Tensor<Float>, motionFlag: Tensor<Int
         plt.savefig(url!.path)
     }
 //    plt.show()
+    plt.close()
     return joined
 }
