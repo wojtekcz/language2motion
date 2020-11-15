@@ -180,7 +180,8 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         let jointNames = dataset.motionSamples[0].jointNames
         let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
         let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
-        try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+        // try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+        try! mmmXMLDoc.xmlData().write(to: mmmURL)
         print("Saved motion: \(mmmURL.path)")
     }
     return joined
