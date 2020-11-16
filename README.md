@@ -10,29 +10,11 @@ The Motion2Language Transformer which works is there, already. Lang2motion one s
 
 I'm using modified [Swift Transformer implementation](https://github.com/acarrera94/swift-models/tree/translation/Models/Translation) by Andre Carrera.
 
-## The plan
-- something 2 label
-  - image 2 label
-    - [x] build image2label dataset with images representing motions
-    - [x] assign 5 dummy(ish) classes with PCA and k-means on motion annotations
-    - [x] classify motion images (+in fastai, +in swift)
-  - language 2 label
-    - [x] Transformer encoder on annotation + classifier
-    - [x] batched prediction
-    - [x] Use BERT classifier to assign better labels - didn't work
-    - [x] manually assign better labels
-  - motion 2 label
-    - [x] 1-channel ResNet on motion + classifier
-    - [x] ResNet feature extractor + Transformer encoder on motion features + classifier - didn't work
-    - [x] Transformer encoder on motion + classifier
-- language 2 language
-    - [x] Transformer seq2seq from annotation to label text
-    - [x] Transformer seq2seq from annotation to (same) annotation
+## Models
 - motion 2 language
   - [x] Transformer from motion to annotation
 - language 2 motion
-  - [x] Transformer encoder on annotation
-  - [x] Transformer decoder on motion
+  - [x] Transformer from annotation to motion
 
 ## Dataset files
 * original: [2017-06-22.zip](https://motion-annotation.humanoids.kit.edu/downloads/4/)

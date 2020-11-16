@@ -68,17 +68,18 @@ public struct MotionLangTransformer: Module {
                                            matrixResult: false)
 
         let encFeedForward = PositionwiseFeedForward(dimensionalityModel: config.encoderDepth,
-                                                     innerLayerDimensionality: config.feedForwardSize)
+                                                     innerLayerDimensionality: config.feedForwardSize, activation: relu)
 
         let decFeedForward = PositionwiseFeedForward(dimensionalityModel: config.decoderDepth,
-                                                  innerLayerDimensionality: config.feedForwardSize)
+                                                  innerLayerDimensionality: config.feedForwardSize, activation: relu)
 
         self.embedding = Embedding(vocabularySize: config.vocabSize, embeddingSize: config.decoderDepth, embeddingsInitializer: glorotUniform())
         self.positionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
         self.motionPositionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
         
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
-        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount, derivativeAllLayers: false)
+        let conv1D = Conv1D<Float>(filter: [1, 1, 1])
+        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability, conv1D: conv1D), layerCount: config.layerCount, derivativeAllLayers: false)
         self.motionNorm = LayerNorm(featureCount: config.encoderDepth, axis: 2)
         self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.encoderDepth)
         self.generator = Generator(dimModel: config.decoderDepth, vocabSize: config.vocabSize)

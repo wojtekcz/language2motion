@@ -13,7 +13,8 @@ extension MotionCatDistHead {
             nbJoints: config.nbJoints,
             discreteBins: config.discreteBins,
             catDistWeights: Dense<Float>(reader: reader, config: config, scope: scope + "/catDistWeights"),
-            linearStop: Dense<Float>(reader: reader, config: config, scope: scope + "/linearStop")
+            linearStop: Dense<Float>(reader: reader, config: config, scope: scope + "/linearStop"),
+            norm: LayerNorm<Float>(reader: reader, config: config, scope: scope + "/norm", axis: 2, epsilon: 0.001)
         )
     }
 }

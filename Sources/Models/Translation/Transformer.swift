@@ -30,8 +30,8 @@ public struct TransformerModel: Module {
                                                     dropoutProbability: dropoutProbability)
         
         self.encoder = Encoder(layer: .init(size: modelSize, selfAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability), layerCount: layerCount)
-        // let conv1D = Conv1D<Float>(filterShape: (1, 1, 1))
-        self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability//, conv1D: conv1D
+        let conv1D = Conv1D<Float>(filterShape: (1, 1, 1))
+        self.decoder = Decoder(layer: .init(size: modelSize, selfAttention: attention, sourceAttention: attention, feedForward: feedForward, dropoutProb: dropoutProbability, conv1D: conv1D
         ), layerCount: layerCount, derivativeAllLayers: false)
         self.sourceEmbed = Sequential(Embedding(vocabularySize: sourceVocabSize, embeddingSize: modelSize, embeddingsInitializer: glorotUniform()), positionalEncoding)
         self.targetEmbed = Sequential(Embedding(vocabularySize: targetVocabSize, embeddingSize: modelSize,embeddingsInitializer: glorotUniform()), positionalEncoding)

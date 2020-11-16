@@ -2,6 +2,26 @@ import TensorFlow
 import PythonKit
 import Datasets
 
+let np  = Python.import("numpy")
+
+public func randomNumber(probabilities: [Double]) -> Int {
+    // https://stackoverflow.com/questions/30309556/generate-random-numbers-with-a-given-distribution
+    // Sum of all probabilities (so that we don't have to require that the sum is 1.0):
+    let sum = probabilities.reduce(0, +)
+    // Random number in the range 0.0 <= rnd < sum :
+    let rnd = Double.random(in: 0.0 ..< sum)
+    // Find the first interval of accumulated probabilities into which `rnd` falls:
+    var accum = 0.0
+    for (i, p) in probabilities.enumerated() {
+        accum += p
+        if rnd < accum {
+            return i
+        }
+    }
+    // This point might be reached due to floating point inaccuracies:
+    return (probabilities.count - 1)
+}
+
 public class MotionCatDistDecoder {
     
     let discretizer: MotionDiscretizer
@@ -14,16 +34,17 @@ public class MotionCatDistDecoder {
     
     public func greedyDecodeMotion(sentence: LangMotionBatch.Sentence, startMotion: Tensor<Float>?, maxMotionLength: Int) -> (motion: Tensor<Float>, done: Tensor<Int32>)
     {
-        print("\nEncode:")
-        print("======")
+        // print("\nEncode:")
+        // print("======")
         let encoded = transformer.encode(input: sentence)
         let memory = encoded.lastLayerOutput
-        print("  memory.count: \(memory.shape)")
+        // print("  memory.count: \(memory.shape)")
 
-        print("\nGenerate:")
-        print("=========")
+        // print("\nGenerate:")
+        // print("=========")
 
         // TODO: kill ys
+        // TODO: gather discretized neutral motion frame
         // start with tensor for neutral motion frame
         let neutralMotionFrame = LangMotionBatch.neutralMotionFrame().expandingShape(at: 0)
         var ys: Tensor<Float> = neutralMotionFrame
@@ -31,7 +52,7 @@ public class MotionCatDistDecoder {
         if startMotion != nil {
             ys = Tensor<Float>(concatenating: [neutralMotionFrame, startMotion!.expandingShape(at:0)], alongAxis: 1)
         }
-        print("ys.shape: \(ys.shape)")
+        // print("ys.shape: \(ys.shape)")
         var discrete_ys = discretizer.transform(ys)
         
         var dones: [Tensor<Int32>] = []
@@ -40,16 +61,18 @@ public class MotionCatDistDecoder {
 
         for _ in 0..<maxMotionLength2 {
             //print("frame: \(f)")
-            print(".", terminator:"")
+            // print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
             let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
-            var segmentIDs = Tensor<Int32>(repeating: LangMotionBatch.MotionSegment.motion.rawValue, shape: [1, ys.shape[1]]).expandingShape(at: 2)
-            segmentIDs[0, 0, 0] = Tensor<Int32>(LangMotionBatch.MotionSegment.start.rawValue)
+
+            // FIXME: woarkaround, can't assign to tensor int32 element
+            var segmentIDs = Tensor<Float>(repeating: Float(LangMotionBatch.MotionSegment.motion.rawValue), shape: [1, ys.shape[1], 1])//.expandingShape(at: 2)
+            segmentIDs[0, 0, 0] = Tensor<Float>(Float(LangMotionBatch.MotionSegment.start.rawValue))
 
             
-            let motionPart = LangMotionBatch.MotionPart(motion: ys, discreteMotion: discrete_ys, decSelfAttentionMask: motionPartMask,
-                                                        motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: segmentIDs)
+            let motionPart = LangMotionBatch.MotionPart(discreteMotion: discrete_ys, decSelfAttentionMask: motionPartMask,
+                                                        motionFlag: motionPartFlag.expandingShape(at: 2), segmentIDs: Tensor<Int32>(segmentIDs))
 
             let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
             // decode motion

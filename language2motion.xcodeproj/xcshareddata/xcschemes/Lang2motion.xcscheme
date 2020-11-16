@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "9999"
+   version = "2.0">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "language2motion::Lang2motion"
+               BuildableName = "Lang2motion"
+               BlueprintName = "Lang2motion"
+               ReferencedContainer = "container:language2motion.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "language2motion::MotionDatasetTests"
+               BuildableName = "MotionDatasetTests.xctest"
+               BlueprintName = "MotionDatasetTests"
+               ReferencedContainer = "container:language2motion.xcodeproj">
+            </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testCatDistHead()">
+               </Test>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testCatDistHeadMotionDecoding()">
+               </Test>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testCatDistHeadMotionGeneration()">
+               </Test>
+               <Test
+                  Identifier = "CategoricalDistributionHeadTests/testMotionDescalingIssue()">
+               </Test>
+               <Test
+                  Identifier = "DiscretizeJointValuesTests">
+               </Test>
+               <Test
+                  Identifier = "ImageCreating">
+               </Test>
+               <Test
+                  Identifier = "LangMotionTransformerTests">
+               </Test>
+               <Test
+                  Identifier = "MotionDatasetTests">
+               </Test>
+               <Test
+                  Identifier = "MotionDatasetTests2">
+               </Test>
+            </SkippedTests>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      disableMainThreadChecker = "YES"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "NO"
+      debugXPCServices = "NO"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "NO"
+      viewDebuggingEnabled = "No"
+      queueDebuggingEnabled = "No"
+      GPUProfilerEnabled = "No">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "language2motion::Lang2motion"
+            BuildableName = "Lang2motion"
+            BlueprintName = "Lang2motion"
+            ReferencedContainer = "container:language2motion.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "PYTHON_LIBRARY"
+            value = "/Users/wcz/opt/anaconda3/envs/bvh/lib/libpython3.8.dylib"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "PYTHON_LIBRARY"
+            value = "/Users/wcz/opt/anaconda3/envs/swift4f/lib/libpython3.8.dylib"
+            isEnabled = "NO">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Release"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>

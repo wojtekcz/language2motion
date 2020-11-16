@@ -87,10 +87,9 @@ public struct LangMotionCatDistTransformer: Module {
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
 
         // decoding motion
-        // TODO: parametrize jointEmbedding: discreteBins, jointEmbeddingSize
-        let discreteBins = 300
+        // TODO: parametrize jointEmbeddingSize
         let jointEmbeddingSize = 5
-        self.jointEmbedding = Embedding<Float>(vocabularySize: discreteBins, embeddingSize: jointEmbeddingSize, embeddingsInitializer: glorotUniform())
+        self.jointEmbedding = Embedding<Float>(vocabularySize: config.discreteBins, embeddingSize: jointEmbeddingSize, embeddingsInitializer: glorotUniform())
         self.motionDense = Dense<Float>(inputSize: config.nbJoints*jointEmbeddingSize, outputSize: config.decoderDepth, activation: config.activation)
 //        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: config.activation)
         self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
@@ -117,10 +116,10 @@ public struct LangMotionCatDistTransformer: Module {
                                                      innerLayerDimensionality: config.feedForwardSize, activation: config.activation)
         
         // TODO: parametrize kernel_size
-        // let kernel_size = 3
-        // let decConv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: config.activation)
+        let kernel_size = 1
+        let decConv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: config.activation, useBias: true)
 
-        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability//, conv1D: decConv1D
+        self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability, conv1D: decConv1D
         ), layerCount: config.layerCount, derivativeAllLayers: true)
 
         // generating motion
@@ -149,7 +148,7 @@ public struct LangMotionCatDistTransformer: Module {
     public func decode(sourceMask: Tensor<Float>, motionPart: LangMotionBatch.MotionPart, memory: Tensor<Float>,
                        decoderSourceAttentionTemp: Float = 1.0, decoderSelfAttentionTemp: Float = 1.0) -> DecoderOutput<Float> {
         // start flag, pos enc, current motion, padding with motion
-        let shape = motionPart.motion.shape
+        let shape = motionPart.discreteMotion.shape
         let (origBatchSize, numFrames, nbJoints) = (shape[0], shape[1], shape[2])
 
         // squeeze all joint values in a batch into first dimension

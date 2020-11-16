@@ -39,15 +39,13 @@ public struct LangMotion {
     }
 
     public struct MotionPart {
-        public var motion: Tensor<Float>               // bs x maxMotionLength x nbJoints
         public var discreteMotion: Tensor<Int32>       // bs x maxMotionLength x nbJoints // mask value needed? padding needed?
 
         public var decSelfAttentionMask: Tensor<Float> // bs x maxMotionLength x maxMotionLength
         public var motionFlag: Tensor<Int32>           // bs x maxMotionLength x 1
         public var segmentIDs: Tensor<Int32>           // bs x maxMotionLength x 1
 
-        public init(motion: Tensor<Float>, discreteMotion: Tensor<Int32>, decSelfAttentionMask: Tensor<Float>, motionFlag: Tensor<Int32>, segmentIDs: Tensor<Int32>) {
-            self.motion = motion
+        public init(discreteMotion: Tensor<Int32>, decSelfAttentionMask: Tensor<Float>, motionFlag: Tensor<Int32>, segmentIDs: Tensor<Int32>) {
             self.discreteMotion = discreteMotion
             
             self.decSelfAttentionMask = decSelfAttentionMask
@@ -59,7 +57,6 @@ public struct LangMotion {
         }
 
         public init(copying motionPart: MotionPart, to device: Device) {
-            motion = Tensor<Float>(copying: motionPart.motion, to: device)
             discreteMotion = Tensor<Int32>(copying: motionPart.discreteMotion, to: device)
 
             decSelfAttentionMask = Tensor<Float>(copying: motionPart.decSelfAttentionMask, to: device)
@@ -68,17 +65,15 @@ public struct LangMotion {
         }
 
         public static func reduceDataBatches(_ batches: [MotionPart]) -> MotionPart {
-            let motionPartTensor: Tensor<Float> = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
             let discreteMotionPartTensor: Tensor<Int32> = Tensor(batches.map{ $0.discreteMotion.squeezingShape(at: 0) })
             let motionPartMask: Tensor<Float> = Tensor(batches.map{ $0.decSelfAttentionMask.squeezingShape(at: 0) })
             let motionPartFlag: Tensor<Int32> = Tensor(batches.map{ $0.motionFlag.squeezingShape(at: 0) })
             let segmentIDs: Tensor<Int32> = Tensor(batches.map{ $0.segmentIDs.squeezingShape(at: 0) })
-            return MotionPart(motion: motionPartTensor, discreteMotion: discreteMotionPartTensor, decSelfAttentionMask: motionPartMask, motionFlag: motionPartFlag, segmentIDs: segmentIDs)
+            return MotionPart(discreteMotion: discreteMotionPartTensor, decSelfAttentionMask: motionPartMask, motionFlag: motionPartFlag, segmentIDs: segmentIDs)
         }
 
         public func printMotionPart() {
             print("motionPart")
-            print("  motion.shape: \(self.motion.shape)")
             print("  discreteMotion.shape: \(self.discreteMotion.shape)")
             print("  decSelfAttentionMask.shape: \(self.decSelfAttentionMask.shape)")
             print("  motionFlag.shape: \(self.motionFlag.shape)")
@@ -124,7 +119,7 @@ public struct LangMotion {
             print("    selfAttentionMask.shape: \(self.sentence.selfAttentionMask.shape)")
             print("    tokenCount: (shape: \(self.sentence.tokenCount.shape), value: \(self.sentence.tokenCount))")
             print("  motionPart")
-            print("    motion.shape: \(self.motionPart.motion.shape)")
+            print("    discreteMotion.shape: \(self.motionPart.discreteMotion.shape)")
             print("    decSelfAttentionMask.shape: \(self.motionPart.decSelfAttentionMask.shape)")
             print("    motionFlag.shape: \(self.motionPart.motionFlag.shape)")
             print("    segmentIDs.shape: \(self.motionPart.segmentIDs.shape)")
@@ -135,17 +130,15 @@ public struct LangMotion {
     public struct Target {
         public let sampleID: Tensor<Int32>        // bs
 
-        public var motion: Tensor<Float>          // bs x maxMotionLength x nbJoints
         public var discreteMotion: Tensor<Int32>  // bs x maxMotionLength x nbJoints // mask value needed? padding needed?
         public var stops: Tensor<Float>           // bs x maxMotionLength
         public var segmentIDs: Tensor<Int32>      // bs x maxMotionLength
 
         public let origMotionFramesCount: Tensor<Int32> // bs
 
-        public init(sampleID: Tensor<Int32>, motion: Tensor<Float>, discreteMotion: Tensor<Int32>, stops: Tensor<Float>, segmentIDs: Tensor<Int32>, origMotionFramesCount: Tensor<Int32>) {
+        public init(sampleID: Tensor<Int32>, discreteMotion: Tensor<Int32>, stops: Tensor<Float>, segmentIDs: Tensor<Int32>, origMotionFramesCount: Tensor<Int32>) {
             self.sampleID = sampleID
 
-            self.motion = motion
             self.discreteMotion = discreteMotion
             self.stops = stops
             self.segmentIDs = segmentIDs
@@ -155,7 +148,6 @@ public struct LangMotion {
         public init(copying target: Target, to device: Device) {
             sampleID = Tensor<Int32>(copying: target.sampleID, to: device)
 
-            motion = Tensor<Float>(copying: target.motion, to: device)
             discreteMotion = Tensor<Int32>(copying: target.discreteMotion, to: device)
             stops = Tensor<Float>(copying: target.stops, to: device)
             segmentIDs = Tensor<Int32>(copying: target.segmentIDs, to: device)
@@ -164,19 +156,17 @@ public struct LangMotion {
 
         public static func reduceDataBatches(_ batches: [Target]) -> Target {
             let sampleID: Tensor<Int32> = Tensor(batches.map{ $0.sampleID.squeezingShape(at: 0) })
-            let motion: Tensor<Float> = Tensor(batches.map{ $0.motion.squeezingShape(at: 0) })
             let discreteMotion: Tensor<Int32> = Tensor(batches.map{ $0.discreteMotion.squeezingShape(at: 0) })
             let stops: Tensor<Float> = Tensor(batches.map{ $0.stops.squeezingShape(at: 0) })
             let segmentIDs: Tensor<Int32> = Tensor(batches.map{ $0.segmentIDs.squeezingShape(at: 0) })
             let origMotionFramesCount: Tensor<Int32> = Tensor(batches.map{ $0.origMotionFramesCount.squeezingShape(at: 0) })
-            return Target(sampleID: sampleID, motion: motion, discreteMotion: discreteMotion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: origMotionFramesCount)
+            return Target(sampleID: sampleID, discreteMotion: discreteMotion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: origMotionFramesCount)
         }
 
         public func printTarget() {
             print("target")
             print("  sampleID: (shape: \(self.sampleID.shape), value: \(self.sampleID))")
 
-            print("  motion.shape: \(self.motion.shape)")
             print("  discreteMotion.shape: \(self.discreteMotion.shape)")
             print("  stops.shape: \(self.stops.shape)")
             print("  segmentIDs.shape: \(self.segmentIDs.shape)")
@@ -282,7 +272,6 @@ extension LangMotionBatch {
         let motionPartMask = Self.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
 
         let motionPart = MotionPart(
-            motion: motionPartTensor.expandingShape(at: 0),
             discreteMotion: discreteMotionPartTensor.expandingShape(at: 0),
             decSelfAttentionMask: motionPartMask,
             motionFlag: motionPartFlag.expandingShape(at: [0, 2]),
@@ -297,7 +286,7 @@ extension LangMotionBatch {
         let targetSegmentIDs = segmentIDs[1...].expandingShape(at: 0)
 
         
-        let target = Target(sampleID: Tensor([Int32(sampleID)]), motion: targetMotion.expandingShape(at: 0), discreteMotion: targetDiscreteMotion.expandingShape(at: 0), stops: targetStops, segmentIDs: targetSegmentIDs, origMotionFramesCount: origMotionFramesCount)
+        let target = Target(sampleID: Tensor([Int32(sampleID)]), discreteMotion: targetDiscreteMotion.expandingShape(at: 0), stops: targetStops, segmentIDs: targetSegmentIDs, origMotionFramesCount: origMotionFramesCount)
         return (motionPart: motionPart, target: target)
     }
 
@@ -325,5 +314,25 @@ extension LangMotionBatch {
         targetMask = targetMask.transposed(permutation: [0, 2, 1])
 
         return Tensor<Float>(targetMask)
+    }
+}
+
+extension LangMotionBatch.Target {
+
+    public func squeezed() -> Self {
+        let sh = self.discreteMotion.shape
+        let (bs, nFrames, nJoints) = (sh[0], sh[1], sh[2])
+        let discreteMotion = self.discreteMotion.reshaped(to: [1, bs*nFrames, nJoints])
+        let stops = self.stops.reshaped(to: [1, bs*nFrames])
+        let segmentIDs = self.segmentIDs.reshaped(to: [1, bs*nFrames])
+        let origMotionFramesCount = self.origMotionFramesCount.sum().expandingShape(at: 0)
+        return Self(sampleID: self.sampleID, discreteMotion: discreteMotion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: origMotionFramesCount)
+    }
+
+    public func gathering(atIndices indices: Tensor<Int32>, alongAxis axis: Int) -> Self {
+        let discreteMotion = self.discreteMotion.gathering(atIndices: indices, alongAxis: axis)
+        let stops = self.stops.gathering(atIndices: indices, alongAxis: axis)
+        let segmentIDs = self.segmentIDs.gathering(atIndices: indices, alongAxis: axis)
+        return Self(sampleID: self.sampleID, discreteMotion: discreteMotion, stops: stops, segmentIDs: segmentIDs, origMotionFramesCount: self.origMotionFramesCount)
     }
 }
