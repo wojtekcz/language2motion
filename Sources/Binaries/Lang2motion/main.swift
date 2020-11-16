@@ -168,7 +168,7 @@ let samplesToDecode: [[String:Any]] = [
     ["sampleID": 67, "text": "A human walks in a counter-clockwise circle."]
 ]
 
-let mgMgr = MotionGenerationManager(dataset: dataset, textProcessor: textProcessor, discretizer: discretizer, logdir: logdir, runName: runName)
+let mgMgr = MotionGenerationManager(scaler: dataset.scaler, jointNames: dataset.motionSamples[0].jointNames, textProcessor: textProcessor, discretizer: discretizer, logdir: logdir, runName: runName)
 
 func generateMotion(sentence: String, prefix: String, model: LangMotionCatDistTransformer) {
     let bestLogProbs = true

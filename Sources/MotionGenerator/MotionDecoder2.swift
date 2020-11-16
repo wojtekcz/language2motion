@@ -136,9 +136,10 @@ public func getClippedMotionFrames(dataset: Lang2Motion, clipInfo: SampleMotionC
     }
 }
 
-public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Motion, model: LangMotionCatDistTransformer, discretizer: MotionDiscretizer, leadingFrames: SampleMotionClip?, prefix: String = "prefix", memoryMultiplier: Float = 0.0, motionsURL: URL?, showAttentionProbs: Bool = true, genOpts: GenOpts) -> Tensor<Float> {
+// TODO: move to a class, move some params to init
+public func greedyDecodeMotion2(textProcessor: TextProcessor, scaler: MinMaxScaler, jointNames: [String], model: LangMotionCatDistTransformer, discretizer: MotionDiscretizer, leadingFrames: SampleMotionClip?, prefix: String = "prefix", memoryMultiplier: Float = 0.0, motionsURL: URL?, showAttentionProbs: Bool = true, genOpts: GenOpts) -> Tensor<Float> {
     // returns motion: descaled groupped joints motion + motion flag tensor
-    let startMotion: Tensor<Float>? = getClippedMotionFrames(dataset: dataset, clipInfo: leadingFrames)
+    let startMotion: Tensor<Float>? = nil //getClippedMotionFrames(dataset: dataset, clipInfo: leadingFrames)
     var leadingFramesStr = "0"
     if startMotion != nil {
         leadingFramesStr = "\(startMotion!.shape[0])"
@@ -161,7 +162,7 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         sentence: processedSentence, startMotion: startMotion, maxMotionLength: 50
     )
     // print("  decodedMotion: min: \(decodedMotion.min()), max: \(decodedMotion.max())")
-    let descaledMotion = dataset.scaler.inverse_transform(decodedMotion)
+    let descaledMotion = scaler.inverse_transform(decodedMotion)
 //    let descaledMotion = decodedMotion
     // print("  descaledMotion.shape: \(descaledMotion.shape)")
     // print("  descaledMotion: min: \(descaledMotion.min()), max: \(descaledMotion.max())")
@@ -172,12 +173,12 @@ public func greedyDecodeMotion2(textProcessor: TextProcessor, dataset: Lang2Moti
         imageURL = motionsURL!.appendingPathComponent("\(prefix).png")
     }
     // use joint groupping
-    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: dataset.motionSamples[0].jointNames)
+    let grouppedJointsMotion = MotionSample.grouppedJoints(motion: descaledMotion, jointNames: jointNames)
     let joined = motionToImg(url: imageURL, motion: grouppedJointsMotion, motionFlag: decodedMotionFlag, padTo: genOpts.maxMotionLength, descr: "\(genOpts.sentence), LF: \(leadingFramesStr)", cmapRange: 1.0)
 
     if genOpts.saveMMM {
         print("Saved image: \(imageURL!.path)")
-        let jointNames = dataset.motionSamples[0].jointNames
+        //let jointNames = dataset.motionSamples[0].jointNames
         let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
         let mmmURL = motionsURL!.appendingPathComponent("\(prefix).mmm.xml")
         // try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)

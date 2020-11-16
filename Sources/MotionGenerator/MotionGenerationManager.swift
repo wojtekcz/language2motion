@@ -46,11 +46,12 @@ public struct GenOpts {
 }
 
 public class MotionGenerationManager {
-    var dataset: Lang2Motion?
     var model: LangMotionCatDistTransformer?
-    var vocabulary: Vocabulary?
-    var textProcessor: TextProcessor?
-    var discretizer: MotionDiscretizer?
+    var vocabSize: Int
+    var textProcessor: TextProcessor
+    var scaler: MinMaxScaler
+    var discretizer: MotionDiscretizer
+    var jointNames: [String]
 
     var epoch = 1
     var motionsURL: URL?
@@ -62,12 +63,11 @@ public class MotionGenerationManager {
     let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
 #endif
 
-    public init() {
-    }
-
-    public init(dataset: Lang2Motion, textProcessor: TextProcessor, discretizer: MotionDiscretizer, logdir: String, runName: String) {
-        self.dataset = dataset
+    public init(scaler: MinMaxScaler, jointNames: [String], textProcessor: TextProcessor, discretizer: MotionDiscretizer, logdir: String, runName: String) {
+        self.scaler = scaler
+        self.jointNames = jointNames
         self.textProcessor = textProcessor
+        self.vocabSize = textProcessor.vocabulary.count
         self.discretizer = discretizer
         
         let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
@@ -76,45 +76,10 @@ public class MotionGenerationManager {
         try! FileManager().createDirectory(at: motionsURL!, withIntermediateDirectories: true)
     }
 
-    public func loadDataset(datasetSize: DatasetSize, maxSamples: Int? = nil, maxMotionLength: Int = 75) {
-        let device = Device.defaultTFEager
-        let batchSize = 2
-        let motionDatasetURL = dataURL.appendingPathComponent("motion_dataset_v3.10Hz.\(datasetSize.rawValue)plist")
-        
-        /// instantiate text processor
-        let vocabularyURL = dataURL.appendingPathComponent("vocab.txt")
-        vocabulary = try! Vocabulary(fromFile: vocabularyURL)
-        let tokenizer: Tokenizer = BERTTokenizer(vocabulary: vocabulary!, caseSensitive: false, unknownToken: "[UNK]", maxTokenLength: nil)
-        textProcessor = TextProcessor(vocabulary: vocabulary!, tokenizer: tokenizer)
-        discretizer = MotionDiscretizer(n_bins: 300)
-        
-        print("\nLoading dataset...")
-
-        dataset = try! Lang2Motion(
-            motionDatasetURL: motionDatasetURL,
-            batchSize: batchSize,
-            minMotionLength: 10,
-            maxMotionLength: maxMotionLength,
-            maxSamples: maxSamples,
-            discretizer: &discretizer!,
-            trainTestSplit: 1.0,
-            device: device
-        ) { (motionSample: MotionSample) -> LangMotionBatch in
-            let sentence = self.textProcessor!.preprocess(sentence: motionSample.annotations[0], maxTextSequenceLength: maxTextSequenceLength)
-            let (motionPart, target) = LangMotionBatch.preprocessTargetMotion(sampleID: motionSample.sampleID, motion: motionSample.motion, maxMotionLength: maxMotionLength, discretizer: self.discretizer!)
-            let source = LangMotionBatch.Source(sentence: sentence, motionPart: motionPart)
-            let singleBatch = LangMotionBatch(data: source,label: target)
-            return singleBatch
-        }
-
-        print("Dataset acquired.")
-    }
-    
     public func loadModel(logdir: String, runName: String, modelName: String) {
         let logdirURL = dataURL.appendingPathComponent(logdir, isDirectory: true)
-        model = getModel5(vocabSize: vocabulary!.count, logdirURL: logdirURL, runName: runName, modelName: modelName)
+        model = getModel5(vocabSize: vocabSize, logdirURL: logdirURL, runName: runName, modelName: modelName)
         print("Loaded.")
-        
     }
 
     public func getModel4(vocabSize: Int, logdirURL: URL) -> LangMotionCatDistTransformer {
@@ -173,12 +138,9 @@ public class MotionGenerationManager {
 //        print("generateMotion()")
         let lf: SampleMotionClip? = nil
 
-//        let prefix = "epoch_\(epoch)_motion_\(genNum)"
-//        let prefix = "temp_motion"
-        
         let usedModel = model ?? self.model!
         
-        let joined = greedyDecodeMotion2(textProcessor: textProcessor!, dataset: dataset!, model: usedModel, discretizer: discretizer!, leadingFrames: lf,
+        let joined = greedyDecodeMotion2(textProcessor: textProcessor, scaler: scaler, jointNames: jointNames, model: usedModel, discretizer: discretizer, leadingFrames: lf,
             prefix: prefix, memoryMultiplier: 1.0, motionsURL: motionsURL!, showAttentionProbs: false, genOpts: genOpts)
         
         genNum += 1
@@ -187,20 +149,20 @@ public class MotionGenerationManager {
 }
 
 
-func tensorShow2(_ tensor: Tensor<Float>) {
-    plt.imshow(tensor.makeNumpyArray(), cmap: "Spectral")
-    plt.show()
-}
+//func tensorShow2(_ tensor: Tensor<Float>) {
+//    plt.imshow(tensor.makeNumpyArray(), cmap: "Spectral")
+//    plt.show()
+//}
 
-func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
-    let descaledMotion = dataset.scaler.inverse_transform(motion)
-//    let descaledMotion = motion
-    let jointNames = dataset.motionSamples[0].jointNames
-    let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
-    // try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
-    try! mmmXMLDoc.xmlData().write(to: mmmURL)
-//    print("Saved motion: \(mmmURL.path)")
-}
+//func saveMotionToMMM(dataset: Lang2Motion, motion: Tensor<Float>, mmmURL: URL) {
+//    let descaledMotion = dataset.scaler.inverse_transform(motion)
+////    let descaledMotion = motion
+//    let jointNames = dataset.motionSamples[0].jointNames
+//    let mmmXMLDoc = MMMWriter.getMMMXMLDoc(jointNames: jointNames, motion: descaledMotion)
+//    // try! mmmXMLDoc.xmlData(options: XMLNode.Options.nodePrettyPrint).write(to: mmmURL)
+//    try! mmmXMLDoc.xmlData().write(to: mmmURL)
+////    print("Saved motion: \(mmmURL.path)")
+//}
 
 //func showMotionSample(dataset: Lang2Motion, _ motionSample: MotionSample) {
 //    let motion = motionSample.motion
