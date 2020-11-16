@@ -33,9 +33,9 @@ let package = Package(
         .testTarget(name: "MotionDatasetTests", dependencies: ["Datasets", "ModelSupport", "LangMotionModels", "SummaryWriter"]),
         .target(
             name: "Checkpoints", dependencies: ["SwiftProtobuf", "ModelSupport"],
-            path: "Sources/Checkpoints"),
-        .target(name: "PreprocessMotionDataset", dependencies: ["Datasets"], path: "Sources/PreprocessMotionDataset"),
-        .target(name: "Batcher", path: "Sources/Batcher"),
+            path: "Sources/Other/Checkpoints"),
+        .target(name: "PreprocessMotionDataset", dependencies: ["Datasets"], path: "Sources/Binaries/PreprocessMotionDataset"),
+        .target(name: "Batcher", path: "Sources/Other/Batcher"),
         .target(name: "Datasets", dependencies: ["ModelSupport", "Batcher"], path: "Sources/Datasets"),
         .target(
             name: "ModelSupport", dependencies: ["SwiftProtobuf", "STBImage"], path: "Sources/Support",
@@ -44,21 +44,21 @@ let package = Package(
         .target(name: "TextModels", dependencies: ["Checkpoints", "Datasets"], path: "Sources/Models/Text"),
         .target(name: "MotionLangModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "TranslationModels", "TrainingLoop"], path: "Sources/Models/MotionLang"),
         .target(name: "LangMotionModels", dependencies: ["Datasets", "TextModels", "ModelSupport", "TranslationModels", "TrainingLoop"], path: "Sources/Models/LangMotion"),
-        .target(name: "SummaryWriter", path: "Sources/SummaryWriter"),
+        .target(name: "SummaryWriter", path: "Sources/Other/SummaryWriter"),
         .target(name: "TranslationModels", dependencies: ["TextModels", "Datasets"], path: "Sources/Models/Translation"),
-        .target(name: "TrainingLoop", dependencies: ["ModelSupport"], path: "Sources/TrainingLoop"),
+        .target(name: "TrainingLoop", dependencies: ["ModelSupport"], path: "Sources/Other/TrainingLoop"),
         .target(
             name: "Motion2lang",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "MotionLangModels", "TrainingLoop"],
-            path: "Sources/Motion2lang"),
+            path: "Sources/Binaries/Motion2lang"),
         .target(
             name: "Lang2motion",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "TrainingLoop", "MotionGenerator"],
-            path: "Sources/Lang2motion"),
+            path: "Sources/Binaries/Lang2motion"),
         .target(
             name: "Lang2motionSet",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "TrainingLoop"],
-            path: "Sources/Lang2motionSet"),
+            path: "Sources/Binaries/Lang2motionSet"),
         .target(
             name: "MotionGenerator",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels"],
@@ -66,6 +66,6 @@ let package = Package(
         .target(
             name: "MotionGeneratorSvr",
             dependencies: ["TranslationModels", "TextModels", "Datasets", "ModelSupport", "SummaryWriter", "LangMotionModels", "MotionGenerator"],
-            path: "Sources/MotionGeneratorSvr"),
+            path: "Sources/Binaries/MotionGeneratorSvr"),
     ]
 )
