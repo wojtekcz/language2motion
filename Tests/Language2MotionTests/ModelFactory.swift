@@ -45,7 +45,7 @@ public class ModelFactory {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
 
         return LangMotionCatDistTransformer(config: config)
@@ -65,7 +65,7 @@ public class ModelFactory {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
 
         let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_123/checkpoints"), config: config, name: "model.e1")
@@ -85,7 +85,7 @@ public class ModelFactory {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
 
         let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_125/checkpoints"), config: config, name: "model.e1")
@@ -105,7 +105,7 @@ public class ModelFactory {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
 
         let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_137/checkpoints"), config: config, name: "model.e7")
@@ -125,7 +125,7 @@ public class ModelFactory {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
 
         let model = try! LangMotionCatDistTransformer(checkpoint: logdirURL.appendingPathComponent("run_143/checkpoints"), config: config, name: "model.e5")

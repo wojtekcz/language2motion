@@ -4,38 +4,6 @@ import TextModels
 import TranslationModels
 
 
-public struct LangMotionCatDistTransformerConfig: ModelConfig {
-    public let vocabSize: Int
-    public let nbJoints: Int
-    public let layerCount: Int
-    public let encoderDepth: Int
-    public let decoderDepth: Int
-    public let feedForwardSize: Int
-    public let headCount: Int
-    public let dropoutProbability: Double
-    public let sentenceMaxPositionalLength: Int
-    public let motionMaxPositionalLength: Int
-    public let discreteBins: Int
-    public let activation: Activation<Float>
-
-    public init(vocabSize: Int, nbJoints: Int, layerCount: Int, encoderDepth: Int, decoderDepth: Int,
-                feedForwardSize: Int, headCount: Int, dropoutProbability: Double,
-                sentenceMaxPositionalLength: Int, motionMaxPositionalLength: Int, discreteBins: Int, activation: @escaping Activation<Float>) {
-        self.vocabSize = vocabSize
-        self.nbJoints = nbJoints
-        self.layerCount = layerCount
-        self.encoderDepth = encoderDepth
-        self.decoderDepth = decoderDepth
-        self.feedForwardSize = feedForwardSize
-        self.headCount = headCount
-        self.dropoutProbability = dropoutProbability
-        self.sentenceMaxPositionalLength = sentenceMaxPositionalLength
-        self.motionMaxPositionalLength = motionMaxPositionalLength
-        self.discreteBins = discreteBins
-        self.activation = activation
-    }
-}
-
 public struct LangMotionCatDistTransformerOutput<Scalar: TensorFlowFloatingPoint>: Differentiable {
     public var preds: MotionCatDistPreds
     public var encoded: EncoderOutput<Scalar>
@@ -82,7 +50,7 @@ public struct LangMotionCatDistTransformer: Module {
                                               attentionDropoutProbability: Float(config.dropoutProbability), matrixResult: false)
         
         let encFeedForward = PositionwiseFeedForward(dimensionalityModel: config.encoderDepth,
-                                                     innerLayerDimensionality: config.feedForwardSize, activation: config.activation)
+                                                     innerLayerDimensionality: config.feedForwardSize, activation: config.activation.actFunc())
 
         self.encoder = Encoder(layer: .init(size: config.encoderDepth, selfAttention: encAttention, feedForward: encFeedForward, dropoutProb: config.dropoutProbability), layerCount: config.layerCount)
 
@@ -90,7 +58,7 @@ public struct LangMotionCatDistTransformer: Module {
         // TODO: parametrize jointEmbeddingSize
         let jointEmbeddingSize = 5
         self.jointEmbedding = Embedding<Float>(vocabularySize: config.discreteBins, embeddingSize: jointEmbeddingSize, embeddingsInitializer: glorotUniform())
-        self.motionDense = Dense<Float>(inputSize: config.nbJoints*jointEmbeddingSize, outputSize: config.decoderDepth, activation: config.activation)
+        self.motionDense = Dense<Float>(inputSize: config.nbJoints*jointEmbeddingSize, outputSize: config.decoderDepth, activation: config.activation.actFunc())
 //        self.motionDense = Dense<Float>(inputSize: config.nbJoints, outputSize: config.decoderDepth, activation: config.activation)
         self.motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
 
@@ -113,11 +81,11 @@ public struct LangMotionCatDistTransformer: Module {
                                                     attentionDropoutProbability: Float(config.dropoutProbability), matrixResult: false)
         
         let decFeedForward = PositionwiseFeedForward(dimensionalityModel: config.decoderDepth,
-                                                     innerLayerDimensionality: config.feedForwardSize, activation: config.activation)
+                                                     innerLayerDimensionality: config.feedForwardSize, activation: config.activation.actFunc())
         
         // TODO: parametrize kernel_size
         let kernel_size = 1
-        let decConv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: config.activation, useBias: true)
+        let decConv1D = Conv1D<Float>(filterShape: (kernel_size, config.decoderDepth, config.decoderDepth), stride: 1, padding: .same, activation: config.activation.actFunc(), useBias: true)
 
         self.decoder = Decoder(layer: .init(size: config.decoderDepth, selfAttention: decSelfAttention, sourceAttention: decSourceAttention, feedForward: decFeedForward, dropoutProb: config.dropoutProbability, conv1D: decConv1D
         ), layerCount: config.layerCount, derivativeAllLayers: true)

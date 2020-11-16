@@ -43,15 +43,15 @@ extension LangMotionCatDistTransformer {
             // encoding
             let _langEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/langEmbedding")
             let _langPositionalEncoding = PositionalEncoding(size: config.encoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.sentenceMaxPositionalLength)
-            let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder", activation: config.activation)
+            let _encoder = Encoder(reader: reader, config: config, scope: scope + "/encoder", activation: config.activation.actFunc())
 
             // decoding
             let _jointEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/jointEmbedding")
-            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense", activation: config.activation)
+            let _motionDense = Dense<Float>(reader: reader, config: config, scope: scope + "/motionDense", activation: config.activation.actFunc())
             let _motionPositionalEncoding = PositionalEncoding(size: config.decoderDepth, dropoutProbability: config.dropoutProbability, maxLength: config.motionMaxPositionalLength)
             let _motionSegmentEmbedding = Embedding<Float>(reader: reader, config: config, scope: scope + "/motionSegmentEmbedding")
             let _motionNorm = LayerNorm<Float>(reader: reader, config: config, scope: scope + "/motionNorm", axis: 2, epsilon: 0.001)
-            let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: true, scope: scope + "/decoder", activation: config.activation)
+            let _decoder = Decoder(reader: reader, config: config, derivativeAllLayers: true, scope: scope + "/decoder", activation: config.activation.actFunc())
             
             // generating
             let _catDistHead = MotionCatDistHead(reader: reader, config: config, scope: scope + "/catDistHead")

@@ -114,7 +114,7 @@ let config = LangMotionCatDistTransformerConfig(
     sentenceMaxPositionalLength: 100,
     motionMaxPositionalLength: 500,
     discreteBins: discreteBins,
-    activation: swish
+    activation: .swish
 )
 
 /// create new model

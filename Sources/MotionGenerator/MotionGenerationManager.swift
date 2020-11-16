@@ -95,7 +95,7 @@ public class MotionGenerationManager {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
         
         let runName = "run_160_maxSamples"
@@ -121,7 +121,7 @@ public class MotionGenerationManager {
             sentenceMaxPositionalLength: 100,
             motionMaxPositionalLength: 500,
             discreteBins: 300,
-            activation: swish
+            activation: .swish
         )
         
         //let runName = "run_176"
