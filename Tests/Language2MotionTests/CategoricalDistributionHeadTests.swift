@@ -41,11 +41,6 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
-        #if os(macOS)
-            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
-        #else
-            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-        #endif
         let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
 
         let model = ModelFactory.getModel4(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
@@ -117,11 +112,6 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
-        #if os(macOS)
-            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
-        #else
-            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-        #endif
         let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
 
         let model = ModelFactory.getModel4(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
@@ -169,11 +159,6 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
-        #if os(macOS)
-            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
-        #else
-            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-        #endif
         let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
 
         let model = ModelFactory.getModel4(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
@@ -203,11 +188,6 @@ class CategoricalDistributionHeadTests: XCTestCase {
         
         let dsMgr = DatasetManager(datasetSize: .small_micro1, device: device)
 
-        #if os(macOS)
-            let dataURL = URL(fileURLWithPath: "/Volumes/Macintosh HD/Users/wcz/Beanflows/All_Beans/swift4tf/language2motion.gt/data/")
-        #else
-            let dataURL = URL(fileURLWithPath: "/notebooks/language2motion.gt/data/")
-        #endif
         let logdirURL = dataURL.appendingPathComponent("runs/Lang2motion/", isDirectory: true)
 
 //        let model = ModelFactory.getModel6(vocabSize: dsMgr.textProcessor!.vocabulary.count, logdirURL: logdirURL)
