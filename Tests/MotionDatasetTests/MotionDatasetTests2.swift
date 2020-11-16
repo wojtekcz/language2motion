@@ -57,7 +57,7 @@ class MotionDatasetTests2: XCTestCase {
 
     func testCreateSameDataset() throws {
         // create dataset with one sample repeated n times
-        loadData()
+        let _ = loadData()
         
         var motionSamples: [MotionSample] = []
         
@@ -103,7 +103,7 @@ class MotionDatasetTests2: XCTestCase {
 
     func testCreateSmallDatasets() throws {
         // create dataset with one sample repeated n times
-        loadData(datasetSize: .multi_full, minMotionLength: 10, maxMotionLength: 50)
+        let _ = loadData(datasetSize: .multi_full, minMotionLength: 10, maxMotionLength: 50)
         
         // with smallest dataset possible
         // 2 samples
@@ -176,7 +176,7 @@ class MotionDatasetTests2: XCTestCase {
 
         // small_mini
 
-        loadData(datasetSize: .small_multi_mini, minMotionLength: 10, maxMotionLength: 50)
+        let _ = loadData(datasetSize: .small_multi_mini, minMotionLength: 10, maxMotionLength: 50)
 
         var allMotionSamples = dataset!.motionSamples
         print("allMotionSamples: \(allMotionSamples.count)")
@@ -189,7 +189,7 @@ class MotionDatasetTests2: XCTestCase {
         writeDataset(datasetSize: .small_mini, motionSamples: mainMotionSamples)
 
         // small_midi
-        loadData(datasetSize: .small_multi_midi, minMotionLength: 10, maxMotionLength: 50)
+        let _ = loadData(datasetSize: .small_multi_midi, minMotionLength: 10, maxMotionLength: 50)
 
         allMotionSamples = dataset!.motionSamples
         print("allMotionSamples: \(allMotionSamples.count)")
