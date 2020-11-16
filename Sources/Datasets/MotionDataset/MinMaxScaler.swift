@@ -1,7 +1,8 @@
+import Foundation
 import TensorFlow
 
 
-public struct MinMaxScaler {
+public struct MinMaxScaler: Codable {
     // https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.MinMaxScaler.html
     public var min: Tensor<Float>? = nil
     public var max: Tensor<Float>? = nil
@@ -9,6 +10,14 @@ public struct MinMaxScaler {
     public init() {
     }
 
+    public static func createFromJSONURL(_ url: URL) -> Self? {
+        let json = try! String(contentsOf: url, encoding: .utf8).data(using: .utf8)!
+        guard let f = try? JSONDecoder().decode(MinMaxScaler.self, from: json) else {
+            return nil
+        }
+        return f
+    }
+    
     public init(X: Tensor<Float>) {
         fit(X)
     }
