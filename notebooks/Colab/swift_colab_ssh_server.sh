@@ -26,4 +26,4 @@ wget -nv $baseURL/private_key.pem -O $privateKeyPath
 chmod 600 $privateKeyPath
 
 options="-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null"
-ssh $options -i $privateKeyPath -f -R 46190:localhost:22 wojtekcz.first@wojtekcz-46190.portmap.io -N -v &
+ssh $options -i $privateKeyPath -f -R 51552:localhost:22 wojtekcz.first@wojtekcz-51552.portmap.io -N -v &
