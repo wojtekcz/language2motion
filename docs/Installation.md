@@ -45,19 +45,20 @@ docker exec -it swift-jupyter bash
 git clone https://github.com/wojtekcz/language2motion.git language2motion.gt
 ```
 
-### c. download data for Motion2label and Language2label scripts
+### c. download data for Lang2motion script
 ```
 cd /notebooks/language2motion.gt/data/
-wget https://github.com/wojtekcz/language2motion/releases/download/v0.2.0/motion_dataset_v3.norm.10Hz.tgz
-wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/labels_ds_v2.csv
+wget https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_datasets_v3.10Hz.small.tgz
+wget https://github.com/wojtekcz/language2motion/releases/download/v0.3.0/motion_datasets_v3.10Hz.tgz
+tar xzvf motion_datasets_v3.10Hz.tgz
+tar xzvf motion_datasets_v3.10Hz.small.tgz
 wget https://github.com/wojtekcz/language2motion/releases/download/v0.1.0/vocab.txt
-tar xzvf motion_dataset_v3.norm.10Hz.tgz
 ```
 
-### d. run Motion2label script
+### d. run Lang2motion script
 ```
 cd ..
-swift run Motion2label
+swift run Lang2motion
 ```
 
 ### e. or use jupyter lab
@@ -99,7 +100,7 @@ TODO: screenshot
 
 TODO: screenshot
 
-## 4. (optional) tensorbord
+## 4. (optional) tensorboard
 
 ### a. exec into container
 
