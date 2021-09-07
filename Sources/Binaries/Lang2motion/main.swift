@@ -18,7 +18,7 @@ let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_182" //_maxSamples\(maxSamplesStr)"
+let runName = "run_183" //_maxSamples\(maxSamplesStr)"
 let batchSize = 120
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
@@ -33,7 +33,7 @@ let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
 let dropoutProbability: Double = 0.0
 
-let datasetSize: DatasetSize = .multi_mini
+let datasetSize: DatasetSize = .mini
 
 print("runName: \(runName)")
 print("batchSize: \(batchSize)")
