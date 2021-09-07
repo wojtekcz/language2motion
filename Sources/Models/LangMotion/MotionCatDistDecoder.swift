@@ -59,12 +59,13 @@ public class MotionCatDistDecoder {
 
         let maxMotionLength2 = maxMotionLength-ys.shape[1]+1
 
-        for _ in 0..<maxMotionLength2 {
+        for i in 0..<maxMotionLength2 {
             //print("frame: \(f)")
             // print(".", terminator:"")
             // prepare input
             let motionPartFlag = Tensor<Int32>(repeating: 1, shape: [1, ys.shape[1]])
-            let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
+            let window_size = min(i, 5)
+            let motionPartMask = LangMotionBatch.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0).bandPart(window_size, 0)
 
             // FIXME: woarkaround, can't assign to tensor int32 element
             var segmentIDs = Tensor<Float>(repeating: Float(LangMotionBatch.MotionSegment.motion.rawValue), shape: [1, ys.shape[1], 1])//.expandingShape(at: 2)

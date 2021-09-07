@@ -269,7 +269,8 @@ extension LangMotionBatch {
 
         let motionPartFlag = motionFlag[rangeExceptLast]
         let motionPartSegmentIDs = segmentIDs[rangeExceptLast]
-        let motionPartMask = Self.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0)
+        let window_size = 5
+        let motionPartMask = Self.makeSelfAttentionDecoderMask(target: motionPartFlag, pad: 0).bandPart(window_size, 0)
 
         let motionPart = MotionPart(
             discreteMotion: discreteMotionPartTensor.expandingShape(at: 0),
