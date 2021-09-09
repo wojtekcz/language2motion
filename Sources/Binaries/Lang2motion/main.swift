@@ -18,7 +18,7 @@ let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_185" //_maxSamples\(maxSamplesStr)"
+let runName = "run_186" //_maxSamples\(maxSamplesStr)"
 let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
@@ -106,8 +106,8 @@ let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
     layerCount: 12,
-    encoderDepth: 64,
-    decoderDepth: 320,
+    encoderDepth: 128,
+    decoderDepth: 384,
     feedForwardSize: 2560,
     headCount: 16,
     dropoutProbability: dropoutProbability,
