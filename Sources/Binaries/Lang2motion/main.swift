@@ -18,14 +18,14 @@ let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_184" //_maxSamples\(maxSamplesStr)"
-let batchSize = 120
+let runName = "run_185" //_maxSamples\(maxSamplesStr)"
+let batchSize = 100
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
-let nEpochs = 100
-let multiplyFactor = 5//17
+let nEpochs = 150
+let multiplyFactor = 4 //17
 let discreteBins = 300
-let lrSlopeMultiplier: Float = 1.1
+let lrSlopeMultiplier: Float = 1.05
 let fixedPeekLR: Bool = false
 let peakLearningRate: Float = 5e-2 //5e-3
 let useBiasCorrection: Bool = true
@@ -107,8 +107,8 @@ let config = LangMotionCatDistTransformerConfig(
     nbJoints: 47,
     layerCount: 12,
     encoderDepth: 64,
-    decoderDepth: 240,
-    feedForwardSize: 1536,
+    decoderDepth: 320,
+    feedForwardSize: 2560,
     headCount: 16,
     dropoutProbability: dropoutProbability,
     sentenceMaxPositionalLength: 100,
