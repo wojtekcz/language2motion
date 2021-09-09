@@ -18,16 +18,16 @@ let maxSamples: Int? = nil
 
 let maxSamplesStr = maxSamples != nil ? "_\(maxSamples!)" : ""
 
-let runName = "run_187" //_maxSamples\(maxSamplesStr)"
-let batchSize = 100
+let runName = "run_188" //_maxSamples\(maxSamplesStr)"
+let batchSize = 25
 let maxTextSequenceLength =  40
 let maxMotionLength = 75
 let nEpochs = 150
-let multiplyFactor = 4 //17
+let multiplyFactor = 1 //17
 let discreteBins = 300
 let lrSlopeMultiplier: Float = 1.05
 let fixedPeekLR: Bool = false
-let peakLearningRate: Float = 5e-2 //5e-3
+let peakLearningRate: Float = 1e-2 //5e-3
 let useBiasCorrection: Bool = true
 let weightDecayRate: Float = 0.001
 let beta2: Float = 0.99
@@ -106,7 +106,7 @@ let config = LangMotionCatDistTransformerConfig(
     vocabSize: vocabulary.count,
     nbJoints: 47,
     layerCount: 12,
-    encoderDepth: 128,
+    encoderDepth: 256,
     decoderDepth: 512,
     feedForwardSize: 3172,
     headCount: 16,
