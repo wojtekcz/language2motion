@@ -56,10 +56,10 @@ public class OptimizerWrapper {
         self.scheduledLearningRate = LinearlyDecayedParameter(
           baseParameter: LinearlyWarmedUpParameter(
             baseParameter: FixedParameter<Float>(opts.peakLearningRate),
-              warmUpStepCount: 20,
+              warmUpStepCount: 20*4,
               warmUpOffset: 0),
             slope: slope,
-          startStep: 10
+          startStep: 10*4
         )
     }
     
