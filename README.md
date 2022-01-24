@@ -1,14 +1,14 @@
 # Language2motion
 
-The goal of this project is to create multi-modal implementation of Transformer architecture in Swift. It's a learning exercise for me, so I've taken it slowly, starting from simple image classifier and building it up.
+The goal of this project was to create multi-modal implementation of Transformer architecture in Swift for Tensorflow.
 
-Also it's an attempt to answer the question if Swift for Tensorflow is ready for non-trivial work.
+Also it was an attempt to answer the question if Swift for Tensorflow is ready for non-trivial work.
 
 The use-case is based on a paper "[Learning a bidirectional mapping between human whole-body motion and natural language using deep recurrent neural networks"](https://arxiv.org/abs/1705.06400) by Matthias Plappert. He created a nice dataset of few thousand motions "[The KIT Motion-Language Dataset (paper)](https://arxiv.org/abs/1607.03827)", [website](https://motion-annotation.humanoids.kit.edu/dataset/).
 
-The Motion2Language Transformer which works is there, already. Lang2motion one started to work recently, and I'm implementing more sophisticated motion generation strategy now.
+The Motion2Language and Lang2motion Transformer-based models were implemented. Also some more sophisticated motion generation strategies were tried.
 
-I'm using modified [Swift Transformer implementation](https://github.com/acarrera94/swift-models/tree/translation/Models/Translation) by Andre Carrera.
+Modified [Swift Transformer implementation](https://github.com/acarrera94/swift-models/tree/translation/Models/Translation) by Andre Carrera was used.
 
 ## Models
 - motion 2 language
